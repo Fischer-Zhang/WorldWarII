@@ -15,10 +15,17 @@
 **第 2 週 — 單位 & 移動**
 - ✅ 單位 ([scripts/units/unit.gd](scripts/units/unit.gd)):faction 染色、HP bar、行動狀態
 - ✅ 單位工廠 ([unit_factory.gd](scripts/units/unit_factory.gd)):從 scenario JSON 生成
-- ✅ Dijkstra 移動範圍 ([pathfinding.gd](scripts/grid/pathfinding.gd)),依地形 move_cost 加權、避開被占據 hex
+- ✅ Dijkstra 移動範圍 ([pathfinding.gd](scripts/grid/pathfinding.gd))、依地形 move_cost 加權、避開被占據 hex
 - ✅ 點擊我方單位 → 標示可移動範圍 → 點藍色 hex → 移動
-- ✅ 沙盒地圖含雙方各 4 個單位
-- ⏳ Week 3 起:戰鬥解算、回合制、勝負判定
+
+**第 3 週 — 戰鬥 & 回合**
+- ✅ 確定性戰鬥解算器 ([combat_resolver.gd](scripts/combat/combat_resolver.gd)):attack/defense/terrain/vs_armor、傷害隨攻擊方 HP 比例縮放、反擊機制、間接射擊不被反擊
+- ✅ 回合管理器 ([turn_manager.gd](scripts/turn/turn_manager.gd)):faction 輪轉、回合計數
+- ✅ 勝負判定 ([victory_checker.gd](scripts/scenario/victory_checker.gd)):eliminate / capture / survive
+- ✅ Battle 狀態機:IDLE → UNIT_SELECTED(藍 hex 移動範圍)→ ATTACK_PHASE(紅 hex 攻擊目標)→ done
+- ✅ 結束回合按鈕、結果面板、雙方 hot-seat 可完整對局
+- ✅ 戰鬥單元測試(7 條:基本傷害、地形修正、反戰車、HP 縮放、致死、間接射擊、超出反擊距離)
+- ⏳ Week 4 起:AI、第一個正式戰役關卡(色當 1940)
 
 完整實作計畫:[CLAUDE plan file](/home/fischer/.claude/plans/ww2-mellow-river.md)(本機)
 

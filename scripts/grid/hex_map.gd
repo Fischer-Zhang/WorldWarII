@@ -8,6 +8,7 @@ extends Node2D
 const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
+const ATTACK_OVERLAY_COLOR := Color(1.0, 0.3, 0.25, 0.45)
 
 var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
 var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
@@ -70,20 +71,26 @@ func _spawn_range_overlay_layer() -> void:
 	add_child(range_overlays)
 
 func show_movement_range(coords: Array) -> void:
-	clear_movement_range()
-	for c in coords:
-		var coord: Vector2i = c
-		var p := Polygon2D.new()
-		p.polygon = _hex_vertices(HEX_SIZE * 0.85)
-		p.color = RANGE_OVERLAY_COLOR
-		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
-		range_overlays.add_child(p)
+	_paint_overlay(coords, RANGE_OVERLAY_COLOR)
+
+func show_attack_targets(coords: Array) -> void:
+	_paint_overlay(coords, ATTACK_OVERLAY_COLOR)
 
 func clear_movement_range() -> void:
 	if range_overlays == null:
 		return
 	for c in range_overlays.get_children():
 		c.queue_free()
+
+func _paint_overlay(coords: Array, color: Color) -> void:
+	clear_movement_range()
+	for c in coords:
+		var coord: Vector2i = c
+		var p := Polygon2D.new()
+		p.polygon = _hex_vertices(HEX_SIZE * 0.85)
+		p.color = color
+		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
+		range_overlays.add_child(p)
 
 func register_unit(unit: Unit) -> void:
 	occupants[unit.coord] = unit

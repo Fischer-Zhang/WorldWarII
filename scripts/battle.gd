@@ -1,26 +1,34 @@
 extends Node2D
 
-# Entry point for the Battle scene.
-# Week 2 scope: load scenario, spawn units, click-to-select, BFS movement range, move.
+# Battle scene controller — owns the per-turn state machine.
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"
+
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
 @onready var info_label: Label = $UI/InfoLabel
 @onready var status_label: Label = $UI/StatusLabel
+@onready var end_turn_button: Button = $UI/EndTurnButton
+@onready var result_panel: Panel = $UI/ResultPanel
+@onready var result_label: Label = $UI/ResultPanel/ResultLabel
 
-var factions: Dictionary = {}        # faction_id -> Dictionary
+var scenario: Dictionary = {}
+var factions: Dictionary = {}
 var units: Array[Unit] = []
+var turn_manager := TurnManager.new()
+
+var phase: Phase = Phase.IDLE
 var selected_unit: Unit = null
-var movement_range: Dictionary = {}  # coord -> cost (when a unit is selected)
-var player_faction_id: String = ""
+var movement_range: Dictionary = {}
+var attack_targets: Array = []
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
 	if scenario_id == "":
 		scenario_id = DEFAULT_SCENARIO_ID
-	var scenario := DataLoader.get_scenario(scenario_id)
+	scenario = DataLoader.get_scenario(scenario_id)
 	if scenario.is_empty():
 		push_error("Scenario not found: " + scenario_id)
 		return
@@ -30,62 +38,183 @@ func _ready() -> void:
 
 	var built := UnitFactory.build(scenario, hex_map)
 	factions = built["factions"]
-	for f_id in factions:
-		if factions[f_id]["controller"] == "player":
-			player_faction_id = f_id
-			break
-	if player_faction_id == "" and not factions.is_empty():
-		player_faction_id = factions.keys()[0]
-
 	for u in built["units"]:
 		var unit: Unit = u
 		hex_map.register_unit(unit)
 		units.append(unit)
 
 	camera.position = hex_map.get_map_center()
-	info_label.text = "%s — 點擊我方單位選取,再點亮藍色 hex 進行移動" % scenario.get("title", scenario_id)
+	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	result_panel.visible = false
+
+	turn_manager.configure(factions)
+	turn_manager.turn_started.connect(_on_turn_started)
+	turn_manager.emit_initial()
+
+	info_label.text = "%s — 點我方單位選取" % scenario.get("title", scenario_id)
 	_update_status()
 
-func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
-	var clicked_unit := hex_map.unit_at(coord)
+# ---------- TURN LIFECYCLE ----------
 
-	# Case 1: a unit was already selected, and clicked hex is in its move range -> move
-	if selected_unit != null and movement_range.has(coord) and clicked_unit == null:
-		hex_map.move_unit(selected_unit, coord)
-		_deselect()
-		_update_status()
-		return
-
-	# Case 2: clicked on a selectable own unit -> select
-	if clicked_unit != null and clicked_unit.faction_id == player_faction_id and not clicked_unit.has_moved:
-		_select(clicked_unit)
-		return
-
-	# Case 3: clicked elsewhere -> show terrain info, deselect
+func _on_turn_started(faction_id: String, turn_number: int) -> void:
+	for u in units:
+		if u.faction_id == faction_id and u.is_alive():
+			u.reset_for_new_turn()
+	phase = Phase.IDLE
 	_deselect()
-	var def := DataLoader.get_terrain_def(terrain_id)
-	info_label.text = "(%d, %d) %s — 移動消耗 %d, 防禦修正 %+d%s" % [
-		coord.x, coord.y,
-		String(def.get("name_zh", terrain_id)),
-		int(def.get("move_cost", 0)),
-		int(def.get("defense", 0)),
-		"  [此格有 " + clicked_unit.display_name + "]" if clicked_unit != null else "",
-	]
+	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
+	info_label.text = "▶ %s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number]
+	_update_status()
 
-func _select(unit: Unit) -> void:
+func _on_end_turn_pressed() -> void:
+	if phase == Phase.GAME_OVER:
+		return
+	_deselect()
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	if winner != "":
+		_handle_game_over(winner)
+		return
+	turn_manager.end_turn()
+
+func _handle_game_over(winner: String) -> void:
+	phase = Phase.GAME_OVER
+	var winner_name := String(factions.get(winner, {}).get("name", winner))
+	result_label.text = "🏆 %s 獲勝!" % winner_name
+	result_panel.visible = true
+	end_turn_button.disabled = true
+	GameState.end_scenario(winner, {"turn": turn_manager.turn_number})
+
+# ---------- INPUT / STATE MACHINE ----------
+
+func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
+	if phase == Phase.GAME_OVER:
+		return
+	var clicked_unit := hex_map.unit_at(coord)
+	var current_faction := turn_manager.current_faction()
+
+	match phase:
+		Phase.IDLE:
+			if clicked_unit != null and clicked_unit.faction_id == current_faction \
+					and not clicked_unit.is_done_for_turn():
+				_select_unit(clicked_unit)
+			else:
+				_show_terrain_info(coord, terrain_id, clicked_unit)
+		Phase.UNIT_SELECTED:
+			# Click own unit (different) → switch selection
+			if clicked_unit != null and clicked_unit != selected_unit \
+					and clicked_unit.faction_id == current_faction \
+					and not clicked_unit.is_done_for_turn():
+				_select_unit(clicked_unit)
+				return
+			# Click same unit → skip move, go straight to attack phase
+			if clicked_unit == selected_unit:
+				_enter_attack_phase()
+				return
+			# Click in movement range → move then attack
+			if movement_range.has(coord) and clicked_unit == null:
+				hex_map.move_unit(selected_unit, coord)
+				_enter_attack_phase()
+				return
+			_deselect()
+			_show_terrain_info(coord, terrain_id, clicked_unit)
+		Phase.ATTACK_PHASE:
+			if clicked_unit != null and clicked_unit in attack_targets:
+				_resolve_attack(selected_unit, clicked_unit)
+				return
+			# Click anywhere else → wait (skip attack)
+			selected_unit.has_attacked = true
+			selected_unit.queue_redraw()
+			_deselect()
+
+func _select_unit(unit: Unit) -> void:
 	selected_unit = unit
+	phase = Phase.UNIT_SELECTED
+	if unit.has_moved:
+		_enter_attack_phase()
+		return
 	var move_pts := int(DataLoader.get_unit_def(unit.type_id).get("move", 0))
 	movement_range = Pathfinding.movement_range(unit.coord, move_pts, hex_map, hex_map.occupants)
 	hex_map.show_movement_range(movement_range.keys())
 	hex_map.highlight_coord(unit.coord)
-	info_label.text = "選取:%s (%s) — HP %d/%d,可移動範圍已標示" % [
-		unit.display_name, factions[unit.faction_id]["name"], unit.hp, unit.max_hp,
+	info_label.text = "選取:%s (HP %d/%d) — 點藍色 hex 移動,或再點自己原地待機" % [
+		unit.display_name, unit.hp, unit.max_hp,
 	]
+
+func _enter_attack_phase() -> void:
+	phase = Phase.ATTACK_PHASE
+	hex_map.clear_movement_range()
+	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
+	var rng := int(atk_def.get("range", 1))
+	attack_targets = CombatResolver.attack_targets_in_range(selected_unit, rng, units)
+	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
+	if attack_targets.is_empty():
+		selected_unit.has_attacked = true
+		info_label.text = "%s 已就位 — 周圍無敵人。回合可結束。" % selected_unit.display_name
+		_deselect()
+	else:
+		info_label.text = "%s 可攻擊 %d 個目標 — 點目標,或點空地待機" % [
+			selected_unit.display_name, attack_targets.size(),
+		]
+
+func _resolve_attack(attacker: Unit, defender: Unit) -> void:
+	var distance := HexCoord.distance(attacker.coord, defender.coord)
+	var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(attacker.coord))
+	var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(defender.coord))
+	var atk_def := DataLoader.get_unit_def(attacker.type_id)
+	var def_def := DataLoader.get_unit_def(defender.type_id)
+	var result := CombatResolver.resolve(
+		atk_def, def_def, attacker.hp, defender.hp, atk_terr, def_terr, distance
+	)
+
+	defender.take_damage(result.damage_to_defender)
+	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
+	if result.counter_damage > 0:
+		attacker.take_damage(result.counter_damage)
+		msg += ",反擊 %d" % result.counter_damage
+
+	if not defender.is_alive():
+		hex_map.unregister_unit(defender)
+		defender.queue_free()
+		msg += " — %s 陣亡" % defender.display_name
+	if not attacker.is_alive():
+		hex_map.unregister_unit(attacker)
+		attacker.queue_free()
+		msg += " — %s 陣亡" % attacker.display_name
+	else:
+		attacker.has_attacked = true
+		attacker.queue_redraw()
+
+	# Garbage-collect dead units from our roster
+	units = units.filter(func(u): return u.is_alive())
+
+	info_label.text = msg
+	_deselect()
+	_update_status()
+
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	if winner != "":
+		_handle_game_over(winner)
 
 func _deselect() -> void:
 	selected_unit = null
 	movement_range.clear()
+	attack_targets.clear()
 	hex_map.clear_movement_range()
+	if phase != Phase.GAME_OVER:
+		phase = Phase.IDLE
+
+func _show_terrain_info(coord: Vector2i, terrain_id: String, unit_here: Unit) -> void:
+	var def := DataLoader.get_terrain_def(terrain_id)
+	var suffix := ""
+	if unit_here != null:
+		suffix = "  [%s 的 %s,HP %d/%d]" % [
+			factions[unit_here.faction_id]["name"], unit_here.display_name,
+			unit_here.hp, unit_here.max_hp,
+		]
+	info_label.text = "(%d, %d) %s — 移動消耗 %d, 防禦 %+d%s" % [
+		coord.x, coord.y, String(def.get("name_zh", terrain_id)),
+		int(def.get("move_cost", 0)), int(def.get("defense", 0)), suffix,
+	]
 
 func _update_status() -> void:
 	var counts := {}
@@ -94,6 +223,6 @@ func _update_status() -> void:
 			continue
 		counts[u.faction_id] = int(counts.get(u.faction_id, 0)) + 1
 	var parts: Array[String] = []
-	for fid in counts:
-		parts.append("%s %d" % [factions[fid]["name"], counts[fid]])
-	status_label.text = "  |  ".join(parts)
+	for fid in factions.keys():
+		parts.append("%s %d" % [factions[fid]["name"], int(counts.get(fid, 0))])
+	status_label.text = "  |  ".join(parts) + "    回合 %d" % turn_manager.turn_number
