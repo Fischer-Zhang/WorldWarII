@@ -13,6 +13,9 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var end_turn_button: Button = $UI/EndTurnButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
+@onready var menu_button: Button = $UI/ResultPanel/MenuButton
+
+const AI_STEP_DELAY := 0.6
 
 var scenario: Dictionary = {}
 var factions: Dictionary = {}
@@ -23,6 +26,7 @@ var phase: Phase = Phase.IDLE
 var selected_unit: Unit = null
 var movement_range: Dictionary = {}
 var attack_targets: Array = []
+var ai_running: bool = false
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -45,6 +49,7 @@ func _ready() -> void:
 
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	menu_button.pressed.connect(_on_menu_button_pressed)
 	result_panel.visible = false
 
 	turn_manager.configure(factions)
@@ -66,6 +71,51 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	info_label.text = "▶ %s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number]
 	_update_status()
 
+	var controller := String(factions[faction_id].get("controller", "player"))
+	if controller == "ai":
+		end_turn_button.disabled = true
+		_run_ai_turn(faction_id)
+	else:
+		end_turn_button.disabled = false
+
+func _run_ai_turn(faction_id: String) -> void:
+	if ai_running:
+		return
+	ai_running = true
+	var personality := String(factions[faction_id].get("ai", "aggressive"))
+	var ai := AIController.new(self, personality)
+	# Process units one at a time with a small delay so the player can see what's happening.
+	var ai_units: Array[Unit] = []
+	for u in units:
+		if u.faction_id == faction_id and u.is_alive():
+			ai_units.append(u)
+	await _process_ai_units(ai, ai_units)
+	ai_running = false
+	if phase != Phase.GAME_OVER:
+		_on_end_turn_pressed()
+
+func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
+	for u in ai_units:
+		if phase == Phase.GAME_OVER:
+			return
+		if not u.is_alive():
+			continue
+		var plan: Dictionary = ai.plan_for_unit(u)
+		var dest: Vector2i = plan["move_to"]
+		if dest != u.coord:
+			hex_map.move_unit(u, dest)
+			hex_map.highlight_coord(dest)
+			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
+			await get_tree().create_timer(AI_STEP_DELAY).timeout
+		u.has_moved = true
+		var target: Unit = plan.get("attack")
+		if target != null and target.is_alive():
+			_resolve_attack(u, target)
+			await get_tree().create_timer(AI_STEP_DELAY).timeout
+		else:
+			u.has_attacked = true
+			u.queue_redraw()
+
 func _on_end_turn_pressed() -> void:
 	if phase == Phase.GAME_OVER:
 		return
@@ -79,10 +129,13 @@ func _on_end_turn_pressed() -> void:
 func _handle_game_over(winner: String) -> void:
 	phase = Phase.GAME_OVER
 	var winner_name := String(factions.get(winner, {}).get("name", winner))
-	result_label.text = "🏆 %s 獲勝!" % winner_name
+	result_label.text = "%s 獲勝!" % winner_name
 	result_panel.visible = true
 	end_turn_button.disabled = true
 	GameState.end_scenario(winner, {"turn": turn_manager.turn_number})
+
+func _on_menu_button_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
 
 # ---------- INPUT / STATE MACHINE ----------
 

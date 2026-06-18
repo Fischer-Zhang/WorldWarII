@@ -24,8 +24,13 @@
 - ✅ 勝負判定 ([victory_checker.gd](scripts/scenario/victory_checker.gd)):eliminate / capture / survive
 - ✅ Battle 狀態機:IDLE → UNIT_SELECTED(藍 hex 移動範圍)→ ATTACK_PHASE(紅 hex 攻擊目標)→ done
 - ✅ 結束回合按鈕、結果面板、雙方 hot-seat 可完整對局
-- ✅ 戰鬥單元測試(7 條:基本傷害、地形修正、反戰車、HP 縮放、致死、間接射擊、超出反擊距離)
-- ⏳ Week 4 起:AI、第一個正式戰役關卡(色當 1940)
+- ✅ 戰鬥單元測試(7 條)
+
+**第 4 週 — AI + 第一場戰役 + 選單流程**
+- ✅ AI 控制器 ([ai_controller.gd](scripts/turn/ai_controller.gd)):啟發式打分(距離 / 攻擊收益 / 受擊曝險 / 地形)、性格權重 (aggressive / defensive / hold)
+- ✅ AI 自動接管非 player faction 回合,動作之間 600 ms 延遲方便觀察
+- ✅ 色當 1940 戰役 ([01_sedan_1940.json](data/scenarios/01_sedan_1940.json)):14×10 地圖含馬士河與阿登森林,德軍攻擊、法軍防守,12 回合內佔領色當鎮獲勝
+- ✅ 主選單 → 戰役選擇 → 簡報 → 戰鬥 → 結果 → 回戰役選擇 的完整導覽流程
 
 完整實作計畫:[CLAUDE plan file](/home/fischer/.claude/plans/ww2-mellow-river.md)(本機)
 
