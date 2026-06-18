@@ -7,10 +7,13 @@ extends Node2D
 
 const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
+const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
 
-var tiles: Dictionary = {}  # Vector2i (axial) -> terrain_id (String)
-var polys: Dictionary = {}  # Vector2i (axial) -> Polygon2D node
+var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
+var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
+var occupants: Dictionary = {} # Vector2i (axial) -> Unit
 var highlight: Polygon2D
+var range_overlays: Node2D
 var bounds_min := Vector2.ZERO
 var bounds_max := Vector2.ZERO
 
@@ -30,6 +33,7 @@ func load_from_scenario(scenario: Dictionary) -> void:
 			var coord := Vector2i(q, r)
 			tiles[coord] = terrain_id
 			_spawn_tile(coord, terrain_id)
+	_spawn_range_overlay_layer()
 	_spawn_highlight()
 	_recompute_bounds()
 
@@ -58,6 +62,45 @@ func _spawn_highlight() -> void:
 	highlight.visible = false
 	highlight.z_index = 10
 	add_child(highlight)
+
+func _spawn_range_overlay_layer() -> void:
+	range_overlays = Node2D.new()
+	range_overlays.name = "RangeOverlays"
+	range_overlays.z_index = 5
+	add_child(range_overlays)
+
+func show_movement_range(coords: Array) -> void:
+	clear_movement_range()
+	for c in coords:
+		var coord: Vector2i = c
+		var p := Polygon2D.new()
+		p.polygon = _hex_vertices(HEX_SIZE * 0.85)
+		p.color = RANGE_OVERLAY_COLOR
+		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
+		range_overlays.add_child(p)
+
+func clear_movement_range() -> void:
+	if range_overlays == null:
+		return
+	for c in range_overlays.get_children():
+		c.queue_free()
+
+func register_unit(unit: Unit) -> void:
+	occupants[unit.coord] = unit
+	add_child(unit)
+	unit.z_index = 20
+
+func unregister_unit(unit: Unit) -> void:
+	if occupants.get(unit.coord) == unit:
+		occupants.erase(unit.coord)
+
+func move_unit(unit: Unit, dest: Vector2i) -> void:
+	occupants.erase(unit.coord)
+	occupants[dest] = unit
+	unit.move_to(dest, HexCoord.to_pixel(dest, HEX_SIZE))
+
+func unit_at(coord: Vector2i) -> Unit:
+	return occupants.get(coord)
 
 func _hex_vertices(size: float) -> PackedVector2Array:
 	# Pointy-top: vertex angles at 30, 90, 150, 210, 270, 330 degrees.
@@ -102,12 +145,21 @@ func highlight_coord(coord: Vector2i) -> void:
 func terrain_at(coord: Vector2i) -> String:
 	return tiles.get(coord, "")
 
+func move_cost_at(coord: Vector2i) -> int:
+	var terrain_id: String = tiles.get(coord, "")
+	if terrain_id == "":
+		return 999
+	var def := DataLoader.get_terrain_def(terrain_id)
+	return int(def.get("move_cost", 1))
+
 func _clear() -> void:
 	for child in get_children():
 		child.queue_free()
 	tiles.clear()
 	polys.clear()
+	occupants.clear()
 	highlight = null
+	range_overlays = null
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

@@ -4,15 +4,21 @@
 
 技術棧:**Godot 4.x + GDScript**,資料驅動(單位/地形/關卡皆 JSON)。
 
-## 目前狀態(第 1 週進度)
+## 目前狀態
 
+**第 1 週 — 地基**
 - ✅ 專案骨架、目錄結構、autoload 設定
-- ✅ Hex 軸向座標數學 (`scripts/grid/hex_coord.gd`) + 單元測試
+- ✅ Hex 軸向座標數學 + 單元測試
 - ✅ JSON 資料載入器 + 單位/地形型錄
-- ✅ Hex 地圖渲染 (`scripts/grid/hex_map.gd`,Polygon2D)
-- ✅ 攝影機平移/縮放/拖曳
-- ✅ 點擊 hex 顯示座標 + 地形資訊
-- ⏳ Week 2 起:單位、移動範圍、戰鬥、AI、戰役
+- ✅ Hex 地圖渲染、攝影機平移/縮放、點 hex 顯示資訊
+
+**第 2 週 — 單位 & 移動**
+- ✅ 單位 ([scripts/units/unit.gd](scripts/units/unit.gd)):faction 染色、HP bar、行動狀態
+- ✅ 單位工廠 ([unit_factory.gd](scripts/units/unit_factory.gd)):從 scenario JSON 生成
+- ✅ Dijkstra 移動範圍 ([pathfinding.gd](scripts/grid/pathfinding.gd)),依地形 move_cost 加權、避開被占據 hex
+- ✅ 點擊我方單位 → 標示可移動範圍 → 點藍色 hex → 移動
+- ✅ 沙盒地圖含雙方各 4 個單位
+- ⏳ Week 3 起:戰鬥解算、回合制、勝負判定
 
 完整實作計畫:[CLAUDE plan file](/home/fischer/.claude/plans/ww2-mellow-river.md)(本機)
 

@@ -20,7 +20,16 @@
     {"id": "axis", "name": "Axis", "controller": "player", "color": "#7a4a3a"},
     {"id": "allies", "name": "Allies", "controller": "ai", "ai": "defensive", "color": "#3a5a7a"}
   ],
-  "units": [],
+  "units": [
+    {"faction": "axis", "type": "medium_tank",  "name": "Pz.IV",   "at": [0, 0]},
+    {"faction": "axis", "type": "light_tank",   "name": "Pz.II",   "at": [1, 1]},
+    {"faction": "axis", "type": "infantry",     "name": "擲彈兵",  "at": [0, 2]},
+    {"faction": "axis", "type": "artillery",    "name": "Wespe",   "at": [0, 3]},
+    {"faction": "allies", "type": "medium_tank","name": "M4 雪曼", "at": [9, 0]},
+    {"faction": "allies", "type": "infantry",   "name": "美 1 步", "at": [9, 2]},
+    {"faction": "allies", "type": "at_gun",     "name": "57 mm",   "at": [8, 3]},
+    {"faction": "allies", "type": "mg_team",    "name": "M1919",   "at": [9, 5]}
+  ],
   "victory": {
     "axis": {"type": "eliminate", "by_turn": 99},
     "allies": {"type": "eliminate", "by_turn": 99}
