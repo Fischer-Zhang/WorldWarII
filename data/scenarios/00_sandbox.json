@@ -1,0 +1,28 @@
+{
+  "id": "00_sandbox",
+  "title": "沙盒測試地圖",
+  "briefing": "用於第一週開發的測試地圖。10x8 hex,混合地形,無單位、無勝負。",
+  "map": {
+    "width": 10,
+    "height": 8,
+    "tiles": [
+      ["plain", "plain", "plain", "road",  "road",  "road",  "plain", "plain", "plain", "plain"],
+      ["plain", "forest", "plain", "plain", "town", "plain", "plain", "forest", "plain", "plain"],
+      ["plain", "forest", "forest", "plain", "plain", "plain", "forest", "forest", "plain", "plain"],
+      ["plain", "plain", "river", "river", "river", "plain", "plain", "plain", "mountain", "mountain"],
+      ["plain", "plain", "plain", "river", "plain", "plain", "plain", "mountain", "mountain", "plain"],
+      ["plain", "plain", "plain", "plain", "plain", "town", "plain", "plain", "plain", "plain"],
+      ["plain", "forest", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
+      ["plain", "forest", "forest", "plain", "plain", "plain", "plain", "road", "road", "road"]
+    ]
+  },
+  "factions": [
+    {"id": "axis", "name": "Axis", "controller": "player", "color": "#7a4a3a"},
+    {"id": "allies", "name": "Allies", "controller": "ai", "ai": "defensive", "color": "#3a5a7a"}
+  ],
+  "units": [],
+  "victory": {
+    "axis": {"type": "eliminate", "by_turn": 99},
+    "allies": {"type": "eliminate", "by_turn": 99}
+  }
+}

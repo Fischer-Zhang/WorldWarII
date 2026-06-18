@@ -1,0 +1,25 @@
+# Godot 4
+.godot/
+.import/
+*.translation
+export.cfg
+export_presets.cfg
+
+# Builds
+build/
+bin/
+exports/
+*.exe
+*.x86_64
+*.pck
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Optional: keep this if you want to ignore generated documentation
+/docs/api/
