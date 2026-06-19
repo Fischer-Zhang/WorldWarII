@@ -101,10 +101,10 @@ func unregister_unit(unit: Unit) -> void:
 	if occupants.get(unit.coord) == unit:
 		occupants.erase(unit.coord)
 
-func move_unit(unit: Unit, dest: Vector2i) -> void:
+func move_unit(unit: Unit, dest: Vector2i, animate_duration: float = 0.0) -> void:
 	occupants.erase(unit.coord)
 	occupants[dest] = unit
-	unit.move_to(dest, HexCoord.to_pixel(dest, HEX_SIZE))
+	unit.move_to(dest, HexCoord.to_pixel(dest, HEX_SIZE), animate_duration)
 
 func unit_at(coord: Vector2i) -> Unit:
 	return occupants.get(coord)

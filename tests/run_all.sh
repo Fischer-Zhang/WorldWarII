@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Runs all GDScript headless tests. Requires `godot` (4.2+) on PATH.
+# Exits non-zero if any test reports a failure.
+
+set -eu
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if ! command -v godot >/dev/null 2>&1; then
+  echo "godot not found on PATH — install Godot 4.2+ first" >&2
+  exit 127
+fi
+
+fail=0
+for t in "$SCRIPT_DIR"/test_*.gd; do
+  name="$(basename "$t" .gd)"
+  echo "=== $name ==="
+  if ! godot --headless --path "$PROJECT_DIR" --script "res://tests/$(basename "$t")"; then
+    fail=1
+  fi
+done
+
+if [ "$fail" -ne 0 ]; then
+  echo "Some tests failed." >&2
+  exit 1
+fi
+echo "All tests passed."

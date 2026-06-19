@@ -49,10 +49,15 @@ func reset_for_new_turn() -> void:
 	has_attacked = false
 	queue_redraw()
 
-func move_to(new_coord: Vector2i, world_pos: Vector2) -> void:
+func move_to(new_coord: Vector2i, world_pos: Vector2, duration: float = 0.0) -> void:
 	coord = new_coord
-	position = world_pos
 	has_moved = true
+	if duration > 0.0:
+		var tween := create_tween()
+		tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(self, "position", world_pos, duration)
+	else:
+		position = world_pos
 	moved.emit(new_coord)
 	queue_redraw()
 

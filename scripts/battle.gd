@@ -14,8 +14,13 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
+@onready var info_unit_name: Label = $UI/InfoPanel/VBox/UnitName
+@onready var info_faction_label: Label = $UI/InfoPanel/VBox/FactionLabel
+@onready var info_stats: RichTextLabel = $UI/InfoPanel/VBox/StatsLabel
+@onready var info_terrain: RichTextLabel = $UI/InfoPanel/VBox/TerrainLabel
 
 const AI_STEP_DELAY := 0.6
+const MOVE_TWEEN_DURATION := 0.22
 
 var scenario: Dictionary = {}
 var factions: Dictionary = {}
@@ -103,7 +108,7 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		var plan: Dictionary = ai.plan_for_unit(u)
 		var dest: Vector2i = plan["move_to"]
 		if dest != u.coord:
-			hex_map.move_unit(u, dest)
+			hex_map.move_unit(u, dest, MOVE_TWEEN_DURATION)
 			hex_map.highlight_coord(dest)
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
@@ -165,7 +170,7 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				return
 			# Click in movement range → move then attack
 			if movement_range.has(coord) and clicked_unit == null:
-				hex_map.move_unit(selected_unit, coord)
+				hex_map.move_unit(selected_unit, coord, MOVE_TWEEN_DURATION)
 				_enter_attack_phase()
 				return
 			_deselect()
@@ -182,6 +187,7 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 func _select_unit(unit: Unit) -> void:
 	selected_unit = unit
 	phase = Phase.UNIT_SELECTED
+	_update_info_panel_for_unit(unit)
 	if unit.has_moved:
 		_enter_attack_phase()
 		return
@@ -264,10 +270,53 @@ func _show_terrain_info(coord: Vector2i, terrain_id: String, unit_here: Unit) ->
 			factions[unit_here.faction_id]["name"], unit_here.display_name,
 			unit_here.hp, unit_here.max_hp,
 		]
+		_update_info_panel_for_unit(unit_here)
+	else:
+		_update_info_panel_terrain_only(coord, terrain_id)
 	info_label.text = "(%d, %d) %s — 移動消耗 %d, 防禦 %+d%s" % [
 		coord.x, coord.y, String(def.get("name_zh", terrain_id)),
 		int(def.get("move_cost", 0)), int(def.get("defense", 0)), suffix,
 	]
+
+func _update_info_panel_for_unit(unit: Unit) -> void:
+	var u_def := DataLoader.get_unit_def(unit.type_id)
+	info_unit_name.text = unit.display_name
+	var faction_color: Color = factions[unit.faction_id]["color"]
+	info_faction_label.add_theme_color_override("font_color", faction_color)
+	info_faction_label.text = String(factions[unit.faction_id]["name"])
+	var lines := [
+		"[b]HP[/b]      %d / %d" % [unit.hp, unit.max_hp],
+		"[b]攻擊[/b]    %d" % int(u_def.get("attack", 0)),
+		"[b]防禦[/b]    %d" % int(u_def.get("defense", 0)),
+		"[b]射程[/b]    %d" % int(u_def.get("range", 1)),
+		"[b]移動[/b]    %d" % int(u_def.get("move", 0)),
+		"[b]反裝甲[/b]  %d" % int(u_def.get("vs_armor", 0)),
+		"[b]裝甲[/b]    %d" % int(u_def.get("armor", 0)),
+	]
+	if u_def.get("indirect", false):
+		lines.append("[i]間接射擊 — 不被反擊[/i]")
+	if unit.has_moved:
+		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
+	info_stats.text = "\n".join(lines)
+	_update_info_panel_terrain_only(unit.coord, hex_map.terrain_at(unit.coord))
+
+func _update_info_panel_terrain_only(coord: Vector2i, terrain_id: String) -> void:
+	if terrain_id == "":
+		info_terrain.text = ""
+		return
+	var t_def := DataLoader.get_terrain_def(terrain_id)
+	var lines := [
+		"[b]位置[/b]    (%d, %d)" % [coord.x, coord.y],
+		"[b]地形[/b]    %s" % String(t_def.get("name_zh", terrain_id)),
+		"[b]移動消耗[/b] %d" % int(t_def.get("move_cost", 0)),
+		"[b]地形防禦[/b] %+d" % int(t_def.get("defense", 0)),
+	]
+	if t_def.get("blocks_los", false):
+		lines.append("[i]遮擋視線[/i]")
+	if t_def.get("capturable", false):
+		lines.append("[i]可佔領[/i]")
+	info_terrain.text = "\n".join(lines)
+
 
 func _update_status() -> void:
 	var counts := {}

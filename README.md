@@ -32,6 +32,14 @@
 - ✅ 色當 1940 戰役 ([01_sedan_1940.json](data/scenarios/01_sedan_1940.json)):14×10 地圖含馬士河與阿登森林,德軍攻擊、法軍防守,12 回合內佔領色當鎮獲勝
 - ✅ 主選單 → 戰役選擇 → 簡報 → 戰鬥 → 結果 → 回戰役選擇 的完整導覽流程
 
+**第 5 週 — 內容擴充 & polish**
+- ✅ 基輔 1941 ([02_kiev_1941.json](data/scenarios/02_kiev_1941.json)):德軍砲兵突破紅軍口袋殘部,展示砲兵 3 格射程與不被反擊機制
+- ✅ 史達林格勒 1942 ([03_stalingrad_1942.json](data/scenarios/03_stalingrad_1942.json)):玩家轉守為攻,在城鎮地形 +3 防禦修正中堅守至 12 回合
+- ✅ 庫斯克 1943 ([04_kursk_1943.json](data/scenarios/04_kursk_1943.json)):大規模戰車對決,反戰車砲縱深、vs_armor / armor 機制核心
+- ✅ 單位資訊側欄:選取/點到單位即時顯示 HP / 攻防 / 移動 / 射程 / vs_armor / armor / 地形修正
+- ✅ 移動平滑動畫(0.22s tween,SINE 緩動)
+- ✅ 測試運行器 [`tests/run_all.sh`](tests/run_all.sh):一鍵跑完 hex_coord / pathfinding / combat_resolver 三組單元測試
+
 完整實作計畫:[CLAUDE plan file](/home/fischer/.claude/plans/ww2-mellow-river.md)(本機)
 
 ## 執行
@@ -42,11 +50,11 @@
 # 1) 用 Godot 編輯器開啟 project.godot
 godot --editor project.godot
 
-# 2) 直接執行主場景
+# 2) 直接執行主場景(主選單)
 godot project.godot
 
-# 3) 執行 hex 座標單元測試
-godot --headless --script res://tests/test_hex_coord.gd
+# 3) 跑全部單元測試
+bash tests/run_all.sh
 ```
 
 操作:

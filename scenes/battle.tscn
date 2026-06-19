@@ -35,6 +35,51 @@ text = ""
 horizontal_alignment = 0
 vertical_alignment = 1
 
+[node name="InfoPanel" type="Panel" parent="UI"]
+offset_left = 1040.0
+offset_top = 60.0
+offset_right = 1268.0
+offset_bottom = 600.0
+
+[node name="VBox" type="VBoxContainer" parent="UI/InfoPanel"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 216.0
+offset_bottom = 528.0
+theme_override_constants/separation = 6
+
+[node name="Header" type="Label" parent="UI/InfoPanel/VBox"]
+theme_override_font_sizes/font_size = 14
+text = "單位資訊"
+
+[node name="UnitName" type="Label" parent="UI/InfoPanel/VBox"]
+theme_override_font_sizes/font_size = 20
+text = "(未選取)"
+
+[node name="FactionLabel" type="Label" parent="UI/InfoPanel/VBox"]
+theme_override_font_sizes/font_size = 14
+text = ""
+
+[node name="Sep1" type="HSeparator" parent="UI/InfoPanel/VBox"]
+
+[node name="StatsLabel" type="RichTextLabel" parent="UI/InfoPanel/VBox"]
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+custom_minimum_size = Vector2(0, 280)
+theme_override_font_sizes/normal_font_size = 14
+text = "點擊單位以查看數據"
+
+[node name="Sep2" type="HSeparator" parent="UI/InfoPanel/VBox"]
+
+[node name="TerrainLabel" type="RichTextLabel" parent="UI/InfoPanel/VBox"]
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+custom_minimum_size = Vector2(0, 100)
+theme_override_font_sizes/normal_font_size = 14
+text = ""
+
 [node name="EndTurnButton" type="Button" parent="UI"]
 offset_left = 1050.0
 offset_top = 670.0
