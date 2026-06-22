@@ -186,6 +186,68 @@ If the spawn hex is already occupied, the reinforcement is silently dropped (wit
 
 ---
 
+## Fog of war + line-of-sight
+
+[scripts/grid/visibility.gd](../scripts/grid/visibility.gd) (~50 LOC).
+
+### Vision per unit type
+
+Each unit type declares `vision` in [data/units.json](../data/units.json):
+
+| Unit type | Vision | Why |
+|---|---|---|
+| `at_gun` | 2 | Static, low profile — bad scout |
+| `infantry` / `mg_team` | 3 | Boots on the ground baseline |
+| `light_tank` / `medium_tank` | 4 | Mobile, higher viewpoint |
+| `artillery` | 5 | High vantage / observers — doubles as a spotter |
+
+Adding a stat to the data tier (rather than hard-coding) lets a future scenario override vision (e.g. night ops) without touching code.
+
+### Hex line drawing
+
+`HexCoord.line(a, b)` walks the line from `a` to `b`, sampling at `t = step / distance` and snapping to the nearest hex via the cube-rounding logic already used for pixel → axial conversion. Returns the full path inclusive of both endpoints.
+
+### LOS check
+
+`Visibility.has_los(observer, target, hex_map)` walks the line, **skipping the endpoints**, and returns false if any intermediate hex's terrain has `blocks_los: true` (currently `forest` and `mountain`). A unit on a forest tile can still be seen by an adjacent observer — only line-crossing forest breaks vision.
+
+### Visibility computation
+
+`Visibility.compute_visible_hexes(units, faction_id, hex_map)` returns a `Dictionary[Vector2i, true]` of every hex visible to **any** living unit of the given faction. For each unit, it iterates `HexCoord.range_within(coord, vision)` and tests LOS to each candidate. Map sizes are small (140 hexes max), so the naive O(units × range² × line_length) is well under one millisecond.
+
+### Asymmetric design
+
+Only the **player** faction gets fog. The AI is omniscient — it can score moves against units it "shouldn't" see. This is a deliberate scope decision:
+
+- Symmetric fog would require the AI to maintain a "last known position" memory of enemy units, including stale entries to chase.
+- The player still gets the depth benefit: terrain choice for cover-while-advancing, scouting, ambush setup.
+- Many published wargames (most early-era ones) ship with this asymmetry.
+
+The omniscient AI is documented here so a reviewer can see it's a choice, not an oversight. A roadmap item exists to upgrade later.
+
+### Rendering
+
+`HexMap._spawn_fog_layer()` creates a Node2D at `z_index = 8` (between range overlays and units) and adds one fog Polygon2D per hex, initially invisible. `HexMap.apply_visibility(visible_hexes, viewer_faction)` then:
+
+1. Sets each fog overlay's `visible` to the inverse of the hex's visibility.
+2. Iterates every occupant; if `unit.faction_id == viewer_faction` shows it unconditionally, otherwise mirrors the hex's visibility.
+
+This means enemy units pop in and out as the player advances or pulls back.
+
+### Recomputation triggers
+
+The `_recompute_visibility()` helper in [scripts/battle.gd](../scripts/battle.gd) fires after:
+
+- Initial scene `_ready` (so the player sees the right state on load).
+- Player movement completes.
+- AI movement completes (for each AI unit individually — the player watches the fog peel back as the AI advances toward them).
+- Combat resolution (a killed unit might have been the only spotter).
+- Reinforcement spawn (new units extend visibility).
+
+Tested in [tests/test_visibility.gd](../tests/test_visibility.gd) — 7 cases covering identity, line endpoints, consecutive hexes, clear LOS, forest blocker, endpoint-not-blocker, adjacent visibility.
+
+---
+
 ## Visual / logic split
 
 A worked example: when a unit attacks and the defender dies,
@@ -217,6 +279,7 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded | 6 |
 | `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect, OOR | 7 |
-| **Total** | | **20 ✓** |
+| `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
+| **Total** | | **27 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

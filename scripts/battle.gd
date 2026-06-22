@@ -7,6 +7,7 @@ const HexMap := preload("res://scripts/grid/hex_map.gd")
 const Unit := preload("res://scripts/units/unit.gd")
 const CameraController := preload("res://scripts/ui/camera_controller.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
@@ -48,6 +49,8 @@ var movement_range: Dictionary = {}
 var attack_targets: Array = []
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
+var player_faction_id: String = ""
+var visible_hexes: Dictionary = {}
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -68,11 +71,18 @@ func _ready() -> void:
 		hex_map.register_unit(unit)
 		units.append(unit)
 
+	# Identify the player's faction once; visibility & objective pulse use it.
+	for fid in factions.keys():
+		if String(factions[fid].get("controller", "")) == "player":
+			player_faction_id = fid
+			break
+
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	result_panel.visible = false
 	_apply_player_objective_pulse()
+	_recompute_visibility()
 
 	turn_manager.configure(factions)
 	turn_manager.turn_started.connect(_on_turn_started)
@@ -134,6 +144,7 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			hex_map.move_unit_along_path(u, path)
 			AudioBank.play("move")
 			hex_map.highlight_coord(dest)
+			_recompute_visibility()
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
 		u.has_moved = true
@@ -207,6 +218,7 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				)
 				hex_map.move_unit_along_path(selected_unit, path)
 				AudioBank.play("move")
+				_recompute_visibility()
 				_enter_attack_phase()
 				return
 			_deselect()
@@ -294,6 +306,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	# Garbage-collect dead units from our roster
 	units = units.filter(func(u): return u.is_alive())
 
+	_recompute_visibility()
 	info_label.text = msg
 	_deselect()
 	_update_status()
@@ -339,6 +352,7 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		"[b]攻擊[/b]    %d" % int(u_def.get("attack", 0)),
 		"[b]防禦[/b]    %d" % int(u_def.get("defense", 0)),
 		"[b]射程[/b]    %d" % int(u_def.get("range", 1)),
+		"[b]視野[/b]    %d" % int(u_def.get("vision", 3)),
 		"[b]移動[/b]    %d" % int(u_def.get("move", 0)),
 		"[b]反裝甲[/b]  %d" % int(u_def.get("vs_armor", 0)),
 		"[b]裝甲[/b]    %d" % int(u_def.get("armor", 0)),
@@ -405,6 +419,12 @@ func _show_turn_banner(text: String) -> void:
 	tween.tween_interval(0.7)
 	tween.tween_property(turn_banner, "modulate:a", 0.0, 0.35)
 
+func _recompute_visibility() -> void:
+	if player_faction_id == "":
+		return
+	visible_hexes = Visibility.compute_visible_hexes(units, player_faction_id, hex_map)
+	hex_map.apply_visibility(visible_hexes, player_faction_id)
+
 func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> void:
 	# Spawns any reinforcements scheduled for `turn_number` belonging to
 	# `faction_id`. Already-spawned entries are skipped.
@@ -441,3 +461,4 @@ func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> voi
 		names.append(u.display_name)
 	info_label.text = "★ 援軍抵達:%s" % ", ".join(names)
 	AudioBank.play("victory")  # fanfare borrow — replace with a dedicated SFX later if added
+	_recompute_visibility()

@@ -6,6 +6,7 @@
     "defense": 2,
     "range": 1,
     "move": 3,
+    "vision": 3,
     "vs_armor": 1,
     "armor": 0
   },
@@ -16,6 +17,7 @@
     "defense": 1,
     "range": 1,
     "move": 2,
+    "vision": 3,
     "vs_armor": 0,
     "armor": 0
   },
@@ -26,6 +28,7 @@
     "defense": 1,
     "range": 1,
     "move": 1,
+    "vision": 2,
     "vs_armor": 5,
     "armor": 0
   },
@@ -36,6 +39,7 @@
     "defense": 4,
     "range": 1,
     "move": 5,
+    "vision": 4,
     "vs_armor": 2,
     "armor": 2
   },
@@ -46,6 +50,7 @@
     "defense": 5,
     "range": 1,
     "move": 4,
+    "vision": 4,
     "vs_armor": 4,
     "armor": 4
   },
@@ -56,6 +61,7 @@
     "defense": 1,
     "range": 3,
     "move": 2,
+    "vision": 5,
     "vs_armor": 2,
     "armor": 0,
     "indirect": true

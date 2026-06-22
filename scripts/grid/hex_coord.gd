@@ -20,6 +20,21 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 	var dr := a.y - b.y
 	return (abs(dq) + abs(dr) + abs(dq + dr)) / 2
 
+static func line(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
+	# Hex line drawing — sample points along the line from `a` to `b`,
+	# round each to the nearest hex. Both endpoints included.
+	var dist: int = distance(a, b)
+	var out: Array[Vector2i] = []
+	if dist == 0:
+		out.append(a)
+		return out
+	for i in range(dist + 1):
+		var t: float = float(i) / float(dist)
+		var qf: float = lerp(float(a.x), float(b.x), t)
+		var rf: float = lerp(float(a.y), float(b.y), t)
+		out.append(_round_axial(qf, rf))
+	return out
+
 static func range_within(center: Vector2i, radius: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for dq in range(-radius, radius + 1):

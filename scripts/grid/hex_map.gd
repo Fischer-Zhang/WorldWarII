@@ -15,12 +15,14 @@ const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
 const ATTACK_OVERLAY_COLOR := Color(1.0, 0.3, 0.25, 0.45)
 const OBJECTIVE_RGB := Color(1.0, 0.85, 0.2)
+const FOG_COLOR := Color(0.04, 0.04, 0.07, 0.72)
 
 var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
 var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
 var occupants: Dictionary = {} # Vector2i (axial) -> Unit
 var highlight: Polygon2D
 var range_overlays: Node2D
+var fog_overlays: Dictionary = {}  # Vector2i -> Polygon2D
 var objective_overlays: Array[Polygon2D] = []
 var _objective_phase: float = 0.0
 var bounds_min := Vector2.ZERO
@@ -44,6 +46,7 @@ func load_from_scenario(scenario: Dictionary) -> void:
 			_spawn_tile(coord, terrain_id)
 	_spawn_range_overlay_layer()
 	_spawn_highlight()
+	_spawn_fog_layer()
 	_recompute_bounds()
 
 func _spawn_tile(coord: Vector2i, terrain_id: String) -> void:
@@ -77,6 +80,34 @@ func _spawn_range_overlay_layer() -> void:
 	range_overlays.name = "RangeOverlays"
 	range_overlays.z_index = 5
 	add_child(range_overlays)
+
+func _spawn_fog_layer() -> void:
+	var layer := Node2D.new()
+	layer.name = "FogLayer"
+	layer.z_index = 8  # above range overlays and wreckage, below units (z=20)
+	add_child(layer)
+	for c in tiles.keys():
+		var coord: Vector2i = c
+		var p := Polygon2D.new()
+		p.polygon = _hex_vertices(HEX_SIZE)
+		p.color = FOG_COLOR
+		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
+		p.visible = false  # default: no fog until apply_visibility called
+		layer.add_child(p)
+		fog_overlays[coord] = p
+
+func apply_visibility(visible_hexes: Dictionary, viewer_faction: String) -> void:
+	# Show fog over non-visible hexes; hide enemy units not on visible hexes.
+	for c in fog_overlays.keys():
+		fog_overlays[c].visible = not visible_hexes.has(c)
+	for c in occupants.keys():
+		var unit: Unit = occupants[c]
+		if unit == null:
+			continue
+		if unit.faction_id == viewer_faction:
+			unit.visible = true
+		else:
+			unit.visible = visible_hexes.has(c)
 
 func show_movement_range(coords: Array) -> void:
 	_paint_overlay(coords, RANGE_OVERLAY_COLOR)
@@ -240,6 +271,13 @@ func move_cost_at(coord: Vector2i) -> int:
 	var def := DataLoader.get_terrain_def(terrain_id)
 	return int(def.get("move_cost", 1))
 
+func blocks_los_at(coord: Vector2i) -> bool:
+	var terrain_id: String = tiles.get(coord, "")
+	if terrain_id == "":
+		return false
+	var def := DataLoader.get_terrain_def(terrain_id)
+	return bool(def.get("blocks_los", false))
+
 func _clear() -> void:
 	for child in get_children():
 		child.queue_free()
@@ -247,6 +285,7 @@ func _clear() -> void:
 	polys.clear()
 	occupants.clear()
 	objective_overlays.clear()
+	fog_overlays.clear()
 	highlight = null
 	range_overlays = null
 	set_process(false)

@@ -2,7 +2,7 @@
 
 > 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,4 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-20%2F20-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-27%2F27-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -32,11 +32,12 @@ A sandbox scenario for development is also included.
 ## Highlights
 
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
+- **Fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. Scouting becomes a meaningful decision.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets** — `aggressive` / `defensive` / `hold`. Each scenario sets its opponents' personality so the German blitz at Sedan feels different from the Soviet defenders in their Kiev pocket.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **20 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding, combat formula edge cases.
-- **~2400 LOC** of GDScript across 18 files. Read it top-to-bottom in an afternoon.
+- **27 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding, combat formula edge cases, hex line drawing, line-of-sight.
+- **~2700 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
 
 ---
 
@@ -167,14 +168,16 @@ No code changes required.
 - [x] AI with three personality presets
 - [x] 5 historical scenarios + sandbox
 - [x] Scheduled reinforcements (Bastogne)
+- [x] Fog of war + hex line-of-sight (per-unit vision ranges)
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 20 unit tests, headless runner
+- [x] 27 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
 - [ ] AI 1-ply lookahead + difficulty selector
+- [ ] Symmetric fog (AI also limited by LOS — currently omniscient)
 - [ ] Save / load mid-scenario
 
 ---
