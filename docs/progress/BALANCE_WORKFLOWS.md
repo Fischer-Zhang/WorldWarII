@@ -20,6 +20,19 @@ The generated report covers:
 
 This workflow should run before and after every proposed stat patch.
 
+## Workflow 1.5: Validation Hook
+
+Use `tools/validate.sh` for the standard validation sequence:
+
+- JSON validation for unit catalogs.
+- Python syntax checks for report tools.
+- Regeneration of balance and scenario reports.
+- `git diff --check`.
+- `bash tests/run_all.sh`.
+
+Use `tools/install_hooks.sh` to install a local git `pre-commit` hook that runs
+`tools/validate.sh` before every commit.
+
 ## Workflow 2: Rule Semantics
 
 Current rules established before large number changes:
