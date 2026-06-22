@@ -185,7 +185,10 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			_deselect()
 
 func _select_unit(unit: Unit) -> void:
+	if selected_unit != null and selected_unit != unit:
+		selected_unit.set_selected(false)
 	selected_unit = unit
+	unit.set_selected(true)
 	phase = Phase.UNIT_SELECTED
 	_update_info_panel_for_unit(unit)
 	if unit.has_moved:
@@ -226,18 +229,20 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	)
 
 	defender.take_damage(result.damage_to_defender)
+	DamagePopup.spawn(hex_map, defender.position, result.damage_to_defender)
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
 	if result.counter_damage > 0:
 		attacker.take_damage(result.counter_damage)
+		DamagePopup.spawn(hex_map, attacker.position, result.counter_damage, Color(1.0, 0.75, 0.4))
 		msg += ",反擊 %d" % result.counter_damage
 
 	if not defender.is_alive():
 		hex_map.unregister_unit(defender)
-		defender.queue_free()
+		defender.play_death_animation()
 		msg += " — %s 陣亡" % defender.display_name
 	if not attacker.is_alive():
 		hex_map.unregister_unit(attacker)
-		attacker.queue_free()
+		attacker.play_death_animation()
 		msg += " — %s 陣亡" % attacker.display_name
 	else:
 		attacker.has_attacked = true
@@ -255,6 +260,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		_handle_game_over(winner)
 
 func _deselect() -> void:
+	if selected_unit != null:
+		selected_unit.set_selected(false)
 	selected_unit = null
 	movement_range.clear()
 	attack_targets.clear()

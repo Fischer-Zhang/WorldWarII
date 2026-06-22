@@ -24,6 +24,8 @@ var hp: int = 0
 var max_hp: int = 0
 var has_moved: bool = false
 var has_attacked: bool = false
+var selected: bool = false
+var dying: bool = false
 
 signal moved(new_coord: Vector2i)
 
@@ -65,7 +67,32 @@ func take_damage(amount: int) -> void:
 	hp = max(0, hp - amount)
 	queue_redraw()
 
+func set_selected(s: bool) -> void:
+	selected = s
+	set_process(s)  # only redraw constantly while pulsing
+	queue_redraw()
+
+func play_death_animation() -> void:
+	# Visual-only: caller already cleared this unit from game-state.
+	dying = true
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", Color(1.4, 0.4, 0.4, 1.0), 0.12)
+	tween.tween_property(self, "modulate:a", 0.0, 0.42).set_trans(Tween.TRANS_QUAD)
+	tween.tween_callback(queue_free)
+
+func _process(_delta: float) -> void:
+	if selected:
+		queue_redraw()
+
 func _draw() -> void:
+	# Selection ring (pulsing yellow halo) drawn behind everything else
+	if selected and not dying:
+		var pulse: float = (sin(Time.get_ticks_msec() * 0.006) + 1.0) * 0.5
+		var ring_alpha: float = 0.45 + pulse * 0.35
+		draw_arc(
+			Vector2.ZERO, RADIUS + 6.0, 0, TAU, 32,
+			Color(1.0, 0.95, 0.3, ring_alpha), 3.5
+		)
 	# Faction-colored circle
 	var fill_color := faction_color
 	if is_done_for_turn():
