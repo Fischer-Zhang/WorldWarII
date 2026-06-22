@@ -17,6 +17,7 @@ const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
@@ -37,6 +38,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var skill_button: Button = $UI/SkillButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
+@onready var result_summary: RichTextLabel = $UI/ResultPanel/ResultSummary
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
 @onready var info_unit_name: Label = $UI/InfoPanel/VBox/UnitName
 @onready var info_faction_label: Label = $UI/InfoPanel/VBox/FactionLabel
@@ -64,6 +66,7 @@ var player_faction_id: String = ""
 # Per-faction visibility + memory (symmetric fog model)
 var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
 var last_known_positions: Dictionary = {}    # faction_id -> Dictionary[Unit, Vector2i]
+var action_log: ActionLog = ActionLog.new()
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -73,6 +76,7 @@ func _ready() -> void:
 	if scenario.is_empty():
 		push_error("Scenario not found: " + scenario_id)
 		return
+	action_log.scenario_id = scenario_id
 
 	hex_map.load_from_scenario(scenario)
 	hex_map.hex_clicked.connect(_on_hex_clicked)
@@ -127,6 +131,7 @@ func _ready() -> void:
 # ---------- TURN LIFECYCLE ----------
 
 func _on_turn_started(faction_id: String, turn_number: int) -> void:
+	action_log.record_turn_change(faction_id, turn_number)
 	for u in units:
 		if u.faction_id == faction_id and u.is_alive():
 			u.reset_for_new_turn()
@@ -263,6 +268,11 @@ func _handle_game_over(winner: String) -> void:
 			break
 	AudioBank.play("victory" if player_won else "defeat")
 	GameState.end_scenario(winner, {"turn": turn_manager.turn_number})
+	# Persist the battle's action log to disk + populate the result panel
+	# with a per-unit summary aggregated from the recorded events.
+	action_log.record_game_over(winner, turn_manager.turn_number)
+	action_log.save_to_disk()
+	_populate_battle_summary()
 	# Campaign progression: only advance + persist roster on player victory.
 	# A defeat still saves the survivor snapshot so the player can re-play
 	# the same scenario without losing previously accumulated experience.
@@ -277,6 +287,48 @@ func _handle_game_over(winner: String) -> void:
 			CampaignManager.complete_scenario(camp_state, "__no_advance__", survivors)
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
+
+func _populate_battle_summary() -> void:
+	# Build a compact battle-log card for the result panel:
+	#   - 1 line: total events / turns
+	#   - up to 8 top performers by damage dealt with kills + overwatch hits
+	#   - log file path on disk
+	var rows: Array = action_log.summary_by_unit()
+	if rows.is_empty():
+		result_summary.text = "[i]無戰鬥行動紀錄[/i]"
+		return
+	var lines: Array[String] = []
+	lines.append("[b]戰場日誌(前 %d 名)[/b]" % min(8, rows.size()))
+	lines.append("")
+	# Per-unit rows
+	var shown := 0
+	for r in rows:
+		if shown >= 8:
+			break
+		var row: Dictionary = r
+		var color := "#ffd84a" if int(row.damage_dealt) > 0 else "#888888"
+		var parts: Array[String] = []
+		if int(row.attacks) > 0:
+			parts.append("攻 %d×" % int(row.attacks))
+		if int(row.damage_dealt) > 0:
+			parts.append("傷 %d" % int(row.damage_dealt))
+		if int(row.damage_taken) > 0:
+			parts.append("受 %d" % int(row.damage_taken))
+		if int(row.kills) > 0:
+			parts.append("殺 %d" % int(row.kills))
+		if int(row.overwatch_hits) > 0:
+			parts.append("警戒 %d" % int(row.overwatch_hits))
+		if int(row.skills_used) > 0:
+			parts.append("技能 %d" % int(row.skills_used))
+		lines.append("[color=%s]%s[/color] · %s" % [
+			color,
+			String(row.unit),
+			"  ".join(parts) if not parts.is_empty() else "未行動",
+		])
+		shown += 1
+	lines.append("")
+	lines.append("[color=#888888]完整紀錄已存於 user://last_replay.json[/color]")
+	result_summary.text = "\n".join(lines)
 
 func _on_menu_button_pressed() -> void:
 	if GameState.campaign_mode:
@@ -504,6 +556,7 @@ func _on_skill_pressed() -> void:
 		selected_unit.dig_in_level = min(Unit.MAX_DIG_IN, selected_unit.dig_in_level + instant_dig)
 	# Apply self_mods / no_counter via the normal active-effect path.
 	selected_unit.use_skill(skill, turn_manager.turn_number)
+	action_log.record_skill(selected_unit, skill_id, turn_manager.turn_number)
 	# Aura propagation to adjacent same-faction units.
 	var aura: Dictionary = skill.get("aura_mods", {})
 	if not aura.is_empty():
@@ -636,6 +689,12 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	# Garbage-collect dead units from our roster
 	units = units.filter(func(u): return u.is_alive())
 
+	action_log.record_attack(
+		attacker, defender,
+		result.damage_to_defender, result.counter_damage,
+		result.defender_dies, result.attacker_dies,
+		turn_manager.turn_number,
+	)
 	_recompute_visibility()
 	info_label.text = msg
 	_deselect()
@@ -922,6 +981,7 @@ func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 			var suppression := CombatEffects.suppression_for_attack(w_def_for_effect, dmg, not mover.is_alive())
 			mover.add_suppression(suppression)
 			DamagePopup.spawn(hex_map, step_world, dmg, Color(1.0, 0.85, 0.4))
+			action_log.record_overwatch(watcher, mover, dmg, turn_manager.turn_number)
 			watcher.on_overwatch = false
 			watcher.queue_redraw()
 			info_label.text = "⌖ %s 警戒射擊 %s @(%d,%d) → -%d" % [

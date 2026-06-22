@@ -158,10 +158,22 @@ text = "結束回合"
 
 [node name="ResultPanel" type="Panel" parent="UI"]
 visible = false
-offset_left = 390.0
-offset_top = 260.0
-offset_right = 890.0
-offset_bottom = 460.0
+offset_left = 290.0
+offset_top = 60.0
+offset_right = 790.0
+offset_bottom = 660.0
+
+[node name="ResultSummary" type="RichTextLabel" parent="UI/ResultPanel"]
+offset_left = 16.0
+offset_top = 110.0
+offset_right = 484.0
+offset_bottom = 550.0
+bbcode_enabled = true
+fit_content = true
+scroll_active = true
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 13
+text = ""
 
 [node name="ResultLabel" type="Label" parent="UI/ResultPanel"]
 offset_left = 0.0
@@ -175,7 +187,7 @@ vertical_alignment = 1
 
 [node name="MenuButton" type="Button" parent="UI/ResultPanel"]
 offset_left = 150.0
-offset_top = 130.0
+offset_top = 555.0
 offset_right = 350.0
-offset_bottom = 175.0
+offset_bottom = 590.0
 text = "返回戰役列表"
