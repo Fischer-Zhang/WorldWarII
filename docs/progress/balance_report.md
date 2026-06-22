@@ -9,7 +9,7 @@ Generated from `data/units.json`, `data/terrains.json`, and `data/scenarios/*.js
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | infantry | 步兵 | 10 | 4 | 2 | 1 | 3 | 3 | 1 | 0 |  |
 | mg_team | 機槍組 | 8 | 6 | 1 | 1 | 2 | 3 | 0 | 0 |  |
-| at_gun | 反戰車砲 | 6 | 6 | 1 | 1 | 1 | 2 | 5 | 0 |  |
+| at_gun | 反戰車砲 | 6 | 5 | 1 | 1 | 1 | 2 | 6 | 0 |  |
 | light_tank | 輕戰車 | 12 | 5 | 4 | 1 | 5 | 5 | 2 | 2 |  |
 | medium_tank | 中戰車 | 16 | 7 | 5 | 1 | 4 | 4 | 4 | 4 |  |
 | artillery | 砲兵 | 8 | 7 | 1 | 3 | 2 | 5 | 1 | 0 | yes |
@@ -22,7 +22,7 @@ Cell format is `damage/counter`.
 | --- | --- | --- | --- | --- | --- | --- |
 | 步兵 | 2/1 | 3/1 | 3/1 | 1/1 | 1/2 | 3/0 |
 | 機槍組 | 4/1 | 5/1 | 5/1 | 2/1 | 1/3 | 5/0 |
-| 反戰車砲 | 4/1 | 5/1 | 5/1 | 7/1 | 6/2 | 5/0 |
+| 反戰車砲 | 3/1 | 4/1 | 4/1 | 7/1 | 6/2 | 4/0 |
 | 輕戰車 | 3/1 | 4/1 | 4/1 | 3/1 | 2/3 | 4/0 |
 | 中戰車 | 5/1 | 6/1 | 6/0 | 7/1 | 6/2 | 6/0 |
 | 砲兵 | 5/0 | 6/0 | 6/0 | 4/0 | 3/0 | 6/0 |
@@ -33,7 +33,7 @@ Cell format is `damage/counter`.
 | --- | --- | --- | --- | --- | --- | --- |
 | 步兵 | 1 | 1 | 1 | 1 | 1 | 1 |
 | 機槍組 | 2 | 3 | 3 | 1 | 1 | 3 |
-| 反戰車砲 | 2 | 3 | 3 | 5 | 4 | 3 |
+| 反戰車砲 | 1 | 2 | 2 | 5 | 4 | 2 |
 | 輕戰車 | 1 | 2 | 2 | 1 | 1 | 2 |
 | 中戰車 | 3 | 4 | 4 | 5 | 4 | 4 |
 | 砲兵 | 3 | 4 | 4 | 2 | 1 | 4 |
@@ -44,7 +44,7 @@ Cell format is `damage/counter`.
 | --- | --- | --- | --- | --- | --- | --- |
 | 步兵 | 1 | 1 | 1 | 1 | 1 | 1 |
 | 機槍組 | 1 | 2 | 2 | 1 | 1 | 2 |
-| 反戰車砲 | 1 | 2 | 2 | 4 | 3 | 2 |
+| 反戰車砲 | 1 | 1 | 1 | 4 | 3 | 1 |
 | 輕戰車 | 1 | 1 | 1 | 1 | 1 | 1 |
 | 中戰車 | 2 | 3 | 3 | 4 | 3 | 3 |
 | 砲兵 | 2 | 3 | 3 | 1 | 1 | 3 |
@@ -100,12 +100,12 @@ Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in l
 | 機槍組 | 輕戰車 | 2 | 6 | 1 | 12 |
 | 機槍組 | 中戰車 | 1 | 16 | 1 | 16 |
 | 機槍組 | 砲兵 | 5 | 2 | 1 | 8 |
-| 反戰車砲 | 步兵 | 4 | 3 | 1 | 10 |
-| 反戰車砲 | 機槍組 | 5 | 2 | 1 | 8 |
-| 反戰車砲 | 反戰車砲 | 5 | 2 | 1 | 6 |
+| 反戰車砲 | 步兵 | 3 | 4 | 1 | 10 |
+| 反戰車砲 | 機槍組 | 4 | 2 | 1 | 8 |
+| 反戰車砲 | 反戰車砲 | 4 | 2 | 1 | 6 |
 | 反戰車砲 | 輕戰車 | 7 | 2 | 1 | 12 |
 | 反戰車砲 | 中戰車 | 6 | 3 | 1 | 16 |
-| 反戰車砲 | 砲兵 | 5 | 2 | 1 | 8 |
+| 反戰車砲 | 砲兵 | 4 | 2 | 1 | 8 |
 | 輕戰車 | 步兵 | 3 | 4 | 1 | 10 |
 | 輕戰車 | 機槍組 | 4 | 2 | 1 | 8 |
 | 輕戰車 | 反戰車砲 | 4 | 2 | 1 | 6 |
@@ -133,7 +133,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | id | name | changes |
 | --- | --- | --- |
-| at_gun | 反戰車砲 | attack 7->6 (-1) |
+| at_gun | 反戰車砲 | attack 7->5 (-2)<br>vs_armor 5->6 (+1) |
 | light_tank | 輕戰車 | vision 4->5 (+1) |
 | artillery | 砲兵 | attack 8->7 (-1)<br>vs_armor 2->1 (-1) |
 
@@ -143,7 +143,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | --- | --- | --- | --- | --- | --- | --- |
 | 步兵 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 機槍組 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 反戰車砲 | -1 | -1 | -1 | -1 | -1 | -1 |
+| 反戰車砲 | -2 | -2 | -2 | -1 | -1 | -2 |
 | 輕戰車 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 中戰車 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 砲兵 | -1 | -1 | -1 | -2 | -2 | -1 |
@@ -152,7 +152,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | attacker | defender | baseline hits | current hits | delta |
 | --- | --- | --- | --- | --- |
-| 反戰車砲 | 步兵 | 2 | 3 | +1 |
+| 反戰車砲 | 步兵 | 2 | 4 | +2 |
 | 反戰車砲 | 反戰車砲 | 1 | 2 | +1 |
 | 砲兵 | 輕戰車 | 2 | 3 | +1 |
 | 砲兵 | 中戰車 | 4 | 6 | +2 |
@@ -161,7 +161,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | attacker | defender | baseline hits | current hits | change |
 | --- | --- | --- | --- | --- |
-| 反戰車砲 | 步兵 | 2 | 3 | +50% |
+| 反戰車砲 | 步兵 | 2 | 4 | +100% |
 | 反戰車砲 | 反戰車砲 | 1 | 2 | +100% |
 | 砲兵 | 輕戰車 | 2 | 3 | +50% |
 | 砲兵 | 中戰車 | 4 | 6 | +50% |
@@ -172,7 +172,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | --- | --- | --- | --- | --- |
 | 步兵 | 2.75 | 1.00 | -1.75 |  |
 | 機槍組 | 4.75 | 1.50 | -3.25 |  |
-| 反戰車砲 | 4.75 | 6.50 | +1.75 | AT has high soft-target output |
+| 反戰車砲 | 3.75 | 6.50 | +2.75 | Role depends heavily on setup and map placement |
 | 輕戰車 | 3.75 | 2.50 | -1.25 | Mobility/vision must justify lower damage |
 | 中戰車 | 5.75 | 6.50 | +0.75 | Baseline main battle unit; many named tanks share this stat |
 | 砲兵 | 5.75 | 3.50 | -2.25 |  |
@@ -210,6 +210,6 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 ## Recommended Next Pass
 
 1. Run this report before and after every candidate stat patch, then compare role diagnostics plus hits-to-kill.
-2. Start with narrow candidate changes: lower AT soft damage, lower artillery armor effectiveness, and give light tanks a stronger scouting identity.
-3. Validate those changes in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.
+2. Playtest whether the AT gun's lower soft-target damage still leaves it useful outside armor lanes.
+3. Validate Rally and suppression tempo in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.
 

@@ -2,7 +2,7 @@
 
 > 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,5 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-76%2F76-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-79%2F79-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -33,13 +33,13 @@ A sandbox scenario for development is also included.
 
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
 - **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
-- **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), and heavy fire can pin units, reduce mobility, block overwatch/entrenchment, and let artillery strip dig-in.
+- **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression, Rally** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), heavy fire can pin units, and Rally lets suppressed units spend their action recovering.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
-- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
+- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead, capture AI values objective hexes, and pinned units can choose Rally.
 - **Historical generals + veteran XP** — 10 named generals (Rommel, Patton, Zhukov, …) attach to specific units in each scenario, applying quality-tiered stat bonuses to compatible unit types. Units gain XP per kill / damage dealt during a battle, ranking up to ★/★★/★★★ for cumulative attack/defense/move/vision bonuses. Both feed a single modifier pipeline through `CombatResolver` / `CombatModifiers`.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **76 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in, suppression + general modifiers), attack legality, AI role shaping and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
-- **~3200 LOC** of GDScript across 22 files. Read it top-to-bottom in an afternoon.
+- **79 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in, suppression, Rally + general modifiers), attack legality, AI role shaping and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
+- **~2800 LOC** of GDScript across 24 files. Read it top-to-bottom in an afternoon.
 
 ---
 
@@ -57,6 +57,7 @@ In-battle interactions:
 | See movement range | Blue overlay on reachable hexes (BFS with per-terrain costs) |
 | Move | Click a blue hex — unit walks the path hex-by-hex |
 | Attack | After moving, red overlay shows enemies in range — click one |
+| Rally | If suppressed, click `整隊 (R)` after moving/staying to spend the action and recover suppression |
 | Pass | After moving, click anywhere off the red overlay |
 | End turn | Bottom-right button (or wait for animations and click) |
 | Camera | WASD pan / mouse-wheel zoom / middle-click drag |
@@ -101,7 +102,7 @@ base   = max(1, attacker.attack
 damage = max(1, round(base × attacker.hp / attacker.max_hp))
 ```
 
-Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter while defending). Direct attacks require visibility and LOS; indirect attacks still require a spotted target but can fire over LOS blockers. Damaging attacks also apply suppression; MG teams and artillery pin hardest, pinned units cannot overwatch or build dig-in, heavy suppression reduces movement/attack, and artillery strips one dig-in level on damaging hits.
+Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter while defending). Direct attacks require visibility and LOS; indirect attacks still require a spotted target but can fire over LOS blockers. Damaging attacks also apply suppression; MG teams and artillery pin hardest, pinned units cannot overwatch or build dig-in, heavy suppression reduces movement/attack, artillery strips one dig-in level on damaging hits, and Rally trades an action for suppression recovery.
 
 ### AI heuristic
 
@@ -142,7 +143,7 @@ bash tests/run_all.sh
 
 ### Balance tooling
 
-Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes. `tools/validate_fast.sh` runs JSON/Python/report checks without launching Godot, and `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
+Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes; `python3 tools/scenario_probe.py` regenerates tactical probes for suppression sources, artillery coverage, objective pressure, and reinforcement deltas. `tools/validate_fast.sh` runs JSON/Python/report checks without launching Godot, and `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
 
 ### WSL2 caveats
 
@@ -172,14 +173,14 @@ No code changes required.
 **Done**
 - [x] Hex grid, BFS movement, combat model, turn cycle
 - [x] AI with three personality presets + three difficulty profiles + 1-ply lookahead on Hard
-- [x] Zone of Control, Overwatch, Dig In, Suppression
+- [x] Zone of Control, Overwatch, Dig In, Suppression, Rally
 - [x] 5 historical scenarios + sandbox
 - [x] Scheduled reinforcements (Bastogne)
 - [x] Symmetric fog of war + line-of-sight + AI last-known-position memory
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 76 unit tests, headless runner
+- [x] 79 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)

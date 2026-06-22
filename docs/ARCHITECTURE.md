@@ -98,14 +98,15 @@ Two design decisions worth flagging:
 1. **HP-ratio scaling.** A wounded attacker hits softer (`attacker_hp / max_hp`). This creates a natural "death spiral" — a 30%-HP unit is much weaker than the same unit at full HP — without needing a separate morale system.
 2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter while defending; it is still countered if it attacks from inside the defender's range.
 3. **Suppression side effects.** Damaging non-lethal hits return side effects alongside damage: light suppression for most attacks, stronger pinning from MG/artillery, and one dig-in level stripped by damaging indirect fire.
+4. **Rally as action economy.** Suppressed units can spend their action to recover suppression, with extra recovery in cover. This turns suppression into a reversible tempo cost rather than a one-way debuff.
 
 Attack legality is owned by [scripts/combat/combat_rules.gd](../scripts/combat/combat_rules.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers. Player targeting and AI attack evaluation both call this shared rule layer.
 
 `vs_armor` only triggers against units with `armor > 0`, so AT guns shred tanks but waste their bonus on infantry.
 
-Suppression thresholds live in [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd): pinned units cannot overwatch or build dig-in, heavier suppression reduces movement, and the highest band reduces attack. Suppression recovers by 1 at the start of the unit's faction turn.
+Suppression thresholds live in [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd): pinned units cannot overwatch or build dig-in, heavier suppression reduces movement, and the highest band reduces attack. Suppression recovers by 1 at the start of the unit's faction turn; Rally recovers 2 immediately, or 3 when the unit is in defensive cover.
 
-Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) and [tests/test_combat_effects.gd](../tests/test_combat_effects.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, dig-in, suppression, and artillery dig-in stripping.
+Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) and [tests/test_combat_effects.gd](../tests/test_combat_effects.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, dig-in, suppression, Rally, and artillery dig-in stripping.
 
 ---
 
@@ -123,6 +124,7 @@ For each AI unit on its faction's turn:
          + 5.0 if attack would kill              (finish bonus)
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
          + suppression / dig-in break value      (prefer pinning and siege hits)
+         + capture-objective pressure            (for capture factions)
          - exposure_to_enemy_threat      × 0.5   (don't walk into kill zones)
          + terrain.defense               × 0.3   (use cover)
          + role_score                            (scout / AT / artillery shaping)
@@ -137,6 +139,8 @@ Role shaping keeps specialist units from collapsing back into raw damage math:
 - AT guns get a target bonus against armored units and a small penalty against soft targets.
 - Indirect-fire units are penalized for candidate positions within 1-2 hexes of known enemies, encouraging standoff behavior.
 - Suppression and dig-in break are part of attack value, so artillery and MG teams can be preferred even when raw damage ties.
+- Capture factions value positions closer to their objective hex.
+- Pinned units can choose Rally in place when suppression recovery beats moving, attacking or overwatch.
 
 **Personality weights** modulate the final score:
 
@@ -171,9 +175,9 @@ Behaviour you'll notice on Hard:
 
 ---
 
-## Tactical mechanics — ZoC, Overwatch, Dig In
+## Tactical mechanics — ZoC, Overwatch, Dig In, Suppression, Rally
 
-Three classic hex-wargame mechanics layered onto the existing systems.
+Classic hex-wargame mechanics layered onto the existing systems.
 
 ### Zone of Control (ZoC)
 
@@ -221,13 +225,24 @@ Any move, attack or overwatch resets the level to zero — entrenchment is a bin
 
 Visual marker: brown chevrons below the unit's HP bar, one per level. The info-panel stats line shows `⛤ 構工 +N 防禦` when active.
 
+### Suppression + Rally
+
+Damaging attacks apply suppression through [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd). Most direct-fire units apply light suppression; MG teams and artillery apply strong suppression. Thresholds:
+
+- `2+`: pinned; cannot enter overwatch or build dig-in.
+- `3+`: movement -1.
+- `4+`: attack -1.
+
+Suppression decays by 1 at the start of the unit's own faction turn. Rally is the active counterplay: the unit spends its action, clears overwatch/dig-in intent, and immediately removes 2 suppression, or 3 if its current terrain has defense 2 or higher. The player uses `整隊 (R)`; the AI evaluates Rally as a fourth action beside attack, overwatch and wait.
+
 ### Combined behaviour
 
 The three mechanics interact in pleasant ways:
 
 - ZoC forces the player to invest movement to bypass an enemy — by then, that enemy can react on its turn.
 - Overwatch lets a static unit pin a corridor without spending its attack.
-- Dig In rewards holding ground in cover; a unit in town (+3 defense) with dig-in 3 (+3 defense) is effectively unkillable to anything but armor with full vs_armor bonus.
+- Dig In rewards holding ground in cover; a unit in town (+3 defense) with dig-in 3 (+3 defense) is hard to remove without artillery.
+- Suppression prevents a dug-in line from staying fully locked forever, while Rally gives the defender a tempo-cost recovery option.
 
 Together they recover most of the strategic-depth gap between a "minimal tactical wargame" and something like Panzer General.
 
@@ -471,12 +486,12 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded / ZoC + reconstruction | 10 |
 | `test_combat_resolver` | Damage formula, counters, dig-in, modifiers, suppression output, artillery dig-in break | 16 |
-| `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, lethal/no-damage handling | 6 |
+| `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, Rally, lethal/no-damage handling | 7 |
 | `test_combat_modifiers` | Rank thresholds and general modifier aggregation | 9 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value | 5 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action | 7 |
 | `test_reinforcements` | Bastogne scheduled turn 7 spawn, coordinate conversion, ready-to-act state, no duplicate spawn, occupied-hex skip | 6 |
-| **Total** | | **76 ✓** |
+| **Total** | | **79 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

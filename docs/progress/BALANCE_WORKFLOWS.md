@@ -28,6 +28,7 @@ Use `tools/validate_fast.sh` for validation that does not launch Godot:
 - JSON validation for unit catalogs.
 - Python syntax checks for report tools.
 - Regeneration of balance and scenario reports.
+- Regeneration of scenario probe report.
 - `git diff --check`.
 
 Use `tools/validate.sh` for the full standard validation sequence:
@@ -48,6 +49,7 @@ Current rules established before large number changes:
 - ZoC cost is part of both movement range and path reconstruction.
 - Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
 - Pinned units cannot overwatch or build dig-in, heavier suppression reduces movement/attack, and artillery strips one dig-in level on damaging indirect hits.
+- Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
 
 These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.
 
@@ -66,6 +68,9 @@ Target identities:
 
 Use `python3 tools/scenario_balance_report.py` to regenerate
 `docs/progress/scenario_balance_report.md`.
+Use `python3 tools/scenario_probe.py` to regenerate
+`docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
+objective pressure, and reinforcement deltas.
 
 Evaluate scenarios in this order:
 
@@ -85,6 +90,8 @@ Current role-shaping pass:
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
+- Capture factions bias movement toward their target hex.
+- Suppressed units can choose Rally when recovery is worth more than other actions.
 
 Likely follow-up:
 

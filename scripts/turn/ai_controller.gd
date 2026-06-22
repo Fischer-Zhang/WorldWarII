@@ -22,6 +22,8 @@ const W_SCOUT := 0.45
 const W_ARTILLERY_STANDOFF := 2.5
 const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
+const W_CAPTURE_OBJECTIVE := 1.8
+const W_RALLY := 4.0
 const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
 
@@ -93,7 +95,7 @@ func plan_for_unit(unit) -> Dictionary:
 	var best: Vector2i = unit.coord
 	var best_score: float = -INF
 	var best_target = null
-	var best_action := "wait"  # "attack", "overwatch", or "wait"
+	var best_action := "wait"  # "attack", "overwatch", "rally", or "wait"
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 
 	for cand in candidates:
@@ -109,6 +111,7 @@ func plan_for_unit(unit) -> Dictionary:
 		# base_score already has attack_value baked in (via _score_position).
 		# To get the "overwatch" total, swap them:
 		var overwatch_score: float = base_score - attack_value + overwatch_value
+		var rally_score: float = _rally_score(unit, coord, hex_map, atk_def)
 
 		if base_score > best_score:
 			best_score = base_score
@@ -121,6 +124,11 @@ func plan_for_unit(unit) -> Dictionary:
 			best = coord
 			best_target = null
 			best_action = "overwatch"
+		if rally_score > best_score:
+			best_score = rally_score
+			best = coord
+			best_target = null
+			best_action = "rally"
 
 	return {
 		"move_to": best,
@@ -192,6 +200,7 @@ func _score_position(
 	var terr_def: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 	var terrain_term: float = float(terr_def.get("defense", 0)) * W_TERRAIN
 	var role_term: float = _role_position_score(unit, pos, known, visible_enemies, atk_def)
+	var objective_term: float = _objective_position_score(unit.faction_id, pos)
 
 	# 1-ply lookahead: discount by worst counter the player could deliver
 	# *after* we land on this hex. Only enabled on Hard difficulty.
@@ -200,8 +209,23 @@ func _score_position(
 		var counter_dmg: int = _lookahead_counter_damage(unit, pos, visible_enemies, hex_map, atk_def)
 		lookahead_term = -float(counter_dmg) * W_LOOKAHEAD
 
-	var total: float = dist_term + attack_term + exposure_term + terrain_term + role_term + lookahead_term
+	var total: float = dist_term + attack_term + exposure_term + terrain_term + role_term + objective_term + lookahead_term
 	return _apply_personality(total, attack_term, exposure_term)
+
+func _rally_score(unit, pos: Vector2i, hex_map, atk_def: Dictionary) -> float:
+	if unit.suppression <= 0 or pos != unit.coord:
+		return -INF
+	var terrain_def: Dictionary = _get_terrain_def(hex_map.terrain_at(unit.coord))
+	var recovery: int = CombatEffects.rally_recovery_for_terrain(terrain_def)
+	var after: int = max(0, unit.suppression - recovery)
+	var score: float = float(unit.suppression - after) * W_RALLY
+	if CombatEffects.is_pinned(unit.suppression):
+		score += 3.0
+	score += float(CombatEffects.move_penalty(unit.suppression) - CombatEffects.move_penalty(after)) * 2.0
+	score += float(CombatEffects.attack_penalty(unit.suppression) - CombatEffects.attack_penalty(after)) * 2.0
+	if not atk_def.get("indirect", false):
+		score += 0.5
+	return score
 
 func _apply_personality(total: float, attack_term: float, exposure_term: float) -> float:
 	match personality:
@@ -375,6 +399,19 @@ func _artillery_standoff_score(pos: Vector2i, known: Array) -> float:
 		elif d == 2:
 			penalty -= W_ARTILLERY_STANDOFF
 	return penalty
+
+func _objective_position_score(faction_id: String, pos: Vector2i) -> float:
+	var victory_cfg: Dictionary = battle.scenario.get("victory", {})
+	var objective: Dictionary = victory_cfg.get(faction_id, {})
+	if String(objective.get("type", "")) != "capture":
+		return 0.0
+	var target: Variant = objective.get("target", [])
+	if typeof(target) != TYPE_ARRAY or target.size() < 2:
+		return 0.0
+	var col := int(target[0])
+	var row := int(target[1])
+	var target_coord := Vector2i(col - (row >> 1), row)
+	return -float(HexCoord.distance(pos, target_coord)) * W_CAPTURE_OBJECTIVE
 
 # ---------- 1-ply lookahead ----------
 

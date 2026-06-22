@@ -106,11 +106,19 @@ vertical_alignment = 1
 
 [node name="OverwatchButton" type="Button" parent="UI"]
 offset_left = 1050.0
+offset_top = 570.0
+offset_right = 1260.0
+offset_bottom = 610.0
+visible = false
+text = "進入警戒 (O)"
+
+[node name="RallyButton" type="Button" parent="UI"]
+offset_left = 1050.0
 offset_top = 620.0
 offset_right = 1260.0
 offset_bottom = 660.0
 visible = false
-text = "進入警戒 (O)"
+text = "整隊 (R)"
 
 [node name="EndTurnButton" type="Button" parent="UI"]
 offset_left = 1050.0

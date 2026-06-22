@@ -5,8 +5,8 @@ extends SceneTree
 
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const AT_DEF := {
-	"hp": 6, "attack": 6, "defense": 1, "range": 1, "move": 1,
-	"vision": 2, "vs_armor": 5, "armor": 0,
+	"hp": 6, "attack": 5, "defense": 1, "range": 1, "move": 1,
+	"vision": 2, "vs_armor": 6, "armor": 0,
 }
 const ARTILLERY_DEF := {
 	"id": "artillery", "hp": 8, "attack": 7, "defense": 1, "range": 3, "move": 2,
@@ -32,6 +32,14 @@ class StubBattle:
 	var visibility_by_faction: Dictionary = {}
 	var units: Array = []
 	var factions: Dictionary = {}
+	var scenario: Dictionary = {}
+	func get_known_enemies(faction_id: String) -> Array:
+		var out: Array = []
+		var visible: Dictionary = visibility_by_faction.get(faction_id, {})
+		for u in units:
+			if u.faction_id != faction_id and u.is_alive():
+				out.append({"unit": u, "coord": u.coord, "visible": visible.has(u.coord)})
+		return out
 
 class StubDataLoader:
 	var defs: Dictionary = {
@@ -172,6 +180,34 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: artillery should prefer entrenched target when suppression/dig-in break adds value")
+
+	# 6) Capture factions should bias movement toward their objective hex.
+	battle.scenario = {"victory": {"axis": {"type": "capture", "target": [5, 0]}}}
+	var objective_far: float = ai._score_position(
+		light_tank, Vector2i(0, 0), scout_known, [], battle.hex_map, light_def, {}
+	)
+	var objective_near: float = ai._score_position(
+		light_tank, Vector2i(4, 0), scout_known, [], battle.hex_map, light_def, {}
+	)
+	if objective_near > objective_far:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: capture objective score expected near %.2f > far %.2f" % [objective_near, objective_far])
+	battle.scenario = {}
+
+	# 7) A pinned unit with no profitable contact should choose Rally in place.
+	var pinned_mg := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	pinned_mg.suppression = 4
+	var distant_enemy := make_unit("infantry", "allies", Vector2i(5, 0), 10)
+	battle.units = [pinned_mg, distant_enemy]
+	battle.visibility_by_faction = {"axis": {}}
+	var rally_plan: Dictionary = ai.plan_for_unit(pinned_mg)
+	if String(rally_plan.get("action", "")) == "rally" and rally_plan.get("move_to") == pinned_mg.coord:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: pinned unit expected rally plan got %s" % str(rally_plan))
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

@@ -12,6 +12,8 @@ func _init() -> void:
 	var infantry := {"id": "infantry"}
 	var mg := {"id": "mg_team"}
 	var artillery := {"id": "artillery", "indirect": true}
+	var plain := {"defense": 0}
+	var town := {"defense": 3}
 
 	# 1) Infantry applies light suppression on a damaging non-lethal hit.
 	var s1 := CombatEffects.suppression_for_attack(infantry, 2, false)
@@ -62,6 +64,15 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: lethal/no-damage suppression expected 0/0 got %d/%d" % [lethal, no_damage])
+
+	# 7) Rally recovers more suppression in cover.
+	var rally_plain := CombatEffects.rally_suppression(5, plain)
+	var rally_town := CombatEffects.rally_suppression(5, town)
+	if rally_plain == 3 and rally_town == 2:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: rally expected plain/town 3/2 got %d/%d" % [rally_plain, rally_town])
 
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

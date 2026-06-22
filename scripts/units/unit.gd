@@ -99,6 +99,15 @@ func reduce_dig_in(amount: int) -> void:
 	dig_in_level = max(0, dig_in_level - amount)
 	queue_redraw()
 
+func rally(terrain_def: Dictionary) -> int:
+	var before := suppression
+	suppression = CombatEffects.rally_suppression(suppression, terrain_def)
+	on_overwatch = false
+	has_moved = true
+	has_attacked = true
+	queue_redraw()
+	return before - suppression
+
 func gain_xp(amount: int) -> void:
 	if amount <= 0 or not is_alive():
 		return

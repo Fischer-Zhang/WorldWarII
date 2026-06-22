@@ -5,6 +5,8 @@ const SUPPRESSION_PIN_THRESHOLD := 2
 const SUPPRESSION_MOVE_THRESHOLD := 3
 const SUPPRESSION_ATTACK_THRESHOLD := 4
 const MAX_SUPPRESSION := 5
+const RALLY_RECOVERY := 2
+const RALLY_COVER_BONUS := 1
 
 const SUPPRESSION_BY_TYPE := {
 	"infantry": 1,
@@ -34,6 +36,15 @@ static func apply_suppression(current: int, added: int) -> int:
 
 static func recover_suppression(current: int) -> int:
 	return max(0, current - 1)
+
+static func rally_recovery_for_terrain(terrain_def: Dictionary) -> int:
+	var recovery := RALLY_RECOVERY
+	if int(terrain_def.get("defense", 0)) >= 2:
+		recovery += RALLY_COVER_BONUS
+	return recovery
+
+static func rally_suppression(current: int, terrain_def: Dictionary) -> int:
+	return max(0, current - rally_recovery_for_terrain(terrain_def))
 
 static func is_pinned(suppression: int) -> bool:
 	return suppression >= SUPPRESSION_PIN_THRESHOLD

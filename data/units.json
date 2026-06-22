@@ -24,12 +24,12 @@
   "at_gun": {
     "name_zh": "反戰車砲",
     "hp": 6,
-    "attack": 6,
+    "attack": 5,
     "defense": 1,
     "range": 1,
     "move": 1,
     "vision": 2,
-    "vs_armor": 5,
+    "vs_armor": 6,
     "armor": 0
   },
   "light_tank": {

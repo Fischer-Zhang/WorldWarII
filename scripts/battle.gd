@@ -31,6 +31,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var status_label: Label = $UI/StatusLabel
 @onready var end_turn_button: Button = $UI/EndTurnButton
 @onready var overwatch_button: Button = $UI/OverwatchButton
+@onready var rally_button: Button = $UI/RallyButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
@@ -98,6 +99,7 @@ func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
+	rally_button.pressed.connect(_on_rally_pressed)
 	result_panel.visible = false
 	_apply_player_objective_pulse()
 	_recompute_visibility()
@@ -187,6 +189,10 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				u.queue_redraw()
 				info_label.text = "AI:%s 進入警戒" % u.display_name
 				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+			"rally":
+				var recovered := _rally_unit(u)
+				info_label.text = "AI:%s 整隊,壓制 -%d" % [u.display_name, recovered]
+				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
 			_:  # "wait" or anything else
 				u.has_attacked = true
 				u.queue_redraw()
@@ -228,6 +234,8 @@ func _handle_game_over(winner: String) -> void:
 	_deselect()
 	if overwatch_button != null:
 		overwatch_button.visible = false
+	if rally_button != null:
+		rally_button.visible = false
 	var winner_name := String(factions.get(winner, {}).get("name", winner))
 	result_label.text = "%s 獲勝!" % winner_name
 	result_panel.visible = true
@@ -326,16 +334,22 @@ func _enter_attack_phase() -> void:
 	# Overwatch button: enabled whenever a unit has finished its move and
 	# is making the attack-or-skip decision.
 	overwatch_button.visible = not CombatEffects.is_pinned(selected_unit.suppression)
+	rally_button.visible = selected_unit.suppression > 0
 	if attack_targets.is_empty():
 		if CombatEffects.is_pinned(selected_unit.suppression):
-			info_label.text = "%s 被壓制 — 無法警戒,點空地待機" % selected_unit.display_name
+			info_label.text = "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name
 		else:
-			info_label.text = "%s 已就位 — 點「警戒」進入警戒,或結束回合待機" % selected_unit.display_name
+			var idle_text := "點「警戒」進入警戒,或結束回合待機"
+			if selected_unit.suppression > 0:
+				idle_text = "點「整隊」恢復壓制,點「警戒」,或待機"
+			info_label.text = "%s 已就位 — %s" % [selected_unit.display_name, idle_text]
 	else:
 		var preview := _attack_preview(selected_unit, attack_targets[0])
 		var action_text := "點目標 / 點「警戒」/ 點空地待機"
 		if CombatEffects.is_pinned(selected_unit.suppression):
-			action_text = "點目標 / 點空地待機"
+			action_text = "點目標 / 點「整隊」/ 點空地待機"
+		elif selected_unit.suppression > 0:
+			action_text = "點目標 / 點「警戒」/ 點「整隊」/ 點空地待機"
 		info_label.text = "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
 		]
@@ -353,6 +367,24 @@ func _on_overwatch_pressed() -> void:
 	info_label.text = "%s 進入警戒 — 進入射程的敵人會被自動射擊" % selected_unit.display_name
 	overwatch_button.visible = false
 	_deselect()
+
+func _on_rally_pressed() -> void:
+	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+		return
+	if selected_unit.suppression <= 0:
+		rally_button.visible = false
+		return
+	var unit := selected_unit
+	var recovered := _rally_unit(unit)
+	info_label.text = "%s 整隊 — 壓制 -%d" % [unit.display_name, recovered]
+	_deselect()
+
+func _rally_unit(unit: Unit) -> int:
+	var terrain_def := DataLoader.get_terrain_def(hex_map.terrain_at(unit.coord))
+	var recovered := unit.rally(terrain_def)
+	unit.dig_in_level = 0
+	unit.queue_redraw()
+	return recovered
 
 func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var distance := HexCoord.distance(attacker.coord, defender.coord)
@@ -470,6 +502,7 @@ func _deselect() -> void:
 	attack_targets.clear()
 	hex_map.clear_movement_range()
 	overwatch_button.visible = false
+	rally_button.visible = false
 	if phase != Phase.GAME_OVER:
 		phase = Phase.IDLE
 

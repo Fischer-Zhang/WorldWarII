@@ -18,27 +18,27 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | axis | Axis | player | 4 | 153.1 | armor:1, artillery:1, infantry:1, scout_armor:1 |
-| allies | Allies | ai | 4 | 127.5 | anti_armor:1, armor:1, infantry:1, support:1 |
+| allies | Allies | ai | 4 | 126.3 | anti_armor:1, armor:1, infantry:1, support:1 |
 
 ## 01_sedan_1940
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | axis | 德軍裝甲軍 | player | 7 | 282.6 | armor:3, artillery:1, infantry:2, scout_armor:1 |
-| allies | 法軍第 55 師 | ai | 6 | 151.6 | anti_armor:1, infantry:3, support:2 |
+| allies | 法軍第 55 師 | ai | 6 | 150.4 | anti_armor:1, infantry:3, support:2 |
 
 ## 02_kiev_1941
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | axis | 德軍裝甲群 | player | 7 | 279.9 | armor:3, artillery:2, infantry:2 |
-| soviet | 蘇軍殘部 | ai | 8 | 243.3 | anti_armor:2, armor:1, infantry:3, scout_armor:1, support:1 |
+| soviet | 蘇軍殘部 | ai | 8 | 240.9 | anti_armor:2, armor:1, infantry:3, scout_armor:1, support:1 |
 
 ## 03_stalingrad_1942
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| soviet | 蘇軍第 62 軍團 | player | 7 | 176.9 | anti_armor:2, infantry:3, support:2 |
+| soviet | 蘇軍第 62 軍團 | player | 7 | 174.5 | anti_armor:2, infantry:3, support:2 |
 | axis | 德軍第六軍團 | ai | 7 | 229.1 | armor:1, artillery:1, infantry:3, scout_armor:1, support:1 |
 
 ## 04_kursk_1943
@@ -46,11 +46,11 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | axis | 德軍第四裝甲軍 | player | 7 | 308.8 | armor:4, artillery:1, infantry:1, scout_armor:1 |
-| soviet | 蘇軍中央方面軍 | ai | 10 | 344.7 | anti_armor:4, armor:3, artillery:1, infantry:2 |
+| soviet | 蘇軍中央方面軍 | ai | 10 | 339.9 | anti_armor:4, armor:3, artillery:1, infantry:2 |
 
 ## 05_bastogne_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美 101 空降師 | player | 9 | 292.9 | anti_armor:1, armor:2, artillery:1, infantry:4, support:1 |
+| allies | 美 101 空降師 | player | 9 | 291.7 | anti_armor:1, armor:2, artillery:1, infantry:4, support:1 |
 | axis | 德軍第 5 裝甲軍 | ai | 6 | 243.5 | armor:3, artillery:1, infantry:2 |
