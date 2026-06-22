@@ -23,6 +23,7 @@ The project was built as a **month-scale portfolio piece** with an explicit cons
 | 2 | **基輔包圍戰 1941** | Indirect-fire artillery (range 3, immune to counter-attack) |
 | 3 | **史達林格勒巷戰 1942** | Role reversal — player defends; town terrain gives +3 defense |
 | 4 | **庫斯克裝甲決戰 1943** | Tank-on-tank `vs_armor` / `armor` interaction with AT-gun defense in depth |
+| 5 | **突出部:Bastogne 1944** | Survive-until-relief — scripted reinforcements arrive on turn 7 |
 
 A sandbox scenario for development is also included.
 
@@ -164,14 +165,14 @@ No code changes required.
 **Done**
 - [x] Hex grid, BFS movement, combat model, turn cycle
 - [x] AI with three personality presets
-- [x] 4 historical scenarios + sandbox
+- [x] 5 historical scenarios + sandbox
+- [x] Scheduled reinforcements (Bastogne)
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
 - [x] 20 unit tests, headless runner
 
 **Open**
-- [ ] **5th scenario — Bastogne 1944** ("survive until reinforcements" mechanic)
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
 - [ ] AI 1-ply lookahead + difficulty selector
 - [ ] Save / load mid-scenario

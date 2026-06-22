@@ -170,6 +170,20 @@ Three victory types are recognised by [scripts/scenario/victory_checker.gd](../s
 
 The player's "capture" target automatically gets a yellow pulse overlay so you can see the goal at a glance — no need to read the briefing twice.
 
+### Reinforcements
+
+Scenarios can optionally specify `reinforcements[]` — units that spawn part-way through the battle:
+
+```json
+"reinforcements": [
+  {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼", "at": [5, 9]}
+]
+```
+
+When `TurnManager` rolls into turn `at_turn` AND the current faction is the reinforcement's `faction`, the unit spawns at its `at` coordinate, `reset_for_new_turn` is called so it can act this turn, and an `★ 援軍抵達` banner appears in the info label. Used by Bastogne 1944 for Patton's relief column on turn 7.
+
+If the spawn hex is already occupied, the reinforcement is silently dropped (with a `push_warning`) — caller can adjust map design rather than us picking a random fallback hex.
+
 ---
 
 ## Visual / logic split

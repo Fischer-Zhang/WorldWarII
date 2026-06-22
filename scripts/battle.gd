@@ -47,6 +47,7 @@ var selected_unit: Unit = null
 var movement_range: Dictionary = {}
 var attack_targets: Array = []
 var ai_running: bool = false
+var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -91,6 +92,9 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
 	info_label.text = "▶ %s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number]
 	_show_turn_banner("%s — 第 %d 回合" % [factions[faction_id]["name"], turn_number])
+	# Spawn after the standard turn UI so the reinforcement message overrides
+	# the "X's turn" text and the player notices it immediately.
+	_spawn_reinforcements_for_turn(faction_id, turn_number)
 	_update_status()
 
 	var controller := String(factions[faction_id].get("controller", "player"))
@@ -400,3 +404,40 @@ func _show_turn_banner(text: String) -> void:
 	tween.tween_property(turn_banner, "modulate:a", 1.0, 0.22)
 	tween.tween_interval(0.7)
 	tween.tween_property(turn_banner, "modulate:a", 0.0, 0.35)
+
+func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> void:
+	# Spawns any reinforcements scheduled for `turn_number` belonging to
+	# `faction_id`. Already-spawned entries are skipped.
+	var reinforcements: Array = scenario.get("reinforcements", [])
+	var fresh: Array[Unit] = []
+	for i in range(reinforcements.size()):
+		if spawned_reinforcements.has(i):
+			continue
+		var r: Dictionary = reinforcements[i]
+		if int(r.get("at_turn", -1)) != turn_number:
+			continue
+		if String(r.get("faction", "")) != faction_id:
+			continue
+		var unit := UnitFactory.create_unit(r, factions)
+		if unit == null:
+			spawned_reinforcements[i] = true
+			continue
+		# If the spawn hex is occupied, skip this reinforcement (try again next turn? — no, just drop)
+		if hex_map.occupants.get(unit.coord) != null:
+			push_warning("[Reinforcement] spawn hex %s occupied; skipping" % [unit.coord])
+			unit.queue_free()
+			spawned_reinforcements[i] = true
+			continue
+		hex_map.register_unit(unit)
+		units.append(unit)
+		# Allow newly-arrived units to act this turn.
+		unit.reset_for_new_turn()
+		spawned_reinforcements[i] = true
+		fresh.append(unit)
+	if fresh.is_empty():
+		return
+	var names := []
+	for u in fresh:
+		names.append(u.display_name)
+	info_label.text = "★ 援軍抵達:%s" % ", ".join(names)
+	AudioBank.play("victory")  # fanfare borrow — replace with a dedicated SFX later if added

@@ -22,19 +22,28 @@ static func build(scenario: Dictionary, hex_map: HexMap) -> Dictionary:
 
 	var units: Array = []
 	for u in scenario.get("units", []):
-		var type_id := String(u.get("type", ""))
-		var faction_id := String(u.get("faction", ""))
-		var at_arr: Array = u.get("at", [0, 0])
-		# scenario coords come in odd-r offset (col, row); convert to axial
-		var col := int(at_arr[0])
-		var row := int(at_arr[1])
-		var coord := Vector2i(col - (row >> 1), row)
-		var unit_name := String(u.get("name", ""))
-
-		var unit: Unit = Unit.new()
-		var color: Color = factions.get(faction_id, {}).get("color", Color.WHITE)
-		unit.configure(type_id, faction_id, color, coord, unit_name)
-		unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
-		units.append(unit)
+		var unit := create_unit(u, factions)
+		if unit != null:
+			units.append(unit)
 
 	return {"units": units, "factions": factions}
+
+static func create_unit(data: Dictionary, factions: Dictionary) -> Unit:
+	# Builds one Unit from a single scenario / reinforcement entry.
+	# Returns null if `data` doesn't have the minimal `type` + `faction` keys.
+	var type_id := String(data.get("type", ""))
+	var faction_id := String(data.get("faction", ""))
+	if type_id == "" or faction_id == "":
+		return null
+	var at_arr: Array = data.get("at", [0, 0])
+	# scenario coords come in odd-r offset (col, row); convert to axial
+	var col := int(at_arr[0])
+	var row := int(at_arr[1])
+	var coord := Vector2i(col - (row >> 1), row)
+	var unit_name := String(data.get("name", ""))
+
+	var unit: Unit = Unit.new()
+	var color: Color = factions.get(faction_id, {}).get("color", Color.WHITE)
+	unit.configure(type_id, faction_id, color, coord, unit_name)
+	unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
+	return unit
