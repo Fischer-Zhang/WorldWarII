@@ -125,7 +125,10 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		var plan: Dictionary = ai.plan_for_unit(u)
 		var dest: Vector2i = plan["move_to"]
 		if dest != u.coord:
-			hex_map.move_unit(u, dest, MOVE_TWEEN_DURATION)
+			var reachable: Dictionary = plan.get("reachable", {})
+			var path := Pathfinding.reconstruct_path(u.coord, dest, reachable, hex_map)
+			hex_map.move_unit_along_path(u, path)
+			AudioBank.play("move")
 			hex_map.highlight_coord(dest)
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
@@ -142,6 +145,7 @@ func _on_end_turn_pressed() -> void:
 	if phase == Phase.GAME_OVER:
 		return
 	_deselect()
+	AudioBank.play("end_turn")
 	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
 	if winner != "":
 		_handle_game_over(winner)
@@ -154,6 +158,13 @@ func _handle_game_over(winner: String) -> void:
 	result_label.text = "%s 獲勝!" % winner_name
 	result_panel.visible = true
 	end_turn_button.disabled = true
+	# Play victory/defeat from the player's perspective
+	var player_won := false
+	for fid in factions.keys():
+		if String(factions[fid].get("controller", "")) == "player" and fid == winner:
+			player_won = true
+			break
+	AudioBank.play("victory" if player_won else "defeat")
 	GameState.end_scenario(winner, {"turn": turn_manager.turn_number})
 
 func _on_menu_button_pressed() -> void:
@@ -187,7 +198,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				return
 			# Click in movement range → move then attack
 			if movement_range.has(coord) and clicked_unit == null:
-				hex_map.move_unit(selected_unit, coord, MOVE_TWEEN_DURATION)
+				var path := Pathfinding.reconstruct_path(
+					selected_unit.coord, coord, movement_range, hex_map
+				)
+				hex_map.move_unit_along_path(selected_unit, path)
+				AudioBank.play("move")
 				_enter_attack_phase()
 				return
 			_deselect()
@@ -207,6 +222,7 @@ func _select_unit(unit: Unit) -> void:
 	selected_unit = unit
 	unit.set_selected(true)
 	phase = Phase.UNIT_SELECTED
+	AudioBank.play("select")
 	_update_info_panel_for_unit(unit)
 	if unit.has_moved:
 		_enter_attack_phase()
@@ -246,6 +262,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	)
 
 	attacker.play_attack_animation(defender.position)
+	AudioBank.play("attack")
 	defender.take_damage(result.damage_to_defender)
 	DamagePopup.spawn(hex_map, defender.position, result.damage_to_defender)
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
@@ -256,11 +273,15 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 
 	if not defender.is_alive():
 		hex_map.unregister_unit(defender)
+		hex_map.place_wreckage(defender.coord, defender.faction_color)
 		defender.play_death_animation()
+		AudioBank.play("death")
 		msg += " — %s 陣亡" % defender.display_name
 	if not attacker.is_alive():
 		hex_map.unregister_unit(attacker)
+		hex_map.place_wreckage(attacker.coord, attacker.faction_color)
 		attacker.play_death_animation()
+		AudioBank.play("death")
 		msg += " — %s 陣亡" % attacker.display_name
 	else:
 		attacker.has_attacked = true

@@ -114,6 +114,54 @@ func move_unit(unit: Unit, dest: Vector2i, animate_duration: float = 0.0) -> voi
 	occupants[dest] = unit
 	unit.move_to(dest, HexCoord.to_pixel(dest, HEX_SIZE), animate_duration)
 
+const PATH_STEP_DURATION := 0.12
+
+func move_unit_along_path(unit: Unit, path: Array) -> void:
+	# `path` is the full BFS path including start and goal. Animates the
+	# unit hex-by-hex along the route; game state (coord, occupancy,
+	# has_moved) is updated synchronously so callers can chain logic
+	# immediately without waiting for the visual.
+	if path.size() < 2:
+		return
+	var dest: Vector2i = path[-1]
+	occupants.erase(unit.coord)
+	occupants[dest] = unit
+	unit.coord = dest
+	unit.has_moved = true
+	var tween := unit.create_tween()
+	tween.set_trans(Tween.TRANS_LINEAR)
+	for i in range(1, path.size()):
+		var step: Vector2i = path[i]
+		tween.tween_property(unit, "position", HexCoord.to_pixel(step, HEX_SIZE), PATH_STEP_DURATION)
+	unit.moved.emit(dest)
+	unit.queue_redraw()
+
+func place_wreckage(coord: Vector2i, faction_color: Color) -> void:
+	# Visual marker left when a unit dies on this hex.
+	var holder := Node2D.new()
+	holder.position = HexCoord.to_pixel(coord, HEX_SIZE)
+	holder.z_index = 6  # above range overlays, below units
+	add_child(holder)
+	# Hex-shaped scorch
+	var scorch := Polygon2D.new()
+	scorch.polygon = _hex_vertices(HEX_SIZE * 0.55)
+	scorch.color = Color(0.10, 0.08, 0.07, 0.65)
+	holder.add_child(scorch)
+	# Cross marks
+	var dim: Color = Color(faction_color.r * 0.45, faction_color.g * 0.45, faction_color.b * 0.45, 0.95)
+	for pts in [[Vector2(-11, -11), Vector2(11, 11)], [Vector2(11, -11), Vector2(-11, 11)]]:
+		var line := Line2D.new()
+		line.width = 3.0
+		line.default_color = dim
+		line.add_point(pts[0])
+		line.add_point(pts[1])
+		holder.add_child(line)
+	# Persist a few seconds then fade away
+	var tween := holder.create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(holder, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(holder.queue_free)
+
 func unit_at(coord: Vector2i) -> Unit:
 	return occupants.get(coord)
 

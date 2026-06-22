@@ -25,7 +25,7 @@ func _init(battle_node: Object, ai_personality: String = "aggressive") -> void:
 	personality = ai_personality
 
 func plan_for_unit(unit: Unit) -> Dictionary:
-	# Returns: { "move_to": Vector2i, "attack": Unit | null, "score": float }
+	# Returns: { "move_to": Vector2i, "attack": Unit | null, "score": float, "reachable": Dictionary }
 	var hex_map = battle.hex_map
 	var atk_def: Dictionary = DataLoader.get_unit_def(unit.type_id)
 	var move_pts := int(atk_def.get("move", 0))
@@ -41,7 +41,7 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 
 	var enemies := _enemy_units(unit.faction_id)
 	if enemies.is_empty():
-		return {"move_to": unit.coord, "attack": null, "score": 0.0}
+		return {"move_to": unit.coord, "attack": null, "score": 0.0, "reachable": reachable}
 
 	var best := unit.coord
 	var best_score := -INF
@@ -56,7 +56,7 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 			best = coord
 			best_target = target
 
-	return {"move_to": best, "attack": best_target, "score": best_score}
+	return {"move_to": best, "attack": best_target, "score": best_score, "reachable": reachable}
 
 func _score_position(
 	unit: Unit,
