@@ -171,7 +171,9 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		match action:
 			"attack":
 				var target: Unit = plan.get("attack")
-				if target != null and _can_attack_target(u, target):
+				# Target may have died between planning and execution — a prior
+				# AI unit on this turn could have killed it. Re-check liveness.
+				if target != null and target.is_alive() and _can_attack_target(u, target):
 					_resolve_attack(u, target)
 					await get_tree().create_timer(AI_STEP_DELAY).timeout
 				else:
@@ -215,6 +217,11 @@ func _update_dig_in_for_current_faction() -> void:
 
 func _handle_game_over(winner: String) -> void:
 	phase = Phase.GAME_OVER
+	# Tear down any in-flight interaction state so late tween callbacks
+	# and stray clicks during the result panel don't dereference units.
+	_deselect()
+	if overwatch_button != null:
+		overwatch_button.visible = false
 	var winner_name := String(factions.get(winner, {}).get("name", winner))
 	result_label.text = "%s 獲勝!" % winner_name
 	result_panel.visible = true
@@ -547,7 +554,10 @@ func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 	hex_map.move_unit_along_path(mover, effective_path)
 	AudioBank.play("move")
 	if death_idx >= 0:
-		var death_coord: Vector2i = path[death_idx]
+		# Defensive bounds: _trigger_overwatch_along_path may return an index
+		# past the last hex if the watcher loop drifts. Clamp to the truncated path.
+		var safe_idx: int = clampi(death_idx, 0, effective_path.size() - 1)
+		var death_coord: Vector2i = effective_path[safe_idx]
 		hex_map.unregister_unit(mover)
 		hex_map.place_wreckage(death_coord, mover.faction_color)
 		mover.play_death_animation()

@@ -53,6 +53,11 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 
 func plan_for_unit(unit) -> Dictionary:
 	# Returns: { "move_to": Vector2i, "attack": Unit | null, "score": float, "reachable": Dictionary }
+	# Invalidate the player-reach cache: a previous AI unit on this turn
+	# may have killed or displaced players, so cached reach is stale.
+	# (Within a single plan_for_unit, the cache still amortises across the
+	# candidate enumeration — it's rebuilt lazily on first lookup.)
+	_player_reach_cache.clear()
 	var hex_map = battle.hex_map
 	var atk_def: Dictionary = _get_unit_def(unit.type_id)
 	var move_pts := int(atk_def.get("move", 0))

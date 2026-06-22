@@ -4,9 +4,11 @@ extends RefCounted
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 
 # Hex line-of-sight + per-faction visibility.
-# Asymmetric model: the player computes their visible set; the AI is
-# omniscient (treats fog as off). This is a deliberate scope choice —
-# documented in docs/ARCHITECTURE.md.
+# Symmetric model: every faction (player or AI) calls compute_visible_hexes
+# for its own units. The Battle node renders only the *player's* fog overlay,
+# but each AI faction independently consults its own visibility set (plus the
+# last-known-position memory it maintains) when planning. See
+# docs/ARCHITECTURE.md → "Symmetric design + AI memory".
 
 # `hex_map` is duck-typed (needs terrain_at + tiles dict).
 

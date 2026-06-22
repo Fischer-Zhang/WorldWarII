@@ -77,7 +77,9 @@ Tested in [tests/test_hex_coord.gd](../tests/test_hex_coord.gd) — neighbor cou
 
 Pathfinding takes `hex_map` as a duck-typed argument (anything with `terrain_at(coord)` and `move_cost_at(coord)`) so tests can pass a tiny stub without spinning up the whole engine.
 
-Tested in [tests/test_pathfinding.gd](../tests/test_pathfinding.gd) — open ground, terrain cost, occupied-block, off-map filtering.
+**ZoC opt-out.** `mover_faction` is optional (default `""`). When empty, ZoC adjacency is **not** applied — the BFS uses pure terrain costs. The opt-out exists so the pathfinding unit tests (and any future caller that wants "raw reachability") can ignore ZoC without constructing fake faction state. Production callsites always pass `unit.faction_id`.
+
+Tested in [tests/test_pathfinding.gd](../tests/test_pathfinding.gd) — open ground, terrain cost, occupied-block, off-map filtering, ZoC blocks expensive hex / friendly does not / opt-out.
 
 ---
 
@@ -228,6 +230,51 @@ Together they recover most of the strategic-depth gap between a "minimal tactica
 
 - AI uses Overwatch via the explicit branch above; AI digs in implicitly when it stays put with no good target (the end-of-turn rule increments `dig_in_level` for any unit that didn't move, attack, or overwatch).
 - Overwatch fires at every step of the mover's path, not just the destination. A unit can no longer rush past an overwatching unit without taking fire.
+
+---
+
+## Cookbook — Adding a new action type
+
+If you want to add a new per-unit action (e.g. an Engineer's "Repair adjacent friendly"), here's the touch list. Each existing action — Attack, Overwatch, Dig In — already follows this pattern, so use them as templates.
+
+**Data layer**
+1. [data/units.json](../data/units.json): add the unit type with stats + any new fields the action reads (e.g. `repair_amount: 3`).
+2. (optional) [data/terrains.json](../data/terrains.json): if the action interacts with terrain.
+
+**Unit state**
+3. [scripts/units/unit.gd](../scripts/units/unit.gd): add a boolean flag (`on_overwatch` / `is_repairing`) or a small integer state (`dig_in_level`). Update `reset_for_new_turn()` to clear or persist it as the rule dictates.
+4. Same file's `_draw()`: add a visual marker so the player can see which units are in the new state.
+
+**Combat / rules layer (only if the action interacts with combat math)**
+5. [scripts/combat/combat_resolver.gd](../scripts/combat/combat_resolver.gd): if the action modifies damage taken or dealt, add a parameter to `resolve()` (see `defender_dig_in` for the pattern). Counters use a `0` default to keep the existing math.
+6. [scripts/combat/combat_rules.gd](../scripts/combat/combat_rules.gd): if the action enables a *new kind of attack* (e.g. healing as an attack on a friendly), extend `can_attack_target` / `can_attack_from_coord`.
+
+**Battle orchestration**
+7. [scripts/battle.gd](../scripts/battle.gd):
+   - Add a UI button to [scenes/battle.tscn](../scenes/battle.tscn) (mirror `OverwatchButton`'s wiring in `_ready`).
+   - Add an action handler (`_on_repair_pressed`) and show/hide the button in `_enter_attack_phase` / `_deselect`.
+   - Add the action's effect in a new helper (`_resolve_repair`) — apply the state change, spawn a damage-popup-style visual, play an `AudioBank.play(...)` cue.
+   - If the action ends the unit's turn, set `unit.has_attacked = true` and call `_deselect()`.
+   - Update `_update_dig_in_for_current_faction` (or its equivalent) so the new action's "no-action" exclusion list stays accurate.
+
+**AI layer**
+8. [scripts/turn/ai_controller.gd](../scripts/turn/ai_controller.gd):
+   - Add an `_action_score(unit, pos, ...)` helper that returns the pre-weighted contribution for choosing this action from `pos`. Mirror `_overwatch_score` / `_best_attack_value`.
+   - In `plan_for_unit`, add a third branch alongside `attack` / `overwatch`: `if action_score > best_score → best_action = "repair"`.
+   - In `_process_ai_units` (back in battle.gd), add a `match` arm for the new action.
+
+**Info panel**
+9. [scripts/battle.gd](../scripts/battle.gd) `_update_info_panel_for_unit`: show the new state line so the player can read it.
+
+**Tests**
+10. [tests/test_ai_controller.gd](../tests/test_ai_controller.gd): add a behaviour test — "Engineer with damaged friendly adjacent should pick `repair`."
+11. If combat math changed: [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) gets a case with the new parameter.
+
+**Docs**
+12. Append a subsection to *Tactical mechanics* with the rule wording.
+13. Update the visual / logic split section if the new action has its own animation pipeline.
+
+A clean action add touches ~6 files, ~80–150 LOC, and 2–3 tests. Items 5/6 and 8 are skippable for pure self-modifications (e.g. a "Camouflage" action that just adjusts your own defense without interacting with combat resolution).
 
 ---
 
