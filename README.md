@@ -1,87 +1,227 @@
 # WorldWarII — 戰術六角格戰棋
 
-一款以二戰戰術級交戰為主題的回合制六角格戰棋遊戲。重心放在**歷史戰役還原**:玩家在重現自真實戰場(色當、基輔、史達林格勒、庫斯克、突出部)的關卡中指揮裝甲、步兵、砲兵單位完成任務。
+> 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,4 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-技術棧:**Godot 4.x + GDScript**,資料驅動(單位/地形/關卡皆 JSON)。
+[![Tests](https://img.shields.io/badge/tests-20%2F20-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
-## 目前狀態
+<!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
+![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
 
-**第 1 週 — 地基**
-- ✅ 專案骨架、目錄結構、autoload 設定
-- ✅ Hex 軸向座標數學 + 單元測試
-- ✅ JSON 資料載入器 + 單位/地形型錄
-- ✅ Hex 地圖渲染、攝影機平移/縮放、點 hex 顯示資訊
+---
 
-**第 2 週 — 單位 & 移動**
-- ✅ 單位 ([scripts/units/unit.gd](scripts/units/unit.gd)):faction 染色、HP bar、行動狀態
-- ✅ 單位工廠 ([unit_factory.gd](scripts/units/unit_factory.gd)):從 scenario JSON 生成
-- ✅ Dijkstra 移動範圍 ([pathfinding.gd](scripts/grid/pathfinding.gd))、依地形 move_cost 加權、避開被占據 hex
-- ✅ 點擊我方單位 → 標示可移動範圍 → 點藍色 hex → 移動
+## What it is
 
-**第 3 週 — 戰鬥 & 回合**
-- ✅ 確定性戰鬥解算器 ([combat_resolver.gd](scripts/combat/combat_resolver.gd)):attack/defense/terrain/vs_armor、傷害隨攻擊方 HP 比例縮放、反擊機制、間接射擊不被反擊
-- ✅ 回合管理器 ([turn_manager.gd](scripts/turn/turn_manager.gd)):faction 輪轉、回合計數
-- ✅ 勝負判定 ([victory_checker.gd](scripts/scenario/victory_checker.gd)):eliminate / capture / survive
-- ✅ Battle 狀態機:IDLE → UNIT_SELECTED(藍 hex 移動範圍)→ ATTACK_PHASE(紅 hex 攻擊目標)→ done
-- ✅ 結束回合按鈕、結果面板、雙方 hot-seat 可完整對局
-- ✅ 戰鬥單元測試(7 條)
+A small, focused tactical wargame inspired by *Panzer General* and *Advance Wars*. You command WW2-era infantry, armor and artillery on a hex grid, completing scenarios with distinct victory conditions across the European theatre.
 
-**第 4 週 — AI + 第一場戰役 + 選單流程**
-- ✅ AI 控制器 ([ai_controller.gd](scripts/turn/ai_controller.gd)):啟發式打分(距離 / 攻擊收益 / 受擊曝險 / 地形)、性格權重 (aggressive / defensive / hold)
-- ✅ AI 自動接管非 player faction 回合,動作之間 600 ms 延遲方便觀察
-- ✅ 色當 1940 戰役 ([01_sedan_1940.json](data/scenarios/01_sedan_1940.json)):14×10 地圖含馬士河與阿登森林,德軍攻擊、法軍防守,12 回合內佔領色當鎮獲勝
-- ✅ 主選單 → 戰役選擇 → 簡報 → 戰鬥 → 結果 → 回戰役選擇 的完整導覽流程
+The project was built as a **month-scale portfolio piece** with an explicit constraint: keep the rules and AI small enough to read, and spend the saved time on **scenario authoring**, **deterministic systems** and **game-feel polish**.
 
-**第 5 週 — 內容擴充 & polish**
-- ✅ 基輔 1941 ([02_kiev_1941.json](data/scenarios/02_kiev_1941.json)):德軍砲兵突破紅軍口袋殘部,展示砲兵 3 格射程與不被反擊機制
-- ✅ 史達林格勒 1942 ([03_stalingrad_1942.json](data/scenarios/03_stalingrad_1942.json)):玩家轉守為攻,在城鎮地形 +3 防禦修正中堅守至 12 回合
-- ✅ 庫斯克 1943 ([04_kursk_1943.json](data/scenarios/04_kursk_1943.json)):大規模戰車對決,反戰車砲縱深、vs_armor / armor 機制核心
-- ✅ 單位資訊側欄:選取/點到單位即時顯示 HP / 攻防 / 移動 / 射程 / vs_armor / armor / 地形修正
-- ✅ 移動平滑動畫(0.22s tween,SINE 緩動)
-- ✅ 測試運行器 [`tests/run_all.sh`](tests/run_all.sh):一鍵跑完 hex_coord / pathfinding / combat_resolver 三組單元測試
+### Built-in scenarios
 
-完整實作計畫:[CLAUDE plan file](/home/fischer/.claude/plans/ww2-mellow-river.md)(本機)
+| # | Title | Mechanic spotlight |
+|---|---|---|
+| 1 | **色當突破 1940** | Capture-objective + terrain costs (Ardennes forest, Meuse crossings) |
+| 2 | **基輔包圍戰 1941** | Indirect-fire artillery (range 3, immune to counter-attack) |
+| 3 | **史達林格勒巷戰 1942** | Role reversal — player defends; town terrain gives +3 defense |
+| 4 | **庫斯克裝甲決戰 1943** | Tank-on-tank `vs_armor` / `armor` interaction with AT-gun defense in depth |
 
-## 執行
+A sandbox scenario for development is also included.
 
-需要先安裝 Godot 4.2+。
+---
+
+## Highlights
+
+- **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
+- **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
+- **AI with three personality presets** — `aggressive` / `defensive` / `hold`. Each scenario sets its opponents' personality so the German blitz at Sedan feels different from the Soviet defenders in their Kiev pocket.
+- **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
+- **20 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding, combat formula edge cases.
+- **~2400 LOC** of GDScript across 18 files. Read it top-to-bottom in an afternoon.
+
+---
+
+## Gameplay flow
+
+```
+Main menu  →  Scenario select  →  Briefing  →  Battle  →  Result  →  back to select
+```
+
+In-battle interactions:
+
+| Action | How |
+|---|---|
+| Select your unit | Click it — yellow pulse halo appears, side panel populates with stats |
+| See movement range | Blue overlay on reachable hexes (BFS with per-terrain costs) |
+| Move | Click a blue hex — unit walks the path hex-by-hex |
+| Attack | After moving, red overlay shows enemies in range — click one |
+| Pass | After moving, click anywhere off the red overlay |
+| End turn | Bottom-right button (or wait for animations and click) |
+| Camera | WASD pan / mouse-wheel zoom / middle-click drag |
+| Screenshot | F12 → `user://screenshots/` |
+
+---
+
+## Architecture
+
+Full breakdown in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). High level:
+
+```
+Battle scene
+├── HexMap          tiles, occupancy, range overlays, wreckage, objective pulse
+├── Camera          WASD / wheel / drag
+├── [Units]         faction-colour circle + type letter + HP bar + selection halo
+└── UI              info / status / unit panel / turn banner / end-turn / result
+
+Autoloads
+├── DataLoader      JSON catalog loader
+├── GameState       inter-scene state
+├── AudioBank       lazy .ogg dispatcher (no-ops if file missing)
+└── ScreenshotHelper F12 → PNG
+
+Pure logic  (all static, all deterministic)
+├── HexCoord        axial coord math
+├── Pathfinding     Dijkstra movement range + path reconstruction
+├── CombatResolver  damage formula + counter-attack
+├── VictoryChecker  eliminate / capture / survive
+├── TurnManager     faction rotation + turn count
+├── AIController    heuristic move scoring
+└── UnitFactory     scenario JSON → instantiated units
+```
+
+### Combat formula
+
+```
+base   = max(1, attacker.attack
+              + (vs_armor if defender.armor > 0 else 0)
+              - defender.defense
+              - defender_terrain.defense)
+damage = max(1, round(base × attacker.hp / attacker.max_hp))
+```
+
+Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter melee).
+
+### AI heuristic
+
+For every reachable hex (including "stay in place"), the AI scores:
+
+```
+score = −distance_to_nearest_enemy            × 1.0
+      + best_attack_damage_from_here          × 2.5
+      + 5.0 if attack would kill the target           (kill bonus)
+      − 0.6 × counter_damage_taken                    (avoid bad trades)
+      − exposure_to_enemy_attacks             × 0.5
+      + terrain.defense                       × 0.3
+
+× personality_modifier
+```
+
+Personality modifiers ship in each scenario JSON. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full breakdown.
+
+---
+
+## Running it
+
+You need **Godot 4.2 or newer**. Linux/macOS/Windows all supported.
 
 ```bash
-# 1) 用 Godot 編輯器開啟 project.godot
-godot --editor project.godot
+git clone git@github.com:Fischer-Zhang/WorldWarII.git
+cd WorldWarII
 
-# 2) 直接執行主場景(主選單)
-godot project.godot
+# Run the game
+godot --path .
 
-# 3) 跑全部單元測試
+# Open in editor instead
+godot -e .
+
+# Run the headless test suite (no GUI required)
 bash tests/run_all.sh
 ```
 
-操作:
-- **WASD / 方向鍵**: 攝影機平移
-- **滾輪**: 縮放
-- **中鍵拖曳**: 拖動視野
-- **左鍵**: 點選 hex 看資訊
+### WSL2 caveats
 
-## 專案結構
+If you see `libasound.so.2: cannot open` on startup, audio falls back to a dummy driver (silent). To enable real audio:
 
-```
-assets/      美術資產(後期使用 Kenney CC0)
-data/        JSON 資料(units / terrains / scenarios)
-scenes/      Godot 場景檔
-scripts/     GDScript
-  autoload/    全域 singleton(DataLoader / GameState)
-  grid/        六角格座標、地圖、尋路
-  units/       單位邏輯
-  combat/      戰鬥解算
-  turn/        回合管理、AI
-  scenario/    關卡載入、勝負判定
-  ui/          UI 控制
-tests/       獨立 GDScript 測試
+```bash
+sudo apt install libasound2 libpulse0
 ```
 
-## 設計檔案
+CC0 sound effects can then be dropped into [assets/audio/](assets/audio/) — see [assets/audio/README.md](assets/audio/README.md) for filename conventions and sourcing.
 
-- [data/terrains.json](data/terrains.json) — 平原、森林、山地、城鎮、河流、道路;`move_cost`/`defense`/`blocks_los`
-- [data/units.json](data/units.json) — 步兵、機槍、反戰車砲、輕/中戰車、砲兵;`hp`/`attack`/`defense`/`range`/`move`/`vs_armor`/`armor`
-- [data/scenarios/00_sandbox.json](data/scenarios/00_sandbox.json) — 測試用 10x8 沙盒地圖
+---
+
+## Adding a new scenario
+
+1. Copy any file in [data/scenarios/](data/scenarios/) to a new id, e.g. `05_bastogne_1944.json`.
+2. Edit the `map.tiles` grid (rectangular `tiles[row][col]`, terrains from [data/terrains.json](data/terrains.json)).
+3. Edit `factions[]` (controller `player` or `ai`, optional `ai` personality), `units[]` (positions in odd-r offset), and `victory` (eliminate / capture / survive).
+4. Re-launch — it appears in the scenario select automatically.
+
+No code changes required.
+
+---
+
+## Roadmap
+
+**Done**
+- [x] Hex grid, BFS movement, combat model, turn cycle
+- [x] AI with three personality presets
+- [x] 4 historical scenarios + sandbox
+- [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
+- [x] Selection halo, objective pulse, turn-change banner
+- [x] Audio scaffolding (works once .ogg files are added)
+- [x] 20 unit tests, headless runner
+
+**Open**
+- [ ] **5th scenario — Bastogne 1944** ("survive until reinforcements" mechanic)
+- [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
+- [ ] AI 1-ply lookahead + difficulty selector
+- [ ] Save / load mid-scenario
+
+---
+
+## Project structure
+
+```
+WorldWarII/
+├── project.godot
+├── README.md                  this file
+├── data/
+│   ├── units.json             unit catalog
+│   ├── terrains.json          terrain catalog
+│   └── scenarios/             one file per battle
+├── scenes/                    Godot scenes (.tscn)
+│   ├── main_menu.tscn
+│   ├── scenario_select.tscn
+│   ├── briefing.tscn
+│   └── battle.tscn
+├── scripts/
+│   ├── autoload/              DataLoader, GameState, AudioBank, ScreenshotHelper
+│   ├── grid/                  hex coord math, hex map renderer, BFS pathfinder
+│   ├── units/                 Unit class + factory
+│   ├── combat/                damage resolver
+│   ├── turn/                  turn manager + AI controller
+│   ├── scenario/              victory checker
+│   ├── ui/                    camera, menus, damage popup
+│   └── battle.gd              battle scene controller (the orchestrator)
+├── assets/
+│   ├── audio/                 .ogg sound effects (placeholder dir)
+│   └── tiles/  units/  ui/    (placeholder dirs for art swap)
+├── tests/                     headless GDScript tests + run_all.sh
+└── docs/
+    ├── ARCHITECTURE.md        system-by-system walkthrough
+    ├── DEMO_SCRIPT.md         90s portfolio video script
+    └── screenshots/           drop captured PNGs here
+```
+
+---
+
+## Credits
+
+- Design + code: built in Godot 4.2 with GDScript.
+- Coordinate math: based on [Red Blob Games — Hexagonal Grids](https://www.redblobgames.com/grids/hexagons/) (no code copied, just the formulas).
+- Built collaboratively with Claude.
+
+---
+
+## License
+
+MIT (code). Historical scenario content is original; any third-party CC0 audio/art added later inherits its own license.

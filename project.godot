@@ -25,6 +25,7 @@ config/icon="res://icon.svg"
 DataLoader="*res://scripts/autoload/data_loader.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 AudioBank="*res://scripts/autoload/audio_bank.gd"
+ScreenshotHelper="*res://scripts/autoload/screenshot_helper.gd"
 
 [debug]
 
