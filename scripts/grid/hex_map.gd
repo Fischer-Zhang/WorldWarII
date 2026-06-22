@@ -14,12 +14,15 @@ const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
 const ATTACK_OVERLAY_COLOR := Color(1.0, 0.3, 0.25, 0.45)
+const OBJECTIVE_RGB := Color(1.0, 0.85, 0.2)
 
 var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
 var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
 var occupants: Dictionary = {} # Vector2i (axial) -> Unit
 var highlight: Polygon2D
 var range_overlays: Node2D
+var objective_overlays: Array[Polygon2D] = []
+var _objective_phase: float = 0.0
 var bounds_min := Vector2.ZERO
 var bounds_max := Vector2.ZERO
 
@@ -114,6 +117,31 @@ func move_unit(unit: Unit, dest: Vector2i, animate_duration: float = 0.0) -> voi
 func unit_at(coord: Vector2i) -> Unit:
 	return occupants.get(coord)
 
+func set_objective_coords(coords: Array) -> void:
+	for old in objective_overlays:
+		old.queue_free()
+	objective_overlays.clear()
+	for c in coords:
+		var coord: Vector2i = c
+		if not tiles.has(coord):
+			continue
+		var p := Polygon2D.new()
+		p.polygon = _hex_vertices(HEX_SIZE * 0.88)
+		p.color = Color(OBJECTIVE_RGB.r, OBJECTIVE_RGB.g, OBJECTIVE_RGB.b, 0.35)
+		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
+		p.z_index = 4
+		add_child(p)
+		objective_overlays.append(p)
+	set_process(not objective_overlays.is_empty())
+
+func _process(delta: float) -> void:
+	if objective_overlays.is_empty():
+		return
+	_objective_phase += delta * 2.4
+	var alpha: float = 0.28 + (sin(_objective_phase) + 1.0) * 0.18
+	for p in objective_overlays:
+		p.color = Color(OBJECTIVE_RGB.r, OBJECTIVE_RGB.g, OBJECTIVE_RGB.b, alpha)
+
 func _hex_vertices(size: float) -> PackedVector2Array:
 	# Pointy-top: vertex angles at 30, 90, 150, 210, 270, 330 degrees.
 	var pts := PackedVector2Array()
@@ -170,8 +198,10 @@ func _clear() -> void:
 	tiles.clear()
 	polys.clear()
 	occupants.clear()
+	objective_overlays.clear()
 	highlight = null
 	range_overlays = null
+	set_process(false)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

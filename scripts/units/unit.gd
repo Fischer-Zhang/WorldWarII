@@ -80,6 +80,17 @@ func play_death_animation() -> void:
 	tween.tween_property(self, "modulate:a", 0.0, 0.42).set_trans(Tween.TRANS_QUAD)
 	tween.tween_callback(queue_free)
 
+func play_attack_animation(target_world_pos: Vector2) -> void:
+	# Brief lunge toward the defender then snap back — gives weight to the hit.
+	var start_pos := position
+	var direction := (target_world_pos - position)
+	if direction.length() < 0.001:
+		return
+	var lunge_pos := position + direction.normalized() * 14.0
+	var tween := create_tween()
+	tween.tween_property(self, "position", lunge_pos, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "position", start_pos, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
 func _process(_delta: float) -> void:
 	if selected:
 		queue_redraw()

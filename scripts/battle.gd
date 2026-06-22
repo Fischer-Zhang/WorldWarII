@@ -32,6 +32,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var info_faction_label: Label = $UI/InfoPanel/VBox/FactionLabel
 @onready var info_stats: RichTextLabel = $UI/InfoPanel/VBox/StatsLabel
 @onready var info_terrain: RichTextLabel = $UI/InfoPanel/VBox/TerrainLabel
+@onready var turn_banner: Label = $UI/TurnBanner
 
 const AI_STEP_DELAY := 0.6
 const MOVE_TWEEN_DURATION := 0.22
@@ -70,6 +71,7 @@ func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	result_panel.visible = false
+	_apply_player_objective_pulse()
 
 	turn_manager.configure(factions)
 	turn_manager.turn_started.connect(_on_turn_started)
@@ -88,6 +90,7 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	_deselect()
 	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
 	info_label.text = "▶ %s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number]
+	_show_turn_banner("%s — 第 %d 回合" % [factions[faction_id]["name"], turn_number])
 	_update_status()
 
 	var controller := String(factions[faction_id].get("controller", "player"))
@@ -242,6 +245,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		atk_def, def_def, attacker.hp, defender.hp, atk_terr, def_terr, distance
 	)
 
+	attacker.play_attack_animation(defender.position)
 	defender.take_damage(result.damage_to_defender)
 	DamagePopup.spawn(hex_map, defender.position, result.damage_to_defender)
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
@@ -349,3 +353,29 @@ func _update_status() -> void:
 	for fid in factions.keys():
 		parts.append("%s %d" % [factions[fid]["name"], int(counts.get(fid, 0))])
 	status_label.text = "  |  ".join(parts) + "    回合 %d" % turn_manager.turn_number
+
+func _apply_player_objective_pulse() -> void:
+	# Highlights the hex the *player* needs to capture, if their victory is type=capture.
+	var victory_cfg: Dictionary = scenario.get("victory", {})
+	for fid in factions.keys():
+		if String(factions[fid].get("controller", "")) != "player":
+			continue
+		var v: Dictionary = victory_cfg.get(fid, {})
+		if String(v.get("type", "")) != "capture":
+			return
+		var target = v.get("target", [0, 0])
+		if typeof(target) != TYPE_ARRAY or target.size() < 2:
+			return
+		var col := int(target[0])
+		var row := int(target[1])
+		var coord := Vector2i(col - (row >> 1), row)
+		hex_map.set_objective_coords([coord])
+		return
+
+func _show_turn_banner(text: String) -> void:
+	turn_banner.text = text
+	turn_banner.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(turn_banner, "modulate:a", 1.0, 0.22)
+	tween.tween_interval(0.7)
+	tween.tween_property(turn_banner, "modulate:a", 0.0, 0.35)
