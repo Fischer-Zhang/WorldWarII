@@ -29,9 +29,7 @@ static func movement_range(
 				continue  # off-map
 			if occupied.has(n) and occupied[n] != null:
 				continue  # blocked by another unit
-			var step_cost: int = hex_map.move_cost_at(n)
-			if mover_faction != "" and _enters_enemy_zoc(n, occupied, mover_faction):
-				step_cost += ZOC_PENALTY
+			var step_cost: int = _movement_step_cost(n, hex_map, occupied, mover_faction)
 			var new_cost := current_cost + step_cost
 			if new_cost > move_points:
 				continue
@@ -49,11 +47,24 @@ static func _enters_enemy_zoc(hex: Vector2i, occupied: Dictionary, mover_faction
 			return true
 	return false
 
+static func _movement_step_cost(
+	hex: Vector2i,
+	hex_map,
+	occupied: Dictionary,
+	mover_faction: String,
+) -> int:
+	var step_cost: int = hex_map.move_cost_at(hex)
+	if mover_faction != "" and _enters_enemy_zoc(hex, occupied, mover_faction):
+		step_cost += ZOC_PENALTY
+	return step_cost
+
 static func reconstruct_path(
 	start: Vector2i,
 	goal: Vector2i,
 	cost_to: Dictionary,
 	hex_map,
+	occupied: Dictionary = {},
+	mover_faction: String = "",
 ) -> Array[Vector2i]:
 	# Walk backwards from goal to start by picking the neighbor with the cheapest cost.
 	if not cost_to.has(goal):
@@ -67,11 +78,13 @@ static func reconstruct_path(
 		var best_cost: int = cost_to[cursor]
 		for n in HexCoord.neighbors(cursor):
 			if n == start:
-				best = n
-				best_cost = -1
-				break
+				var start_step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction)
+				if start_step == cost_to[cursor]:
+					best = n
+					best_cost = -1
+					break
 			if cost_to.has(n) and cost_to[n] < best_cost:
-				var step: int = hex_map.move_cost_at(cursor)
+				var step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction)
 				if cost_to[n] + step == cost_to[cursor]:
 					best = n
 					best_cost = cost_to[n]
@@ -81,4 +94,3 @@ static func reconstruct_path(
 		path.append(cursor)
 	path.reverse()
 	return path
-

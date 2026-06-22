@@ -64,7 +64,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: lethal — died=%s counter=%d" % [r5.defender_dies, r5.counter_damage])
 
-	# 6) Artillery (indirect) does NOT trigger counter even if defender alive and in own range
+	# 6) Indirect units do NOT counter-attack when defending.
 	var r6 := CombatResolver.resolve(infantry, artillery, 10, 8, plain, plain, 1)
 	if r6.counter_damage == 0:
 		pass_count += 1
@@ -96,6 +96,15 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: counter without dig-in — counter=%d" % r9.counter_damage)
+
+	# 10) Indirect attackers are still countered if they attack inside defender range.
+	# Indirect means the unit cannot counter while defending; it is not a melee immunity flag.
+	var r10 := CombatResolver.resolve(artillery, infantry, 8, 10, plain, plain, 1)
+	if r10.counter_damage == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: close indirect attack should receive infantry counter; counter=%d" % r10.counter_damage)
 
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

@@ -72,8 +72,8 @@ Tested in [tests/test_hex_coord.gd](../tests/test_hex_coord.gd) — neighbor cou
 
 [scripts/grid/pathfinding.gd](../scripts/grid/pathfinding.gd) provides two static methods:
 
-- `movement_range(start, move_points, hex_map, occupied) → Dictionary[Vector2i, int]` — returns every reachable hex with the cumulative move cost. Honors per-terrain `move_cost` (forest = 2, mountain = 3, river = 4) and blocks on any hex occupied by a unit.
-- `reconstruct_path(start, goal, cost_to, hex_map) → Array[Vector2i]` — walks the cost-to map backwards from `goal` to recover the actual route. Used to animate the unit hex-by-hex along its path instead of teleporting.
+- `movement_range(start, move_points, hex_map, occupied, mover_faction) → Dictionary[Vector2i, int]` — returns every reachable hex with the cumulative move cost. Honors per-terrain `move_cost` (forest = 2, mountain = 3, river = 4), blocks on any hex occupied by a unit, and applies enemy ZoC when `mover_faction` is provided.
+- `reconstruct_path(start, goal, cost_to, hex_map, occupied, mover_faction) → Array[Vector2i]` — walks the cost-to map backwards from `goal` using the same terrain + ZoC step costs to recover the actual route. Used to animate the unit hex-by-hex along its path instead of teleporting.
 
 Pathfinding takes `hex_map` as a duck-typed argument (anything with `terrain_at(coord)` and `move_cost_at(coord)`) so tests can pass a tiny stub without spinning up the whole engine.
 
@@ -94,11 +94,13 @@ damage = max(1, round(base * attacker_hp / attacker_max_hp))
 Two design decisions worth flagging:
 
 1. **HP-ratio scaling.** A wounded attacker hits softer (`attacker_hp / max_hp`). This creates a natural "death spiral" — a 30%-HP unit is much weaker than the same unit at full HP — without needing a separate morale system.
-2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter — they're vulnerable in melee.
+2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter while defending; it is still countered if it attacks from inside the defender's range.
+
+Attack legality is owned by [scripts/battle.gd](../scripts/battle.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers.
 
 `vs_armor` only triggers against units with `armor > 0`, so AT guns shred tanks but waste their bonus on infantry.
 
-Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) — 7 cases covering base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect-no-counter, out-of-range-no-counter.
+Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, and dig-in cases.
 
 ---
 
@@ -166,7 +168,7 @@ Every unit projects ZoC onto its 6 adjacent hexes. Entering a ZoC hex costs `Pat
 - Slipping past an enemy is *possible* but expensive (often more than a single turn's movement budget).
 - A defender doesn't have to physically chase — placement alone narrows the attacker's options.
 
-Implementation lives entirely inside [scripts/grid/pathfinding.gd](../scripts/grid/pathfinding.gd) — `movement_range` takes an optional `mover_faction` parameter and, for each candidate hex `n`, adds the penalty if any neighbour of `n` is occupied by a different-faction unit. The cost stacks with terrain (forest + ZoC = 4 to enter). Callsites pass `unit.faction_id`; tests pass `""` to opt out, preserving the original behaviour.
+Implementation lives entirely inside [scripts/grid/pathfinding.gd](../scripts/grid/pathfinding.gd) — `movement_range` takes an optional `mover_faction` parameter and, for each candidate hex `n`, adds the penalty if any neighbour of `n` is occupied by a different-faction unit. The cost stacks with terrain (forest + ZoC = 4 to enter). `reconstruct_path` uses the same step-cost helper, so the animated route matches the reachable-cost map. Callsites pass `unit.faction_id`; tests pass `""` to opt out, preserving the original behaviour.
 
 ### Overwatch
 
@@ -378,10 +380,10 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 |---|---|---|
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded | 6 |
-| `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect, OOR | 7 |
+| `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect defender no-counter, OOR, close indirect attack counter | 8 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out | +3 |
+| `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out + ZoC path reconstruction | +4 |
 | `test_combat_resolver` (cont.) | Dig-in defense bonus + counter-no-dig-in | +2 |
-| **Total** | | **32 ✓** |
+| **Total** | | **34 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

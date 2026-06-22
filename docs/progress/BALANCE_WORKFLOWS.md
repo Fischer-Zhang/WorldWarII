@@ -1,0 +1,60 @@
+# Balance Workflows
+
+This project should treat balance as a repeatable workflow, not a one-off stat edit.
+
+## Workflow 1: Numeric Diagnosis
+
+Use `python3 tools/balance_report.py` to regenerate `docs/progress/balance_report.md`.
+
+The generated report covers:
+
+- Unit catalog values.
+- Damage and counter matrices.
+- Terrain and dig-in damage matrices.
+- Hits-to-kill under plain and town + dig-in 3 conditions.
+- Scenario unit and terrain exposure.
+- Known rule risks.
+
+This workflow should run before and after every proposed stat patch.
+
+## Workflow 2: Rule Semantics
+
+Current rules established before large number changes:
+
+- Direct attack target selection requires current visibility and LOS.
+- Indirect attack target selection requires current visibility but ignores LOS blockers.
+- `indirect` means the unit cannot counter-attack while defending; it does not grant close-range immunity when attacking.
+- ZoC cost is part of both movement range and path reconstruction.
+
+These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.
+
+## Workflow 3: Role Differentiation
+
+Target identities:
+
+- Infantry: durable terrain holder and ZoC anchor.
+- MG team: anti-infantry overwatch and static fire support.
+- AT gun: anti-armor specialist with weak soft-target pressure.
+- Light tank: scouting, flanking, capture pressure, wounded-target cleanup.
+- Medium tank: general-purpose armored mainstay.
+- Artillery: long-range suppression with clear close-range vulnerability.
+
+## Workflow 4: Scenario Pass
+
+Evaluate scenarios in this order:
+
+1. `03_stalingrad_1942`: town density and dig-in durability.
+2. `05_bastogne_1944`: survival pacing and reinforcement timing.
+3. `04_kursk_1943`: armor versus AT-gun interaction.
+4. `02_kiev_1941`: artillery dominance and screening requirements.
+5. `01_sedan_1940`: river/forest breakthrough tempo.
+
+## Workflow 5: AI Compatibility
+
+After rule or stat changes, inspect whether AI scoring still understands the new roles.
+
+Likely follow-ups:
+
+- Add value for vision/scouting if light tanks become recon units.
+- Penalize AT guns for chasing soft targets if their role becomes static anti-armor.
+- Revisit overwatch scoring if MG teams become the premier reaction-fire unit.

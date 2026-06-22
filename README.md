@@ -20,7 +20,7 @@ The project was built as a **month-scale portfolio piece** with an explicit cons
 | # | Title | Mechanic spotlight |
 |---|---|---|
 | 1 | **色當突破 1940** | Capture-objective + terrain costs (Ardennes forest, Meuse crossings) |
-| 2 | **基輔包圍戰 1941** | Indirect-fire artillery (range 3, immune to counter-attack) |
+| 2 | **基輔包圍戰 1941** | Indirect-fire artillery (range 3, can fire over LOS blockers) |
 | 3 | **史達林格勒巷戰 1942** | Role reversal — player defends; town terrain gives +3 defense |
 | 4 | **庫斯克裝甲決戰 1943** | Tank-on-tank `vs_armor` / `armor` interaction with AT-gun defense in depth |
 | 5 | **突出部:Bastogne 1944** | Survive-until-relief — scripted reinforcements arrive on turn 7 |
@@ -37,7 +37,7 @@ A sandbox scenario for development is also included.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **32 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), hex line drawing, line-of-sight.
+- **34 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), hex line drawing, line-of-sight.
 - **~3000 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
 
 ---
@@ -100,7 +100,7 @@ base   = max(1, attacker.attack
 damage = max(1, round(base × attacker.hp / attacker.max_hp))
 ```
 
-Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter melee).
+Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter while defending). Direct attacks require visibility and LOS; indirect attacks still require a spotted target but can fire over LOS blockers.
 
 ### AI heuristic
 
@@ -174,7 +174,7 @@ No code changes required.
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 27 unit tests, headless runner
+- [x] 34 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)

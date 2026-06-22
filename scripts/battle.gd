@@ -154,7 +154,9 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		var dest: Vector2i = plan["move_to"]
 		if dest != u.coord:
 			var reachable: Dictionary = plan.get("reachable", {})
-			var path := Pathfinding.reconstruct_path(u.coord, dest, reachable, hex_map)
+			var path := Pathfinding.reconstruct_path(
+				u.coord, dest, reachable, hex_map, hex_map.occupants, u.faction_id
+			)
 			var survived := _move_with_overwatch(u, path)
 			hex_map.highlight_coord(dest)
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
@@ -164,12 +166,12 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		u.has_moved = true
 		var action := String(plan.get("action", "attack"))
 		match action:
-			"attack":
-				var target: Unit = plan.get("attack")
-				if target != null and target.is_alive():
-					_resolve_attack(u, target)
-					await get_tree().create_timer(AI_STEP_DELAY).timeout
-				else:
+				"attack":
+					var target: Unit = plan.get("attack")
+					if target != null and _can_attack_target(u, target):
+						_resolve_attack(u, target)
+						await get_tree().create_timer(AI_STEP_DELAY).timeout
+					else:
 					u.has_attacked = true
 					u.queue_redraw()
 			"overwatch":
@@ -255,7 +257,8 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			# Click in movement range → move then attack
 			if movement_range.has(coord) and clicked_unit == null:
 				var path := Pathfinding.reconstruct_path(
-					selected_unit.coord, coord, movement_range, hex_map
+					selected_unit.coord, coord, movement_range, hex_map,
+					hex_map.occupants, selected_unit.faction_id
 				)
 				var survived := _move_with_overwatch(selected_unit, path)
 				if not survived:
@@ -301,7 +304,7 @@ func _enter_attack_phase() -> void:
 	hex_map.clear_movement_range()
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
 	var rng := int(atk_def.get("range", 1))
-	attack_targets = CombatResolver.attack_targets_in_range(selected_unit, rng, units)
+	attack_targets = _visible_attack_targets(selected_unit, rng)
 	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
 	# Overwatch button: enabled whenever a unit has finished its move and
 	# is making the attack-or-skip decision.
@@ -372,6 +375,36 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	if winner != "":
 		_handle_game_over(winner)
 
+func _visible_attack_targets(attacker: Unit, attacker_range: int) -> Array:
+	var out: Array = []
+	for u in units:
+		var other: Unit = u
+		if _can_attack_target(attacker, other, attacker_range):
+			out.append(other)
+	return out
+
+func _can_attack_target(attacker: Unit, target: Unit, attacker_range: int = -1) -> bool:
+	# Direct fire needs both current visibility and line of sight.
+	# Indirect fire can arc over LOS blockers, but still needs a spotted target.
+	if attacker == null or target == null:
+		return false
+	if not attacker.is_alive() or not target.is_alive():
+		return false
+	if target.faction_id == attacker.faction_id:
+		return false
+	var atk_def := DataLoader.get_unit_def(attacker.type_id)
+	var rng := attacker_range
+	if rng < 0:
+		rng = int(atk_def.get("range", 1))
+	if HexCoord.distance(attacker.coord, target.coord) > rng:
+		return false
+	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
+	if not visible.has(target.coord):
+		return false
+	if not atk_def.get("indirect", false) and not Visibility.has_los(attacker.coord, target.coord, hex_map):
+		return false
+	return true
+
 func _deselect() -> void:
 	if selected_unit != null:
 		selected_unit.set_selected(false)
@@ -416,7 +449,7 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		"[b]裝甲[/b]    %d" % int(u_def.get("armor", 0)),
 	]
 	if u_def.get("indirect", false):
-		lines.append("[i]間接射擊 — 不被反擊[/i]")
+		lines.append("[i]間接射擊 — 可越過視線阻擋,但不能反擊[/i]")
 	if unit.on_overwatch:
 		lines.append("[color=#ff8a6a]⌖ 警戒中[/color]")
 	if unit.dig_in_level > 0:

@@ -3,6 +3,7 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const Unit := preload("res://scripts/units/unit.gd")
 
@@ -131,9 +132,9 @@ func _score_position(
 	var attack_term := 0.0
 	for e in visible_enemies:
 		var enemy: Unit = e
-		var d := HexCoord.distance(pos, enemy.coord)
-		if d > rng:
+		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
 			continue
+		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
 		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
@@ -191,9 +192,9 @@ func _best_attack_value(
 	var best := 0.0
 	for e in visible_enemies:
 		var enemy: Unit = e
-		var d := HexCoord.distance(pos, enemy.coord)
-		if d > rng:
+		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
 			continue
+		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
 		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
@@ -244,9 +245,9 @@ func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Diction
 	var best_dmg := 0
 	for e in enemies:
 		var enemy: Unit = e
-		var d := HexCoord.distance(pos, enemy.coord)
-		if d > rng:
+		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
 			continue
+		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
 		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
@@ -257,6 +258,19 @@ func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Diction
 			best_dmg = dmg
 			best = enemy
 	return best
+
+func _can_attack_from(
+	attacker_pos: Vector2i,
+	target: Unit,
+	hex_map,
+	atk_def: Dictionary,
+	rng: int,
+) -> bool:
+	if HexCoord.distance(attacker_pos, target.coord) > rng:
+		return false
+	if atk_def.get("indirect", false):
+		return true
+	return Visibility.has_los(attacker_pos, target.coord, hex_map)
 
 # ---------- 1-ply lookahead ----------
 

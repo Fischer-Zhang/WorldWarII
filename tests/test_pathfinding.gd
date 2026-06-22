@@ -122,6 +122,30 @@ func _init() -> void:
 		printerr("FAIL: friendly adjacency must not apply ZoC; got ",
 			range_friend.get(Vector2i(1, 0), "missing"))
 
+	# 10) Reconstructed path must honor ZoC-adjusted cumulative costs.
+	# The goal itself is in enemy ZoC, so the reconstructed path is only valid
+	# if its accumulated terrain + ZoC cost matches the Dijkstra cost map.
+	var range_zoc_path := Pathfinding.movement_range(
+		Vector2i(0, 0), 6, stub, occ_zoc, "allies"
+	)
+	var path_zoc := Pathfinding.reconstruct_path(
+		Vector2i(0, 0), Vector2i(2, 0), range_zoc_path, stub, occ_zoc, "allies"
+	)
+	var path_cost := 0
+	for i in range(1, path_zoc.size()):
+		path_cost += stub.move_cost_at(path_zoc[i])
+		if Pathfinding._enters_enemy_zoc(path_zoc[i], occ_zoc, "allies"):
+			path_cost += Pathfinding.ZOC_PENALTY
+	if path_zoc.size() > 1 and path_zoc[0] == Vector2i(0, 0) \
+			and path_zoc[-1] == Vector2i(2, 0) \
+			and path_cost == range_zoc_path[Vector2i(2, 0)]:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: reconstructed ZoC path wrong: path=%s cost=%d expected=%s" % [
+			path_zoc, path_cost, range_zoc_path.get(Vector2i(2, 0), "missing"),
+		])
+
 	print("Pathfinding tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
