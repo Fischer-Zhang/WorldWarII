@@ -12,6 +12,7 @@ const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
+const DamagePreview := preload("res://scripts/ui/damage_preview.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
@@ -40,6 +41,8 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var info_stats: RichTextLabel = $UI/InfoPanel/VBox/StatsLabel
 @onready var info_terrain: RichTextLabel = $UI/InfoPanel/VBox/TerrainLabel
 @onready var turn_banner: Label = $UI/TurnBanner
+@onready var damage_preview_panel: Panel = $UI/DamagePreviewPanel
+@onready var damage_preview_content: RichTextLabel = $UI/DamagePreviewPanel/Content
 
 const AI_STEP_DELAY := 0.6
 const MOVE_TWEEN_DURATION := 0.22
@@ -71,6 +74,7 @@ func _ready() -> void:
 
 	hex_map.load_from_scenario(scenario)
 	hex_map.hex_clicked.connect(_on_hex_clicked)
+	hex_map.hex_hovered.connect(_on_hex_hovered)
 
 	var built := UnitFactory.build(scenario, hex_map)
 	factions = built["factions"]
@@ -253,6 +257,73 @@ func _on_menu_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
 
 # ---------- INPUT / STATE MACHINE ----------
+
+func _on_hex_hovered(coord: Vector2i, _terrain_id: String) -> void:
+	# Damage preview only fires when we're in attack phase with a selected
+	# unit and the hovered hex contains an enemy in attack_targets.
+	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+		damage_preview_panel.visible = false
+		return
+	var hovered_unit := hex_map.unit_at(coord)
+	if hovered_unit == null or hovered_unit.faction_id == selected_unit.faction_id:
+		damage_preview_panel.visible = false
+		return
+	# Only preview valid targets (in attack_targets list)
+	if not (hovered_unit in attack_targets):
+		damage_preview_panel.visible = false
+		return
+	_show_damage_preview(selected_unit, hovered_unit)
+
+func _show_damage_preview(attacker: Unit, defender: Unit) -> void:
+	var atk_def := DataLoader.get_unit_def(attacker.type_id)
+	var def_def := DataLoader.get_unit_def(defender.type_id)
+	var atk_general := DataLoader.get_general_def(attacker.general_id)
+	var def_general := DataLoader.get_general_def(defender.general_id)
+	var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(attacker.coord))
+	var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(defender.coord))
+	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
+	var preview: Dictionary = DamagePreview.preview(
+		attacker, defender, atk_def, def_def,
+		atk_general, def_general, atk_terr, def_terr,
+		visible, hex_map,
+	)
+	if not preview.legal:
+		damage_preview_content.text = "[color=#ff8080]無法攻擊:%s[/color]" % preview.reason
+		damage_preview_panel.visible = true
+		return
+
+	# Build a compact preview card
+	var lines: Array[String] = []
+	lines.append("[b]%s → %s[/b]" % [attacker.display_name, defender.display_name])
+	var dmg_color := "#9aff7a" if preview.defender_dies else "#ffd84a"
+	var dmg_tag := "  [color=#ff7a7a](致命)[/color]" if preview.defender_dies else ""
+	lines.append("造成 [color=%s][b]%d[/b][/color] 傷害%s" % [dmg_color, preview.dmg, dmg_tag])
+	# Remaining HP after damage
+	var def_hp_after: int = max(0, defender.hp - int(preview.dmg))
+	lines.append("敵 HP %d → [color=#cccccc]%d[/color] / %d" % [defender.hp, def_hp_after, defender.max_hp])
+	if int(preview.counter) > 0:
+		var ctr_tag: String = "  [color=#ff7a7a](致命)[/color]" if preview.attacker_dies else ""
+		lines.append("反擊 [color=#ff9a4a]%d[/color]%s" % [int(preview.counter), ctr_tag])
+		var atk_hp_after: int = max(0, attacker.hp - int(preview.counter))
+		lines.append("我 HP %d → [color=#cccccc]%d[/color] / %d" % [attacker.hp, atk_hp_after, attacker.max_hp])
+	else:
+		lines.append("[color=#9aff7a]無反擊[/color]")
+	# Modifier breakdown (only shown if non-zero)
+	var atk_mods: Dictionary = preview.mods.atk
+	var def_mods: Dictionary = preview.mods.def
+	var mod_bits: Array[String] = []
+	if int(atk_mods.get("attack", 0)) != 0:
+		mod_bits.append("我攻 %+d" % int(atk_mods.attack))
+	if int(def_mods.get("defense", 0)) != 0:
+		mod_bits.append("敵防 %+d" % int(def_mods.defense))
+	if int(atk_mods.get("vs_armor", 0)) != 0:
+		mod_bits.append("反裝甲 %+d" % int(atk_mods.vs_armor))
+	if defender.dig_in_level > 0:
+		mod_bits.append("構工 +%d" % defender.dig_in_level)
+	if not mod_bits.is_empty():
+		lines.append("[color=#88aaff]修正: %s[/color]" % " · ".join(mod_bits))
+	damage_preview_content.text = "\n".join(lines)
+	damage_preview_panel.visible = true
 
 func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 	if phase == Phase.GAME_OVER:
@@ -550,6 +621,8 @@ func _deselect() -> void:
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
 	rally_button.visible = false
+	if damage_preview_panel != null:
+		damage_preview_panel.visible = false
 	if phase != Phase.GAME_OVER:
 		phase = Phase.IDLE
 

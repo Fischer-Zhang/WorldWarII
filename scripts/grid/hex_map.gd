@@ -31,6 +31,7 @@ var bounds_min := Vector2.ZERO
 var bounds_max := Vector2.ZERO
 
 signal hex_clicked(coord: Vector2i, terrain_id: String)
+signal hex_hovered(coord: Vector2i, terrain_id: String)
 
 func load_from_scenario(scenario: Dictionary) -> void:
 	_clear()
@@ -315,6 +316,8 @@ func _clear() -> void:
 	threat_overlays = null
 	set_process(false)
 
+var _hover_coord: Vector2i = Vector2i(-9999, -9999)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
@@ -323,3 +326,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			if tiles.has(coord):
 				highlight_coord(coord)
 				hex_clicked.emit(coord, tiles[coord])
+	elif event is InputEventMouseMotion:
+		var coord := coord_at_world(get_global_mouse_position())
+		if coord != _hover_coord:
+			_hover_coord = coord
+			if tiles.has(coord):
+				hex_hovered.emit(coord, tiles[coord])
+			else:
+				hex_hovered.emit(Vector2i(-9999, -9999), "")
