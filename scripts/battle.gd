@@ -155,23 +155,32 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		if dest != u.coord:
 			var reachable: Dictionary = plan.get("reachable", {})
 			var path := Pathfinding.reconstruct_path(u.coord, dest, reachable, hex_map)
-			hex_map.move_unit_along_path(u, path)
-			AudioBank.play("move")
+			var survived := _move_with_overwatch(u, path)
 			hex_map.highlight_coord(dest)
-			_recompute_visibility()
-			_trigger_overwatch_on_mover(u)
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
-		if not u.is_alive():
-			continue
+			if not survived:
+				continue
 		u.has_moved = true
-		var target: Unit = plan.get("attack")
-		if target != null and target.is_alive():
-			_resolve_attack(u, target)
-			await get_tree().create_timer(AI_STEP_DELAY).timeout
-		else:
-			u.has_attacked = true
-			u.queue_redraw()
+		var action := String(plan.get("action", "attack"))
+		match action:
+			"attack":
+				var target: Unit = plan.get("attack")
+				if target != null and target.is_alive():
+					_resolve_attack(u, target)
+					await get_tree().create_timer(AI_STEP_DELAY).timeout
+				else:
+					u.has_attacked = true
+					u.queue_redraw()
+			"overwatch":
+				u.on_overwatch = true
+				u.has_attacked = true
+				u.queue_redraw()
+				info_label.text = "AI:%s 進入警戒" % u.display_name
+				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+			_:  # "wait" or anything else
+				u.has_attacked = true
+				u.queue_redraw()
 
 func _on_end_turn_pressed() -> void:
 	if phase == Phase.GAME_OVER:
@@ -248,11 +257,8 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				var path := Pathfinding.reconstruct_path(
 					selected_unit.coord, coord, movement_range, hex_map
 				)
-				hex_map.move_unit_along_path(selected_unit, path)
-				AudioBank.play("move")
-				_recompute_visibility()
-				_trigger_overwatch_on_mover(selected_unit)
-				if not selected_unit.is_alive():
+				var survived := _move_with_overwatch(selected_unit, path)
+				if not survived:
 					_deselect()
 					_update_status()
 					return
@@ -467,55 +473,74 @@ func _apply_player_objective_pulse() -> void:
 		hex_map.set_objective_coords([coord])
 		return
 
-func _trigger_overwatch_on_mover(mover: Unit) -> void:
-	# After `mover` arrived at its destination, check every overwatch
-	# unit. Each that sees the mover and has it in range fires once
-	# (half damage, no counter). Multiple watchers can all shoot.
-	for u in units:
-		var watcher: Unit = u
-		if not watcher.is_alive() or not watcher.on_overwatch:
-			continue
-		if watcher.faction_id == mover.faction_id:
-			continue
-		var w_vis: Dictionary = visibility_by_faction.get(watcher.faction_id, {})
-		if not w_vis.has(mover.coord):
-			continue
-		var w_def := DataLoader.get_unit_def(watcher.type_id)
-		var w_rng := int(w_def.get("range", 1))
-		if HexCoord.distance(watcher.coord, mover.coord) > w_rng:
-			continue
-		_resolve_overwatch(watcher, mover)
+func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
+	# As `mover` passes through each hex along `path`, every watcher that
+	# sees the hex and has it in attack range snap-shots the mover. Each
+	# watcher fires at most once (on_overwatch consumed). Returns the
+	# path index at which the mover died, or -1 if it survived.
+	for i in range(1, path.size()):
 		if not mover.is_alive():
-			break
+			return i - 1
+		var step: Vector2i = path[i]
+		var step_world := HexCoord.to_pixel(step, HexMap.HEX_SIZE)
+		for u in units:
+			var watcher: Unit = u
+			if not watcher.is_alive() or not watcher.on_overwatch:
+				continue
+			if watcher.faction_id == mover.faction_id:
+				continue
+			var w_vis: Dictionary = visibility_by_faction.get(watcher.faction_id, {})
+			if not w_vis.has(step):
+				continue
+			var w_def := DataLoader.get_unit_def(watcher.type_id)
+			var w_rng := int(w_def.get("range", 1))
+			if HexCoord.distance(watcher.coord, step) > w_rng:
+				continue
+			var dmg: int = _compute_overwatch_damage(watcher, mover, step)
+			watcher.play_attack_animation(step_world)
+			AudioBank.play("attack")
+			mover.take_damage(dmg)
+			DamagePopup.spawn(hex_map, step_world, dmg, Color(1.0, 0.85, 0.4))
+			watcher.on_overwatch = false
+			watcher.queue_redraw()
+			info_label.text = "⌖ %s 警戒射擊 %s @(%d,%d) → -%d" % [
+				watcher.display_name, mover.display_name, step.x, step.y, dmg,
+			]
+			if not mover.is_alive():
+				return i
+	return -1
 
-func _resolve_overwatch(watcher: Unit, target: Unit) -> void:
+func _compute_overwatch_damage(watcher: Unit, target: Unit, target_step: Vector2i) -> int:
 	var w_def := DataLoader.get_unit_def(watcher.type_id)
 	var t_def := DataLoader.get_unit_def(target.type_id)
 	var w_terr := DataLoader.get_terrain_def(hex_map.terrain_at(watcher.coord))
-	var t_terr := DataLoader.get_terrain_def(hex_map.terrain_at(target.coord))
-	var d := HexCoord.distance(watcher.coord, target.coord)
+	var t_terr := DataLoader.get_terrain_def(hex_map.terrain_at(target_step))
+	var d := HexCoord.distance(watcher.coord, target_step)
 	var result := CombatResolver.resolve(
 		w_def, t_def, watcher.hp, target.hp,
 		w_terr, t_terr, d, target.dig_in_level,
 	)
-	# Overwatch: half damage rounded up, no counter (snap shot)
-	var dmg: int = int(ceil(float(result.damage_to_defender) / 2.0))
-	watcher.play_attack_animation(target.position)
-	AudioBank.play("attack")
-	target.take_damage(dmg)
-	DamagePopup.spawn(hex_map, target.position, dmg, Color(1.0, 0.85, 0.4))
-	watcher.on_overwatch = false
-	watcher.queue_redraw()
-	if not target.is_alive():
-		hex_map.unregister_unit(target)
-		hex_map.place_wreckage(target.coord, target.faction_color)
-		target.play_death_animation()
+	return int(ceil(float(result.damage_to_defender) / 2.0))
+
+func _move_with_overwatch(mover: Unit, path: Array) -> bool:
+	# Resolves overwatch along the path; truncates the move if the mover
+	# dies en route; performs the actual hex_map move + death effects.
+	# Returns true if the mover survived to its destination.
+	if path.size() < 2:
+		return mover.is_alive()
+	var death_idx := _trigger_overwatch_along_path(mover, path)
+	var effective_path: Array = path if death_idx < 0 else path.slice(0, death_idx + 1)
+	hex_map.move_unit_along_path(mover, effective_path)
+	AudioBank.play("move")
+	if death_idx >= 0:
+		var death_coord: Vector2i = path[death_idx]
+		hex_map.unregister_unit(mover)
+		hex_map.place_wreckage(death_coord, mover.faction_color)
+		mover.play_death_animation()
 		AudioBank.play("death")
 		units = units.filter(func(u): return u.is_alive())
-		_recompute_visibility()
-	info_label.text = "⌖ %s 警戒射擊 %s → -%d" % [
-		watcher.display_name, target.display_name, dmg,
-	]
+	_recompute_visibility()
+	return death_idx < 0
 
 func _show_turn_banner(text: String) -> void:
 	turn_banner.text = text

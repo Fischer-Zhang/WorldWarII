@@ -75,17 +75,40 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 	var best := unit.coord
 	var best_score := -INF
 	var best_target: Unit = null
+	var best_action := "wait"  # "attack", "overwatch", or "wait"
 
 	for cand in candidates:
 		var coord: Vector2i = cand
-		var score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, rng)
+		var base_score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, rng)
 		var target := _best_attack_from(coord, rng, visible_enemies, atk_def)
-		if score > best_score:
-			best_score = score
+		# Attack score is implicit in base_score (already includes attack_term).
+		# Overwatch is an alternative: subtract the attack contribution (not
+		# attacking this turn) and add the overwatch score.
+		var overwatch_value := _overwatch_score(unit, coord, visible_enemies, hex_map, atk_def, rng)
+		var attack_value := _best_attack_value(unit, coord, visible_enemies, hex_map, atk_def, rng)
+		# attack_value and overwatch_value are both pre-weighted contributions.
+		# base_score already has attack_value baked in (via _score_position).
+		# To get the "overwatch" total, swap them:
+		var overwatch_score := base_score - attack_value + overwatch_value
+
+		if base_score > best_score:
+			best_score = base_score
 			best = coord
 			best_target = target
+			best_action = "attack" if target != null else "wait"
+		if overwatch_score > best_score and not atk_def.get("indirect", false):
+			best_score = overwatch_score
+			best = coord
+			best_target = null
+			best_action = "overwatch"
 
-	return {"move_to": best, "attack": best_target, "score": best_score, "reachable": reachable}
+	return {
+		"move_to": best,
+		"attack": best_target,
+		"action": best_action,
+		"score": best_score,
+		"reachable": reachable,
+	}
 
 func _score_position(
 	unit: Unit,
@@ -157,6 +180,63 @@ func _apply_personality(total: float, attack_term: float, exposure_term: float) 
 			return total - 0.5
 		_:
 			return total
+
+func _best_attack_value(
+	unit: Unit, pos: Vector2i, visible_enemies: Array, hex_map,
+	atk_def: Dictionary, rng: int,
+) -> float:
+	# Returns the (pre-weighted) attack-term contribution this candidate
+	# position would produce — mirrors the attack block in _score_position
+	# so the AI can compare attack vs overwatch on equal footing.
+	var best := 0.0
+	for e in visible_enemies:
+		var enemy: Unit = e
+		var d := HexCoord.distance(pos, enemy.coord)
+		if d > rng:
+			continue
+		var def_def := DataLoader.get_unit_def(enemy.type_id)
+		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(enemy.coord))
+		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
+		var r := CombatResolver.resolve(atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d)
+		var dmg := float(r.damage_to_defender)
+		if r.defender_dies:
+			dmg += _kill_bonus
+		dmg -= 0.6 * float(r.counter_damage)
+		best = max(best, dmg)
+	return best * _attack_w
+
+func _overwatch_score(
+	unit: Unit, pos: Vector2i, visible_enemies: Array, hex_map,
+	atk_def: Dictionary, rng: int,
+) -> float:
+	# Estimates the value of *finishing turn on overwatch from pos*:
+	# best snap-shot damage to any enemy that could enter our range next
+	# turn. Discounted vs attack because triggering is uncertain.
+	if visible_enemies.is_empty():
+		return 0.0
+	if atk_def.get("indirect", false):
+		return 0.0
+	var best_snap := 0.0
+	for e in visible_enemies:
+		var enemy: Unit = e
+		var edef := DataLoader.get_unit_def(enemy.type_id)
+		var emove := int(edef.get("move", 0))
+		var d := HexCoord.distance(pos, enemy.coord)
+		# Enemy must be able to enter our attack range next turn.
+		if d > rng + emove:
+			continue
+		var def_terr := DataLoader.get_terrain_def("plain")  # worst-case (no cover bonus)
+		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
+		var r := CombatResolver.resolve(
+			atk_def, edef, unit.hp, enemy.hp, atk_terr, def_terr, rng, 0
+		)
+		var snap: float = max(1.0, ceil(float(r.damage_to_defender) / 2.0))
+		if snap >= enemy.hp:
+			snap += _kill_bonus * 0.5  # half kill bonus — less reliable
+		if snap > best_snap:
+			best_snap = snap
+	# 0.6 discount: enemy might not actually walk into range.
+	return best_snap * _attack_w * 0.6
 
 func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Dictionary) -> Unit:
 	var hex_map = battle.hex_map

@@ -170,15 +170,32 @@ Implementation lives entirely inside [scripts/grid/pathfinding.gd](../scripts/gr
 
 ### Overwatch
 
-A unit that finishes its turn on overwatch (clicking the `進入警戒 (O)` button after its move) takes a *snap shot* at any enemy that ends a movement inside its sight + attack range during the rest of the round. Rules:
+A unit that finishes its turn on overwatch (clicking the `進入警戒 (O)` button after its move, or the AI choosing the overwatch branch) takes a *snap shot* at any enemy that **passes through** its sight + attack range during the rest of the round. Rules:
 
 - Half damage rounded up, no counter-attack — it's a reactive shot, not a deliberate engagement.
-- Watcher must currently see the mover (uses the per-faction `visibility_by_faction` set).
+- Watcher must currently see the hex the mover is entering (uses the per-faction `visibility_by_faction` set).
 - Each watcher fires once per setup; the flag is cleared after firing.
 - The flag also clears at the start of the watcher's own next turn (lost focus).
 - Multiple watchers can all fire on the same mover, in faction-roster order.
 
-Triggered by [scripts/battle.gd](../scripts/battle.gd)'s `_trigger_overwatch_on_mover(mover)`, called after every successful move (player or AI). Visual marker: a red gunsight triangle above the unit; gold damage popup colours mark snap-shot hits versus the red of a normal attack.
+Path-crossing implementation ([scripts/battle.gd](../scripts/battle.gd)):
+- `_trigger_overwatch_along_path(mover, path)` iterates each hex along the BFS path. For every overwatch-flagged enemy unit that sees the hex AND has it in range, applies snap damage at that hex's world position. Returns the path index at which the mover died (if any).
+- `_move_with_overwatch(mover, path)` is the unified move helper: resolves overwatch first, truncates the visual path to the death hex if the mover doesn't survive, then runs the normal `hex_map.move_unit_along_path` animation, finally places wreckage + plays the death animation if needed.
+
+So a unit can be shot multiple times during a single move — once per overwatching enemy whose range it passes through. ZoC's +2 cost interacts naturally: covering more ZoC hexes means more potential overwatch triggers.
+
+Visual marker: a red gunsight triangle above the watcher; gold damage popups mark snap-shot hits versus the red of a normal attack.
+
+### AI overwatch decision
+
+The AI evaluates overwatch as a third action class alongside attack and wait. For every candidate hex `M`:
+
+- `attack_value(M)` = best damage to a visible enemy from `M`, with the existing kill bonus / counter penalty
+- `overwatch_value(M)` = best snap-shot damage to any enemy that could *enter* the watcher's range next turn, multiplied by 0.6 (uncertainty discount) and the same `_attack_w`
+
+Both are pre-weighted contributions, so swapping them in/out of the base position score gives directly-comparable scores. The AI picks whichever (M, action) pair scores highest. Indirect-fire units (artillery) skip overwatch consideration — they don't snap-shot moving troops well.
+
+The result: the AI naturally garrisons chokepoints. When it can't find a profitable attack but enemies are about to walk into a sight line, it sets overwatch and lets the player pay the cost of crossing.
 
 ### Dig In
 
@@ -200,8 +217,8 @@ Together they recover most of the strategic-depth gap between a "minimal tactica
 
 ### Scope notes
 
-- The AI doesn't *intentionally* use Overwatch (no scoring for it) but does dig in implicitly when it has nothing to chase. A future round can teach the AI to overwatch chokepoints.
-- Overwatch fires at the mover's *destination*, not along its path. A unit can still rush through an overwatch range if its destination is out of range. ZoC's +2 cost is the primary counter to slip-through.
+- AI uses Overwatch via the explicit branch above; AI digs in implicitly when it stays put with no good target (the end-of-turn rule increments `dig_in_level` for any unit that didn't move, attack, or overwatch).
+- Overwatch fires at every step of the mover's path, not just the destination. A unit can no longer rush past an overwatching unit without taking fire.
 
 ---
 
