@@ -50,7 +50,7 @@ static func reconstruct_path(
 	while cursor != start and safety > 0:
 		safety -= 1
 		var best: Vector2i = cursor
-		var best_cost := cost_to[cursor]
+		var best_cost: int = cost_to[cursor]
 		for n in HexCoord.neighbors(cursor):
 			if n == start:
 				best = n

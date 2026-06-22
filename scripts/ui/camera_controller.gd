@@ -41,5 +41,5 @@ func _unhandled_input(event: InputEvent) -> void:
 		position = _drag_start_pos - (mm.position - _drag_start_mouse) / zoom.x
 
 func _apply_zoom(delta_zoom: float) -> void:
-	var new_zoom_v := clamp(zoom.x + delta_zoom, zoom_min, zoom_max)
+	var new_zoom_v: float = clamp(zoom.x + delta_zoom, zoom_min, zoom_max)
 	zoom = Vector2(new_zoom_v, new_zoom_v)

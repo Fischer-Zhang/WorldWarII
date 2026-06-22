@@ -23,8 +23,8 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 static func range_within(center: Vector2i, radius: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for dq in range(-radius, radius + 1):
-		var r_min := max(-radius, -dq - radius)
-		var r_max := min(radius, -dq + radius)
+		var r_min: int = max(-radius, -dq - radius)
+		var r_max: int = min(radius, -dq + radius)
 		for dr in range(r_min, r_max + 1):
 			out.append(Vector2i(center.x + dq, center.y + dr))
 	return out
@@ -40,13 +40,13 @@ static func from_pixel(point: Vector2, size: float) -> Vector2i:
 	return _round_axial(q, r)
 
 static func _round_axial(q_frac: float, r_frac: float) -> Vector2i:
-	var s_frac := -q_frac - r_frac
-	var q := round(q_frac)
-	var r := round(r_frac)
-	var s := round(s_frac)
-	var dq := abs(q - q_frac)
-	var dr := abs(r - r_frac)
-	var ds := abs(s - s_frac)
+	var s_frac: float = -q_frac - r_frac
+	var q: float = round(q_frac)
+	var r: float = round(r_frac)
+	var s: float = round(s_frac)
+	var dq: float = abs(q - q_frac)
+	var dr: float = abs(r - r_frac)
+	var ds: float = abs(s - s_frac)
 	if dq > dr and dq > ds:
 		q = -r - s
 	elif dr > ds:

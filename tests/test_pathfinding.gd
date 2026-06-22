@@ -22,8 +22,8 @@ func _init() -> void:
 	var pass_count := 0
 	var fail_count := 0
 
-	# 1) 3 move pts on open ground: should reach 18 hexes (ring1=6 + ring2=12)
-	var range1 := Pathfinding.movement_range(Vector2i(0, 0), 3, stub, {})
+	# 1) 2 move pts on open ground: should reach 18 hexes (ring1=6 + ring2=12)
+	var range1: Dictionary = Pathfinding.movement_range(Vector2i(0, 0), 2, stub, {})
 	if range1.size() == 18:
 		pass_count += 1
 	else:
