@@ -16,6 +16,14 @@ const SHORT_LABELS := {
 }
 
 const MAX_DIG_IN := 3
+const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
+
+# Quality colours for the general's outer ring
+const GENERAL_QUALITY_COLOR := {
+	"gold":   Color(1.0, 0.85, 0.2, 0.95),
+	"silver": Color(0.85, 0.85, 0.9, 0.95),
+	"bronze": Color(0.8, 0.55, 0.3, 0.95),
+}
 
 var type_id: String = ""
 var display_name: String = ""
@@ -30,8 +38,14 @@ var selected: bool = false
 var dying: bool = false
 var on_overwatch: bool = false
 var dig_in_level: int = 0
+# Veteran XP (in-battle progression) — rank derived from xp.
+var xp: int = 0
+var rank: int = 0
+# Optional attached general (data lookup via DataLoader.get_general_def).
+var general_id: String = ""
 
 signal moved(new_coord: Vector2i)
+signal ranked_up(new_rank: int)
 
 func configure(_type_id: String, _faction_id: String, _faction_color: Color, _coord: Vector2i, _name: String = "") -> void:
 	type_id = _type_id
@@ -72,6 +86,24 @@ func take_damage(amount: int) -> void:
 	hp = max(0, hp - amount)
 	queue_redraw()
 
+func gain_xp(amount: int) -> void:
+	if amount <= 0 or not is_alive():
+		return
+	xp += amount
+	var new_rank: int = CombatModifiers.rank_for_xp(xp)
+	if new_rank > rank:
+		rank = new_rank
+		ranked_up.emit(rank)
+	queue_redraw()
+
+func effective_move(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
+	var mods: Dictionary = CombatModifiers.for_unit(self, general_def)
+	return max(0, int(unit_def.get("move", 0)) + int(mods.get("move", 0)))
+
+func effective_vision(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
+	var mods: Dictionary = CombatModifiers.for_unit(self, general_def)
+	return max(0, int(unit_def.get("vision", 3)) + int(mods.get("vision", 0)))
+
 func set_selected(s: bool) -> void:
 	selected = s
 	set_process(s)  # only redraw constantly while pulsing
@@ -109,6 +141,12 @@ func _draw() -> void:
 			Vector2.ZERO, RADIUS + 6.0, 0, TAU, 32,
 			Color(1.0, 0.95, 0.3, ring_alpha), 3.5
 		)
+	# General quality ring (gold/silver/bronze outline outside the faction circle)
+	if general_id != "" and not dying:
+		var quality := _general_quality()
+		if quality != "":
+			var ring_color: Color = GENERAL_QUALITY_COLOR.get(quality, Color.WHITE)
+			draw_arc(Vector2.ZERO, RADIUS + 3.0, 0, TAU, 32, ring_color, 2.5)
 	# Faction-colored circle
 	var fill_color := faction_color
 	if is_done_for_turn():
@@ -152,9 +190,30 @@ func _draw() -> void:
 				Color(0.55, 0.4, 0.2, 0.95)
 			)
 
+	# Veteran rank: 1-3 gold chevrons at the top-right
+	if rank > 0:
+		var stars_y := -RADIUS - 4.0
+		for i in range(rank):
+			var x := RADIUS - 14.0 - i * 7.0
+			draw_rect(
+				Rect2(x, stars_y, 5.0, 5.0),
+				Color(1.0, 0.85, 0.2, 0.95)
+			)
+			draw_rect(
+				Rect2(x, stars_y, 5.0, 5.0),
+				Color(0.0, 0.0, 0.0, 0.7),
+				false, 0.8
+			)
+
 func _hp_color(pct: float) -> Color:
 	if pct > 0.6:
 		return Color(0.4, 0.85, 0.4)
 	if pct > 0.3:
 		return Color(0.95, 0.85, 0.3)
 	return Color(0.9, 0.3, 0.3)
+
+func _general_quality() -> String:
+	if general_id == "":
+		return ""
+	var g: Dictionary = DataLoader.get_general_def(general_id)
+	return String(g.get("quality", ""))

@@ -49,6 +49,8 @@ class StubDataLoader:
 		return defs[type_id]
 	func get_terrain_def(terrain_id: String) -> Dictionary:
 		return terrains.get(terrain_id, terrains["plain"])
+	func get_general_def(general_id: String) -> Dictionary:
+		return {}  # tests don't exercise generals — empty disables bonuses
 
 class StubUnit:
 	var type_id: String
@@ -56,6 +58,11 @@ class StubUnit:
 	var coord: Vector2i
 	var hp: int
 	var max_hp: int
+	# Fields read by CombatModifiers / AI's general+rank pipeline
+	var rank: int = 0
+	var xp: int = 0
+	var general_id: String = ""
+	var dig_in_level: int = 0
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
 		type_id = _type_id
 		faction_id = _faction

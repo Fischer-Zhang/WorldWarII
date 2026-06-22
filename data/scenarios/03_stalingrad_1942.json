@@ -24,7 +24,7 @@
   ],
   "units": [
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 1",  "at": [11, 1]},
-    {"faction": "soviet", "type": "infantry",  "name": "近衛步 2",  "at": [10, 4]},
+    {"faction": "soviet", "type": "infantry",  "name": "近衛步 2",  "at": [10, 4], "general": "chuikov"},
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 3",  "at": [11, 7]},
     {"faction": "soviet", "type": "mg_team",   "name": "Maxim a",  "at": [12, 2]},
     {"faction": "soviet", "type": "mg_team",   "name": "Maxim b",  "at": [12, 6]},
@@ -33,7 +33,7 @@
 
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",    "at": [1, 1]},
     {"faction": "axis", "type": "light_tank",  "name": "Pz.III",   "at": [2, 4]},
-    {"faction": "axis", "type": "infantry",    "name": "擲彈兵 1", "at": [1, 3]},
+    {"faction": "axis", "type": "infantry",    "name": "擲彈兵 1", "at": [1, 3], "general": "manstein"},
     {"faction": "axis", "type": "infantry",    "name": "擲彈兵 2", "at": [1, 6]},
     {"faction": "axis", "type": "infantry",    "name": "擲彈兵 3", "at": [3, 8]},
     {"faction": "axis", "type": "mg_team",     "name": "MG 42",    "at": [2, 2]},

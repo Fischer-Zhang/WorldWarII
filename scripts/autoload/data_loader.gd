@@ -5,18 +5,21 @@ extends Node
 
 const UNITS_PATH := "res://data/units.json"
 const TERRAINS_PATH := "res://data/terrains.json"
+const GENERALS_PATH := "res://data/generals.json"
 const SCENARIOS_DIR := "res://data/scenarios/"
 
 var units: Dictionary = {}
 var terrains: Dictionary = {}
+var generals: Dictionary = {}
 var scenarios: Array[Dictionary] = []
 
 func _ready() -> void:
 	units = _load_json(UNITS_PATH)
 	terrains = _load_json(TERRAINS_PATH)
+	generals = _load_json(GENERALS_PATH)
 	scenarios = _load_scenarios()
-	print("[DataLoader] loaded %d unit types, %d terrains, %d scenarios" % [
-		units.size(), terrains.size(), scenarios.size(),
+	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d scenarios" % [
+		units.size(), terrains.size(), generals.size(), scenarios.size(),
 	])
 
 func get_unit_def(type_id: String) -> Dictionary:
@@ -30,6 +33,14 @@ func get_terrain_def(terrain_id: String) -> Dictionary:
 		push_error("Unknown terrain: " + terrain_id)
 		return {}
 	return terrains[terrain_id]
+
+func get_general_def(general_id: String) -> Dictionary:
+	if general_id == "":
+		return {}
+	if not generals.has(general_id):
+		push_error("Unknown general: " + general_id)
+		return {}
+	return generals[general_id]
 
 func get_scenario(scenario_id: String) -> Dictionary:
 	for s in scenarios:

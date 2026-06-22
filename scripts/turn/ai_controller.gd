@@ -5,6 +5,7 @@ const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
+const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
 # moves there, attacks if a target is available.
@@ -60,7 +61,9 @@ func plan_for_unit(unit) -> Dictionary:
 	_player_reach_cache.clear()
 	var hex_map = battle.hex_map
 	var atk_def: Dictionary = _get_unit_def(unit.type_id)
-	var move_pts := int(atk_def.get("move", 0))
+	var atk_general: Dictionary = _get_general_def(unit.general_id)
+	var atk_mods: Dictionary = CombatModifiers.for_unit(unit, atk_general)
+	var move_pts: int = int(atk_def.get("move", 0)) + int(atk_mods.get("move", 0))
 	var rng := int(atk_def.get("range", 1))
 
 	var reachable: Dictionary = Pathfinding.movement_range(
@@ -140,6 +143,8 @@ func _score_position(
 
 	# Attack term: only currently-visible enemies (can't shoot fog).
 	var attack_term := 0.0
+	var atk_general_for_score: Dictionary = _get_general_def(unit.general_id)
+	var atk_mods_for_score: Dictionary = CombatModifiers.for_unit(unit, atk_general_for_score)
 	for e in visible_enemies:
 		var enemy = e
 		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
@@ -148,7 +153,12 @@ func _score_position(
 		var def_def: Dictionary = _get_unit_def(enemy.type_id)
 		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
-		var r: CombatResolver.Result = CombatResolver.resolve(atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d)
+		var def_general: Dictionary = _get_general_def(enemy.general_id)
+		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+		var r: CombatResolver.Result = CombatResolver.resolve(
+			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
+			enemy.dig_in_level, atk_mods_for_score, def_mods
+		)
 		var dmg_score := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg_score += _kill_bonus
@@ -202,6 +212,8 @@ func _best_attack_value(
 	# position would produce — mirrors the attack block in _score_position
 	# so the AI can compare attack vs overwatch on equal footing.
 	var best := 0.0
+	var atk_general_local: Dictionary = _get_general_def(unit.general_id)
+	var atk_mods_local: Dictionary = CombatModifiers.for_unit(unit, atk_general_local)
 	for e in visible_enemies:
 		var enemy = e
 		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
@@ -210,7 +222,12 @@ func _best_attack_value(
 		var def_def: Dictionary = _get_unit_def(enemy.type_id)
 		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
-		var r: CombatResolver.Result = CombatResolver.resolve(atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d)
+		var def_general: Dictionary = _get_general_def(enemy.general_id)
+		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+		var r: CombatResolver.Result = CombatResolver.resolve(
+			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
+			enemy.dig_in_level, atk_mods_local, def_mods
+		)
 		var dmg := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg += _kill_bonus
@@ -241,8 +258,13 @@ func _overwatch_score(
 			continue
 		var def_terr: Dictionary = _get_terrain_def("plain")  # worst-case (no cover bonus)
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
+		var atk_general_ow: Dictionary = _get_general_def(unit.general_id)
+		var atk_mods_ow: Dictionary = CombatModifiers.for_unit(unit, atk_general_ow)
+		var def_general_ow: Dictionary = _get_general_def(enemy.general_id)
+		var def_mods_ow: Dictionary = CombatModifiers.for_unit(enemy, def_general_ow)
 		var r: CombatResolver.Result = CombatResolver.resolve(
-			atk_def, edef, unit.hp, enemy.hp, atk_terr, def_terr, rng, 0
+			atk_def, edef, unit.hp, enemy.hp, atk_terr, def_terr, rng,
+			0, atk_mods_ow, def_mods_ow
 		)
 		var snap: float = max(1.0, ceil(float(r.damage_to_defender) / 2.0))
 		if snap >= enemy.hp:
@@ -272,7 +294,12 @@ func _best_attack_from(
 		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 		var atk_hp := int(atk_def.get("hp", 1))
-		var r: CombatResolver.Result = CombatResolver.resolve(atk_def, def_def, atk_hp, enemy.hp, atk_terr, def_terr, d)
+		var def_general: Dictionary = _get_general_def(enemy.general_id)
+		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+		var r: CombatResolver.Result = CombatResolver.resolve(
+			atk_def, def_def, atk_hp, enemy.hp, atk_terr, def_terr, d,
+			enemy.dig_in_level, {}, def_mods
+		)
 		var dmg: float = r.damage_to_defender + (10 if r.defender_dies else 0) \
 			+ _target_role_score(attacker_type, def_def)
 		if dmg > best_dmg:
@@ -374,9 +401,14 @@ func _lookahead_counter_damage(
 			continue
 		# Damage formula doesn't depend on the attacker's terrain (only counter does).
 		var plain := {"defense": 0}
+		var p_general: Dictionary = _get_general_def(player.general_id)
+		var p_mods: Dictionary = CombatModifiers.for_unit(player, p_general)
+		var ai_general: Dictionary = _get_general_def(ai_unit.general_id)
+		var ai_mods: Dictionary = CombatModifiers.for_unit(ai_unit, ai_general)
 		var result: CombatResolver.Result = CombatResolver.resolve(
 			pdef, ai_def, player.hp, ai_unit.hp,
 			plain, ai_terrain_def, 1,
+			ai_unit.dig_in_level, p_mods, ai_mods,
 		)
 		if result.damage_to_defender > worst:
 			worst = result.damage_to_defender
@@ -392,4 +424,11 @@ func _get_terrain_def(terrain_id: String) -> Dictionary:
 	if _data_loader != null:
 		return _data_loader.get_terrain_def(terrain_id)
 	push_error("AIController requires a data loader before planning")
+	return {}
+
+func _get_general_def(general_id: String) -> Dictionary:
+	if general_id == "":
+		return {}
+	if _data_loader != null:
+		return _data_loader.get_general_def(general_id)
 	return {}

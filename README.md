@@ -2,7 +2,7 @@
 
 > 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,4 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-54%2F54-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-66%2F66-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -36,9 +36,10 @@ A sandbox scenario for development is also included.
 - **Tactical depth: Zone of Control, Overwatch, Dig In** — slipping past an enemy costs +2 movement, ending a turn watching makes any unit that enters your range take a snap shot, and staying put compounds entrenchment (+1/+2/+3 defense). All three are classic wargame mechanics with one-paragraph rules each.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
+- **Historical generals + veteran XP** — 10 named generals (Rommel, Patton, Zhukov, …) attach to specific units in each scenario, applying quality-tiered stat bonuses to compatible unit types. Units gain XP per kill / damage dealt during a battle, ranking up to ★/★★/★★★ for cumulative attack/defense/move/vision bonuses. Both feed a single modifier pipeline through `CombatResolver` / `CombatModifiers`.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **54 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), attack legality, AI role shaping and lookahead, Bastogne reinforcements, hex line drawing, line-of-sight.
-- **~3000 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
+- **66 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in + general modifiers), attack legality, AI role shaping and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
+- **~3200 LOC** of GDScript across 22 files. Read it top-to-bottom in an afternoon.
 
 ---
 

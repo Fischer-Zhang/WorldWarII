@@ -23,7 +23,7 @@
     {"id": "allies", "name": "法軍第 55 師", "controller": "ai", "ai": "defensive", "color": "#3a5a7a"}
   ],
   "units": [
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",     "at": [12, 0]},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",     "at": [12, 0], "general": "guderian"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III a",  "at": [13, 2]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III b",  "at": [12, 4]},
     {"faction": "axis", "type": "light_tank",  "name": "Pz.II",     "at": [11, 6]},
@@ -36,7 +36,7 @@
     {"faction": "allies", "type": "infantry",  "name": "法步 2",   "at": [1, 4]},
     {"faction": "allies", "type": "at_gun",    "name": "25 mm AT", "at": [4, 5]},
     {"faction": "allies", "type": "mg_team",   "name": "MG 8",     "at": [3, 7]},
-    {"faction": "allies", "type": "infantry",  "name": "法步 3",   "at": [10, 8]}
+    {"faction": "allies", "type": "infantry",  "name": "法步 3",   "at": [10, 8], "general": "de_gaulle"}
   ],
   "victory": {
     "axis":   {"type": "capture", "target": [10, 8], "by_turn": 12},

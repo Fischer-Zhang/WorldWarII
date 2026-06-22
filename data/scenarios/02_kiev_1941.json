@@ -23,7 +23,7 @@
     {"id": "soviet", "name": "蘇軍殘部",     "controller": "ai", "ai": "hold", "color": "#7a3a3a"}
   ],
   "units": [
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",      "at": [12, 2]},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",      "at": [12, 2], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III a",   "at": [13, 4]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III b",   "at": [12, 6]},
     {"faction": "axis", "type": "artillery",   "name": "150 mm sFH", "at": [13, 7]},
@@ -31,7 +31,7 @@
     {"faction": "axis", "type": "infantry",    "name": "擲彈兵 1",   "at": [11, 5]},
     {"faction": "axis", "type": "infantry",    "name": "擲彈兵 2",   "at": [11, 8]},
 
-    {"faction": "soviet", "type": "medium_tank", "name": "T-34",     "at": [2, 4]},
+    {"faction": "soviet", "type": "medium_tank", "name": "T-34",     "at": [2, 4], "general": "konev"},
     {"faction": "soviet", "type": "light_tank",  "name": "T-26",     "at": [3, 6]},
     {"faction": "soviet", "type": "infantry",    "name": "蘇步 1",   "at": [2, 3]},
     {"faction": "soviet", "type": "infantry",    "name": "蘇步 2",   "at": [2, 5]},

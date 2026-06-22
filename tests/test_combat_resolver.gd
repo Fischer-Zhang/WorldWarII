@@ -106,5 +106,49 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: close indirect attack should receive infantry counter; counter=%d" % r10.counter_damage)
 
+	# 11) Attacker modifiers add to attack stat: +2 attack via modifier raises damage
+	var r11 := CombatResolver.resolve(
+		infantry, infantry, 10, 10, plain, plain, 1,
+		0, {"attack": 2}, {}
+	)
+	# base = max(1, 4 + 2 + 0 - 2 - 0) = 4, hp_ratio 1.0 → 4
+	if r11.damage_to_defender == 4:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: attacker_mods +2 attack expected dmg=4 got %d" % r11.damage_to_defender)
+
+	# 12) Defender modifiers add to defense stat: +2 defense via modifier soaks damage
+	var r12 := CombatResolver.resolve(
+		infantry, infantry, 10, 10, plain, plain, 1,
+		0, {}, {"defense": 2}
+	)
+	# base = max(1, 4 - 2 - 2) = max(1, 0) → 1
+	if r12.damage_to_defender == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: defender_mods +2 defense expected dmg=1 got %d" % r12.damage_to_defender)
+
+	# 13) Attacker vs_armor modifier — stacks with base vs_armor when target has armor
+	# infantry has vs_armor=1; +1 mod = 2 effective vs_armor; tank armor>0 triggers it
+	var r13 := CombatResolver.resolve(
+		infantry, medium_tank, 10, 16, plain, plain, 1,
+		0, {"vs_armor": 1}, {}
+	)
+	# base = max(1, 4 + (1+1) - 5 - 0) = max(1, 1) = 1; ratio=1 → 1
+	# Compare without modifier: 4 + 1 - 5 = 0 → 1 also. Hmm same.
+	# Use medium_tank → medium_tank instead: tank attack=7 vs_armor=4, +1 mod = 5 effective.
+	var r13b := CombatResolver.resolve(
+		medium_tank, medium_tank, 16, 16, plain, plain, 1,
+		0, {"vs_armor": 1}, {}
+	)
+	# base = max(1, 7 + (4+1) - 5 - 0) = 7; ratio=1 → 7
+	if r13b.damage_to_defender == 7:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: attacker vs_armor mod expected dmg=7 got %d" % r13b.damage_to_defender)
+
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

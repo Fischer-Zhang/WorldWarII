@@ -1,0 +1,102 @@
+{
+  "rommel": {
+    "name_zh": "隆美爾",
+    "title_zh": "沙漠之狐",
+    "quality": "gold",
+    "specialization": "armor",
+    "applies_to": ["medium_tank", "light_tank"],
+    "attack_bonus": 2,
+    "defense_bonus": 1,
+    "move_bonus": 1
+  },
+  "guderian": {
+    "name_zh": "古德林",
+    "title_zh": "閃電將軍",
+    "quality": "gold",
+    "specialization": "armor",
+    "applies_to": ["medium_tank", "light_tank", "infantry"],
+    "attack_bonus": 1,
+    "defense_bonus": 0,
+    "move_bonus": 2
+  },
+  "manstein": {
+    "name_zh": "曼施坦因",
+    "title_zh": "戰略大師",
+    "quality": "gold",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 1,
+    "defense_bonus": 2,
+    "move_bonus": 0
+  },
+  "patton": {
+    "name_zh": "巴頓",
+    "title_zh": "鐵血將軍",
+    "quality": "gold",
+    "specialization": "armor",
+    "applies_to": ["medium_tank", "light_tank"],
+    "attack_bonus": 2,
+    "defense_bonus": 0,
+    "move_bonus": 1
+  },
+  "bradley": {
+    "name_zh": "布萊德利",
+    "title_zh": "士兵將軍",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 1,
+    "defense_bonus": 1,
+    "move_bonus": 0
+  },
+  "zhukov": {
+    "name_zh": "朱可夫",
+    "title_zh": "勝利元帥",
+    "quality": "gold",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun", "artillery"],
+    "attack_bonus": 2,
+    "defense_bonus": 1,
+    "move_bonus": 0
+  },
+  "chuikov": {
+    "name_zh": "崔可夫",
+    "title_zh": "石頭般的人",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team"],
+    "attack_bonus": 0,
+    "defense_bonus": 3,
+    "move_bonus": 0
+  },
+  "konev": {
+    "name_zh": "科涅夫",
+    "title_zh": "前線總司令",
+    "quality": "silver",
+    "specialization": "armor",
+    "applies_to": ["medium_tank", "light_tank"],
+    "attack_bonus": 1,
+    "defense_bonus": 1,
+    "move_bonus": 0
+  },
+  "de_gaulle": {
+    "name_zh": "戴高樂",
+    "title_zh": "自由法蘭西",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 0,
+    "defense_bonus": 2,
+    "move_bonus": 0
+  },
+  "manteuffel": {
+    "name_zh": "曼陶菲爾",
+    "title_zh": "裝甲擲彈兵將軍",
+    "quality": "silver",
+    "specialization": "armor",
+    "applies_to": ["medium_tank", "light_tank"],
+    "attack_bonus": 2,
+    "defense_bonus": 0,
+    "move_bonus": 0
+  }
+}

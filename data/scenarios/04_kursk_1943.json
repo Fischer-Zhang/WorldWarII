@@ -23,7 +23,7 @@
     {"id": "soviet", "name": "蘇軍中央方面軍", "controller": "ai", "ai": "defensive", "color": "#7a3a3a"}
   ],
   "units": [
-    {"faction": "axis", "type": "medium_tank", "name": "Tiger I",    "at": [12, 1]},
+    {"faction": "axis", "type": "medium_tank", "name": "Tiger I",    "at": [12, 1], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Panther",    "at": [13, 3]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV a",    "at": [12, 5]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV b",    "at": [13, 7]},
@@ -32,7 +32,7 @@
     {"faction": "axis", "type": "artillery",   "name": "Hummel",     "at": [13, 6]},
 
     {"faction": "soviet", "type": "medium_tank", "name": "T-34 a",    "at": [1, 2]},
-    {"faction": "soviet", "type": "medium_tank", "name": "T-34 b",    "at": [1, 5]},
+    {"faction": "soviet", "type": "medium_tank", "name": "T-34 b",    "at": [1, 5], "general": "konev"},
     {"faction": "soviet", "type": "medium_tank", "name": "T-34 c",    "at": [2, 8]},
     {"faction": "soviet", "type": "at_gun",      "name": "76 mm AT",  "at": [5, 2]},
     {"faction": "soviet", "type": "at_gun",      "name": "76 mm AT",  "at": [8, 2]},
@@ -40,7 +40,7 @@
     {"faction": "soviet", "type": "at_gun",      "name": "45 mm AT",  "at": [7, 7]},
     {"faction": "soviet", "type": "infantry",    "name": "蘇步 1",   "at": [5, 4]},
     {"faction": "soviet", "type": "infantry",    "name": "蘇步 2",   "at": [8, 6]},
-    {"faction": "soviet", "type": "artillery",   "name": "152 mm",    "at": [1, 4]}
+    {"faction": "soviet", "type": "artillery",   "name": "152 mm",    "at": [1, 4], "general": "zhukov"}
   ],
   "victory": {
     "axis":   {"type": "capture", "target": [5, 2], "by_turn": 14},

@@ -23,14 +23,14 @@
     {"id": "axis",   "name": "德軍第 5 裝甲軍", "controller": "ai", "ai": "aggressive", "color": "#7a4a3a"}
   ],
   "units": [
-    {"faction": "allies", "type": "infantry", "name": "101 空降 a", "at": [5, 4]},
+    {"faction": "allies", "type": "infantry", "name": "101 空降 a", "at": [5, 4], "general": "bradley"},
     {"faction": "allies", "type": "infantry", "name": "101 空降 b", "at": [6, 4]},
     {"faction": "allies", "type": "infantry", "name": "101 空降 c", "at": [5, 5]},
     {"faction": "allies", "type": "mg_team",  "name": "M1919",      "at": [6, 5]},
     {"faction": "allies", "type": "at_gun",   "name": "57 mm AT",   "at": [6, 3]},
     {"faction": "allies", "type": "artillery","name": "105 mm",     "at": [4, 5]},
 
-    {"faction": "axis", "type": "medium_tank", "name": "Panther",   "at": [3, 0]},
+    {"faction": "axis", "type": "medium_tank", "name": "Panther",   "at": [3, 0], "general": "manteuffel"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV a",   "at": [8, 0]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV b",   "at": [11, 1]},
     {"faction": "axis", "type": "infantry",    "name": "擲彈兵 1", "at": [5, 1]},
@@ -38,7 +38,7 @@
     {"faction": "axis", "type": "artillery",   "name": "150 mm",   "at": [12, 5]}
   ],
   "reinforcements": [
-    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 a", "at": [5, 9]},
+    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 a", "at": [5, 9], "general": "patton"},
     {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 b", "at": [7, 9]},
     {"at_turn": 7, "faction": "allies", "type": "infantry",    "name": "第 3 軍援",  "at": [6, 9]}
   ],

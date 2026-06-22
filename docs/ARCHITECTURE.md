@@ -233,6 +233,37 @@ Together they recover most of the strategic-depth gap between a "minimal tactica
 
 ---
 
+## Generals + Veteran XP (single modifier pipeline)
+
+Two systems, one code path:
+
+- **Generals** ([data/generals.json](../data/generals.json)). Named historical commanders attached to specific units in a scenario via `"general": "rommel"`. Each general declares `quality` (gold/silver/bronze — visual ring colour), `applies_to` (list of unit types the bonus targets), and additive bonuses (`attack_bonus`, `defense_bonus`, `vs_armor_bonus`, `move_bonus`, `vision_bonus`). Specialisation is enforced by `applies_to` — Rommel on a Panzer fires; Rommel on an infantry unit doesn't.
+
+- **Veteran rank** (in-battle XP, no save/load needed). Each `Unit` carries `xp` and `rank`. XP earned: +1 per damage round dealt, +3 for a kill. Thresholds **0 / 2 / 5 / 9** map to ranks **0 / 1 / 2 / 3**. Bonuses are cumulative:
+
+  | Rank | Bonus |
+  |---|---|
+  | 1 | +1 attack |
+  | 2 | +1 attack, +1 defense |
+  | 3 | +1 attack, +1 defense, +1 move, +1 vision |
+
+Both feed [scripts/combat/combat_modifiers.gd](../scripts/combat/combat_modifiers.gd)'s single `for_unit(unit, general_def) → Dictionary` helper. The returned dict is then passed to:
+
+- `CombatResolver.resolve(..., attacker_mods, defender_mods)` — additive on top of base attack/defense/vs_armor.
+- `Unit.effective_move(unit_def, general_def)` / `effective_vision(...)` — used by Pathfinding callsites for the movement budget and by Visibility for sight range.
+
+Why one pipeline: every future modifier source (terrain auras, equipment, weather, etc.) plugs into the same dict, so combat math doesn't need to know where the bonuses came from. The AI consumes the same modifier helper in its scoring functions, so its damage predictions match what the player will actually see.
+
+Visual surface: gold/silver/bronze ring around units with a general; yellow chevrons (1–3) above units with rank > 0; info panel lines:
+- `★ 隆美爾「沙漠之狐」` (general line, coloured by quality)
+- `老兵 ★☆☆ (XP 1/2)` (rank stars + progress)
+
+10 historical generals ship with the game (Rommel, Guderian, Manstein, Manteuffel, Patton, Bradley, Zhukov, Chuikov, Konev, de Gaulle); each scenario deploys 2–4 in narratively appropriate spots (Guderian's Pz.IV at Sedan, Chuikov on a Soviet infantry at Stalingrad, Patton on the Sherman that arrives at Bastogne turn 7).
+
+Tested in [tests/test_combat_modifiers.gd](../tests/test_combat_modifiers.gd) (rank thresholds + general aggregation, 9 cases) and [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) (modifier integration into damage formula, 3 added cases).
+
+---
+
 ## Cookbook — Adding a new action type
 
 If you want to add a new per-unit action (e.g. an Engineer's "Repair adjacent friendly"), here's the touch list. Each existing action — Attack, Overwatch, Dig In — already follows this pattern, so use them as templates.
