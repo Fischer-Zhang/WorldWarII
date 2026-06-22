@@ -131,7 +131,7 @@ func _run_ai_turn(faction_id: String) -> void:
 		return
 	ai_running = true
 	var personality := String(factions[faction_id].get("ai", "aggressive"))
-	var ai := AIController.new(self, personality)
+	var ai := AIController.new(self, personality, GameState.difficulty)
 	# Process units one at a time with a small delay so the player can see what's happening.
 	var ai_units: Array[Unit] = []
 	for u in units:

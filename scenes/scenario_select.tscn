@@ -35,6 +35,32 @@ text = "選擇戰役"
 theme_override_font_sizes/font_size = 14
 text = "點選一場戰役查看簡報。"
 
+[node name="DifficultyRow" type="HBoxContainer" parent="Margin/VBox"]
+theme_override_constants/separation = 12
+
+[node name="DifficultyLabel" type="Label" parent="Margin/VBox/DifficultyRow"]
+theme_override_font_sizes/font_size = 16
+text = "AI 難度:"
+
+[node name="EasyButton" type="Button" parent="Margin/VBox/DifficultyRow"]
+custom_minimum_size = Vector2(110, 36)
+toggle_mode = true
+text = "簡單"
+
+[node name="NormalButton" type="Button" parent="Margin/VBox/DifficultyRow"]
+custom_minimum_size = Vector2(110, 36)
+toggle_mode = true
+text = "普通"
+
+[node name="HardButton" type="Button" parent="Margin/VBox/DifficultyRow"]
+custom_minimum_size = Vector2(110, 36)
+toggle_mode = true
+text = "困難"
+
+[node name="DifficultyHint" type="Label" parent="Margin/VBox/DifficultyRow"]
+theme_override_font_sizes/font_size = 13
+text = ""
+
 [node name="Spacer1" type="Control" parent="Margin/VBox"]
 custom_minimum_size = Vector2(0, 12)
 

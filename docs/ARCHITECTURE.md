@@ -132,6 +132,27 @@ The "best target from here" reuses the same `CombatResolver.resolve` the player'
 
 Each scenario sets the personality via the faction's `"ai"` key. The Soviet survivors at Kiev should sit in their cover, the Germans at Stalingrad should press into the city — and they do.
 
+### Difficulty profiles + 1-ply lookahead
+
+A player-selectable difficulty (`GameState.difficulty`, chosen on the scenario-select screen) maps to a profile that tunes the heuristic weights and toggles a 1-ply lookahead:
+
+| Difficulty | `attack_w` | `kill_bonus` | `exposure_w` | Lookahead |
+|---|---:|---:|---:|---:|
+| Easy   | 1.5 | 2.5 | 0.3 | off |
+| Normal | 2.5 | 5.0 | 0.5 | off |
+| Hard   | 3.0 | 7.0 | 0.4 | **on** |
+
+When lookahead is on, for every candidate hex `M` the AI considers, it computes the worst counter-attack damage any *currently visible* player unit could deliver to a unit at `M` on the player's next turn. That damage is subtracted from the candidate's score (weight `W_LOOKAHEAD = 1.0`).
+
+The implementation caches each player unit's full reachable-hex set once per AI turn (Dijkstra from the player's current position, honouring current occupancy). Per candidate, the threat check is then just a `HexCoord.distance(...) <= player_range` membership test over the cached set — cheap even for ~30 candidates × 8 AI units × 5 players.
+
+Damage is a real `CombatResolver.resolve(...)` using the player's actual HP and the AI unit's HP + terrain at `M` — not a stat-based proxy. Attacker terrain is ignored because it only affects counter-counter damage, which we don't simulate.
+
+Behaviour you'll notice on Hard:
+- The AI stops advancing through open ground when a player unit could one-shot it.
+- It picks longer routes through forest / town to break the player's LOS to its destination.
+- Wounded AI units retreat more aggressively because the counter-cost relative to their HP shoots up.
+
 ---
 
 ## Scenarios — data, not code

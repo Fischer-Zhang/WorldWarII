@@ -34,7 +34,7 @@ A sandbox scenario for development is also included.
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
 - **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
-- **AI with three personality presets** — `aggressive` / `defensive` / `hold`. Each scenario sets its opponents' personality so the German blitz at Sedan feels different from the Soviet defenders in their Kiev pocket.
+- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
 - **27 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding, combat formula edge cases, hex line drawing, line-of-sight.
 - **~2700 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
@@ -165,7 +165,7 @@ No code changes required.
 
 **Done**
 - [x] Hex grid, BFS movement, combat model, turn cycle
-- [x] AI with three personality presets
+- [x] AI with three personality presets + three difficulty profiles + 1-ply lookahead on Hard
 - [x] 5 historical scenarios + sandbox
 - [x] Scheduled reinforcements (Bastogne)
 - [x] Symmetric fog of war + line-of-sight + AI last-known-position memory
@@ -176,7 +176,6 @@ No code changes required.
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
-- [ ] AI 1-ply lookahead + difficulty selector
 - [ ] Save / load mid-scenario
 
 ---

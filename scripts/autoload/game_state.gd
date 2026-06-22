@@ -5,6 +5,7 @@ extends Node
 
 var current_scenario_id: String = ""
 var last_result: Dictionary = {}
+var difficulty: String = "normal"  # "easy" | "normal" | "hard"
 
 signal scenario_started(scenario_id: String)
 signal scenario_ended(winner: String, summary: Dictionary)
