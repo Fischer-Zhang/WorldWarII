@@ -14,6 +14,12 @@ func _ready() -> void:
 	# Force keyboard focus so Tab/Enter work even if mouse routing is broken.
 	begin_button.grab_focus()
 	print("[MainMenu] signals connected. begin_button.global_rect=", begin_button.get_global_rect())
+	# Window focus probe: WSL2/WSLg sometimes deliver no input until the
+	# game window is explicitly clicked on its title bar.
+	var win := get_window()
+	win.focus_entered.connect(func(): print("[Window] focus_entered (window now receives input)"))
+	win.focus_exited.connect(func(): print("[Window] focus_exited (window will NOT receive input)"))
+	print("[Window] has_focus=", win.has_focus())
 
 func _input(event: InputEvent) -> void:
 	# Global low-level probe: confirms the window is receiving ANY input at all.
