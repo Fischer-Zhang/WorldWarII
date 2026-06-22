@@ -14,9 +14,9 @@ var generals: Dictionary = {}
 var scenarios: Array[Dictionary] = []
 
 func _ready() -> void:
-	units = _load_json(UNITS_PATH)
-	terrains = _load_json(TERRAINS_PATH)
-	generals = _load_json(GENERALS_PATH)
+	units = _with_catalog_ids(_load_json(UNITS_PATH))
+	terrains = _with_catalog_ids(_load_json(TERRAINS_PATH))
+	generals = _with_catalog_ids(_load_json(GENERALS_PATH))
 	scenarios = _load_scenarios()
 	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d scenarios" % [
 		units.size(), terrains.size(), generals.size(), scenarios.size(),
@@ -61,6 +61,12 @@ func _load_json(path: String) -> Dictionary:
 		push_error("Invalid JSON dict: " + path)
 		return {}
 	return parsed
+
+func _with_catalog_ids(data: Dictionary) -> Dictionary:
+	for key in data.keys():
+		if data[key] is Dictionary:
+			data[key]["id"] = String(key)
+	return data
 
 func _load_scenarios() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []

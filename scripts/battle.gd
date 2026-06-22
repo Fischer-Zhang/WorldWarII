@@ -11,6 +11,7 @@ const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
@@ -210,6 +211,10 @@ func _update_dig_in_for_current_faction() -> void:
 		var unit: Unit = u
 		if not unit.is_alive() or unit.faction_id != current:
 			continue
+		if CombatEffects.is_pinned(unit.suppression):
+			unit.dig_in_level = 0
+			unit.queue_redraw()
+			continue
 		if unit.has_moved or unit.has_attacked or unit.on_overwatch:
 			unit.dig_in_level = 0
 		else:
@@ -320,16 +325,27 @@ func _enter_attack_phase() -> void:
 	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
 	# Overwatch button: enabled whenever a unit has finished its move and
 	# is making the attack-or-skip decision.
-	overwatch_button.visible = true
+	overwatch_button.visible = not CombatEffects.is_pinned(selected_unit.suppression)
 	if attack_targets.is_empty():
-		info_label.text = "%s 已就位 — 點「警戒」進入警戒,或結束回合待機" % selected_unit.display_name
+		if CombatEffects.is_pinned(selected_unit.suppression):
+			info_label.text = "%s 被壓制 — 無法警戒,點空地待機" % selected_unit.display_name
+		else:
+			info_label.text = "%s 已就位 — 點「警戒」進入警戒,或結束回合待機" % selected_unit.display_name
 	else:
-		info_label.text = "%s 可攻擊 %d 個目標 — 點目標 / 點「警戒」/ 點空地待機" % [
-			selected_unit.display_name, attack_targets.size(),
+		var preview := _attack_preview(selected_unit, attack_targets[0])
+		var action_text := "點目標 / 點「警戒」/ 點空地待機"
+		if CombatEffects.is_pinned(selected_unit.suppression):
+			action_text = "點目標 / 點空地待機"
+		info_label.text = "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
+			selected_unit.display_name, attack_targets.size(), action_text, preview,
 		]
 
 func _on_overwatch_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+		return
+	if CombatEffects.is_pinned(selected_unit.suppression):
+		info_label.text = "%s 被壓制,無法進入警戒" % selected_unit.display_name
+		overwatch_button.visible = false
 		return
 	selected_unit.on_overwatch = true
 	selected_unit.has_attacked = true
@@ -348,6 +364,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var def_general := DataLoader.get_general_def(defender.general_id)
 	var atk_mods: Dictionary = CombatModifiers.for_unit(attacker, atk_general)
 	var def_mods: Dictionary = CombatModifiers.for_unit(defender, def_general)
+	atk_mods.attack -= CombatEffects.attack_penalty(attacker.suppression)
 	var result := CombatResolver.resolve(
 		atk_def, def_def, attacker.hp, defender.hp,
 		atk_terr, def_terr, distance, defender.dig_in_level,
@@ -357,8 +374,14 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	attacker.play_attack_animation(defender.position)
 	AudioBank.play("attack")
 	defender.take_damage(result.damage_to_defender)
+	defender.add_suppression(result.suppression_to_defender)
+	defender.reduce_dig_in(result.defender_dig_in_loss)
 	DamagePopup.spawn(hex_map, defender.position, result.damage_to_defender)
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
+	if result.suppression_to_defender > 0:
+		msg += ",壓制 +%d" % result.suppression_to_defender
+	if result.defender_dig_in_loss > 0:
+		msg += ",構工 -%d" % result.defender_dig_in_loss
 	if result.counter_damage > 0:
 		attacker.take_damage(result.counter_damage)
 		DamagePopup.spawn(hex_map, attacker.position, result.counter_damage, Color(1.0, 0.75, 0.4))
@@ -413,6 +436,31 @@ func _can_attack_target(attacker: Unit, target: Unit) -> bool:
 	var atk_def := DataLoader.get_unit_def(attacker.type_id)
 	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
 	return CombatRules.can_attack_target(attacker, target, atk_def, hex_map, visible)
+
+func _attack_preview(attacker: Unit, defender: Unit) -> String:
+	var distance := HexCoord.distance(attacker.coord, defender.coord)
+	var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(attacker.coord))
+	var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(defender.coord))
+	var atk_def := DataLoader.get_unit_def(attacker.type_id)
+	var def_def := DataLoader.get_unit_def(defender.type_id)
+	var atk_general := DataLoader.get_general_def(attacker.general_id)
+	var def_general := DataLoader.get_general_def(defender.general_id)
+	var atk_mods: Dictionary = CombatModifiers.for_unit(attacker, atk_general)
+	var def_mods: Dictionary = CombatModifiers.for_unit(defender, def_general)
+	atk_mods.attack -= CombatEffects.attack_penalty(attacker.suppression)
+	var result := CombatResolver.resolve(
+		atk_def, def_def, attacker.hp, defender.hp,
+		atk_terr, def_terr, distance, defender.dig_in_level,
+		atk_mods, def_mods,
+	)
+	var parts: Array[String] = ["傷害 %d" % result.damage_to_defender]
+	if result.counter_damage > 0:
+		parts.append("反擊 %d" % result.counter_damage)
+	if result.suppression_to_defender > 0:
+		parts.append("壓制 +%d" % result.suppression_to_defender)
+	if result.defender_dig_in_loss > 0:
+		parts.append("構工 -%d" % result.defender_dig_in_loss)
+	return " / ".join(parts)
 
 func _deselect() -> void:
 	if selected_unit != null:
@@ -483,6 +531,9 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		lines.append("[color=#ff8a6a]⌖ 警戒中[/color]")
 	if unit.dig_in_level > 0:
 		lines.append("[color=#d6a060]⛤ 構工 +%d 防禦[/color]" % unit.dig_in_level)
+	if unit.suppression > 0:
+		var pin_text := " / 無法警戒構工" if CombatEffects.is_pinned(unit.suppression) else ""
+		lines.append("[color=#79aaff]壓制 %d%s[/color]" % [unit.suppression, pin_text])
 	if unit.has_moved:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
 	info_stats.text = "\n".join(lines)
@@ -569,6 +620,9 @@ func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 			watcher.play_attack_animation(step_world)
 			AudioBank.play("attack")
 			mover.take_damage(dmg)
+			var w_def_for_effect := DataLoader.get_unit_def(watcher.type_id)
+			var suppression := CombatEffects.suppression_for_attack(w_def_for_effect, dmg, not mover.is_alive())
+			mover.add_suppression(suppression)
 			DamagePopup.spawn(hex_map, step_world, dmg, Color(1.0, 0.85, 0.4))
 			watcher.on_overwatch = false
 			watcher.queue_redraw()
@@ -589,6 +643,7 @@ func _compute_overwatch_damage(watcher: Unit, target: Unit, target_step: Vector2
 	var t_general := DataLoader.get_general_def(target.general_id)
 	var w_mods: Dictionary = CombatModifiers.for_unit(watcher, w_general)
 	var t_mods: Dictionary = CombatModifiers.for_unit(target, t_general)
+	w_mods.attack -= CombatEffects.attack_penalty(watcher.suppression)
 	var result := CombatResolver.resolve(
 		w_def, t_def, watcher.hp, target.hp,
 		w_terr, t_terr, d, target.dig_in_level,

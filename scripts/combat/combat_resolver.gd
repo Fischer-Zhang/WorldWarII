@@ -2,6 +2,7 @@ class_name CombatResolver
 extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 
 # Deterministic combat resolution.
 # Damage scales with the attacker's current HP — wounded units hit softer.
@@ -14,6 +15,8 @@ const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 class Result:
 	var damage_to_defender: int = 0
 	var counter_damage: int = 0
+	var suppression_to_defender: int = 0
+	var defender_dig_in_loss: int = 0
 	var attacker_dies: bool = false
 	var defender_dies: bool = false
 
@@ -36,6 +39,12 @@ static func resolve(
 	)
 	var defender_hp_after := defender_hp - out.damage_to_defender
 	out.defender_dies = defender_hp_after <= 0
+	out.suppression_to_defender = CombatEffects.suppression_for_attack(
+		atk_def, out.damage_to_defender, out.defender_dies
+	)
+	out.defender_dig_in_loss = CombatEffects.dig_in_loss_for_attack(
+		atk_def, out.damage_to_defender, defender_dig_in
+	)
 
 	# Counter-attack: defender must survive, attacker must be in defender's
 	# range, and defender must not be an indirect-fire unit (artillery cannot

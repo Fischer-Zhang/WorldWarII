@@ -97,12 +97,15 @@ Two design decisions worth flagging:
 
 1. **HP-ratio scaling.** A wounded attacker hits softer (`attacker_hp / max_hp`). This creates a natural "death spiral" — a 30%-HP unit is much weaker than the same unit at full HP — without needing a separate morale system.
 2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter while defending; it is still countered if it attacks from inside the defender's range.
+3. **Suppression side effects.** Damaging non-lethal hits return side effects alongside damage: light suppression for most attacks, stronger pinning from MG/artillery, and one dig-in level stripped by damaging indirect fire.
 
 Attack legality is owned by [scripts/combat/combat_rules.gd](../scripts/combat/combat_rules.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers. Player targeting and AI attack evaluation both call this shared rule layer.
 
 `vs_armor` only triggers against units with `armor > 0`, so AT guns shred tanks but waste their bonus on infantry.
 
-Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, and dig-in cases.
+Suppression thresholds live in [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd): pinned units cannot overwatch or build dig-in, heavier suppression reduces movement, and the highest band reduces attack. Suppression recovers by 1 at the start of the unit's faction turn.
+
+Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) and [tests/test_combat_effects.gd](../tests/test_combat_effects.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, dig-in, suppression, and artillery dig-in stripping.
 
 ---
 
@@ -119,6 +122,7 @@ For each AI unit on its faction's turn:
          + best_damage_from_here         × 2.5   (reward attacks)
          + 5.0 if attack would kill              (finish bonus)
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
+         + suppression / dig-in break value      (prefer pinning and siege hits)
          - exposure_to_enemy_threat      × 0.5   (don't walk into kill zones)
          + terrain.defense               × 0.3   (use cover)
          + role_score                            (scout / AT / artillery shaping)
@@ -132,6 +136,7 @@ Role shaping keeps specialist units from collapsing back into raw damage math:
 - Light tanks with high move + vision get a small scouting bonus when they close toward last-known enemy positions without current contact.
 - AT guns get a target bonus against armored units and a small penalty against soft targets.
 - Indirect-fire units are penalized for candidate positions within 1-2 hexes of known enemies, encouraging standoff behavior.
+- Suppression and dig-in break are part of attack value, so artillery and MG teams can be preferred even when raw damage ties.
 
 **Personality weights** modulate the final score:
 
@@ -464,14 +469,14 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | Suite | Coverage | Cases |
 |---|---|---|
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
-| `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded | 6 |
-| `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect defender no-counter, OOR, close indirect attack counter | 8 |
+| `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded / ZoC + reconstruction | 10 |
+| `test_combat_resolver` | Damage formula, counters, dig-in, modifiers, suppression output, artillery dig-in break | 16 |
+| `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, lethal/no-damage handling | 6 |
+| `test_combat_modifiers` | Rank thresholds and general modifier aggregation | 9 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead | 4 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value | 5 |
 | `test_reinforcements` | Bastogne scheduled turn 7 spawn, coordinate conversion, ready-to-act state, no duplicate spawn, occupied-hex skip | 6 |
-| `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out + ZoC path reconstruction | +4 |
-| `test_combat_resolver` (cont.) | Dig-in defense bonus + counter-no-dig-in | +2 |
-| **Total** | | **54 ✓** |
+| **Total** | | **76 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

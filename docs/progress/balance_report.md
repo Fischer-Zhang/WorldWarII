@@ -71,6 +71,19 @@ Cell format is `damage/counter`.
 | 中戰車 | 1 | 1 | 1 | 1 | 1 | 1 |
 | 砲兵 | 1 | 1 | 1 | 1 | 1 | 1 |
 
+## Suppression / Dig-In Break Matrix
+
+Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level when it damages an entrenched target.
+
+| atk \ def | 步兵 | 機槍組 | 反戰車砲 | 輕戰車 | 中戰車 | 砲兵 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 步兵 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
+| 機槍組 | S3/D0 | S3/D0 | S3/D0 | S3/D0 | S3/D0 | S3/D0 |
+| 反戰車砲 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
+| 輕戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
+| 中戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
+| 砲兵 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 |
+
 ## Hits To Kill
 
 | attacker | defender | plain dmg | plain hits | town+dig3 dmg | town+dig3 hits |
@@ -192,7 +205,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | Attack visibility | Resolved: direct attacks require visibility + LOS; indirect attacks require visibility and ignore LOS blockers. | Keep future attack helpers routed through CombatRules. |
 | indirect semantics | Resolved: indirect units cannot counter while defending, but close indirect attacks can still be countered. | Preserve this distinction in UI text and combat tests. |
 | ZoC path reconstruction | Resolved: movement range and path reconstruction share the same terrain + ZoC step cost. | Keep new pathfinding callsites passing occupied + mover_faction. |
-| Town + dig-in | Town defense 3 plus dig-in 3 pushes most attacks to the 1-damage floor. | Consider max dig-in 2, siege traits, or partial artillery/AT entrenchment bypass. |
+| Town + dig-in | Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery now strips one dig-in level on damaging hits. | Monitor scenario pacing and whether artillery availability is enough to break static towns. |
 
 ## Recommended Next Pass
 

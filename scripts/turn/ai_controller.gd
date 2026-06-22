@@ -6,6 +6,7 @@ const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
 # moves there, attacks if a target is available.
@@ -19,6 +20,8 @@ const W_TERRAIN := 0.3
 const W_LOOKAHEAD := 1.0
 const W_SCOUT := 0.45
 const W_ARTILLERY_STANDOFF := 2.5
+const W_SUPPRESSION := 1.2
+const W_DIG_IN_BREAK := 2.0
 const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
 
@@ -63,7 +66,9 @@ func plan_for_unit(unit) -> Dictionary:
 	var atk_def: Dictionary = _get_unit_def(unit.type_id)
 	var atk_general: Dictionary = _get_general_def(unit.general_id)
 	var atk_mods: Dictionary = CombatModifiers.for_unit(unit, atk_general)
-	var move_pts: int = int(atk_def.get("move", 0)) + int(atk_mods.get("move", 0))
+	var move_pts: int = int(atk_def.get("move", 0)) + int(atk_mods.get("move", 0)) \
+		- CombatEffects.move_penalty(unit.suppression)
+	move_pts = max(0, move_pts)
 	var rng := int(atk_def.get("range", 1))
 
 	var reachable: Dictionary = Pathfinding.movement_range(
@@ -110,7 +115,8 @@ func plan_for_unit(unit) -> Dictionary:
 			best = coord
 			best_target = target
 			best_action = "attack" if target != null else "wait"
-		if overwatch_score > best_score and not atk_def.get("indirect", false):
+		if overwatch_score > best_score and not atk_def.get("indirect", false) \
+				and not CombatEffects.is_pinned(unit.suppression):
 			best_score = overwatch_score
 			best = coord
 			best_target = null
@@ -155,14 +161,18 @@ func _score_position(
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 		var def_general: Dictionary = _get_general_def(enemy.general_id)
 		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+		var atk_mods_effective: Dictionary = atk_mods_for_score.duplicate()
+		atk_mods_effective.attack -= CombatEffects.attack_penalty(unit.suppression)
 		var r: CombatResolver.Result = CombatResolver.resolve(
 			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
-			enemy.dig_in_level, atk_mods_for_score, def_mods
+			enemy.dig_in_level, atk_mods_effective, def_mods
 		)
 		var dmg_score := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg_score += _kill_bonus
 		dmg_score += _target_role_score(unit.type_id, def_def)
+		dmg_score += float(r.suppression_to_defender) * W_SUPPRESSION
+		dmg_score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg_score -= 0.6 * float(r.counter_damage)
 		attack_term = max(attack_term, dmg_score)
 	attack_term *= _attack_w
@@ -224,14 +234,18 @@ func _best_attack_value(
 		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 		var def_general: Dictionary = _get_general_def(enemy.general_id)
 		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+		var atk_mods_effective: Dictionary = atk_mods_local.duplicate()
+		atk_mods_effective.attack -= CombatEffects.attack_penalty(unit.suppression)
 		var r: CombatResolver.Result = CombatResolver.resolve(
 			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
-			enemy.dig_in_level, atk_mods_local, def_mods
+			enemy.dig_in_level, atk_mods_effective, def_mods
 		)
 		var dmg := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg += _kill_bonus
 		dmg += _target_role_score(unit.type_id, def_def)
+		dmg += float(r.suppression_to_defender) * W_SUPPRESSION
+		dmg += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg -= 0.6 * float(r.counter_damage)
 		best = max(best, dmg)
 	return best * _attack_w
@@ -246,6 +260,8 @@ func _overwatch_score(
 	if visible_enemies.is_empty():
 		return 0.0
 	if atk_def.get("indirect", false):
+		return 0.0
+	if CombatEffects.is_pinned(unit.suppression):
 		return 0.0
 	var best_snap := 0.0
 	for e in visible_enemies:
@@ -262,6 +278,7 @@ func _overwatch_score(
 		var atk_mods_ow: Dictionary = CombatModifiers.for_unit(unit, atk_general_ow)
 		var def_general_ow: Dictionary = _get_general_def(enemy.general_id)
 		var def_mods_ow: Dictionary = CombatModifiers.for_unit(enemy, def_general_ow)
+		atk_mods_ow.attack -= CombatEffects.attack_penalty(unit.suppression)
 		var r: CombatResolver.Result = CombatResolver.resolve(
 			atk_def, edef, unit.hp, enemy.hp, atk_terr, def_terr, rng,
 			0, atk_mods_ow, def_mods_ow
@@ -301,7 +318,9 @@ func _best_attack_from(
 			enemy.dig_in_level, {}, def_mods
 		)
 		var dmg: float = r.damage_to_defender + (10 if r.defender_dies else 0) \
-			+ _target_role_score(attacker_type, def_def)
+			+ _target_role_score(attacker_type, def_def) \
+			+ float(r.suppression_to_defender) * W_SUPPRESSION \
+			+ float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		if dmg > best_dmg:
 			best_dmg = dmg
 			best = enemy
@@ -365,7 +384,8 @@ func _ensure_player_reach_cached(players: Array, hex_map) -> void:
 		if _player_reach_cache.has(player):
 			continue
 		var pdef: Dictionary = _get_unit_def(player.type_id)
-		var pmove := int(pdef.get("move", 0))
+		var pmove := int(pdef.get("move", 0)) - CombatEffects.move_penalty(player.suppression)
+		pmove = max(0, pmove)
 		var reach: Dictionary = Pathfinding.movement_range(
 			player.coord, pmove, hex_map, hex_map.occupants, player.faction_id
 		)
@@ -405,6 +425,7 @@ func _lookahead_counter_damage(
 		var p_mods: Dictionary = CombatModifiers.for_unit(player, p_general)
 		var ai_general: Dictionary = _get_general_def(ai_unit.general_id)
 		var ai_mods: Dictionary = CombatModifiers.for_unit(ai_unit, ai_general)
+		p_mods.attack -= CombatEffects.attack_penalty(player.suppression)
 		var result: CombatResolver.Result = CombatResolver.resolve(
 			pdef, ai_def, player.hp, ai_unit.hp,
 			plain, ai_terrain_def, 1,

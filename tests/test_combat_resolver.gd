@@ -8,20 +8,24 @@ func _init() -> void:
 	var fail_count := 0
 
 	var infantry := {
-		"hp": 10, "attack": 4, "defense": 2, "range": 1, "vs_armor": 1, "armor": 0
+		"id": "infantry", "hp": 10, "attack": 4, "defense": 2, "range": 1, "vs_armor": 1, "armor": 0
 	}
 	var medium_tank := {
-		"hp": 16, "attack": 7, "defense": 5, "range": 1, "vs_armor": 4, "armor": 4
+		"id": "medium_tank", "hp": 16, "attack": 7, "defense": 5, "range": 1, "vs_armor": 4, "armor": 4
 	}
 	var at_gun := {
-		"hp": 6, "attack": 7, "defense": 1, "range": 1, "vs_armor": 5, "armor": 0
+		"id": "at_gun", "hp": 6, "attack": 7, "defense": 1, "range": 1, "vs_armor": 5, "armor": 0
+	}
+	var mg := {
+		"id": "mg_team", "hp": 8, "attack": 5, "defense": 2, "range": 1, "vs_armor": 1, "armor": 0
 	}
 	var artillery := {
-		"hp": 8, "attack": 8, "defense": 1, "range": 3, "vs_armor": 2, "armor": 0,
+		"id": "artillery", "hp": 8, "attack": 8, "defense": 1, "range": 3, "vs_armor": 2, "armor": 0,
 		"indirect": true
 	}
 	var plain := {"defense": 0}
 	var forest := {"defense": 2}
+	var town := {"defense": 3}
 
 	# 1) Infantry vs infantry on plain: base = max(1, 4 + 0 - 2 - 0) = 2; full HP -> 2
 	var r := CombatResolver.resolve(infantry, infantry, 10, 10, plain, plain, 1)
@@ -149,6 +153,36 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: attacker vs_armor mod expected dmg=7 got %d" % r13b.damage_to_defender)
+
+	# 14) Resolver reports suppression side effect without applying scene state.
+	var r14 := CombatResolver.resolve(mg, infantry, 8, 10, plain, plain, 1)
+	if r14.damage_to_defender > 0 and r14.suppression_to_defender == 3:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: MG suppression expected 3 got dmg=%d suppression=%d" % [
+			r14.damage_to_defender, r14.suppression_to_defender,
+		])
+
+	# 15) Indirect artillery removes one dig-in level on damaging non-lethal hits.
+	var r15 := CombatResolver.resolve(artillery, infantry, 8, 10, plain, town, 3, 2)
+	if r15.damage_to_defender > 0 and r15.suppression_to_defender == 3 and r15.defender_dig_in_loss == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: artillery effects expected suppression=3 digloss=1 got %d/%d" % [
+			r15.suppression_to_defender, r15.defender_dig_in_loss,
+		])
+
+	# 16) Lethal hits do not leave suppression on a removed defender.
+	var r16 := CombatResolver.resolve(mg, infantry, 8, 1, plain, plain, 1)
+	if r16.defender_dies and r16.suppression_to_defender == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: lethal suppression expected 0 got died=%s suppression=%d" % [
+			r16.defender_dies, r16.suppression_to_defender,
+		])
 
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

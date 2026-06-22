@@ -21,7 +21,7 @@ Aim for the viewer to walk away with:
 | **0:44 – 0:58** | **Scenario 3 — Stalingrad 1942** | Player as Soviet defender. Show city blocks (+3 defense tint). German tank attacks Guards infantry → infantry survives in town, counter-attacks. | `Role reversal: defending the city · Town terrain +3 defense` |
 | **0:58 – 1:18** | **Scenario 4 — Kursk 1943** | Wide camera over the tank duel. Tiger / Panther / T-34 trading shots. AT-gun reveals a Panzer's vs_armor weakness. One unit dies, scorch wreckage marker persists into next turn. | `Determinstic combat · vs_armor / armor mechanic · Heuristic AI` |
 | 1:18 – 1:25 | Victory screen | Victory modal pops up. "🏆 德軍裝甲軍 獲勝!" | `Victory: capture target by turn 12` |
-| 1:25 – 1:30 | Code montage / end card | Quick pan across `scripts/` tree in editor, then end card | `~2400 LOC · 20 unit tests · github.com/Fischer-Zhang/WorldWarII` |
+| 1:25 – 1:30 | Code montage / end card | Quick pan across `scripts/` tree in editor, then end card | `24 GDScript files · 76 unit tests · github.com/Fischer-Zhang/WorldWarII` |
 
 ---
 
@@ -74,7 +74,7 @@ The video doesn't need narration but the on-screen captions should make these po
    - Stalingrad → role reversal + town defense modifier
    - Kursk → armor vs anti-armor interaction
 4. **AI** — surface the fact that the AI's behaviour shifts per scenario (defensive at Sedan, aggressive at Stalingrad, holding at Kiev).
-5. **Code/tests** — end on a quick code pan + line-count + 20/20 tests passing.
+5. **Code/tests** — end on a quick code pan + `76/76` tests passing.
 
 ---
 

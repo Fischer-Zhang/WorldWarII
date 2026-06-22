@@ -13,6 +13,7 @@ The generated report covers:
 - Unit catalog values.
 - Damage and counter matrices.
 - Terrain and dig-in damage matrices.
+- Suppression / dig-in break matrix (`Sx/Dy`) for town + dig-in targets.
 - Hits-to-kill under plain and town + dig-in 3 conditions.
 - Optional baseline deltas for stat changes, damage changes, and hits-to-kill changes.
 - Scenario unit and terrain exposure.
@@ -45,6 +46,8 @@ Current rules established before large number changes:
 - Indirect attack target selection requires current visibility but ignores LOS blockers.
 - `indirect` means the unit cannot counter-attack while defending; it does not grant close-range immunity when attacking.
 - ZoC cost is part of both movement range and path reconstruction.
+- Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
+- Pinned units cannot overwatch or build dig-in, heavier suppression reduces movement/attack, and artillery strips one dig-in level on damaging indirect hits.
 
 These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.
 
@@ -81,6 +84,7 @@ Current role-shaping pass:
 - Light tanks get a scouting-position bonus when no enemy is currently visible.
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
+- Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
 
 Likely follow-up:
 

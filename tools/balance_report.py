@@ -31,11 +31,22 @@ TERRAIN_CASES = [
     ("town_dig3", "town", 3),
 ]
 
+SUPPRESSION_BY_TYPE = {
+    "infantry": 1,
+    "mg_team": 3,
+    "at_gun": 1,
+    "light_tank": 1,
+    "medium_tank": 1,
+    "artillery": 3,
+}
+
 
 @dataclass(frozen=True)
 class CombatResult:
     damage: int
     counter: int
+    suppression: int
+    dig_in_loss: int
     defender_dies: bool
     attacker_dies: bool
 
@@ -76,6 +87,21 @@ def compute_damage(
     return scaled
 
 
+def suppression_for_attack(attacker_id: str, attacker: dict[str, Any], damage: int, defender_dies: bool) -> int:
+    if defender_dies or damage <= 0:
+        return 0
+    base = SUPPRESSION_BY_TYPE.get(attacker_id, 1)
+    if bool(attacker.get("indirect", False)):
+        base = max(base, 3)
+    return base
+
+
+def dig_in_loss_for_attack(attacker: dict[str, Any], damage: int, defender_dig_in: int) -> int:
+    if damage <= 0 or defender_dig_in <= 0:
+        return 0
+    return 1 if bool(attacker.get("indirect", False)) else 0
+
+
 def resolve(
     attacker_id: str,
     defender_id: str,
@@ -108,6 +134,8 @@ def resolve(
     )
     defender_after = defender_hp - damage
     defender_dies = defender_after <= 0
+    suppression = suppression_for_attack(attacker_id, attacker, damage, defender_dies)
+    dig_in_loss = dig_in_loss_for_attack(attacker, damage, defender_dig_in)
     counter = 0
     attacker_dies = False
 
@@ -124,7 +152,7 @@ def resolve(
         )
         attacker_dies = attacker_hp - counter <= 0
 
-    return CombatResult(damage, counter, defender_dies, attacker_dies)
+    return CombatResult(damage, counter, suppression, dig_in_loss, defender_dies, attacker_dies)
 
 
 def ceil_div(a: int, b: int) -> int:
@@ -205,6 +233,26 @@ def damage_matrix(
             )
             cell = f"{result.damage}/{result.counter}" if include_counter else result.damage
             row.append(cell)
+        rows.append(row)
+    return table(headers, rows)
+
+
+def effect_matrix(units: dict[str, Any], terrains: dict[str, Any], terrain_id: str, dig_in: int) -> str:
+    unit_ids = list(units.keys())
+    headers = ["atk \\ def"] + [unit_name(unit_id, units) for unit_id in unit_ids]
+    rows: list[list[Any]] = []
+    for attacker_id in unit_ids:
+        row: list[Any] = [unit_name(attacker_id, units)]
+        for defender_id in unit_ids:
+            result = resolve(
+                attacker_id,
+                defender_id,
+                units,
+                terrains,
+                defender_terrain_id=terrain_id,
+                defender_dig_in=dig_in,
+            )
+            row.append(f"S{result.suppression}/D{result.dig_in_loss}")
         rows.append(row)
     return table(headers, rows)
 
@@ -460,8 +508,8 @@ def rule_risk_section() -> str:
         ],
         [
             "Town + dig-in",
-            "Town defense 3 plus dig-in 3 pushes most attacks to the 1-damage floor.",
-            "Consider max dig-in 2, siege traits, or partial artillery/AT entrenchment bypass.",
+            "Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery now strips one dig-in level on damaging hits.",
+            "Monitor scenario pacing and whether artillery availability is enough to break static towns.",
         ],
     ]
     return table(["risk", "why it matters", "next action"], rows)
@@ -482,6 +530,12 @@ def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
     sections.append("## Plain Damage / Counter\n\nCell format is `damage/counter`.\n\n" + damage_matrix(units, terrains, "plain", 0, True))
     for label, terrain_id, dig_in in TERRAIN_CASES[1:]:
         sections.append(f"## Damage Matrix: {label}\n\n" + damage_matrix(units, terrains, terrain_id, dig_in, False))
+    sections.append(
+        "## Suppression / Dig-In Break Matrix\n\n"
+        "Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. "
+        "MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level when it damages an entrenched target.\n\n"
+        + effect_matrix(units, terrains, "town", 2)
+    )
     sections.append("## Hits To Kill\n\n" + ttk_table(units, terrains))
     if baseline_units is not None:
         sections.append(baseline_delta_section(units, baseline_units, terrains))

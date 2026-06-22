@@ -9,7 +9,7 @@ const AT_DEF := {
 	"vision": 2, "vs_armor": 5, "armor": 0,
 }
 const ARTILLERY_DEF := {
-	"hp": 8, "attack": 7, "defense": 1, "range": 3, "move": 2,
+	"id": "artillery", "hp": 8, "attack": 7, "defense": 1, "range": 3, "move": 2,
 	"vision": 5, "vs_armor": 1, "armor": 0, "indirect": true,
 }
 const LIGHT_TANK_DEF := {
@@ -63,6 +63,7 @@ class StubUnit:
 	var xp: int = 0
 	var general_id: String = ""
 	var dig_in_level: int = 0
+	var suppression: int = 0
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
 		type_id = _type_id
 		faction_id = _faction
@@ -155,6 +156,22 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: hard lookahead expected counter penalty, normal %.2f hard %.2f counter %d" % [normal_exposed_score, hard_exposed_score, counter_damage])
+
+	# 5) Artillery should prefer breaking an entrenched target when damage is otherwise comparable.
+	battle.hex_map.terrain_overrides.clear()
+	var dug_infantry := make_unit("infantry", "allies", Vector2i(2, -1), 10)
+	var exposed_infantry := make_unit("infantry", "allies", Vector2i(1, -1), 10)
+	dug_infantry.dig_in_level = 1
+	var artillery_target = ai._best_attack_from(
+		artillery.coord, artillery.faction_id, artillery.type_id,
+		[exposed_infantry, dug_infantry], art_def,
+		{exposed_infantry.coord: true, dug_infantry.coord: true}
+	)
+	if artillery_target == dug_infantry:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: artillery should prefer entrenched target when suppression/dig-in break adds value")
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

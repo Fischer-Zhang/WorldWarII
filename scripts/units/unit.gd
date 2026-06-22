@@ -17,6 +17,7 @@ const SHORT_LABELS := {
 
 const MAX_DIG_IN := 3
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 
 # Quality colours for the general's outer ring
 const GENERAL_QUALITY_COLOR := {
@@ -38,6 +39,7 @@ var selected: bool = false
 var dying: bool = false
 var on_overwatch: bool = false
 var dig_in_level: int = 0
+var suppression: int = 0
 # Veteran XP (in-battle progression) — rank derived from xp.
 var xp: int = 0
 var rank: int = 0
@@ -68,6 +70,7 @@ func reset_for_new_turn() -> void:
 	has_moved = false
 	has_attacked = false
 	on_overwatch = false  # overwatch only persists one round
+	suppression = CombatEffects.recover_suppression(suppression)
 	queue_redraw()
 
 func move_to(new_coord: Vector2i, world_pos: Vector2, duration: float = 0.0) -> void:
@@ -86,6 +89,16 @@ func take_damage(amount: int) -> void:
 	hp = max(0, hp - amount)
 	queue_redraw()
 
+func add_suppression(amount: int) -> void:
+	suppression = CombatEffects.apply_suppression(suppression, amount)
+	if CombatEffects.is_pinned(suppression):
+		on_overwatch = false
+	queue_redraw()
+
+func reduce_dig_in(amount: int) -> void:
+	dig_in_level = max(0, dig_in_level - amount)
+	queue_redraw()
+
 func gain_xp(amount: int) -> void:
 	if amount <= 0 or not is_alive():
 		return
@@ -98,7 +111,7 @@ func gain_xp(amount: int) -> void:
 
 func effective_move(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
 	var mods: Dictionary = CombatModifiers.for_unit(self, general_def)
-	return max(0, int(unit_def.get("move", 0)) + int(mods.get("move", 0)))
+	return max(0, int(unit_def.get("move", 0)) + int(mods.get("move", 0)) - CombatEffects.move_penalty(suppression))
 
 func effective_vision(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
 	var mods: Dictionary = CombatModifiers.for_unit(self, general_def)
@@ -188,6 +201,15 @@ func _draw() -> void:
 			draw_rect(
 				Rect2(x, base_y, 6.0, 3.0),
 				Color(0.55, 0.4, 0.2, 0.95)
+			)
+
+	# Suppression: blue pips on the left, one per level.
+	if suppression > 0:
+		var base_y := -RADIUS - 2.0
+		for i in range(suppression):
+			draw_rect(
+				Rect2(-RADIUS - 7.0, base_y + i * 5.0, 4.0, 3.0),
+				Color(0.35, 0.65, 1.0, 0.95)
 			)
 
 	# Veteran rank: 1-3 gold chevrons at the top-right
