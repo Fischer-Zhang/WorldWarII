@@ -3,11 +3,10 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const HexMap := preload("res://scripts/grid/hex_map.gd")
+const Unit := preload("res://scripts/units/unit.gd")
 
 # Builds Unit instances from a scenario JSON.
 # Returns: { "units": Array[Unit], "factions": Dictionary[String, Dictionary] }
-
-const UNIT_SCRIPT := preload("res://scripts/units/unit.gd")
 
 static func build(scenario: Dictionary, hex_map: HexMap) -> Dictionary:
 	var factions := {}
@@ -32,7 +31,7 @@ static func build(scenario: Dictionary, hex_map: HexMap) -> Dictionary:
 		var coord := Vector2i(col - (row >> 1), row)
 		var unit_name := String(u.get("name", ""))
 
-		var unit: Unit = UNIT_SCRIPT.new()
+		var unit: Unit = Unit.new()
 		var color: Color = factions.get(faction_id, {}).get("color", Color.WHITE)
 		unit.configure(type_id, faction_id, color, coord, unit_name)
 		unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
