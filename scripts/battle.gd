@@ -26,6 +26,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var info_label: Label = $UI/InfoLabel
 @onready var status_label: Label = $UI/StatusLabel
 @onready var end_turn_button: Button = $UI/EndTurnButton
+@onready var overwatch_button: Button = $UI/OverwatchButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
@@ -92,6 +93,7 @@ func _ready() -> void:
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
+	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	result_panel.visible = false
 	_apply_player_objective_pulse()
 	_recompute_visibility()
@@ -157,8 +159,11 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			AudioBank.play("move")
 			hex_map.highlight_coord(dest)
 			_recompute_visibility()
+			_trigger_overwatch_on_mover(u)
 			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
+		if not u.is_alive():
+			continue
 		u.has_moved = true
 		var target: Unit = plan.get("attack")
 		if target != null and target.is_alive():
@@ -173,11 +178,26 @@ func _on_end_turn_pressed() -> void:
 		return
 	_deselect()
 	AudioBank.play("end_turn")
+	_update_dig_in_for_current_faction()
 	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
 	if winner != "":
 		_handle_game_over(winner)
 		return
 	turn_manager.end_turn()
+
+func _update_dig_in_for_current_faction() -> void:
+	# Units that ended turn without moving, attacking or going on overwatch
+	# entrench themselves: +1 defense, stacking up to MAX_DIG_IN.
+	var current := turn_manager.current_faction()
+	for u in units:
+		var unit: Unit = u
+		if not unit.is_alive() or unit.faction_id != current:
+			continue
+		if unit.has_moved or unit.has_attacked or unit.on_overwatch:
+			unit.dig_in_level = 0
+		else:
+			unit.dig_in_level = min(Unit.MAX_DIG_IN, unit.dig_in_level + 1)
+		unit.queue_redraw()
 
 func _handle_game_over(winner: String) -> void:
 	phase = Phase.GAME_OVER
@@ -231,6 +251,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				hex_map.move_unit_along_path(selected_unit, path)
 				AudioBank.play("move")
 				_recompute_visibility()
+				_trigger_overwatch_on_mover(selected_unit)
+				if not selected_unit.is_alive():
+					_deselect()
+					_update_status()
+					return
 				_enter_attack_phase()
 				return
 			_deselect()
@@ -256,7 +281,9 @@ func _select_unit(unit: Unit) -> void:
 		_enter_attack_phase()
 		return
 	var move_pts := int(DataLoader.get_unit_def(unit.type_id).get("move", 0))
-	movement_range = Pathfinding.movement_range(unit.coord, move_pts, hex_map, hex_map.occupants)
+	movement_range = Pathfinding.movement_range(
+		unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id
+	)
 	hex_map.show_movement_range(movement_range.keys())
 	hex_map.highlight_coord(unit.coord)
 	info_label.text = "選取:%s (HP %d/%d) — 點藍色 hex 移動,或再點自己原地待機" % [
@@ -270,14 +297,25 @@ func _enter_attack_phase() -> void:
 	var rng := int(atk_def.get("range", 1))
 	attack_targets = CombatResolver.attack_targets_in_range(selected_unit, rng, units)
 	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
+	# Overwatch button: enabled whenever a unit has finished its move and
+	# is making the attack-or-skip decision.
+	overwatch_button.visible = true
 	if attack_targets.is_empty():
-		selected_unit.has_attacked = true
-		info_label.text = "%s 已就位 — 周圍無敵人。回合可結束。" % selected_unit.display_name
-		_deselect()
+		info_label.text = "%s 已就位 — 點「警戒」進入警戒,或結束回合待機" % selected_unit.display_name
 	else:
-		info_label.text = "%s 可攻擊 %d 個目標 — 點目標,或點空地待機" % [
+		info_label.text = "%s 可攻擊 %d 個目標 — 點目標 / 點「警戒」/ 點空地待機" % [
 			selected_unit.display_name, attack_targets.size(),
 		]
+
+func _on_overwatch_pressed() -> void:
+	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+		return
+	selected_unit.on_overwatch = true
+	selected_unit.has_attacked = true
+	selected_unit.queue_redraw()
+	info_label.text = "%s 進入警戒 — 進入射程的敵人會被自動射擊" % selected_unit.display_name
+	overwatch_button.visible = false
+	_deselect()
 
 func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var distance := HexCoord.distance(attacker.coord, defender.coord)
@@ -286,7 +324,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var atk_def := DataLoader.get_unit_def(attacker.type_id)
 	var def_def := DataLoader.get_unit_def(defender.type_id)
 	var result := CombatResolver.resolve(
-		atk_def, def_def, attacker.hp, defender.hp, atk_terr, def_terr, distance
+		atk_def, def_def, attacker.hp, defender.hp,
+		atk_terr, def_terr, distance, defender.dig_in_level,
 	)
 
 	attacker.play_attack_animation(defender.position)
@@ -334,6 +373,7 @@ func _deselect() -> void:
 	movement_range.clear()
 	attack_targets.clear()
 	hex_map.clear_movement_range()
+	overwatch_button.visible = false
 	if phase != Phase.GAME_OVER:
 		phase = Phase.IDLE
 
@@ -371,6 +411,10 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 	]
 	if u_def.get("indirect", false):
 		lines.append("[i]間接射擊 — 不被反擊[/i]")
+	if unit.on_overwatch:
+		lines.append("[color=#ff8a6a]⌖ 警戒中[/color]")
+	if unit.dig_in_level > 0:
+		lines.append("[color=#d6a060]⛤ 構工 +%d 防禦[/color]" % unit.dig_in_level)
 	if unit.has_moved:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
 	info_stats.text = "\n".join(lines)
@@ -422,6 +466,56 @@ func _apply_player_objective_pulse() -> void:
 		var coord := Vector2i(col - (row >> 1), row)
 		hex_map.set_objective_coords([coord])
 		return
+
+func _trigger_overwatch_on_mover(mover: Unit) -> void:
+	# After `mover` arrived at its destination, check every overwatch
+	# unit. Each that sees the mover and has it in range fires once
+	# (half damage, no counter). Multiple watchers can all shoot.
+	for u in units:
+		var watcher: Unit = u
+		if not watcher.is_alive() or not watcher.on_overwatch:
+			continue
+		if watcher.faction_id == mover.faction_id:
+			continue
+		var w_vis: Dictionary = visibility_by_faction.get(watcher.faction_id, {})
+		if not w_vis.has(mover.coord):
+			continue
+		var w_def := DataLoader.get_unit_def(watcher.type_id)
+		var w_rng := int(w_def.get("range", 1))
+		if HexCoord.distance(watcher.coord, mover.coord) > w_rng:
+			continue
+		_resolve_overwatch(watcher, mover)
+		if not mover.is_alive():
+			break
+
+func _resolve_overwatch(watcher: Unit, target: Unit) -> void:
+	var w_def := DataLoader.get_unit_def(watcher.type_id)
+	var t_def := DataLoader.get_unit_def(target.type_id)
+	var w_terr := DataLoader.get_terrain_def(hex_map.terrain_at(watcher.coord))
+	var t_terr := DataLoader.get_terrain_def(hex_map.terrain_at(target.coord))
+	var d := HexCoord.distance(watcher.coord, target.coord)
+	var result := CombatResolver.resolve(
+		w_def, t_def, watcher.hp, target.hp,
+		w_terr, t_terr, d, target.dig_in_level,
+	)
+	# Overwatch: half damage rounded up, no counter (snap shot)
+	var dmg: int = int(ceil(float(result.damage_to_defender) / 2.0))
+	watcher.play_attack_animation(target.position)
+	AudioBank.play("attack")
+	target.take_damage(dmg)
+	DamagePopup.spawn(hex_map, target.position, dmg, Color(1.0, 0.85, 0.4))
+	watcher.on_overwatch = false
+	watcher.queue_redraw()
+	if not target.is_alive():
+		hex_map.unregister_unit(target)
+		hex_map.place_wreckage(target.coord, target.faction_color)
+		target.play_death_animation()
+		AudioBank.play("death")
+		units = units.filter(func(u): return u.is_alive())
+		_recompute_visibility()
+	info_label.text = "⌖ %s 警戒射擊 %s → -%d" % [
+		watcher.display_name, target.display_name, dmg,
+	]
 
 func _show_turn_banner(text: String) -> void:
 	turn_banner.text = text

@@ -54,7 +54,7 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 	var rng := int(atk_def.get("range", 1))
 
 	var reachable: Dictionary = Pathfinding.movement_range(
-		unit.coord, move_pts, hex_map, hex_map.occupants
+		unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id
 	)
 	# Include staying in place as a candidate
 	var candidates: Array = [unit.coord]
@@ -188,7 +188,7 @@ func _ensure_player_reach_cached(players: Array, hex_map) -> void:
 		var pdef := DataLoader.get_unit_def(player.type_id)
 		var pmove := int(pdef.get("move", 0))
 		var reach: Dictionary = Pathfinding.movement_range(
-			player.coord, pmove, hex_map, hex_map.occupants
+			player.coord, pmove, hex_map, hex_map.occupants, player.faction_id
 		)
 		# Player can also fire from their current hex without moving
 		reach[player.coord] = 0

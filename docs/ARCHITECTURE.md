@@ -155,6 +155,56 @@ Behaviour you'll notice on Hard:
 
 ---
 
+## Tactical mechanics — ZoC, Overwatch, Dig In
+
+Three classic hex-wargame mechanics layered onto the existing systems.
+
+### Zone of Control (ZoC)
+
+Every unit projects ZoC onto its 6 adjacent hexes. Entering a ZoC hex costs `Pathfinding.ZOC_PENALTY = 2` extra movement. The effect:
+
+- Slipping past an enemy is *possible* but expensive (often more than a single turn's movement budget).
+- A defender doesn't have to physically chase — placement alone narrows the attacker's options.
+
+Implementation lives entirely inside [scripts/grid/pathfinding.gd](../scripts/grid/pathfinding.gd) — `movement_range` takes an optional `mover_faction` parameter and, for each candidate hex `n`, adds the penalty if any neighbour of `n` is occupied by a different-faction unit. The cost stacks with terrain (forest + ZoC = 4 to enter). Callsites pass `unit.faction_id`; tests pass `""` to opt out, preserving the original behaviour.
+
+### Overwatch
+
+A unit that finishes its turn on overwatch (clicking the `進入警戒 (O)` button after its move) takes a *snap shot* at any enemy that ends a movement inside its sight + attack range during the rest of the round. Rules:
+
+- Half damage rounded up, no counter-attack — it's a reactive shot, not a deliberate engagement.
+- Watcher must currently see the mover (uses the per-faction `visibility_by_faction` set).
+- Each watcher fires once per setup; the flag is cleared after firing.
+- The flag also clears at the start of the watcher's own next turn (lost focus).
+- Multiple watchers can all fire on the same mover, in faction-roster order.
+
+Triggered by [scripts/battle.gd](../scripts/battle.gd)'s `_trigger_overwatch_on_mover(mover)`, called after every successful move (player or AI). Visual marker: a red gunsight triangle above the unit; gold damage popup colours mark snap-shot hits versus the red of a normal attack.
+
+### Dig In
+
+A unit that ends its turn with neither move, attack, nor overwatch active gains `dig_in_level += 1` (capped at `Unit.MAX_DIG_IN = 3`). The level is added to the unit's defense in any incoming attack via the new `defender_dig_in` parameter on `CombatResolver.resolve`. Counter-attacks ignore the attacker's dig-in (they just acted, so they're not entrenched).
+
+Any move, attack or overwatch resets the level to zero — entrenchment is a binary choice between standing fast and committing to action.
+
+Visual marker: brown chevrons below the unit's HP bar, one per level. The info-panel stats line shows `⛤ 構工 +N 防禦` when active.
+
+### Combined behaviour
+
+The three mechanics interact in pleasant ways:
+
+- ZoC forces the player to invest movement to bypass an enemy — by then, that enemy can react on its turn.
+- Overwatch lets a static unit pin a corridor without spending its attack.
+- Dig In rewards holding ground in cover; a unit in town (+3 defense) with dig-in 3 (+3 defense) is effectively unkillable to anything but armor with full vs_armor bonus.
+
+Together they recover most of the strategic-depth gap between a "minimal tactical wargame" and something like Panzer General.
+
+### Scope notes
+
+- The AI doesn't *intentionally* use Overwatch (no scoring for it) but does dig in implicitly when it has nothing to chase. A future round can teach the AI to overwatch chokepoints.
+- Overwatch fires at the mover's *destination*, not along its path. A unit can still rush through an overwatch range if its destination is out of range. ZoC's +2 cost is the primary counter to slip-through.
+
+---
+
 ## Scenarios — data, not code
 
 [data/scenarios/*.json](../data/scenarios/). One file per battle. Shape:
@@ -313,6 +363,8 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded | 6 |
 | `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect, OOR | 7 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| **Total** | | **27 ✓** |
+| `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out | +3 |
+| `test_combat_resolver` (cont.) | Dig-in defense bonus + counter-no-dig-in | +2 |
+| **Total** | | **32 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

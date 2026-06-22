@@ -3,6 +3,8 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 
+const ZOC_PENALTY := 2  # extra cost to enter a hex adjacent to an enemy unit
+
 # Dijkstra-style BFS for hex movement.
 # Returns `coord -> cumulative_cost` for every hex reachable within `move_points`,
 # honoring per-terrain move_cost and blocking on occupied hexes (except the start).
@@ -14,6 +16,7 @@ static func movement_range(
 	move_points: int,
 	hex_map,  # duck-typed: needs terrain_at(coord) and move_cost_at(coord)
 	occupied: Dictionary,
+	mover_faction: String = "",  # required for ZoC; "" disables ZoC
 ) -> Dictionary:
 	var cost_to: Dictionary = {start: 0}
 	var frontier: Array = [start]  # poor-man's priority via re-relaxation; map sizes are small
@@ -27,6 +30,8 @@ static func movement_range(
 			if occupied.has(n) and occupied[n] != null:
 				continue  # blocked by another unit
 			var step_cost: int = hex_map.move_cost_at(n)
+			if mover_faction != "" and _enters_enemy_zoc(n, occupied, mover_faction):
+				step_cost += ZOC_PENALTY
 			var new_cost := current_cost + step_cost
 			if new_cost > move_points:
 				continue
@@ -36,6 +41,13 @@ static func movement_range(
 
 	cost_to.erase(start)  # caller does not need to know it can "stay"
 	return cost_to
+
+static func _enters_enemy_zoc(hex: Vector2i, occupied: Dictionary, mover_faction: String) -> bool:
+	for nb in HexCoord.neighbors(hex):
+		var u = occupied.get(nb)
+		if u != null and u.faction_id != mover_faction:
+			return true
+	return false
 
 static func reconstruct_path(
 	start: Vector2i,

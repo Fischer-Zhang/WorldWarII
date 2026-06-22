@@ -80,5 +80,22 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: out-of-range counter — counter=%d" % r7.counter_damage)
 
+	# 8) Dig-in: defender_dig_in=2 raises effective defense → base 2 → 2-2 = 0 → floor 1
+	var r8 := CombatResolver.resolve(infantry, infantry, 10, 10, plain, plain, 1, 2)
+	if r8.damage_to_defender == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: dig-in 2 — dmg=%d" % r8.damage_to_defender)
+
+	# 9) Dig-in does NOT help the attacker's counter (attacker just moved/attacked)
+	# Counter half of base(2) = 1; dig-in on attacker is 0 by design.
+	var r9 := CombatResolver.resolve(infantry, infantry, 10, 10, plain, plain, 1, 0)
+	if r9.counter_damage == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: counter without dig-in — counter=%d" % r9.counter_damage)
+
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

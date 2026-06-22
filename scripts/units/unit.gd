@@ -15,6 +15,8 @@ const SHORT_LABELS := {
 	"artillery": "砲",
 }
 
+const MAX_DIG_IN := 3
+
 var type_id: String = ""
 var display_name: String = ""
 var faction_id: String = ""
@@ -26,6 +28,8 @@ var has_moved: bool = false
 var has_attacked: bool = false
 var selected: bool = false
 var dying: bool = false
+var on_overwatch: bool = false
+var dig_in_level: int = 0
 
 signal moved(new_coord: Vector2i)
 
@@ -49,6 +53,7 @@ func is_done_for_turn() -> bool:
 func reset_for_new_turn() -> void:
 	has_moved = false
 	has_attacked = false
+	on_overwatch = false  # overwatch only persists one round
 	queue_redraw()
 
 func move_to(new_coord: Vector2i, world_pos: Vector2, duration: float = 0.0) -> void:
@@ -127,6 +132,25 @@ func _draw() -> void:
 			Color(0.15, 0.15, 0.15))
 		draw_rect(Rect2(-HP_BAR_WIDTH / 2.0, bar_y, HP_BAR_WIDTH * pct, HP_BAR_HEIGHT),
 			_hp_color(pct))
+
+	# Overwatch: red gunsight triangle above the unit
+	if on_overwatch:
+		var pts: PackedVector2Array = [
+			Vector2(-7, -RADIUS - 10),
+			Vector2(7, -RADIUS - 10),
+			Vector2(0, -RADIUS - 20),
+		]
+		draw_colored_polygon(pts, Color(1.0, 0.35, 0.3, 0.95))
+
+	# Dig in: brown chevrons below the HP bar, one per level (max 3)
+	if dig_in_level > 0:
+		var base_y := RADIUS + (14.0 if hp < max_hp else 8.0)
+		for i in range(dig_in_level):
+			var x := -10.0 + i * 8.0
+			draw_rect(
+				Rect2(x, base_y, 6.0, 3.0),
+				Color(0.55, 0.4, 0.2, 0.95)
+			)
 
 func _hp_color(pct: float) -> Color:
 	if pct > 0.6:

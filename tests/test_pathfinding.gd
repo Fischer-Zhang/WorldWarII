@@ -75,5 +75,57 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: off-map filtering broken; got ", range4)
 
+	# ZoC tests use a small object that mimics a Unit for occupancy.
+	# `faction_id` is the only field movement_range looks at.
+	var enemy_unit := RefCounted.new()
+	enemy_unit.set_script(GDScript.new())
+	# Simpler: use a Dictionary-like duck — Pathfinding just reads `.faction_id`.
+	# Make a tiny class.
+	var enemy := EnemyStub.new("axis")
+	var friendly := EnemyStub.new("allies")
+
+	# 7) ZoC: hex adjacent to enemy costs ZOC_PENALTY extra
+	stub.tiles[Vector2i(1, 0)] = "plain"  # reset
+	# place enemy at (1, 1); (1, 0) is its neighbor and so is (0, 1).
+	var occ_zoc := {Vector2i(1, 1): enemy}
+	var range_zoc := Pathfinding.movement_range(
+		Vector2i(0, 0), 1, stub, occ_zoc, "allies"
+	)
+	# (1, 0) is adjacent to (1, 1) enemy → costs 1 + 2 = 3, exceeds budget 1 → not in range
+	if not range_zoc.has(Vector2i(1, 0)):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: ZoC should block (1,0) with 1 move pt; got cost ",
+			range_zoc[Vector2i(1, 0)])
+
+	# 8) Without ZoC (no faction passed), same hex IS reachable
+	var range_no_zoc := Pathfinding.movement_range(
+		Vector2i(0, 0), 1, stub, occ_zoc
+	)
+	if range_no_zoc.has(Vector2i(1, 0)) and range_no_zoc[Vector2i(1, 0)] == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: without faction param, ZoC must not apply; got ",
+			range_no_zoc.get(Vector2i(1, 0), "missing"))
+
+	# 9) Same-faction adjacent does NOT impose ZoC
+	var occ_friend := {Vector2i(1, 1): friendly}
+	var range_friend := Pathfinding.movement_range(
+		Vector2i(0, 0), 1, stub, occ_friend, "allies"
+	)
+	if range_friend.has(Vector2i(1, 0)) and range_friend[Vector2i(1, 0)] == 1:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: friendly adjacency must not apply ZoC; got ",
+			range_friend.get(Vector2i(1, 0), "missing"))
+
 	print("Pathfinding tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+class EnemyStub:
+	var faction_id: String
+	func _init(fid: String) -> void:
+		faction_id = fid
