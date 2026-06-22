@@ -44,6 +44,9 @@ Target identities:
 
 ## Workflow 4: Scenario Pass
 
+Use `python3 tools/scenario_balance_report.py` to regenerate
+`docs/progress/scenario_balance_report.md`.
+
 Evaluate scenarios in this order:
 
 1. `03_stalingrad_1942`: town density and dig-in durability.
@@ -56,8 +59,12 @@ Evaluate scenarios in this order:
 
 After rule or stat changes, inspect whether AI scoring still understands the new roles.
 
-Likely follow-ups:
+Current role-shaping pass:
 
-- Add value for vision/scouting if light tanks become recon units.
-- Penalize AT guns for chasing soft targets if their role becomes static anti-armor.
+- Light tanks get a scouting-position bonus when no enemy is currently visible.
+- AT guns prefer armored targets over soft targets when damage is otherwise close.
+- Artillery avoids close positions near known enemies.
+
+Likely follow-up:
+
 - Revisit overwatch scoring if MG teams become the premier reaction-fire unit.

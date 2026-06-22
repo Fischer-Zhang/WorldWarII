@@ -17,6 +17,10 @@ const Unit := preload("res://scripts/units/unit.gd")
 const W_OBJECTIVE := 1.0
 const W_TERRAIN := 0.3
 const W_LOOKAHEAD := 1.0
+const W_SCOUT := 0.45
+const W_ARTILLERY_STANDOFF := 2.5
+const AT_ARMOR_TARGET_BONUS := 2.0
+const AT_SOFT_TARGET_PENALTY := 1.0
 
 const DIFFICULTY_PROFILE := {
 	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false},
@@ -82,7 +86,7 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 	for cand in candidates:
 		var coord: Vector2i = cand
 		var base_score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, visible_hexes)
-		var target := _best_attack_from(coord, unit.faction_id, visible_enemies, atk_def, visible_hexes)
+		var target := _best_attack_from(coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes)
 		# Attack score is implicit in base_score (already includes attack_term).
 		# Overwatch is an alternative: subtract the attack contribution (not
 		# attacking this turn) and add the overwatch score.
@@ -143,6 +147,7 @@ func _score_position(
 		var dmg_score := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg_score += _kill_bonus
+		dmg_score += _target_role_score(unit.type_id, def_def)
 		dmg_score -= 0.6 * float(r.counter_damage)
 		attack_term = max(attack_term, dmg_score)
 	attack_term *= _attack_w
@@ -161,6 +166,7 @@ func _score_position(
 	# Terrain defense bonus
 	var terr_def := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
 	var terrain_term := float(terr_def.get("defense", 0)) * W_TERRAIN
+	var role_term := _role_position_score(unit, pos, known, visible_enemies, atk_def)
 
 	# 1-ply lookahead: discount by worst counter the player could deliver
 	# *after* we land on this hex. Only enabled on Hard difficulty.
@@ -169,7 +175,7 @@ func _score_position(
 		var counter_dmg: int = _lookahead_counter_damage(unit, pos, visible_enemies, hex_map, atk_def)
 		lookahead_term = -float(counter_dmg) * W_LOOKAHEAD
 
-	var total := dist_term + attack_term + exposure_term + terrain_term + lookahead_term
+	var total := dist_term + attack_term + exposure_term + terrain_term + role_term + lookahead_term
 	return _apply_personality(total, attack_term, exposure_term)
 
 func _apply_personality(total: float, attack_term: float, exposure_term: float) -> float:
@@ -203,6 +209,7 @@ func _best_attack_value(
 		var dmg := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg += _kill_bonus
+		dmg += _target_role_score(unit.type_id, def_def)
 		dmg -= 0.6 * float(r.counter_damage)
 		best = max(best, dmg)
 	return best * _attack_w
@@ -243,13 +250,14 @@ func _overwatch_score(
 func _best_attack_from(
 	pos: Vector2i,
 	attacker_faction: String,
+	attacker_type: String,
 	enemies: Array,
 	atk_def: Dictionary,
 	visible_hexes: Dictionary,
 ) -> Unit:
 	var hex_map = battle.hex_map
 	var best: Unit = null
-	var best_dmg := 0
+	var best_dmg := 0.0
 	for e in enemies:
 		var enemy: Unit = e
 		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, hex_map, visible_hexes):
@@ -260,11 +268,62 @@ func _best_attack_from(
 		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
 		var atk_hp := int(atk_def.get("hp", 1))
 		var r := CombatResolver.resolve(atk_def, def_def, atk_hp, enemy.hp, atk_terr, def_terr, d)
-		var dmg := r.damage_to_defender + (10 if r.defender_dies else 0)
+		var dmg := r.damage_to_defender + (10 if r.defender_dies else 0) \
+			+ _target_role_score(attacker_type, def_def)
 		if dmg > best_dmg:
 			best_dmg = dmg
 			best = enemy
 	return best
+
+func _target_role_score(attacker_type: String, defender_def: Dictionary) -> float:
+	if attacker_type == "at_gun":
+		if int(defender_def.get("armor", 0)) > 0:
+			return AT_ARMOR_TARGET_BONUS
+		return -AT_SOFT_TARGET_PENALTY
+	return 0.0
+
+func _role_position_score(
+	unit: Unit,
+	pos: Vector2i,
+	known: Array,
+	visible_enemies: Array,
+	atk_def: Dictionary,
+) -> float:
+	var score := 0.0
+	if unit.type_id == "light_tank":
+		score += _scout_position_score(pos, known, visible_enemies, atk_def)
+	if atk_def.get("indirect", false):
+		score += _artillery_standoff_score(pos, known)
+	return score
+
+func _scout_position_score(
+	pos: Vector2i,
+	known: Array,
+	visible_enemies: Array,
+	atk_def: Dictionary,
+) -> float:
+	if int(atk_def.get("vision", 0)) < 5 or int(atk_def.get("move", 0)) < 5:
+		return 0.0
+	if not visible_enemies.is_empty():
+		return 0.0
+	var nearest_known := 9999
+	for k in known:
+		nearest_known = min(nearest_known, HexCoord.distance(pos, k["coord"]))
+	if nearest_known == 9999:
+		return 0.0
+	var ideal_distance := 3
+	var distance_error: int = abs(nearest_known - ideal_distance)
+	return max(0.0, 3.0 - float(distance_error)) * W_SCOUT
+
+func _artillery_standoff_score(pos: Vector2i, known: Array) -> float:
+	var penalty := 0.0
+	for k in known:
+		var d := HexCoord.distance(pos, k["coord"])
+		if d <= 1:
+			penalty -= W_ARTILLERY_STANDOFF * 2.0
+		elif d == 2:
+			penalty -= W_ARTILLERY_STANDOFF
+	return penalty
 
 # ---------- 1-ply lookahead ----------
 

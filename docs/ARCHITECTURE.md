@@ -119,10 +119,17 @@ For each AI unit on its faction's turn:
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
          - exposure_to_enemy_threat      × 0.5   (don't walk into kill zones)
          + terrain.defense               × 0.3   (use cover)
+         + role_score                            (scout / AT / artillery shaping)
    ```
 3. Pick the highest-scoring destination, move there, attack best target if in range.
 
 The "best target from here" reuses the same `CombatResolver.resolve` the player's hits go through — so the AI's evaluation matches the actual damage that would happen.
+
+Role shaping keeps specialist units from collapsing back into raw damage math:
+
+- Light tanks with high move + vision get a small scouting bonus when they close toward last-known enemy positions without current contact.
+- AT guns get a target bonus against armored units and a small penalty against soft targets.
+- Indirect-fire units are penalized for candidate positions within 1-2 hexes of known enemies, encouraging standoff behavior.
 
 **Personality weights** modulate the final score:
 
