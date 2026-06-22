@@ -45,9 +45,18 @@ var xp: int = 0
 var rank: int = 0
 # Optional attached general (data lookup via DataLoader.get_general_def).
 var general_id: String = ""
+# Temporary effects from general's active skill. Each entry:
+#   { skill_id, expires_at_turn, source_general, self_mods, aura_mods, no_counter }
+# `expires_at_turn` is the absolute TurnManager turn_number AFTER which the
+# effect is removed (during this unit's faction's next turn_started tick).
+var active_effects: Array = []
+# Per-skill cooldown bookkeeping. cooldowns[skill_id] = turn_number when skill
+# is usable again. Absent / past current turn = ready.
+var skill_cooldowns: Dictionary = {}
 
 signal moved(new_coord: Vector2i)
 signal ranked_up(new_rank: int)
+signal skill_used(skill_id: String)
 
 func configure(_type_id: String, _faction_id: String, _faction_color: Color, _coord: Vector2i, _name: String = "") -> void:
 	type_id = _type_id
@@ -125,6 +134,69 @@ func effective_move(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
 func effective_vision(unit_def: Dictionary, general_def: Dictionary = {}) -> int:
 	var mods: Dictionary = CombatModifiers.for_unit(self, general_def)
 	return max(0, int(unit_def.get("vision", 3)) + int(mods.get("vision", 0)))
+
+func skill_ready(skill_id: String, current_turn: int) -> bool:
+	# Returns true if this skill has no cooldown active.
+	return int(skill_cooldowns.get(skill_id, 0)) <= current_turn
+
+func use_skill(skill_def: Dictionary, current_turn: int) -> void:
+	# Adds the skill's effect to active_effects and starts the cooldown.
+	# Caller is responsible for any aura propagation (we just track self).
+	if skill_def.is_empty():
+		return
+	var duration: int = int(skill_def.get("duration", 1))
+	var effect: Dictionary = {
+		"skill_id": String(skill_def.get("id", "")),
+		"expires_at_turn": current_turn + duration,
+		"self_mods": skill_def.get("self_mods", {}),
+		"aura_mods": skill_def.get("aura_mods", {}),
+		"no_counter": bool(skill_def.get("no_counter", false)),
+	}
+	active_effects.append(effect)
+	var cd: int = int(skill_def.get("cooldown", 0))
+	skill_cooldowns[String(skill_def.get("id", ""))] = current_turn + cd
+	skill_used.emit(String(skill_def.get("id", "")))
+	queue_redraw()
+
+func receive_aura(effect: Dictionary) -> void:
+	# A separate copy of an ally's skill so it expires independently.
+	active_effects.append(effect.duplicate(true))
+	queue_redraw()
+
+func tick_active_effects(current_turn: int) -> void:
+	# Drop expired effects at the start of the unit's faction's turn.
+	var keep: Array = []
+	for e in active_effects:
+		if int(e.get("expires_at_turn", 0)) >= current_turn:
+			keep.append(e)
+	active_effects = keep
+	queue_redraw()
+
+func has_no_counter_active() -> bool:
+	for e in active_effects:
+		if bool(e.get("no_counter", false)):
+			return true
+	return false
+
+func aggregated_self_mods() -> Dictionary:
+	# Sum of all active effect self_mods. Used by CombatModifiers.
+	var out := {"attack": 0, "defense": 0, "vs_armor": 0, "move": 0, "vision": 0}
+	for e in active_effects:
+		var m: Dictionary = e.get("self_mods", {})
+		for k in out.keys():
+			out[k] += int(m.get(k, 0))
+		var a: Dictionary = e.get("aura_mods", {})
+		# aura_mods that arrived via receive_aura also apply to this unit
+		# (the "self" of the aura recipient). Source unit doesn't get its
+		# own aura — it must use self_mods to also buff itself.
+		# We distinguish by tracking who owns the effect, but for simplicity
+		# both keys add to the recipient's own mods.
+		# To avoid double-counting on the source, only effects without a
+		# `source_of_aura` flag contribute via aura_mods.
+		if not e.get("source_of_aura", false):
+			for k in out.keys():
+				out[k] += int(a.get(k, 0))
+	return out
 
 func set_selected(s: bool) -> void:
 	selected = s

@@ -33,6 +33,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var end_turn_button: Button = $UI/EndTurnButton
 @onready var overwatch_button: Button = $UI/OverwatchButton
 @onready var rally_button: Button = $UI/RallyButton
+@onready var skill_button: Button = $UI/SkillButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
@@ -104,6 +105,7 @@ func _ready() -> void:
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	rally_button.pressed.connect(_on_rally_pressed)
+	skill_button.pressed.connect(_on_skill_pressed)
 	result_panel.visible = false
 	_apply_player_objective_pulse()
 	_recompute_visibility()
@@ -121,6 +123,8 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	for u in units:
 		if u.faction_id == faction_id and u.is_alive():
 			u.reset_for_new_turn()
+			# Drop expired active effects (general's skill buffs).
+			u.tick_active_effects(turn_number)
 	phase = Phase.IDLE
 	_deselect()
 	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
@@ -407,6 +411,8 @@ func _enter_attack_phase() -> void:
 	# is making the attack-or-skip decision.
 	overwatch_button.visible = not CombatEffects.is_pinned(selected_unit.suppression)
 	rally_button.visible = selected_unit.suppression > 0
+	# Skill button: only if attached general has a skill and cooldown is ready.
+	_refresh_skill_button(selected_unit)
 	if attack_targets.is_empty():
 		if CombatEffects.is_pinned(selected_unit.suppression):
 			info_label.text = "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name
@@ -425,6 +431,74 @@ func _enter_attack_phase() -> void:
 		info_label.text = "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
 		]
+
+func _refresh_skill_button(unit: Unit) -> void:
+	if unit == null or unit.general_id == "":
+		skill_button.visible = false
+		return
+	var general_def := DataLoader.get_general_def(unit.general_id)
+	var skill: Dictionary = general_def.get("skill", {})
+	if skill.is_empty():
+		skill_button.visible = false
+		return
+	var skill_id := String(skill.get("id", ""))
+	var ready: bool = unit.skill_ready(skill_id, turn_manager.turn_number)
+	if ready:
+		skill_button.text = "技能: %s" % String(skill.get("name_zh", skill_id))
+		skill_button.disabled = false
+		skill_button.tooltip_text = String(skill.get("description_zh", ""))
+		skill_button.visible = true
+	else:
+		var cd_left: int = int(unit.skill_cooldowns.get(skill_id, 0)) - turn_manager.turn_number
+		skill_button.text = "技能 (CD %d)" % max(0, cd_left)
+		skill_button.disabled = true
+		skill_button.visible = true
+
+func _on_skill_pressed() -> void:
+	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+		return
+	if selected_unit.general_id == "":
+		return
+	var general_def := DataLoader.get_general_def(selected_unit.general_id)
+	var skill: Dictionary = general_def.get("skill", {})
+	if skill.is_empty():
+		return
+	var skill_id := String(skill.get("id", ""))
+	if not selected_unit.skill_ready(skill_id, turn_manager.turn_number):
+		return
+	# Apply to self (always)
+	selected_unit.use_skill(skill, turn_manager.turn_number)
+	# If skill has aura_mods, copy the effect to all adjacent same-faction units.
+	# Mark the source's own effect with source_of_aura=true so the aggregation
+	# helper doesn't double-count it.
+	var aura: Dictionary = skill.get("aura_mods", {})
+	if not aura.is_empty():
+		# Tag the source's effect entry
+		if not selected_unit.active_effects.is_empty():
+			selected_unit.active_effects[-1]["source_of_aura"] = true
+		var duration: int = int(skill.get("duration", 1))
+		var aura_effect := {
+			"skill_id": skill_id,
+			"expires_at_turn": turn_manager.turn_number + duration,
+			"self_mods": {},
+			"aura_mods": aura,
+			"no_counter": false,
+		}
+		for nb in HexCoord.neighbors(selected_unit.coord):
+			var u := hex_map.unit_at(nb)
+			if u != null and u.is_alive() and u.faction_id == selected_unit.faction_id:
+				u.receive_aura(aura_effect)
+	info_label.text = "★ %s 發動「%s」" % [
+		selected_unit.display_name,
+		String(skill.get("name_zh", skill_id)),
+	]
+	AudioBank.play("select")
+	skill_button.visible = false
+	# Skill counts as the unit's attack action — end its turn.
+	selected_unit.has_attacked = true
+	selected_unit.queue_redraw()
+	_deselect()
+	_update_status()
 
 func _on_overwatch_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
@@ -469,10 +543,11 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var atk_mods: Dictionary = CombatModifiers.for_unit(attacker, atk_general)
 	var def_mods: Dictionary = CombatModifiers.for_unit(defender, def_general)
 	atk_mods.attack -= CombatEffects.attack_penalty(attacker.suppression)
+	var suppress_counter: bool = attacker.has_no_counter_active()
 	var result := CombatResolver.resolve(
 		atk_def, def_def, attacker.hp, defender.hp,
 		atk_terr, def_terr, distance, defender.dig_in_level,
-		atk_mods, def_mods,
+		atk_mods, def_mods, suppress_counter,
 	)
 	var spotter_bonus := _spotter_suppression_bonus(
 		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
@@ -558,10 +633,11 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 	var atk_mods: Dictionary = CombatModifiers.for_unit(attacker, atk_general)
 	var def_mods: Dictionary = CombatModifiers.for_unit(defender, def_general)
 	atk_mods.attack -= CombatEffects.attack_penalty(attacker.suppression)
+	var suppress_counter: bool = attacker.has_no_counter_active()
 	var result := CombatResolver.resolve(
 		atk_def, def_def, attacker.hp, defender.hp,
 		atk_terr, def_terr, distance, defender.dig_in_level,
-		atk_mods, def_mods,
+		atk_mods, def_mods, suppress_counter,
 	)
 	var spotter_bonus := _spotter_suppression_bonus(
 		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
@@ -621,6 +697,8 @@ func _deselect() -> void:
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
 	rally_button.visible = false
+	if skill_button != null:
+		skill_button.visible = false
 	if damage_preview_panel != null:
 		damage_preview_panel.visible = false
 	if phase != Phase.GAME_OVER:

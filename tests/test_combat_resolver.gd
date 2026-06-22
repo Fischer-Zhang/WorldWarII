@@ -184,5 +184,19 @@ func _init() -> void:
 			r16.defender_dies, r16.suppression_to_defender,
 		])
 
+	# 17) suppress_counter=true skips the counter even when defender survives.
+	#     Used by general active skills like Rommel's 閃電進攻.
+	var r17 := CombatResolver.resolve(
+		infantry, infantry, 10, 10, plain, plain, 1,
+		0, {}, {}, true
+	)
+	if r17.damage_to_defender == 2 and r17.counter_damage == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: suppress_counter expected dmg=2 counter=0 got dmg=%d counter=%d" % [
+			r17.damage_to_defender, r17.counter_damage
+		])
+
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

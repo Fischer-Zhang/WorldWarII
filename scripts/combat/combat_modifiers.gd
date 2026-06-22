@@ -52,4 +52,10 @@ static func for_unit(unit, general_def: Dictionary = {}) -> Dictionary:
 			mods.vs_armor += int(general_def.get("vs_armor_bonus", 0))
 			mods.move += int(general_def.get("move_bonus", 0))
 			mods.vision += int(general_def.get("vision_bonus", 0))
+	# Active skill effects layered on top of base + rank + general
+	# (transient buffs from skills like Rommel's 閃電進攻).
+	if unit.get("active_effects") != null:
+		var skill_mods: Dictionary = unit.aggregated_self_mods()
+		for k in mods.keys():
+			mods[k] += int(skill_mods.get(k, 0))
 	return mods

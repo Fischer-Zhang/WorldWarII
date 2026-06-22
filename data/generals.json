@@ -7,7 +7,16 @@
     "applies_to": ["medium_tank", "light_tank"],
     "attack_bonus": 2,
     "defense_bonus": 1,
-    "move_bonus": 1
+    "move_bonus": 1,
+    "skill": {
+      "id": "blitz",
+      "name_zh": "閃電進攻",
+      "description_zh": "本回合 +2 移動,攻擊不被反擊",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"move": 2},
+      "no_counter": true
+    }
   },
   "guderian": {
     "name_zh": "古德林",
@@ -17,7 +26,15 @@
     "applies_to": ["medium_tank", "light_tank", "infantry"],
     "attack_bonus": 1,
     "defense_bonus": 0,
-    "move_bonus": 2
+    "move_bonus": 2,
+    "skill": {
+      "id": "panzer_breakthrough",
+      "name_zh": "裝甲突破",
+      "description_zh": "本回合 +3 移動 +1 攻擊",
+      "cooldown": 5,
+      "duration": 1,
+      "self_mods": {"move": 3, "attack": 1}
+    }
   },
   "manstein": {
     "name_zh": "曼施坦因",
@@ -27,7 +44,15 @@
     "applies_to": ["infantry", "mg_team", "at_gun"],
     "attack_bonus": 1,
     "defense_bonus": 2,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "reserve_call",
+      "name_zh": "預備隊調動",
+      "description_zh": "本回合 +2 移動 +2 攻擊",
+      "cooldown": 5,
+      "duration": 1,
+      "self_mods": {"move": 2, "attack": 2}
+    }
   },
   "patton": {
     "name_zh": "巴頓",
@@ -37,7 +62,15 @@
     "applies_to": ["medium_tank", "light_tank"],
     "attack_bonus": 2,
     "defense_bonus": 0,
-    "move_bonus": 1
+    "move_bonus": 1,
+    "skill": {
+      "id": "push",
+      "name_zh": "頑強推進",
+      "description_zh": "本回合 +3 攻擊 +1 移動",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"attack": 3, "move": 1}
+    }
   },
   "bradley": {
     "name_zh": "布萊德利",
@@ -47,7 +80,15 @@
     "applies_to": ["infantry", "mg_team", "at_gun"],
     "attack_bonus": 1,
     "defense_bonus": 1,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "combined_arms",
+      "name_zh": "步兵協同",
+      "description_zh": "1 回合內,相鄰我方 +1 攻 +1 防",
+      "cooldown": 5,
+      "duration": 1,
+      "aura_mods": {"attack": 1, "defense": 1}
+    }
   },
   "zhukov": {
     "name_zh": "朱可夫",
@@ -57,7 +98,15 @@
     "applies_to": ["infantry", "mg_team", "at_gun", "artillery"],
     "attack_bonus": 2,
     "defense_bonus": 1,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "iron_wall",
+      "name_zh": "鋼鐵之牆",
+      "description_zh": "2 回合內,相鄰我方 +3 防禦",
+      "cooldown": 6,
+      "duration": 2,
+      "aura_mods": {"defense": 3}
+    }
   },
   "chuikov": {
     "name_zh": "崔可夫",
@@ -67,7 +116,15 @@
     "applies_to": ["infantry", "mg_team"],
     "attack_bonus": 0,
     "defense_bonus": 3,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "urban_command",
+      "name_zh": "巷戰指揮",
+      "description_zh": "1 回合內,相鄰我方 +2 攻擊 +1 防禦",
+      "cooldown": 5,
+      "duration": 1,
+      "aura_mods": {"attack": 2, "defense": 1}
+    }
   },
   "konev": {
     "name_zh": "科涅夫",
@@ -77,7 +134,15 @@
     "applies_to": ["medium_tank", "light_tank"],
     "attack_bonus": 1,
     "defense_bonus": 1,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "counter_strike",
+      "name_zh": "戰術反擊",
+      "description_zh": "本回合 +2 攻擊 +2 反裝甲",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"attack": 2, "vs_armor": 2}
+    }
   },
   "de_gaulle": {
     "name_zh": "戴高樂",
@@ -87,7 +152,15 @@
     "applies_to": ["infantry", "mg_team", "at_gun"],
     "attack_bonus": 0,
     "defense_bonus": 2,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "free_french",
+      "name_zh": "自由法蘭西",
+      "description_zh": "2 回合內,相鄰我方 +1 攻 +2 防",
+      "cooldown": 6,
+      "duration": 2,
+      "aura_mods": {"attack": 1, "defense": 2}
+    }
   },
   "manteuffel": {
     "name_zh": "曼陶菲爾",
@@ -97,6 +170,14 @@
     "applies_to": ["medium_tank", "light_tank"],
     "attack_bonus": 2,
     "defense_bonus": 0,
-    "move_bonus": 0
+    "move_bonus": 0,
+    "skill": {
+      "id": "panzer_assault",
+      "name_zh": "裝甲突擊",
+      "description_zh": "本回合 +1 攻擊 +2 移動",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"attack": 1, "move": 2}
+    }
   }
 }
