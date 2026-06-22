@@ -97,16 +97,16 @@ Two design decisions worth flagging:
 
 1. **HP-ratio scaling.** A wounded attacker hits softer (`attacker_hp / max_hp`). This creates a natural "death spiral" — a 30%-HP unit is much weaker than the same unit at full HP — without needing a separate morale system.
 2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter while defending; it is still countered if it attacks from inside the defender's range.
-3. **Suppression side effects.** Damaging non-lethal hits return side effects alongside damage: light suppression for most attacks, stronger pinning from MG/artillery, and one dig-in level stripped by damaging indirect fire.
+3. **Suppression side effects.** Damaging non-lethal hits return side effects alongside damage: light suppression for most attacks, stronger pinning from MG/artillery, +1 artillery suppression when a light tank spots the target, and one dig-in level stripped by damaging indirect fire.
 4. **Rally as action economy.** Suppressed units can spend their action to recover suppression, with extra recovery in cover. This turns suppression into a reversible tempo cost rather than a one-way debuff.
 
 Attack legality is owned by [scripts/combat/combat_rules.gd](../scripts/combat/combat_rules.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers. Player targeting and AI attack evaluation both call this shared rule layer.
 
 `vs_armor` only triggers against units with `armor > 0`, so AT guns shred tanks but waste their bonus on infantry.
 
-Suppression thresholds live in [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd): pinned units cannot overwatch or build dig-in, heavier suppression reduces movement, and the highest band reduces attack. Suppression recovers by 1 at the start of the unit's faction turn; Rally recovers 2 immediately, or 3 when the unit is in defensive cover.
+Suppression thresholds live in [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd): pinned units cannot overwatch or build dig-in, heavier suppression reduces movement, and the highest band reduces attack. Light tanks can act as artillery spotters: if a same-faction light tank has LOS and vision to the target, damaging indirect fire adds +1 suppression. Suppression recovers by 1 at the start of the unit's faction turn; Rally recovers 2 immediately, or 3 when the unit is in defensive cover.
 
-Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) and [tests/test_combat_effects.gd](../tests/test_combat_effects.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, dig-in, suppression, Rally, and artillery dig-in stripping.
+Tested in [tests/test_combat_resolver.gd](../tests/test_combat_resolver.gd) and [tests/test_combat_effects.gd](../tests/test_combat_effects.gd) — base damage, terrain modifier, vs_armor, HP scaling, lethal damage, indirect defender no-counter, out-of-range no-counter, close indirect attack counter, dig-in, suppression, spotter support, Rally, and artillery dig-in stripping.
 
 ---
 
@@ -125,6 +125,7 @@ For each AI unit on its faction's turn:
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
          + wounded/suppressed target focus       (finish damaged units)
          + suppression / dig-in break value      (prefer pinning and siege hits)
+         + light-tank spotter support            (prefer coordinated artillery)
          + capture-objective pressure            (for capture factions)
          - exposure_to_enemy_threat      × 0.5   (don't walk into kill zones)
          + terrain.defense               × 0.3   (use cover)
@@ -140,6 +141,7 @@ Role shaping keeps specialist units from collapsing back into raw damage math:
 - AT guns get a target bonus against armored units and a small penalty against soft targets.
 - Indirect-fire units are penalized for candidate positions within 1-2 hexes of known enemies, encouraging standoff behavior.
 - Suppression and dig-in break are part of attack value, so artillery and MG teams can be preferred even when raw damage ties.
+- Artillery adds light-tank spotter support into its attack value, so coordinated scouts can break raw-damage ties.
 - Capture factions value positions closer to their objective hex.
 - Pinned units can choose Rally in place when suppression recovery beats moving, attacking or overwatch.
 - Focus-fire scoring gives extra value to already wounded or suppressed targets, making the AI finish damaged units instead of spreading equal attacks.
@@ -229,7 +231,7 @@ Visual marker: brown chevrons below the unit's HP bar, one per level. The info-p
 
 ### Suppression + Rally
 
-Damaging attacks apply suppression through [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd). Most direct-fire units apply light suppression; MG teams and artillery apply strong suppression. Thresholds:
+Damaging attacks apply suppression through [scripts/combat/combat_effects.gd](../scripts/combat/combat_effects.gd). Most direct-fire units apply light suppression; MG teams and artillery apply strong suppression. Damaging artillery attacks gain +1 suppression if a same-faction light tank has current LOS and vision to the target. Thresholds:
 
 - `2+`: pinned; cannot enter overwatch or build dig-in.
 - `3+`: movement -1.
@@ -490,12 +492,12 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded / ZoC + reconstruction | 10 |
 | `test_combat_resolver` | Damage formula, counters, dig-in, modifiers, suppression output, artillery dig-in break | 16 |
-| `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, Rally, lethal/no-damage handling | 7 |
+| `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, Rally, lethal/no-damage handling, spotter bonus guardrails | 9 |
 | `test_combat_modifiers` | Rank thresholds and general modifier aggregation | 9 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action, focus fire | 8 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action, focus fire, spotter-assisted artillery target choice | 9 |
 | `test_reinforcements` | Bastogne scheduled turn 7 spawn, coordinate conversion, ready-to-act state, no duplicate spawn, occupied-hex skip | 6 |
-| **Total** | | **80 ✓** |
+| **Total** | | **83 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

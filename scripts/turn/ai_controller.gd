@@ -3,6 +3,7 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
@@ -177,12 +178,15 @@ func _score_position(
 			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
 			enemy.dig_in_level, atk_mods_effective, def_mods
 		)
+		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
+			unit.faction_id, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
+		)
 		var dmg_score := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg_score += _kill_bonus
 		dmg_score += _target_role_score(unit.type_id, def_def)
 		dmg_score += _target_focus_score(enemy, def_def)
-		dmg_score += float(r.suppression_to_defender) * W_SUPPRESSION
+		dmg_score += float(suppression) * W_SUPPRESSION
 		dmg_score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg_score -= 0.6 * float(r.counter_damage)
 		attack_term = max(attack_term, dmg_score)
@@ -267,12 +271,15 @@ func _best_attack_value(
 			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
 			enemy.dig_in_level, atk_mods_effective, def_mods
 		)
+		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
+			unit.faction_id, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
+		)
 		var dmg := float(r.damage_to_defender)
 		if r.defender_dies:
 			dmg += _kill_bonus
 		dmg += _target_role_score(unit.type_id, def_def)
 		dmg += _target_focus_score(enemy, def_def)
-		dmg += float(r.suppression_to_defender) * W_SUPPRESSION
+		dmg += float(suppression) * W_SUPPRESSION
 		dmg += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg -= 0.6 * float(r.counter_damage)
 		best = max(best, dmg)
@@ -345,15 +352,51 @@ func _best_attack_from(
 			atk_def, def_def, atk_hp, enemy.hp, atk_terr, def_terr, d,
 			enemy.dig_in_level, {}, def_mods
 		)
+		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
+			attacker_faction, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
+		)
 		var dmg: float = r.damage_to_defender + (10 if r.defender_dies else 0) \
 			+ _target_role_score(attacker_type, def_def) \
 			+ _target_focus_score(enemy, def_def) \
-			+ float(r.suppression_to_defender) * W_SUPPRESSION \
+			+ float(suppression) * W_SUPPRESSION \
 			+ float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		if dmg > best_dmg:
 			best_dmg = dmg
 			best = enemy
 	return best
+
+func _spotter_suppression_bonus(
+	attacker_faction: String,
+	target_coord: Vector2i,
+	atk_def: Dictionary,
+	damage: int,
+	defender_dies: bool,
+) -> int:
+	return CombatEffects.spotter_suppression_bonus(
+		atk_def,
+		_has_light_tank_spotter(attacker_faction, target_coord),
+		damage,
+		defender_dies,
+	)
+
+func _has_light_tank_spotter(faction_id: String, target_coord: Vector2i) -> bool:
+	var visible: Dictionary = battle.visibility_by_faction.get(faction_id, {})
+	if not visible.has(target_coord):
+		return false
+	for u in battle.units:
+		var spotter = u
+		if not spotter.is_alive() or spotter.faction_id != faction_id:
+			continue
+		if spotter.type_id != "light_tank":
+			continue
+		var spotter_def: Dictionary = _get_unit_def(spotter.type_id)
+		var spotter_general: Dictionary = _get_general_def(spotter.general_id)
+		var spotter_mods: Dictionary = CombatModifiers.for_unit(spotter, spotter_general)
+		var vision := int(spotter_def.get("vision", 3)) + int(spotter_mods.get("vision", 0))
+		if HexCoord.distance(spotter.coord, target_coord) <= vision \
+				and Visibility.has_los(spotter.coord, target_coord, battle.hex_map):
+			return true
+	return false
 
 func _target_role_score(attacker_type: String, defender_def: Dictionary) -> float:
 	if attacker_type == "at_gun":

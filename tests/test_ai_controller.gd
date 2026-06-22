@@ -227,5 +227,29 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: AI should focus damaged/suppressed target")
 
+	# 9) Artillery should prefer a light-tank-spotted target when raw damage ties.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	var spotter_artillery := make_unit("artillery", "axis", Vector2i(0, 0), 8)
+	var spotter := make_unit("light_tank", "axis", Vector2i(-3, 0), 12)
+	var unspotted_target := make_unit("infantry", "allies", Vector2i(3, 0), 10)
+	var spotted_target := make_unit("infantry", "allies", Vector2i(0, 1), 10)
+	battle.units = [spotter_artillery, spotter, unspotted_target, spotted_target]
+	battle.visibility_by_faction = {
+		"axis": {unspotted_target.coord: true, spotted_target.coord: true},
+	}
+	var spotter_choice = ai._best_attack_from(
+		spotter_artillery.coord, spotter_artillery.faction_id, spotter_artillery.type_id,
+		[unspotted_target, spotted_target],
+		art_def,
+		battle.visibility_by_faction["axis"]
+	)
+	if spotter_choice == spotted_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: artillery should prefer light-tank-spotted target")
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

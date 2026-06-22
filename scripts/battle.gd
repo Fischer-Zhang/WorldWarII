@@ -403,6 +403,10 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		atk_terr, def_terr, distance, defender.dig_in_level,
 		atk_mods, def_mods,
 	)
+	var spotter_bonus := _spotter_suppression_bonus(
+		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
+	)
+	result.suppression_to_defender += spotter_bonus
 
 	attacker.play_attack_animation(defender.position)
 	AudioBank.play("attack")
@@ -413,6 +417,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
 	if result.suppression_to_defender > 0:
 		msg += ",壓制 +%d" % result.suppression_to_defender
+	if spotter_bonus > 0:
+		msg += ",偵察校射 +%d" % spotter_bonus
 	if result.defender_dig_in_loss > 0:
 		msg += ",構工 -%d" % result.defender_dig_in_loss
 	if result.counter_damage > 0:
@@ -486,19 +492,53 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 		atk_terr, def_terr, distance, defender.dig_in_level,
 		atk_mods, def_mods,
 	)
+	var spotter_bonus := _spotter_suppression_bonus(
+		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
+	)
+	var total_suppression := result.suppression_to_defender + spotter_bonus
 	var parts: Array[String] = ["傷害 %d" % result.damage_to_defender]
 	if result.counter_damage > 0:
 		parts.append("反擊 %d" % result.counter_damage)
-	if result.suppression_to_defender > 0:
-		parts.append("壓制 +%d" % result.suppression_to_defender)
+	if total_suppression > 0:
+		parts.append("壓制 +%d" % total_suppression)
+	if spotter_bonus > 0:
+		parts.append("偵察校射 +%d壓制" % spotter_bonus)
 	if result.defender_dig_in_loss > 0:
 		parts.append("構工 -%d" % result.defender_dig_in_loss)
-	var future_suppression := CombatEffects.apply_suppression(defender.suppression, result.suppression_to_defender)
+	var future_suppression := CombatEffects.apply_suppression(defender.suppression, total_suppression)
 	if future_suppression != defender.suppression:
 		parts.append("目標壓制 %d→%d" % [defender.suppression, future_suppression])
 		if CombatEffects.is_pinned(future_suppression):
 			parts.append("釘住")
 	return " / ".join(parts)
+
+func _spotter_suppression_bonus(
+	attacker: Unit, defender: Unit, atk_def: Dictionary, damage: int, defender_dies: bool
+) -> int:
+	return CombatEffects.spotter_suppression_bonus(
+		atk_def,
+		_has_light_tank_spotter(attacker.faction_id, defender.coord),
+		damage,
+		defender_dies,
+	)
+
+func _has_light_tank_spotter(faction_id: String, target_coord: Vector2i) -> bool:
+	var visible: Dictionary = visibility_by_faction.get(faction_id, {})
+	if not visible.has(target_coord):
+		return false
+	for u in units:
+		var spotter: Unit = u
+		if not spotter.is_alive() or spotter.faction_id != faction_id:
+			continue
+		if spotter.type_id != "light_tank":
+			continue
+		var spotter_def := DataLoader.get_unit_def(spotter.type_id)
+		var spotter_general := DataLoader.get_general_def(spotter.general_id)
+		var vision := spotter.effective_vision(spotter_def, spotter_general)
+		if HexCoord.distance(spotter.coord, target_coord) <= vision \
+				and Visibility.has_los(spotter.coord, target_coord, hex_map):
+			return true
+	return false
 
 func _deselect() -> void:
 	if selected_unit != null:

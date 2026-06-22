@@ -74,5 +74,27 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: rally expected plain/town 3/2 got %d/%d" % [rally_plain, rally_town])
 
+	# 8) Indirect fire gets a small extra suppression bonus from a light-tank spotter.
+	var spotted := CombatEffects.spotter_suppression_bonus(artillery, true, 2, false)
+	var unspotted := CombatEffects.spotter_suppression_bonus(artillery, false, 2, false)
+	if spotted == CombatEffects.SPOTTER_SUPPRESSION_BONUS and unspotted == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: spotter bonus expected 1/0 got %d/%d" % [spotted, unspotted])
+
+	# 9) Spotter support does not help direct, lethal, or zero-damage attacks.
+	var direct := CombatEffects.spotter_suppression_bonus(infantry, true, 2, false)
+	var lethal_spotted := CombatEffects.spotter_suppression_bonus(artillery, true, 2, true)
+	var no_damage_spotted := CombatEffects.spotter_suppression_bonus(artillery, true, 0, false)
+	if direct == 0 and lethal_spotted == 0 and no_damage_spotted == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: spotter guardrails expected 0/0/0 got %d/%d/%d"
+			% [direct, lethal_spotted, no_damage_spotted]
+		)
+
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

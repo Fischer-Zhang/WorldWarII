@@ -3,7 +3,7 @@
 
 This report stays static and deterministic. It complements the broader
 scenario balance report by focusing on suppression sources, artillery reach,
-capture-target pressure, and reinforcement power swings.
+spotter coverage, capture-target pressure, and reinforcement power swings.
 """
 
 from __future__ import annotations
@@ -115,6 +115,37 @@ def artillery_coverage(scenario: dict[str, Any], units: dict[str, Any]) -> str:
     )
 
 
+def spotter_coverage(scenario: dict[str, Any], units: dict[str, Any]) -> str:
+    map_cfg = scenario.get("map", {})
+    width = int(map_cfg.get("width", 0))
+    height = int(map_cfg.get("height", 0))
+    total = max(1, width * height)
+    by_faction: dict[str, set[tuple[int, int]]] = collections.defaultdict(set)
+    for unit in initial_units(scenario):
+        unit_type = str(unit.get("type", ""))
+        if unit_type != "light_tank":
+            continue
+        center = axial_from_offset(unit.get("at", [0, 0]))
+        vision = int(units.get(unit_type, {}).get("vision", 3))
+        for col in range(width):
+            for row in range(height):
+                coord = axial_from_offset([col, row])
+                if hex_distance(center, coord) <= vision:
+                    by_faction[str(unit.get("faction", ""))].add(coord)
+    if not by_faction:
+        return "none"
+    parts: list[str] = []
+    for faction, coords in sorted(by_faction.items()):
+        seen_enemies = 0
+        for unit in initial_units(scenario):
+            if str(unit.get("faction", "")) == faction:
+                continue
+            if axial_from_offset(unit.get("at", [0, 0])) in coords:
+                seen_enemies += 1
+        parts.append(f"{faction} {len(coords)}/{total} ({len(coords) / total:.0%}), spots {seen_enemies}")
+    return "; ".join(parts)
+
+
 def objective_pressure(scenario: dict[str, Any]) -> str:
     parts: list[str] = []
     for faction_id, cfg in scenario.get("victory", {}).items():
@@ -162,6 +193,7 @@ def generate_report() -> str:
                 scenario.get("id", ""),
                 suppression_sources(scenario),
                 artillery_coverage(scenario, units),
+                spotter_coverage(scenario, units),
                 objective_pressure(scenario),
                 reinforcement_delta(scenario, units),
             ]
@@ -170,7 +202,17 @@ def generate_report() -> str:
     sections = [
         "# Scenario Probe",
         "Static tactical probe for pressure tuning. Coverage is approximate and ignores LOS/fog; use it to spot scenarios that need manual playtesting.",
-        table(["scenario", "suppression sources", "artillery coverage", "objective pressure", "reinforcement delta"], rows),
+        table(
+            [
+                "scenario",
+                "suppression sources",
+                "artillery coverage",
+                "spotter coverage",
+                "objective pressure",
+                "reinforcement delta",
+            ],
+            rows,
+        ),
     ]
     return "\n\n".join(sections) + "\n"
 

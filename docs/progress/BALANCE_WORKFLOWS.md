@@ -48,6 +48,7 @@ Current rules established before large number changes:
 - `indirect` means the unit cannot counter-attack while defending; it does not grant close-range immunity when attacking.
 - ZoC cost is part of both movement range and path reconstruction.
 - Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
+- Damaging indirect fire gets +1 suppression when a same-faction light tank has LOS and vision to the target.
 - Pinned units cannot overwatch or build dig-in, heavier suppression reduces movement/attack, and artillery strips one dig-in level on damaging indirect hits.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
 
@@ -70,7 +71,7 @@ Use `python3 tools/scenario_balance_report.py` to regenerate
 `docs/progress/scenario_balance_report.md`.
 Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
-objective pressure, and reinforcement deltas.
+spotter coverage, objective pressure, and reinforcement deltas.
 
 Evaluate scenarios in this order:
 
@@ -90,6 +91,7 @@ Current role-shaping pass:
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
+- Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 
