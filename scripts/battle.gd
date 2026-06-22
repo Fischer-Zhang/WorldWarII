@@ -50,7 +50,9 @@ var attack_targets: Array = []
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var player_faction_id: String = ""
-var visible_hexes: Dictionary = {}
+# Per-faction visibility + memory (symmetric fog model)
+var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
+var last_known_positions: Dictionary = {}    # faction_id -> Dictionary[Unit, Vector2i]
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -76,6 +78,16 @@ func _ready() -> void:
 		if String(factions[fid].get("controller", "")) == "player":
 			player_faction_id = fid
 			break
+
+	# Seed initial enemy memory: every faction starts with intel on
+	# where their opponents are deployed (briefing-table knowledge).
+	# Memory becomes stale as units move out of view.
+	for fid in factions.keys():
+		last_known_positions[fid] = {}
+		for u in units:
+			var unit: Unit = u
+			if unit.faction_id != fid:
+				last_known_positions[fid][unit] = unit.coord
 
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -420,10 +432,50 @@ func _show_turn_banner(text: String) -> void:
 	tween.tween_property(turn_banner, "modulate:a", 0.0, 0.35)
 
 func _recompute_visibility() -> void:
-	if player_faction_id == "":
-		return
-	visible_hexes = Visibility.compute_visible_hexes(units, player_faction_id, hex_map)
-	hex_map.apply_visibility(visible_hexes, player_faction_id)
+	# Symmetric fog: compute visibility for every faction. Player's set
+	# drives the rendered fog overlay; AI factions consume their set
+	# (plus stale memory) via `get_known_enemies`.
+	for fid in factions.keys():
+		visibility_by_faction[fid] = Visibility.compute_visible_hexes(units, fid, hex_map)
+	# Update each faction's last-known-position memory:
+	#   - Drop entries for dead units.
+	#   - Refresh entry for any currently-visible enemy.
+	#   - Keep stale entries untouched (the "memory" of where they were).
+	for viewer_fid in factions.keys():
+		var viewer_vis: Dictionary = visibility_by_faction[viewer_fid]
+		var memory: Dictionary = last_known_positions.get(viewer_fid, {})
+		var stale_keys: Array = []
+		for key in memory.keys():
+			if not (key as Unit).is_alive():
+				stale_keys.append(key)
+		for k in stale_keys:
+			memory.erase(k)
+		for u in units:
+			var unit: Unit = u
+			if not unit.is_alive() or unit.faction_id == viewer_fid:
+				continue
+			if viewer_vis.has(unit.coord):
+				memory[unit] = unit.coord
+	# Render only the player's fog overlay.
+	if player_faction_id != "":
+		hex_map.apply_visibility(visibility_by_faction[player_faction_id], player_faction_id)
+
+func get_known_enemies(faction_id: String) -> Array:
+	# Returns Array of {unit: Unit, coord: Vector2i, visible: bool}.
+	# `coord` is the unit's CURRENT coord if visible, otherwise the
+	# last-known coord from memory.
+	var out: Array = []
+	var visible: Dictionary = visibility_by_faction.get(faction_id, {})
+	var memory: Dictionary = last_known_positions.get(faction_id, {})
+	for u in units:
+		var unit: Unit = u
+		if not unit.is_alive() or unit.faction_id == faction_id:
+			continue
+		if visible.has(unit.coord):
+			out.append({"unit": unit, "coord": unit.coord, "visible": true})
+		elif memory.has(unit):
+			out.append({"unit": unit, "coord": memory[unit], "visible": false})
+	return out
 
 func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> void:
 	# Spawns any reinforcements scheduled for `turn_number` belonging to

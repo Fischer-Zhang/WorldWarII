@@ -215,15 +215,27 @@ Adding a stat to the data tier (rather than hard-coding) lets a future scenario 
 
 `Visibility.compute_visible_hexes(units, faction_id, hex_map)` returns a `Dictionary[Vector2i, true]` of every hex visible to **any** living unit of the given faction. For each unit, it iterates `HexCoord.range_within(coord, vision)` and tests LOS to each candidate. Map sizes are small (140 hexes max), so the naive O(units × range² × line_length) is well under one millisecond.
 
-### Asymmetric design
+### Symmetric design + AI memory
 
-Only the **player** faction gets fog. The AI is omniscient — it can score moves against units it "shouldn't" see. This is a deliberate scope decision:
+Both the player and the AI factions have fog. The AI does **not** cheat — it can only score moves and pick targets based on what its own units currently see, plus what it remembers seeing.
 
-- Symmetric fog would require the AI to maintain a "last known position" memory of enemy units, including stale entries to chase.
-- The player still gets the depth benefit: terrain choice for cover-while-advancing, scouting, ambush setup.
-- Many published wargames (most early-era ones) ship with this asymmetry.
+**Per-faction visibility.** `battle.gd` keeps `visibility_by_faction: Dictionary[String, Dictionary[Vector2i, true]]` and recomputes every entry on the same triggers as the player's fog (init, every move, after combat, after reinforcement spawn). Only the player's set is rendered as the on-screen fog overlay.
 
-The omniscient AI is documented here so a reviewer can see it's a choice, not an oversight. A roadmap item exists to upgrade later.
+**Last-known-position memory.** For each `(viewer_faction, target_unit)` pair the engine records the last coord the viewer saw the target at (`last_known_positions: Dictionary[String, Dictionary[Unit, Vector2i]]`). On every visibility recompute the table is updated:
+
+- Dead targets are evicted.
+- Currently-visible enemies have their entry refreshed to their current coord.
+- Out-of-sight enemies keep their stale entry — that's the memory.
+
+**Seed memory.** At scenario start, each faction is seeded with intel on every opponent unit's starting position (the "briefing-table" knowledge). This avoids the first-turn nonsense of armies pretending each other don't exist. Memory grows stale from there as units move out of view.
+
+**How the AI uses it.** `battle.get_known_enemies(faction_id)` returns a list of `{unit, coord, visible}` entries — coord is current if visible, stale-memory otherwise. The AI then:
+
+- **Distance / advance scoring** uses each known enemy's `coord` (memory ok — it wants to walk *toward* where you were last seen).
+- **Attack target selection** is restricted to `visible == true` (you can't shoot fog).
+- **Threat / exposure scoring** also restricted to visible enemies (the AI has no information to weigh hidden units' threat).
+
+The behaviour reads as: the AI advances toward your last known position, scouts when it loses sight, and engages when it spots you. Fog gives the player real tactical levers — pulling back through a forest to break LOS makes the AI commit to a stale path it can no longer punish you for.
 
 ### Rendering
 

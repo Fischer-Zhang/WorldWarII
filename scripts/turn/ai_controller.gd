@@ -39,9 +39,18 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 	for c in reachable.keys():
 		candidates.append(c)
 
-	var enemies := _enemy_units(unit.faction_id)
-	if enemies.is_empty():
+	# Symmetric fog: AI only knows enemies it can currently see + remembers.
+	# `known[i]` = {unit, coord, visible}. `coord` is the *last known* position
+	# (current if visible, stale memory otherwise).
+	var known: Array = battle.get_known_enemies(unit.faction_id)
+	if known.is_empty():
 		return {"move_to": unit.coord, "attack": null, "score": 0.0, "reachable": reachable}
+
+	# Only currently-visible enemies are valid attack targets.
+	var visible_enemies: Array = []
+	for k in known:
+		if k.get("visible", false):
+			visible_enemies.append(k["unit"])
 
 	var best := unit.coord
 	var best_score := -INF
@@ -49,8 +58,8 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 
 	for cand in candidates:
 		var coord: Vector2i = cand
-		var score := _score_position(unit, coord, enemies, hex_map, atk_def, rng)
-		var target := _best_attack_from(coord, rng, enemies, atk_def)
+		var score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, rng)
+		var target := _best_attack_from(coord, rng, visible_enemies, atk_def)
 		if score > best_score:
 			best_score = score
 			best = coord
@@ -61,22 +70,24 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 func _score_position(
 	unit: Unit,
 	pos: Vector2i,
-	enemies: Array,
+	known: Array,           # [{unit, coord, visible}] — coord may be stale memory
+	visible_enemies: Array, # currently-visible Unit list (subset of known)
 	hex_map,
 	atk_def: Dictionary,
 	rng: int,
 ) -> float:
-	# Closer to nearest enemy is better (negative distance contributes)
+	# Distance: use the BEST known position (memory or current). Stale memory
+	# is fine — AI advances toward "where we last saw them".
 	var nearest := 9999
-	for e in enemies:
-		var d := HexCoord.distance(pos, (e as Unit).coord)
+	for k in known:
+		var d := HexCoord.distance(pos, k["coord"])
 		if d < nearest:
 			nearest = d
 	var dist_term := -float(nearest) * W_OBJECTIVE
 
-	# Best damage we could deal from this hex
+	# Attack: only consider currently-VISIBLE enemies (can't shoot fog).
 	var attack_term := 0.0
-	for e in enemies:
+	for e in visible_enemies:
 		var enemy: Unit = e
 		var d := HexCoord.distance(pos, enemy.coord)
 		if d > rng:
@@ -86,22 +97,21 @@ func _score_position(
 		var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(pos))
 		var r := CombatResolver.resolve(atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d)
 		var dmg_score := float(r.damage_to_defender)
-		# kill bonus: bigger reward if this would kill the target
 		if r.defender_dies:
 			dmg_score += 5.0
-		# risk: subtract counter damage we'd eat
 		dmg_score -= 0.6 * float(r.counter_damage)
 		attack_term = max(attack_term, dmg_score)
 	attack_term *= W_ATTACK
 
-	# Exposure: enemies that could shoot us next turn
+	# Exposure: only visible enemies are a known threat. (A hidden enemy
+	# can still attack us next turn, but the AI has no information to
+	# weigh that risk — it has to accept reduced situational awareness.)
 	var exposure := 0.0
-	for e in enemies:
+	for e in visible_enemies:
 		var enemy: Unit = e
 		var enemy_def := DataLoader.get_unit_def(enemy.type_id)
 		var enemy_rng := int(enemy_def.get("range", 1))
 		var enemy_move := int(enemy_def.get("move", 0))
-		# rough approximation: anyone within (enemy_move + enemy_rng) hexes is a threat
 		if HexCoord.distance(pos, enemy.coord) <= enemy_move + enemy_rng:
 			exposure += float(enemy_def.get("attack", 0)) * 0.5
 	var exposure_term := -exposure * W_EXPOSURE
@@ -147,10 +157,3 @@ func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Diction
 			best = enemy
 	return best
 
-func _enemy_units(own_faction: String) -> Array:
-	var out: Array = []
-	for u in battle.units:
-		var unit: Unit = u
-		if unit.is_alive() and unit.faction_id != own_faction:
-			out.append(unit)
-	return out

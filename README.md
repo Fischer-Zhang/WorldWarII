@@ -32,7 +32,7 @@ A sandbox scenario for development is also included.
 ## Highlights
 
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
-- **Fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. Scouting becomes a meaningful decision.
+- **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets** — `aggressive` / `defensive` / `hold`. Each scenario sets its opponents' personality so the German blitz at Sedan feels different from the Soviet defenders in their Kiev pocket.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
@@ -168,7 +168,7 @@ No code changes required.
 - [x] AI with three personality presets
 - [x] 5 historical scenarios + sandbox
 - [x] Scheduled reinforcements (Bastogne)
-- [x] Fog of war + hex line-of-sight (per-unit vision ranges)
+- [x] Symmetric fog of war + line-of-sight + AI last-known-position memory
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
@@ -177,7 +177,6 @@ No code changes required.
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
 - [ ] AI 1-ply lookahead + difficulty selector
-- [ ] Symmetric fog (AI also limited by LOS — currently omniscient)
 - [ ] Save / load mid-scenario
 
 ---
