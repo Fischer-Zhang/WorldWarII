@@ -11,7 +11,18 @@ func _ready() -> void:
 	begin_button.pressed.connect(_on_begin_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	begin_button.mouse_entered.connect(func(): print("[MainMenu] hover on BeginButton"))
-	print("[MainMenu] signals connected; click 開始戰役 now")
+	# Force keyboard focus so Tab/Enter work even if mouse routing is broken.
+	begin_button.grab_focus()
+	print("[MainMenu] signals connected. begin_button.global_rect=", begin_button.get_global_rect())
+
+func _input(event: InputEvent) -> void:
+	# Global low-level probe: confirms the window is receiving ANY input at all.
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		var mb := event as InputEventMouseButton
+		print("[MainMenu._input] mouse-down at ", mb.position, " button=", mb.button_index)
+	elif event is InputEventKey and (event as InputEventKey).pressed:
+		var ke := event as InputEventKey
+		print("[MainMenu._input] key-down ", ke.as_text())
 
 func _on_begin_pressed() -> void:
 	print("[MainMenu] BeginButton pressed — changing to scenario_select")
