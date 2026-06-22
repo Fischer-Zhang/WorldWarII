@@ -1,6 +1,9 @@
 class_name UnitFactory
 extends RefCounted
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const HexMap := preload("res://scripts/grid/hex_map.gd")
+
 # Builds Unit instances from a scenario JSON.
 # Returns: { "units": Array[Unit], "factions": Dictionary[String, Dictionary] }
 

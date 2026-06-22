@@ -1,6 +1,8 @@
 class_name Pathfinding
 extends RefCounted
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+
 # Dijkstra-style BFS for hex movement.
 # Returns `coord -> cumulative_cost` for every hex reachable within `move_points`,
 # honoring per-terrain move_cost and blocking on occupied hexes (except the start).

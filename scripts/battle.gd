@@ -1,5 +1,19 @@
 extends Node2D
 
+# Explicit preloads so we don't depend on the global class_name registry,
+# which Godot 4.6 sometimes drops on re-import.
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const HexMap := preload("res://scripts/grid/hex_map.gd")
+const Unit := preload("res://scripts/units/unit.gd")
+const CameraController := preload("res://scripts/ui/camera_controller.gd")
+const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
+const TurnManager := preload("res://scripts/turn/turn_manager.gd")
+const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
+const AIController := preload("res://scripts/turn/ai_controller.gd")
+const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
+const UnitFactory := preload("res://scripts/units/unit_factory.gd")
+
 # Battle scene controller — owns the per-turn state machine.
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"

@@ -5,6 +5,11 @@ extends Node2D
 # Coordinates are axial (q, r). Map data comes from a scenario's
 # rectangular `tiles[row][col]` array, converted to axial on load.
 
+# Explicit preloads so we don't depend on the global class_name registry,
+# which Godot 4.6 sometimes drops on re-import.
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const Unit := preload("res://scripts/units/unit.gd")
+
 const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)

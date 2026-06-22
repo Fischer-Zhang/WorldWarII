@@ -1,6 +1,11 @@
 class_name AIController
 extends RefCounted
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
+const Unit := preload("res://scripts/units/unit.gd")
+
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
 # moves there, attacks if a target is available.
 #

@@ -1,6 +1,9 @@
 class_name CombatResolver
 extends RefCounted
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const Unit := preload("res://scripts/units/unit.gd")
+
 # Deterministic combat resolution.
 # Damage scales with the attacker's current HP — wounded units hit softer.
 # Defender counter-attacks if it survives, the attacker is in its range, and

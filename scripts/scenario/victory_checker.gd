@@ -1,6 +1,8 @@
 class_name VictoryChecker
 extends RefCounted
 
+const Unit := preload("res://scripts/units/unit.gd")
+
 # Evaluates scenario victory conditions after each turn end.
 # Returns winner faction_id, or "" if no resolution yet.
 #
