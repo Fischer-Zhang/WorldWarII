@@ -13,6 +13,8 @@ const SHORT_LABELS := {
 	"light_tank": "輕",
 	"medium_tank": "中",
 	"artillery": "砲",
+	"paratrooper": "傘",
+	"engineer": "工",
 }
 
 const MAX_DIG_IN := 3

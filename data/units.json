@@ -65,5 +65,36 @@
     "vs_armor": 1,
     "armor": 0,
     "indirect": true
+  },
+  "paratrooper": {
+    "name_zh": "傘兵",
+    "hp": 8,
+    "attack": 5,
+    "defense": 2,
+    "range": 1,
+    "move": 3,
+    "vision": 4,
+    "vs_armor": 2,
+    "armor": 0,
+    "airdrop": true
+  },
+  "engineer": {
+    "name_zh": "工兵",
+    "hp": 8,
+    "attack": 3,
+    "defense": 2,
+    "range": 1,
+    "move": 2,
+    "vision": 3,
+    "vs_armor": 1,
+    "armor": 0,
+    "skill": {
+      "id": "fortify",
+      "name_zh": "構築工事",
+      "description_zh": "立即 +1 構工等級(免行動消耗一回合構工)",
+      "cooldown": 2,
+      "duration": 1,
+      "instant_dig_in": 1
+    }
   }
 }

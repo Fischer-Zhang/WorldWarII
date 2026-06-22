@@ -432,12 +432,21 @@ func _enter_attack_phase() -> void:
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
 		]
 
+func _resolve_active_skill(unit: Unit) -> Dictionary:
+	# Returns the active skill available to this unit, preferring the unit's
+	# own kit (engineer's Fortify) over the attached general's skill.
+	if unit == null:
+		return {}
+	var unit_def := DataLoader.get_unit_def(unit.type_id)
+	var unit_skill: Dictionary = unit_def.get("skill", {})
+	if not unit_skill.is_empty():
+		return unit_skill
+	if unit.general_id != "":
+		return DataLoader.get_general_def(unit.general_id).get("skill", {})
+	return {}
+
 func _refresh_skill_button(unit: Unit) -> void:
-	if unit == null or unit.general_id == "":
-		skill_button.visible = false
-		return
-	var general_def := DataLoader.get_general_def(unit.general_id)
-	var skill: Dictionary = general_def.get("skill", {})
+	var skill: Dictionary = _resolve_active_skill(unit)
 	if skill.is_empty():
 		skill_button.visible = false
 		return
@@ -457,23 +466,23 @@ func _refresh_skill_button(unit: Unit) -> void:
 func _on_skill_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
 		return
-	if selected_unit.general_id == "":
-		return
-	var general_def := DataLoader.get_general_def(selected_unit.general_id)
-	var skill: Dictionary = general_def.get("skill", {})
+	var skill: Dictionary = _resolve_active_skill(selected_unit)
 	if skill.is_empty():
 		return
 	var skill_id := String(skill.get("id", ""))
 	if not selected_unit.skill_ready(skill_id, turn_manager.turn_number):
 		return
-	# Apply to self (always)
+	# Special instant effects (e.g. engineer's Fortify) are applied
+	# immediately, in addition to recording the active_effect entry so the
+	# cooldown is tracked uniformly.
+	var instant_dig: int = int(skill.get("instant_dig_in", 0))
+	if instant_dig > 0:
+		selected_unit.dig_in_level = min(Unit.MAX_DIG_IN, selected_unit.dig_in_level + instant_dig)
+	# Apply self_mods / no_counter via the normal active-effect path.
 	selected_unit.use_skill(skill, turn_manager.turn_number)
-	# If skill has aura_mods, copy the effect to all adjacent same-faction units.
-	# Mark the source's own effect with source_of_aura=true so the aggregation
-	# helper doesn't double-count it.
+	# Aura propagation to adjacent same-faction units.
 	var aura: Dictionary = skill.get("aura_mods", {})
 	if not aura.is_empty():
-		# Tag the source's effect entry
 		if not selected_unit.active_effects.is_empty():
 			selected_unit.active_effects[-1]["source_of_aura"] = true
 		var duration: int = int(skill.get("duration", 1))
@@ -494,7 +503,6 @@ func _on_skill_pressed() -> void:
 	]
 	AudioBank.play("select")
 	skill_button.visible = false
-	# Skill counts as the unit's attack action — end its turn.
 	selected_unit.has_attacked = true
 	selected_unit.queue_redraw()
 	_deselect()
