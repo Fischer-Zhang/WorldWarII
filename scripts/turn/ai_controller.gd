@@ -3,8 +3,8 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
-const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
+const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const Unit := preload("res://scripts/units/unit.gd")
 
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
@@ -77,16 +77,17 @@ func plan_for_unit(unit: Unit) -> Dictionary:
 	var best_score := -INF
 	var best_target: Unit = null
 	var best_action := "wait"  # "attack", "overwatch", or "wait"
+	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 
 	for cand in candidates:
 		var coord: Vector2i = cand
-		var base_score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, rng)
-		var target := _best_attack_from(coord, rng, visible_enemies, atk_def)
+		var base_score := _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, visible_hexes)
+		var target := _best_attack_from(coord, unit.faction_id, visible_enemies, atk_def, visible_hexes)
 		# Attack score is implicit in base_score (already includes attack_term).
 		# Overwatch is an alternative: subtract the attack contribution (not
 		# attacking this turn) and add the overwatch score.
 		var overwatch_value := _overwatch_score(unit, coord, visible_enemies, hex_map, atk_def, rng)
-		var attack_value := _best_attack_value(unit, coord, visible_enemies, hex_map, atk_def, rng)
+		var attack_value := _best_attack_value(unit, coord, visible_enemies, hex_map, atk_def, visible_hexes)
 		# attack_value and overwatch_value are both pre-weighted contributions.
 		# base_score already has attack_value baked in (via _score_position).
 		# To get the "overwatch" total, swap them:
@@ -118,7 +119,7 @@ func _score_position(
 	visible_enemies: Array,
 	hex_map,
 	atk_def: Dictionary,
-	rng: int,
+	visible_hexes: Dictionary,
 ) -> float:
 	# Distance term: use the best known position (memory or current).
 	var nearest := 9999
@@ -132,7 +133,7 @@ func _score_position(
 	var attack_term := 0.0
 	for e in visible_enemies:
 		var enemy: Unit = e
-		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
+		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
 			continue
 		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
@@ -184,7 +185,7 @@ func _apply_personality(total: float, attack_term: float, exposure_term: float) 
 
 func _best_attack_value(
 	unit: Unit, pos: Vector2i, visible_enemies: Array, hex_map,
-	atk_def: Dictionary, rng: int,
+	atk_def: Dictionary, visible_hexes: Dictionary,
 ) -> float:
 	# Returns the (pre-weighted) attack-term contribution this candidate
 	# position would produce — mirrors the attack block in _score_position
@@ -192,7 +193,7 @@ func _best_attack_value(
 	var best := 0.0
 	for e in visible_enemies:
 		var enemy: Unit = e
-		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
+		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
 			continue
 		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
@@ -239,13 +240,19 @@ func _overwatch_score(
 	# 0.6 discount: enemy might not actually walk into range.
 	return best_snap * _attack_w * 0.6
 
-func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Dictionary) -> Unit:
+func _best_attack_from(
+	pos: Vector2i,
+	attacker_faction: String,
+	enemies: Array,
+	atk_def: Dictionary,
+	visible_hexes: Dictionary,
+) -> Unit:
 	var hex_map = battle.hex_map
 	var best: Unit = null
 	var best_dmg := 0
 	for e in enemies:
 		var enemy: Unit = e
-		if not _can_attack_from(pos, enemy, hex_map, atk_def, rng):
+		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, hex_map, visible_hexes):
 			continue
 		var d := HexCoord.distance(pos, enemy.coord)
 		var def_def := DataLoader.get_unit_def(enemy.type_id)
@@ -258,19 +265,6 @@ func _best_attack_from(pos: Vector2i, rng: int, enemies: Array, atk_def: Diction
 			best_dmg = dmg
 			best = enemy
 	return best
-
-func _can_attack_from(
-	attacker_pos: Vector2i,
-	target: Unit,
-	hex_map,
-	atk_def: Dictionary,
-	rng: int,
-) -> bool:
-	if HexCoord.distance(attacker_pos, target.coord) > rng:
-		return false
-	if atk_def.get("indirect", false):
-		return true
-	return Visibility.has_los(attacker_pos, target.coord, hex_map)
 
 # ---------- 1-ply lookahead ----------
 

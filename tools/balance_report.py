@@ -314,7 +314,7 @@ def rule_risk_section() -> str:
         [
             "Attack visibility",
             "Resolved: direct attacks require visibility + LOS; indirect attacks require visibility and ignore LOS blockers.",
-            "Keep future attack helpers routed through Battle._can_attack_target or the same rule.",
+            "Keep future attack helpers routed through CombatRules.",
         ],
         [
             "indirect semantics",

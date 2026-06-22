@@ -148,7 +148,7 @@ Cell format is `damage/counter`.
 
 | risk | why it matters | next action |
 | --- | --- | --- |
-| Attack visibility | Resolved: direct attacks require visibility + LOS; indirect attacks require visibility and ignore LOS blockers. | Keep future attack helpers routed through Battle._can_attack_target or the same rule. |
+| Attack visibility | Resolved: direct attacks require visibility + LOS; indirect attacks require visibility and ignore LOS blockers. | Keep future attack helpers routed through CombatRules. |
 | indirect semantics | Resolved: indirect units cannot counter while defending, but close indirect attacks can still be countered. | Preserve this distinction in UI text and combat tests. |
 | ZoC path reconstruction | Resolved: movement range and path reconstruction share the same terrain + ZoC step cost. | Keep new pathfinding callsites passing occupied + mover_faction. |
 | Town + dig-in | Town defense 3 plus dig-in 3 pushes most attacks to the 1-damage floor. | Consider max dig-in 2, siege traits, or partial artillery/AT entrenchment bypass. |

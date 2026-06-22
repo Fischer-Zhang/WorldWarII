@@ -17,7 +17,7 @@ Aim for the viewer to walk away with:
 | 0:03 – 0:08 | Menu → list | Cursor clicks 「開始戰役」 → scenario select shows 4 historical battles | `Data-driven scenarios — JSON, no code per battle` |
 | 0:08 – 0:12 | Briefing | Brief flash of Sedan 1940 briefing screen | `Historical scenarios with bespoke briefings` |
 | **0:12 – 0:28** | **Scenario 1 — Sedan 1940** | Open with the yellow pulsing objective hex. Move a Pz.IV across road, attack a French AT-gun → see damage popup, wreckage, HP bar drop. End turn → AI defensive AI shuffles French line. | `Hex-based movement · Terrain costs · Capture objective pulse` |
-| **0:28 – 0:44** | **Scenario 2 — Kiev 1941** | Show artillery's 3-tile range overlay. Fire at distant Soviet T-34, no counter (indirect). Tanks close in for kill. | `Range 3 indirect-fire artillery cannot be counter-attacked` |
+| **0:28 – 0:44** | **Scenario 2 — Kiev 1941** | Show artillery's 3-tile range overlay. Fire at distant Soviet T-34 from outside its range, so there is no counter. Tanks close in for kill. | `Range 3 indirect-fire artillery · spotted targets over blockers` |
 | **0:44 – 0:58** | **Scenario 3 — Stalingrad 1942** | Player as Soviet defender. Show city blocks (+3 defense tint). German tank attacks Guards infantry → infantry survives in town, counter-attacks. | `Role reversal: defending the city · Town terrain +3 defense` |
 | **0:58 – 1:18** | **Scenario 4 — Kursk 1943** | Wide camera over the tank duel. Tiger / Panther / T-34 trading shots. AT-gun reveals a Panzer's vs_armor weakness. One unit dies, scorch wreckage marker persists into next turn. | `Determinstic combat · vs_armor / armor mechanic · Heuristic AI` |
 | 1:18 – 1:25 | Victory screen | Victory modal pops up. "🏆 德軍裝甲軍 獲勝!" | `Victory: capture target by turn 12` |

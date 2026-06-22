@@ -9,6 +9,7 @@ const CameraController := preload("res://scripts/ui/camera_controller.gd")
 const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
 const Visibility := preload("res://scripts/grid/visibility.gd")
 const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
+const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
@@ -166,12 +167,12 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		u.has_moved = true
 		var action := String(plan.get("action", "attack"))
 		match action:
-				"attack":
-					var target: Unit = plan.get("attack")
-					if target != null and _can_attack_target(u, target):
-						_resolve_attack(u, target)
-						await get_tree().create_timer(AI_STEP_DELAY).timeout
-					else:
+			"attack":
+				var target: Unit = plan.get("attack")
+				if target != null and _can_attack_target(u, target):
+					_resolve_attack(u, target)
+					await get_tree().create_timer(AI_STEP_DELAY).timeout
+				else:
 					u.has_attacked = true
 					u.queue_redraw()
 			"overwatch":
@@ -303,8 +304,7 @@ func _enter_attack_phase() -> void:
 	phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
-	var rng := int(atk_def.get("range", 1))
-	attack_targets = _visible_attack_targets(selected_unit, rng)
+	attack_targets = _visible_attack_targets(selected_unit, atk_def)
 	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
 	# Overwatch button: enabled whenever a unit has finished its move and
 	# is making the attack-or-skip decision.
@@ -375,35 +375,14 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	if winner != "":
 		_handle_game_over(winner)
 
-func _visible_attack_targets(attacker: Unit, attacker_range: int) -> Array:
-	var out: Array = []
-	for u in units:
-		var other: Unit = u
-		if _can_attack_target(attacker, other, attacker_range):
-			out.append(other)
-	return out
-
-func _can_attack_target(attacker: Unit, target: Unit, attacker_range: int = -1) -> bool:
-	# Direct fire needs both current visibility and line of sight.
-	# Indirect fire can arc over LOS blockers, but still needs a spotted target.
-	if attacker == null or target == null:
-		return false
-	if not attacker.is_alive() or not target.is_alive():
-		return false
-	if target.faction_id == attacker.faction_id:
-		return false
-	var atk_def := DataLoader.get_unit_def(attacker.type_id)
-	var rng := attacker_range
-	if rng < 0:
-		rng = int(atk_def.get("range", 1))
-	if HexCoord.distance(attacker.coord, target.coord) > rng:
-		return false
+func _visible_attack_targets(attacker: Unit, atk_def: Dictionary) -> Array:
 	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
-	if not visible.has(target.coord):
-		return false
-	if not atk_def.get("indirect", false) and not Visibility.has_los(attacker.coord, target.coord, hex_map):
-		return false
-	return true
+	return CombatRules.targets_for_attacker(attacker, atk_def, units, hex_map, visible)
+
+func _can_attack_target(attacker: Unit, target: Unit) -> bool:
+	var atk_def := DataLoader.get_unit_def(attacker.type_id)
+	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
+	return CombatRules.can_attack_target(attacker, target, atk_def, hex_map, visible)
 
 func _deselect() -> void:
 	if selected_unit != null:

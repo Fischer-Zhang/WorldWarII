@@ -96,7 +96,7 @@ Two design decisions worth flagging:
 1. **HP-ratio scaling.** A wounded attacker hits softer (`attacker_hp / max_hp`). This creates a natural "death spiral" — a 30%-HP unit is much weaker than the same unit at full HP — without needing a separate morale system.
 2. **Counter-attack at half damage.** If the defender survives and the attacker is within the defender's range, the defender retaliates at 50% damage. Artillery (`indirect: true`) cannot counter while defending; it is still countered if it attacks from inside the defender's range.
 
-Attack legality is owned by [scripts/battle.gd](../scripts/battle.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers.
+Attack legality is owned by [scripts/combat/combat_rules.gd](../scripts/combat/combat_rules.gd): direct attacks require current faction visibility and line of sight; indirect attacks still require a spotted target but ignore LOS blockers. Player targeting and AI attack evaluation both call this shared rule layer.
 
 `vs_armor` only triggers against units with `armor > 0`, so AT guns shred tanks but waste their bonus on infantry.
 
@@ -381,9 +381,10 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded | 6 |
 | `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect defender no-counter, OOR, close indirect attack counter | 8 |
+| `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
 | `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out + ZoC path reconstruction | +4 |
 | `test_combat_resolver` (cont.) | Dig-in defense bonus + counter-no-dig-in | +2 |
-| **Total** | | **34 ✓** |
+| **Total** | | **44 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.

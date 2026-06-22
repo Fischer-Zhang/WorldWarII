@@ -2,7 +2,6 @@ class_name CombatResolver
 extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
-const Unit := preload("res://scripts/units/unit.gd")
 
 # Deterministic combat resolution.
 # Damage scales with the attacker's current HP — wounded units hit softer.
@@ -68,16 +67,3 @@ static func _compute_damage(
 	if is_counter:
 		scaled = max(1, scaled / 2)
 	return scaled
-
-static func attack_targets_in_range(
-	attacker: Unit, attacker_range: int, units: Array
-) -> Array:
-	# Returns enemy units within attacker's range from its current coord.
-	var out: Array = []
-	for u in units:
-		var other: Unit = u
-		if not other.is_alive() or other.faction_id == attacker.faction_id:
-			continue
-		if HexCoord.distance(attacker.coord, other.coord) <= attacker_range:
-			out.append(other)
-	return out
