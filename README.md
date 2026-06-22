@@ -37,7 +37,7 @@ A sandbox scenario for development is also included.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **44 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), attack legality, hex line drawing, line-of-sight.
+- **47 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), attack legality, AI role shaping, hex line drawing, line-of-sight.
 - **~3000 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
 
 ---
@@ -174,7 +174,7 @@ No code changes required.
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 44 unit tests, headless runner
+- [x] 47 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)

@@ -2,7 +2,6 @@ class_name Visibility
 extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
-const Unit := preload("res://scripts/units/unit.gd")
 
 # Hex line-of-sight + per-faction visibility.
 # Asymmetric model: the player computes their visible set; the AI is
@@ -28,16 +27,17 @@ static func has_los(observer: Vector2i, target: Vector2i, hex_map) -> bool:
 	return true
 
 static func compute_visible_hexes(
-	units: Array, faction_id: String, hex_map
+	units: Array, faction_id: String, hex_map, unit_defs: Dictionary = {}
 ) -> Dictionary:
 	# Returns the set of hexes (as a Dictionary[Vector2i, true]) visible
 	# to any living unit of `faction_id`.
 	var visible: Dictionary = {}
 	for u in units:
-		var unit: Unit = u
+		var unit = u
 		if not unit.is_alive() or unit.faction_id != faction_id:
 			continue
-		var vision: int = int(DataLoader.get_unit_def(unit.type_id).get("vision", 3))
+		var unit_def: Dictionary = unit_defs.get(unit.type_id, {})
+		var vision: int = int(unit_def.get("vision", 3))
 		visible[unit.coord] = true  # unit's own hex always visible
 		for c in HexCoord.range_within(unit.coord, vision):
 			var coord: Vector2i = c

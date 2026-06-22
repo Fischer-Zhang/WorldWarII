@@ -135,6 +135,7 @@ func _run_ai_turn(faction_id: String) -> void:
 	ai_running = true
 	var personality := String(factions[faction_id].get("ai", "aggressive"))
 	var ai := AIController.new(self, personality, GameState.difficulty)
+	ai._data_loader = DataLoader
 	# Process units one at a time with a small delay so the player can see what's happening.
 	var ai_units: Array[Unit] = []
 	for u in units:
@@ -567,7 +568,7 @@ func _recompute_visibility() -> void:
 	# drives the rendered fog overlay; AI factions consume their set
 	# (plus stale memory) via `get_known_enemies`.
 	for fid in factions.keys():
-		visibility_by_faction[fid] = Visibility.compute_visible_hexes(units, fid, hex_map)
+		visibility_by_faction[fid] = Visibility.compute_visible_hexes(units, fid, hex_map, DataLoader.units)
 	# Update each faction's last-known-position memory:
 	#   - Drop entries for dead units.
 	#   - Refresh entry for any currently-visible enemy.

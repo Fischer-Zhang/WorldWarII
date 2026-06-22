@@ -22,12 +22,16 @@ This workflow should run before and after every proposed stat patch.
 
 ## Workflow 1.5: Validation Hook
 
-Use `tools/validate.sh` for the standard validation sequence:
+Use `tools/validate_fast.sh` for validation that does not launch Godot:
 
 - JSON validation for unit catalogs.
 - Python syntax checks for report tools.
 - Regeneration of balance and scenario reports.
 - `git diff --check`.
+
+Use `tools/validate.sh` for the full standard validation sequence:
+
+- Everything in `tools/validate_fast.sh`.
 - `bash tests/run_all.sh`.
 
 Use `tools/install_hooks.sh` to install a local git `pre-commit` hook that runs

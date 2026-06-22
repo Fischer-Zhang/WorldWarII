@@ -390,8 +390,9 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_combat_resolver` | Base, terrain, vs_armor, HP scaling, lethal, indirect defender no-counter, OOR, close indirect attack counter | 8 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning | 3 |
 | `test_pathfinding` (cont.) | ZoC + friendly-not-ZoC + no-faction opt-out + ZoC path reconstruction | +4 |
 | `test_combat_resolver` (cont.) | Dig-in defense bonus + counter-no-dig-in | +2 |
-| **Total** | | **44 ✓** |
+| **Total** | | **47 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.
