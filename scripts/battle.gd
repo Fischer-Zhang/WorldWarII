@@ -16,6 +16,7 @@ const DamagePreview := preload("res://scripts/ui/damage_preview.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
+const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
@@ -83,6 +84,12 @@ func _ready() -> void:
 		var unit: Unit = u
 		hex_map.register_unit(unit)
 		units.append(unit)
+
+	# Campaign mode: restore each unit's xp/rank/general from the saved roster
+	# (matched by display_name within faction). New units stay fresh.
+	if GameState.campaign_mode:
+		var camp_state := CampaignManager.load_state()
+		CampaignManager.apply_roster_to_units(camp_state, units)
 
 	# Identify the player's faction once; visibility & objective pulse use it.
 	for fid in factions.keys():
@@ -256,9 +263,26 @@ func _handle_game_over(winner: String) -> void:
 			break
 	AudioBank.play("victory" if player_won else "defeat")
 	GameState.end_scenario(winner, {"turn": turn_manager.turn_number})
+	# Campaign progression: only advance + persist roster on player victory.
+	# A defeat still saves the survivor snapshot so the player can re-play
+	# the same scenario without losing previously accumulated experience.
+	if GameState.campaign_mode:
+		var camp_state := CampaignManager.load_state()
+		var scenario_id := String(scenario.get("id", ""))
+		var survivors: Array = units.filter(func(u): return u.is_alive())
+		if player_won:
+			CampaignManager.complete_scenario(camp_state, scenario_id, survivors)
+		else:
+			# Defeat: snapshot survivors but don't advance progress.
+			CampaignManager.complete_scenario(camp_state, "__no_advance__", survivors)
+		# Steer the Back button to the campaign scene rather than scenario_select.
+		menu_button.text = "返回戰役地圖"
 
 func _on_menu_button_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
+	if GameState.campaign_mode:
+		get_tree().change_scene_to_file("res://scenes/campaign.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
 
 # ---------- INPUT / STATE MACHINE ----------
 

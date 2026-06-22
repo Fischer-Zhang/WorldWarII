@@ -52,5 +52,5 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美 101 空降師 | player | 9 | 291.7 | anti_armor:1, armor:2, artillery:1, infantry:4, support:1 |
+| allies | 美 101 空降師 | player | 10 | 315.2 | anti_armor:1, armor:2, artillery:1, engineer:1, infantry:2, paratrooper:2, support:1 |
 | axis | 德軍第 5 裝甲軍 | ai | 6 | 243.5 | armor:3, artillery:1, infantry:2 |

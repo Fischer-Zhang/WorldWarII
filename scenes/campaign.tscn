@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1ww2campaign001"]
+
+[ext_resource type="Script" path="res://scripts/ui/campaign.gd" id="1_cam"]
+
+[node name="Campaign" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_cam")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.10, 0.12, 0.14, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/VBox"]
+theme_override_font_sizes/font_size = 32
+text = "戰役模式"
+
+[node name="Hint" type="Label" parent="Margin/VBox"]
+theme_override_font_sizes/font_size = 14
+text = "5 場歷史戰役依時序連打,存活的單位 (XP/階級/將軍配置) 會帶到下一場。"
+
+[node name="Spacer1" type="Control" parent="Margin/VBox"]
+custom_minimum_size = Vector2(0, 12)
+
+[node name="Status" type="Label" parent="Margin/VBox"]
+theme_override_font_sizes/font_size = 18
+text = ""
+
+[node name="List" type="VBoxContainer" parent="Margin/VBox"]
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="Spacer2" type="Control" parent="Margin/VBox"]
+custom_minimum_size = Vector2(0, 12)
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/VBox"]
+theme_override_constants/separation = 12
+
+[node name="ContinueButton" type="Button" parent="Margin/VBox/Buttons"]
+custom_minimum_size = Vector2(220, 44)
+theme_override_font_sizes/font_size = 18
+text = "下一場戰役"
+
+[node name="ResetButton" type="Button" parent="Margin/VBox/Buttons"]
+custom_minimum_size = Vector2(160, 44)
+text = "重置進度"
+
+[node name="BackButton" type="Button" parent="Margin/VBox/Buttons"]
+custom_minimum_size = Vector2(160, 44)
+text = "返回主選單"
