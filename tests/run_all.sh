@@ -16,9 +16,14 @@ fail=0
 for t in "$SCRIPT_DIR"/test_*.gd; do
   name="$(basename "$t" .gd)"
   echo "=== $name ==="
-  if ! godot --headless --path "$PROJECT_DIR" --script "res://tests/$(basename "$t")"; then
+  output="$(mktemp)"
+  if ! godot --headless --path "$PROJECT_DIR" --script "res://tests/$(basename "$t")" 2>&1 | tee "$output"; then
     fail=1
   fi
+  if grep -Eq '(^|[[:space:]])FAIL:|SCRIPT ERROR|Compile Error|Parse Error|Failed to load script' "$output"; then
+    fail=1
+  fi
+  rm -f "$output"
 done
 
 if [ "$fail" -ne 0 ]; then

@@ -19,6 +19,7 @@ const LIGHT_TANK_DEF := {
 
 class StubHexMap:
 	var terrain_overrides: Dictionary = {}
+	var occupants: Dictionary = {}
 	func terrain_at(coord: Vector2i) -> String:
 		return terrain_overrides.get(coord, "plain")
 	func blocks_los_at(coord: Vector2i) -> bool:
@@ -122,6 +123,31 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: light tank scout score expected scout %.2f > far %.2f" % [scout_score, too_far_score])
+
+	# 4) Hard AI should apply 1-ply lookahead as a counter-damage penalty.
+	var hard_ai := AIController.new(battle, "aggressive", "hard")
+	hard_ai._data_loader = ai._data_loader
+	var normal_ai := AIController.new(battle, "aggressive", "normal")
+	normal_ai._data_loader = ai._data_loader
+	battle.hex_map.occupants.clear()
+	var wounded_tank := make_unit("medium_tank", "axis", Vector2i(0, 0), 4)
+	var player_tank := make_unit("medium_tank", "allies", Vector2i(0, 2), 16)
+	var visible_enemies := [player_tank]
+	var tank_def: Dictionary = hard_ai._get_unit_def(wounded_tank.type_id)
+	var normal_exposed_score: float = normal_ai._score_position(
+		wounded_tank, Vector2i(0, 1), [{"coord": player_tank.coord, "visible": true}], visible_enemies, battle.hex_map, tank_def, {}
+	)
+	var hard_exposed_score: float = hard_ai._score_position(
+		wounded_tank, Vector2i(0, 1), [{"coord": player_tank.coord, "visible": true}], visible_enemies, battle.hex_map, tank_def, {}
+	)
+	var counter_damage: int = hard_ai._lookahead_counter_damage(
+		wounded_tank, Vector2i(0, 1), visible_enemies, battle.hex_map, tank_def
+	)
+	if counter_damage > 0 and hard_exposed_score < normal_exposed_score:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: hard lookahead expected counter penalty, normal %.2f hard %.2f counter %d" % [normal_exposed_score, hard_exposed_score, counter_damage])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

@@ -2,7 +2,7 @@
 
 > 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,4 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-32%2F32-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-54%2F54-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -37,7 +37,7 @@ A sandbox scenario for development is also included.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead that simulates the player's worst counter-attack and discounts the score.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **47 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), attack legality, AI role shaping, hex line drawing, line-of-sight.
+- **54 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in), attack legality, AI role shaping and lookahead, Bastogne reinforcements, hex line drawing, line-of-sight.
 - **~3000 LOC** of GDScript across 19 files. Read it top-to-bottom in an afternoon.
 
 ---
@@ -139,6 +139,10 @@ godot -e .
 bash tests/run_all.sh
 ```
 
+### Balance tooling
+
+Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes. `tools/validate_fast.sh` runs JSON/Python/report checks without launching Godot, and `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
+
 ### WSL2 caveats
 
 If you see `libasound.so.2: cannot open` on startup, audio falls back to a dummy driver (silent). To enable real audio:
@@ -174,7 +178,7 @@ No code changes required.
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 47 unit tests, headless runner
+- [x] 54 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)

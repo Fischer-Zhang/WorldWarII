@@ -12,6 +12,7 @@ const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
+const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
@@ -612,32 +613,9 @@ func get_known_enemies(faction_id: String) -> Array:
 func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> void:
 	# Spawns any reinforcements scheduled for `turn_number` belonging to
 	# `faction_id`. Already-spawned entries are skipped.
-	var reinforcements: Array = scenario.get("reinforcements", [])
-	var fresh: Array[Unit] = []
-	for i in range(reinforcements.size()):
-		if spawned_reinforcements.has(i):
-			continue
-		var r: Dictionary = reinforcements[i]
-		if int(r.get("at_turn", -1)) != turn_number:
-			continue
-		if String(r.get("faction", "")) != faction_id:
-			continue
-		var unit := UnitFactory.create_unit(r, factions)
-		if unit == null:
-			spawned_reinforcements[i] = true
-			continue
-		# If the spawn hex is occupied, skip this reinforcement (try again next turn? — no, just drop)
-		if hex_map.occupants.get(unit.coord) != null:
-			push_warning("[Reinforcement] spawn hex %s occupied; skipping" % [unit.coord])
-			unit.queue_free()
-			spawned_reinforcements[i] = true
-			continue
-		hex_map.register_unit(unit)
-		units.append(unit)
-		# Allow newly-arrived units to act this turn.
-		unit.reset_for_new_turn()
-		spawned_reinforcements[i] = true
-		fresh.append(unit)
+	var fresh: Array = ReinforcementSpawner.spawn_for_turn(
+		scenario, factions, hex_map, units, spawned_reinforcements, faction_id, turn_number
+	)
 	if fresh.is_empty():
 		return
 	var names := []
