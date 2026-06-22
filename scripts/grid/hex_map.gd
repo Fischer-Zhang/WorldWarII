@@ -14,6 +14,7 @@ const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
 const ATTACK_OVERLAY_COLOR := Color(1.0, 0.3, 0.25, 0.45)
+const THREAT_OVERLAY_COLOR := Color(1.0, 0.45, 0.05, 0.25)
 const OBJECTIVE_RGB := Color(1.0, 0.85, 0.2)
 const FOG_COLOR := Color(0.04, 0.04, 0.07, 0.72)
 
@@ -22,6 +23,7 @@ var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
 var occupants: Dictionary = {} # Vector2i (axial) -> Unit
 var highlight: Polygon2D
 var range_overlays: Node2D
+var threat_overlays: Node2D
 var fog_overlays: Dictionary = {}  # Vector2i -> Polygon2D
 var objective_overlays: Array[Polygon2D] = []
 var _objective_phase: float = 0.0
@@ -45,6 +47,7 @@ func load_from_scenario(scenario: Dictionary) -> void:
 			tiles[coord] = terrain_id
 			_spawn_tile(coord, terrain_id)
 	_spawn_range_overlay_layer()
+	_spawn_threat_overlay_layer()
 	_spawn_highlight()
 	_spawn_fog_layer()
 	_recompute_bounds()
@@ -81,6 +84,12 @@ func _spawn_range_overlay_layer() -> void:
 	range_overlays.z_index = 5
 	add_child(range_overlays)
 
+func _spawn_threat_overlay_layer() -> void:
+	threat_overlays = Node2D.new()
+	threat_overlays.name = "ThreatOverlays"
+	threat_overlays.z_index = 4
+	add_child(threat_overlays)
+
 func _spawn_fog_layer() -> void:
 	var layer := Node2D.new()
 	layer.name = "FogLayer"
@@ -115,21 +124,36 @@ func show_movement_range(coords: Array) -> void:
 func show_attack_targets(coords: Array) -> void:
 	_paint_overlay(coords, ATTACK_OVERLAY_COLOR)
 
+func show_threat_range(coords: Array) -> void:
+	_paint_overlay_on_layer(threat_overlays, coords, THREAT_OVERLAY_COLOR, 0.92)
+
+func clear_threat_range() -> void:
+	_clear_overlay_layer(threat_overlays)
+
 func clear_movement_range() -> void:
-	if range_overlays == null:
-		return
-	for c in range_overlays.get_children():
-		c.queue_free()
+	_clear_overlay_layer(range_overlays)
 
 func _paint_overlay(coords: Array, color: Color) -> void:
 	clear_movement_range()
+	_paint_overlay_on_layer(range_overlays, coords, color, 0.85)
+
+func _paint_overlay_on_layer(layer: Node2D, coords: Array, color: Color, scale: float) -> void:
+	if layer == null:
+		return
+	_clear_overlay_layer(layer)
 	for c in coords:
 		var coord: Vector2i = c
 		var p := Polygon2D.new()
-		p.polygon = _hex_vertices(HEX_SIZE * 0.85)
+		p.polygon = _hex_vertices(HEX_SIZE * scale)
 		p.color = color
 		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
-		range_overlays.add_child(p)
+		layer.add_child(p)
+
+func _clear_overlay_layer(layer: Node2D) -> void:
+	if layer == null:
+		return
+	for c in layer.get_children():
+		c.queue_free()
 
 func register_unit(unit: Unit) -> void:
 	occupants[unit.coord] = unit
@@ -288,6 +312,7 @@ func _clear() -> void:
 	fog_overlays.clear()
 	highlight = null
 	range_overlays = null
+	threat_overlays = null
 	set_process(false)
 
 func _unhandled_input(event: InputEvent) -> void:

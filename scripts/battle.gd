@@ -320,6 +320,7 @@ func _select_unit(unit: Unit) -> void:
 		unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id
 	)
 	hex_map.show_movement_range(movement_range.keys())
+	hex_map.show_threat_range(_enemy_threat_hexes(unit.faction_id))
 	hex_map.highlight_coord(unit.coord)
 	info_label.text = "選取:%s (HP %d/%d) — 點藍色 hex 移動,或再點自己原地待機" % [
 		unit.display_name, unit.hp, unit.max_hp,
@@ -492,6 +493,11 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 		parts.append("壓制 +%d" % result.suppression_to_defender)
 	if result.defender_dig_in_loss > 0:
 		parts.append("構工 -%d" % result.defender_dig_in_loss)
+	var future_suppression := CombatEffects.apply_suppression(defender.suppression, result.suppression_to_defender)
+	if future_suppression != defender.suppression:
+		parts.append("目標壓制 %d→%d" % [defender.suppression, future_suppression])
+		if CombatEffects.is_pinned(future_suppression):
+			parts.append("釘住")
 	return " / ".join(parts)
 
 func _deselect() -> void:
@@ -501,10 +507,30 @@ func _deselect() -> void:
 	movement_range.clear()
 	attack_targets.clear()
 	hex_map.clear_movement_range()
+	hex_map.clear_threat_range()
 	overwatch_button.visible = false
 	rally_button.visible = false
 	if phase != Phase.GAME_OVER:
 		phase = Phase.IDLE
+
+func _enemy_threat_hexes(faction_id: String) -> Array:
+	var out: Dictionary = {}
+	var viewer_visible: Dictionary = visibility_by_faction.get(faction_id, {})
+	for u in units:
+		var enemy: Unit = u
+		if not enemy.is_alive() or enemy.faction_id == faction_id:
+			continue
+		if not viewer_visible.has(enemy.coord):
+			continue
+		var enemy_def := DataLoader.get_unit_def(enemy.type_id)
+		var enemy_general := DataLoader.get_general_def(enemy.general_id)
+		var enemy_range := int(enemy_def.get("range", 1))
+		var enemy_move := enemy.effective_move(enemy_def, enemy_general)
+		for c in hex_map.tiles.keys():
+			var coord: Vector2i = c
+			if HexCoord.distance(enemy.coord, coord) <= enemy_move + enemy_range:
+				out[coord] = true
+	return out.keys()
 
 func _show_terrain_info(coord: Vector2i, terrain_id: String, unit_here: Unit) -> void:
 	var def := DataLoader.get_terrain_def(terrain_id)
@@ -565,8 +591,12 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 	if unit.dig_in_level > 0:
 		lines.append("[color=#d6a060]⛤ 構工 +%d 防禦[/color]" % unit.dig_in_level)
 	if unit.suppression > 0:
-		var pin_text := " / 無法警戒構工" if CombatEffects.is_pinned(unit.suppression) else ""
-		lines.append("[color=#79aaff]壓制 %d%s[/color]" % [unit.suppression, pin_text])
+		var effect_text := _suppression_effect_text(unit.suppression)
+		var terrain_def := DataLoader.get_terrain_def(hex_map.terrain_at(unit.coord))
+		var after_rally := CombatEffects.rally_suppression(unit.suppression, terrain_def)
+		lines.append("[color=#79aaff]壓制 %d: %s; 整隊後 %d[/color]" % [
+			unit.suppression, effect_text, after_rally,
+		])
 	if unit.has_moved:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
 	info_stats.text = "\n".join(lines)
@@ -578,6 +608,18 @@ func _mod_suffix(delta: int) -> String:
 	if delta < 0:
 		return " [color=#fc7a7a](%d)[/color]" % delta
 	return ""
+
+func _suppression_effect_text(value: int) -> String:
+	var parts: Array[String] = []
+	if CombatEffects.is_pinned(value):
+		parts.append("無法警戒/構工")
+	if CombatEffects.move_penalty(value) > 0:
+		parts.append("移動 -%d" % CombatEffects.move_penalty(value))
+	if CombatEffects.attack_penalty(value) > 0:
+		parts.append("攻擊 -%d" % CombatEffects.attack_penalty(value))
+	if parts.is_empty():
+		return "輕度"
+	return ", ".join(parts)
 
 func _update_info_panel_terrain_only(coord: Vector2i, terrain_id: String) -> void:
 	if terrain_id == "":

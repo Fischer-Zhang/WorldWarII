@@ -209,5 +209,23 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: pinned unit expected rally plan got %s" % str(rally_plan))
 
+	# 8) AI should focus an already damaged/suppressed target when raw matchups tie.
+	battle.hex_map.terrain_overrides.clear()
+	var focus_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var fresh_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	var focus_target := make_unit("infantry", "allies", Vector2i(0, 1), 6)
+	focus_target.suppression = 2
+	var focus_choice = ai._best_attack_from(
+		focus_attacker.coord, focus_attacker.faction_id, focus_attacker.type_id,
+		[fresh_target, focus_target],
+		ai._get_unit_def(focus_attacker.type_id),
+		{fresh_target.coord: true, focus_target.coord: true}
+	)
+	if focus_choice == focus_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: AI should focus damaged/suppressed target")
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

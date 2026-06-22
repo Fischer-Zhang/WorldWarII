@@ -2,7 +2,7 @@
 
 > 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,5 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-79%2F79-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-80%2F80-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -33,12 +33,12 @@ A sandbox scenario for development is also included.
 
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
 - **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
-- **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression, Rally** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), heavy fire can pin units, and Rally lets suppressed units spend their action recovering.
+- **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression, Rally** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), heavy fire can pin units, Rally lets suppressed units spend their action recovering, and threat overlays expose dangerous hexes.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
-- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead, capture AI values objective hexes, and pinned units can choose Rally.
+- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead, capture AI values objective hexes, pinned units can choose Rally, and focus-fire scoring prefers wounded or suppressed targets.
 - **Historical generals + veteran XP** — 10 named generals (Rommel, Patton, Zhukov, …) attach to specific units in each scenario, applying quality-tiered stat bonuses to compatible unit types. Units gain XP per kill / damage dealt during a battle, ranking up to ★/★★/★★★ for cumulative attack/defense/move/vision bonuses. Both feed a single modifier pipeline through `CombatResolver` / `CombatModifiers`.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **79 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in, suppression, Rally + general modifiers), attack legality, AI role shaping and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
+- **80 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in, suppression, Rally + general modifiers), attack legality, AI role shaping, focus fire and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
 - **~2800 LOC** of GDScript across 24 files. Read it top-to-bottom in an afternoon.
 
 ---
@@ -54,7 +54,7 @@ In-battle interactions:
 | Action | How |
 |---|---|
 | Select your unit | Click it — yellow pulse halo appears, side panel populates with stats |
-| See movement range | Blue overlay on reachable hexes (BFS with per-terrain costs) |
+| See movement range | Blue overlay on reachable hexes; orange overlay marks visible enemy threat reach |
 | Move | Click a blue hex — unit walks the path hex-by-hex |
 | Attack | After moving, red overlay shows enemies in range — click one |
 | Rally | If suppressed, click `整隊 (R)` after moving/staying to spend the action and recover suppression |
@@ -180,7 +180,7 @@ No code changes required.
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 79 unit tests, headless runner
+- [x] 80 unit tests, headless runner
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)

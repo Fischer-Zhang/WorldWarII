@@ -24,6 +24,8 @@ const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
 const W_RALLY := 4.0
+const W_FOCUS_DAMAGE := 0.18
+const W_FOCUS_SUPPRESSION := 0.7
 const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
 
@@ -179,6 +181,7 @@ func _score_position(
 		if r.defender_dies:
 			dmg_score += _kill_bonus
 		dmg_score += _target_role_score(unit.type_id, def_def)
+		dmg_score += _target_focus_score(enemy, def_def)
 		dmg_score += float(r.suppression_to_defender) * W_SUPPRESSION
 		dmg_score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg_score -= 0.6 * float(r.counter_damage)
@@ -268,6 +271,7 @@ func _best_attack_value(
 		if r.defender_dies:
 			dmg += _kill_bonus
 		dmg += _target_role_score(unit.type_id, def_def)
+		dmg += _target_focus_score(enemy, def_def)
 		dmg += float(r.suppression_to_defender) * W_SUPPRESSION
 		dmg += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		dmg -= 0.6 * float(r.counter_damage)
@@ -343,6 +347,7 @@ func _best_attack_from(
 		)
 		var dmg: float = r.damage_to_defender + (10 if r.defender_dies else 0) \
 			+ _target_role_score(attacker_type, def_def) \
+			+ _target_focus_score(enemy, def_def) \
 			+ float(r.suppression_to_defender) * W_SUPPRESSION \
 			+ float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		if dmg > best_dmg:
@@ -356,6 +361,12 @@ func _target_role_score(attacker_type: String, defender_def: Dictionary) -> floa
 			return AT_ARMOR_TARGET_BONUS
 		return -AT_SOFT_TARGET_PENALTY
 	return 0.0
+
+func _target_focus_score(enemy, defender_def: Dictionary) -> float:
+	var max_hp := int(defender_def.get("hp", max(1, enemy.hp)))
+	var missing_hp: int = max(0, max_hp - enemy.hp)
+	var suppression := int(enemy.suppression)
+	return float(missing_hp) * W_FOCUS_DAMAGE + float(suppression) * W_FOCUS_SUPPRESSION
 
 func _role_position_score(
 	unit,

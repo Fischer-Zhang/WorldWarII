@@ -123,6 +123,7 @@ For each AI unit on its faction's turn:
          + best_damage_from_here         × 2.5   (reward attacks)
          + 5.0 if attack would kill              (finish bonus)
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
+         + wounded/suppressed target focus       (finish damaged units)
          + suppression / dig-in break value      (prefer pinning and siege hits)
          + capture-objective pressure            (for capture factions)
          - exposure_to_enemy_threat      × 0.5   (don't walk into kill zones)
@@ -141,6 +142,7 @@ Role shaping keeps specialist units from collapsing back into raw damage math:
 - Suppression and dig-in break are part of attack value, so artillery and MG teams can be preferred even when raw damage ties.
 - Capture factions value positions closer to their objective hex.
 - Pinned units can choose Rally in place when suppression recovery beats moving, attacking or overwatch.
+- Focus-fire scoring gives extra value to already wounded or suppressed targets, making the AI finish damaged units instead of spreading equal attacks.
 
 **Personality weights** modulate the final score:
 
@@ -234,6 +236,8 @@ Damaging attacks apply suppression through [scripts/combat/combat_effects.gd](..
 - `4+`: attack -1.
 
 Suppression decays by 1 at the start of the unit's own faction turn. Rally is the active counterplay: the unit spends its action, clears overwatch/dig-in intent, and immediately removes 2 suppression, or 3 if its current terrain has defense 2 or higher. The player uses `整隊 (R)`; the AI evaluates Rally as a fourth action beside attack, overwatch and wait.
+
+When selecting a unit, visible enemy threat reach is shown as an orange overlay behind the blue movement range. The selected unit's info panel expands suppression into concrete effects (`無法警戒/構工`, `移動 -1`, `攻擊 -1`) and shows the expected suppression value after Rally.
 
 ### Combined behaviour
 
@@ -490,8 +494,8 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 | `test_combat_modifiers` | Rank thresholds and general modifier aggregation | 9 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action | 7 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action, focus fire | 8 |
 | `test_reinforcements` | Bastogne scheduled turn 7 spawn, coordinate conversion, ready-to-act state, no duplicate spawn, occupied-hex skip | 6 |
-| **Total** | | **79 ✓** |
+| **Total** | | **80 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.
