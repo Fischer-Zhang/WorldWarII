@@ -237,6 +237,138 @@ def ttk_table(units: dict[str, Any], terrains: dict[str, Any]) -> str:
     return table(["attacker", "defender", "plain dmg", "plain hits", "town+dig3 dmg", "town+dig3 hits"], rows)
 
 
+def fmt_delta(value: int | float) -> str:
+    if isinstance(value, float):
+        if abs(value) < 0.005:
+            return "0.00"
+        return f"{value:+.2f}"
+    if value == 0:
+        return "0"
+    return f"{value:+d}"
+
+
+def baseline_delta_section(
+    units: dict[str, Any],
+    baseline_units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    sections: list[str] = []
+    sections.append("## Baseline Delta")
+    sections.append("Baseline deltas compare current `data/units.json` against the provided `--baseline` unit catalog.")
+    sections.append("### Stat Changes\n\n" + unit_delta_table(units, baseline_units))
+    sections.append("### Plain Damage Delta\n\n" + damage_delta_matrix(units, baseline_units, terrains, "plain", 0))
+    sections.append("### Hits-To-Kill Delta\n\n" + ttk_delta_table(units, baseline_units, terrains))
+    sections.append("### High-Risk TTK Changes\n\n" + high_risk_ttk_changes(units, baseline_units, terrains))
+    return "\n\n".join(sections)
+
+
+def unit_delta_table(units: dict[str, Any], baseline_units: dict[str, Any]) -> str:
+    stat_keys = ["hp", "attack", "defense", "range", "move", "vision", "vs_armor", "armor"]
+    rows: list[list[Any]] = []
+    for unit_id, unit in units.items():
+        if unit_id not in baseline_units:
+            rows.append([unit_id, unit.get("name_zh", unit_id), "new unit"])
+            continue
+        baseline = baseline_units[unit_id]
+        changes: list[str] = []
+        for key in stat_keys:
+            old = int(baseline.get(key, 0))
+            new = int(unit.get(key, 0))
+            if old != new:
+                changes.append(f"{key} {old}->{new} ({fmt_delta(new - old)})")
+        if bool(baseline.get("indirect", False)) != bool(unit.get("indirect", False)):
+            changes.append(f"indirect {baseline.get('indirect', False)}->{unit.get('indirect', False)}")
+        if changes:
+            rows.append([unit_id, unit.get("name_zh", unit_id), "<br>".join(changes)])
+    if not rows:
+        rows.append(["-", "-", "no stat changes"])
+    return table(["id", "name", "changes"], rows)
+
+
+def damage_delta_matrix(
+    units: dict[str, Any],
+    baseline_units: dict[str, Any],
+    terrains: dict[str, Any],
+    terrain_id: str,
+    dig_in: int,
+) -> str:
+    unit_ids = [unit_id for unit_id in units.keys() if unit_id in baseline_units]
+    headers = ["atk \\ def"] + [unit_name(unit_id, units) for unit_id in unit_ids]
+    rows: list[list[Any]] = []
+    for attacker_id in unit_ids:
+        row: list[Any] = [unit_name(attacker_id, units)]
+        for defender_id in unit_ids:
+            current = resolve(
+                attacker_id, defender_id, units, terrains,
+                defender_terrain_id=terrain_id, defender_dig_in=dig_in,
+            )
+            baseline = resolve(
+                attacker_id, defender_id, baseline_units, terrains,
+                defender_terrain_id=terrain_id, defender_dig_in=dig_in,
+            )
+            row.append(fmt_delta(current.damage - baseline.damage))
+        rows.append(row)
+    return table(headers, rows)
+
+
+def ttk_delta_table(
+    units: dict[str, Any],
+    baseline_units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    rows: list[list[Any]] = []
+    unit_ids = [unit_id for unit_id in units.keys() if unit_id in baseline_units]
+    for attacker_id in unit_ids:
+        for defender_id in unit_ids:
+            current = resolve(attacker_id, defender_id, units, terrains)
+            baseline = resolve(attacker_id, defender_id, baseline_units, terrains)
+            current_hits = ceil_div(int(units[defender_id].get("hp", 1)), current.damage)
+            baseline_hits = ceil_div(int(baseline_units[defender_id].get("hp", 1)), baseline.damage)
+            delta = current_hits - baseline_hits
+            if delta == 0:
+                continue
+            rows.append([
+                unit_name(attacker_id, units),
+                unit_name(defender_id, units),
+                baseline_hits,
+                current_hits,
+                fmt_delta(delta),
+            ])
+    if not rows:
+        rows.append(["-", "-", "-", "-", "no plain TTK changes"])
+    return table(["attacker", "defender", "baseline hits", "current hits", "delta"], rows)
+
+
+def high_risk_ttk_changes(
+    units: dict[str, Any],
+    baseline_units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    rows: list[list[Any]] = []
+    unit_ids = [unit_id for unit_id in units.keys() if unit_id in baseline_units]
+    for attacker_id in unit_ids:
+        for defender_id in unit_ids:
+            baseline = resolve(attacker_id, defender_id, baseline_units, terrains)
+            current = resolve(attacker_id, defender_id, units, terrains)
+            baseline_hits = ceil_div(int(baseline_units[defender_id].get("hp", 1)), baseline.damage)
+            current_hits = ceil_div(int(units[defender_id].get("hp", 1)), current.damage)
+            if baseline_hits == current_hits:
+                continue
+            pct = (float(current_hits - baseline_hits) / float(max(1, baseline_hits))) * 100.0
+            if abs(pct) < 30.0:
+                continue
+            rows.append([
+                unit_name(attacker_id, units),
+                unit_name(defender_id, units),
+                baseline_hits,
+                current_hits,
+                f"{pct:+.0f}%",
+            ])
+    if not rows:
+        rows.append(["-", "-", "-", "-", "no >=30% plain TTK changes"])
+    return table(["attacker", "defender", "baseline hits", "current hits", "change"], rows)
+
+
 def matchup_flags(units: dict[str, Any], terrains: dict[str, Any]) -> str:
     rows: list[list[Any]] = []
     for attacker_id in units.keys():
@@ -335,7 +467,7 @@ def rule_risk_section() -> str:
     return table(["risk", "why it matters", "next action"], rows)
 
 
-def generate_report() -> str:
+def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
     units = load_json(UNITS_PATH)
     terrains = load_json(TERRAINS_PATH)
     scenarios = [load_json(Path(path)) for path in sorted(glob.glob(SCENARIOS_GLOB))]
@@ -351,6 +483,8 @@ def generate_report() -> str:
     for label, terrain_id, dig_in in TERRAIN_CASES[1:]:
         sections.append(f"## Damage Matrix: {label}\n\n" + damage_matrix(units, terrains, terrain_id, dig_in, False))
     sections.append("## Hits To Kill\n\n" + ttk_table(units, terrains))
+    if baseline_units is not None:
+        sections.append(baseline_delta_section(units, baseline_units, terrains))
     sections.append("## Role Diagnostics\n\n" + matchup_flags(units, terrains))
     sections.append("## Scenario Exposure\n\n" + scenario_tables(scenarios, units))
     sections.append("## Rule Risks\n\n" + rule_risk_section())
@@ -371,10 +505,19 @@ def main() -> None:
         default=DEFAULT_OUTPUT,
         help=f"report path, default: {DEFAULT_OUTPUT.relative_to(ROOT)}",
     )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="optional baseline units.json to compare against current data/units.json",
+    )
     args = parser.parse_args()
     output = args.output if args.output.is_absolute() else ROOT / args.output
+    baseline_units = None
+    if args.baseline is not None:
+        baseline_path = args.baseline if args.baseline.is_absolute() else ROOT / args.baseline
+        baseline_units = load_json(baseline_path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(generate_report(), encoding="utf-8")
+    output.write_text(generate_report(baseline_units), encoding="utf-8")
     print(f"Wrote {output.relative_to(ROOT)}")
 
 

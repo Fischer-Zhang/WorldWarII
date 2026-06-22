@@ -24,7 +24,7 @@
   "at_gun": {
     "name_zh": "反戰車砲",
     "hp": 6,
-    "attack": 6,
+    "attack": 7,
     "defense": 1,
     "range": 1,
     "move": 1,
@@ -39,7 +39,7 @@
     "defense": 4,
     "range": 1,
     "move": 5,
-    "vision": 5,
+    "vision": 4,
     "vs_armor": 2,
     "armor": 2
   },
@@ -57,12 +57,12 @@
   "artillery": {
     "name_zh": "砲兵",
     "hp": 8,
-    "attack": 7,
+    "attack": 8,
     "defense": 1,
     "range": 3,
     "move": 2,
     "vision": 5,
-    "vs_armor": 1,
+    "vs_armor": 2,
     "armor": 0,
     "indirect": true
   }

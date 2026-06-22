@@ -5,6 +5,8 @@ This project should treat balance as a repeatable workflow, not a one-off stat e
 ## Workflow 1: Numeric Diagnosis
 
 Use `python3 tools/balance_report.py` to regenerate `docs/progress/balance_report.md`.
+Use `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json`
+when reviewing the first balance patch against the pre-patch catalog.
 
 The generated report covers:
 
@@ -12,6 +14,7 @@ The generated report covers:
 - Damage and counter matrices.
 - Terrain and dig-in damage matrices.
 - Hits-to-kill under plain and town + dig-in 3 conditions.
+- Optional baseline deltas for stat changes, damage changes, and hits-to-kill changes.
 - Scenario unit and terrain exposure.
 - Known rule risks.
 
