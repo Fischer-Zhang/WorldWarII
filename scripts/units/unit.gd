@@ -47,6 +47,8 @@ var xp: int = 0
 var rank: int = 0
 # Optional attached general (data lookup via DataLoader.get_general_def).
 var general_id: String = ""
+var general_upgrade_levels: Dictionary = {}
+var tech_mods: Dictionary = {}
 # Temporary effects from general's active skill. Each entry:
 #   { skill_id, expires_at_turn, source_general, self_mods, aura_mods, no_counter }
 # `expires_at_turn` is the absolute TurnManager turn_number AFTER which the

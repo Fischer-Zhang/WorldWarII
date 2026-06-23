@@ -6,12 +6,14 @@ extends Node
 const UNITS_PATH := "res://data/units.json"
 const TERRAINS_PATH := "res://data/terrains.json"
 const GENERALS_PATH := "res://data/generals.json"
+const TECH_TREE_PATH := "res://data/tech_tree.json"
 const CAMPAIGNS_PATH := "res://data/campaigns.json"
 const SCENARIOS_DIR := "res://data/scenarios/"
 
 var units: Dictionary = {}
 var terrains: Dictionary = {}
 var generals: Dictionary = {}
+var tech_tree: Dictionary = {}
 var campaigns: Array[Dictionary] = []
 var scenarios: Array[Dictionary] = []
 
@@ -19,10 +21,11 @@ func _ready() -> void:
 	units = _with_catalog_ids(_load_json(UNITS_PATH))
 	terrains = _with_catalog_ids(_load_json(TERRAINS_PATH))
 	generals = _with_catalog_ids(_load_json(GENERALS_PATH))
+	tech_tree = _with_catalog_ids(_load_json(TECH_TREE_PATH))
 	campaigns = _load_campaigns()
 	scenarios = _load_scenarios()
-	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d campaigns, %d scenarios" % [
-		units.size(), terrains.size(), generals.size(), campaigns.size(), scenarios.size(),
+	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d techs, %d campaigns, %d scenarios" % [
+		units.size(), terrains.size(), generals.size(), tech_tree.size(), campaigns.size(), scenarios.size(),
 	])
 
 func get_unit_def(type_id: String) -> Dictionary:
@@ -44,6 +47,14 @@ func get_general_def(general_id: String) -> Dictionary:
 		push_error("Unknown general: " + general_id)
 		return {}
 	return generals[general_id]
+
+func get_tech_def(tech_id: String) -> Dictionary:
+	if tech_id == "":
+		return {}
+	if not tech_tree.has(tech_id):
+		push_error("Unknown tech: " + tech_id)
+		return {}
+	return tech_tree[tech_id]
 
 func get_scenario(scenario_id: String) -> Dictionary:
 	for s in scenarios:

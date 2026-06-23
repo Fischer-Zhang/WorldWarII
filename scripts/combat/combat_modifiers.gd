@@ -1,6 +1,8 @@
 class_name CombatModifiers
 extends RefCounted
 
+const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
+
 # Aggregates per-unit stat modifiers from two sources:
 #   1. Veteran rank (in-battle XP progression)
 #   2. Attached general's bonuses (deployment-time assignment)
@@ -52,6 +54,21 @@ static func for_unit(unit, general_def: Dictionary = {}) -> Dictionary:
 			mods.vs_armor += int(general_def.get("vs_armor_bonus", 0))
 			mods.move += int(general_def.get("move_bonus", 0))
 			mods.vision += int(general_def.get("vision_bonus", 0))
+			var general_levels_var: Variant = unit.get("general_upgrade_levels")
+			if general_levels_var is Dictionary:
+				var general_levels: Dictionary = general_levels_var
+				var general_id := String(unit.get("general_id"))
+				var upgrade_mods := LoungeManager.general_upgrade_mods(
+					general_def,
+					int(general_levels.get(general_id, 0))
+				)
+				for k in mods.keys():
+					mods[k] += int(upgrade_mods.get(k, 0))
+	var tech_mods_var: Variant = unit.get("tech_mods")
+	if tech_mods_var is Dictionary:
+		var stored_tech_mods: Dictionary = tech_mods_var
+		for k in mods.keys():
+			mods[k] += int(stored_tech_mods.get(k, 0))
 	# Active skill effects layered on top of base + rank + general
 	# (transient buffs from skills like Rommel's 閃電進攻).
 	if unit.get("active_effects") != null:

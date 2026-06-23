@@ -17,6 +17,7 @@ const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
 const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
@@ -97,6 +98,8 @@ func _ready() -> void:
 		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
 		var scenario_order: Array = campaign.get("scenario_order", [])
 		CampaignManager.apply_roster_to_units(camp_state, GameState.current_campaign_id, scenario_order, units)
+
+	LoungeManager.apply_upgrades_to_units(units, factions, DataLoader.tech_tree)
 
 	_apply_deployment_overrides(scenario_id)
 

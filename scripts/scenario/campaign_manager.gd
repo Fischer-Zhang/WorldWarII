@@ -6,6 +6,11 @@ extends RefCounted
 #
 # {
 #   "version": 2,
+#   "lounge": {
+#     "general_levels": {},
+#     "tech_levels": {},
+#     "spent_points": 0
+#   },
 #   "campaigns": {
 #     "eastern_front": {
 #       "progress": 0,
@@ -59,7 +64,10 @@ static func _empty_state() -> Dictionary:
 
 static func _normalise_state(state: Dictionary) -> Dictionary:
 	var campaigns: Dictionary = state.get("campaigns", {})
-	return {"version": VERSION, "campaigns": campaigns}
+	var out := {"version": VERSION, "campaigns": campaigns}
+	if state.has("lounge") and state["lounge"] is Dictionary:
+		out["lounge"] = state["lounge"]
+	return out
 
 static func campaign_state(state: Dictionary, campaign_id: String, scenario_order: Array) -> Dictionary:
 	var campaigns: Dictionary = state.get("campaigns", {})
