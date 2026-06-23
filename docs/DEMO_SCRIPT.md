@@ -1,89 +1,83 @@
-# Demo video script — 90s portfolio cut
+# Demo Script
 
-Target length: **90 seconds**. One continuous play-through edit, no narration (just on-screen captions). Background music optional (CC0 WW2-era march works).
+Target: **90 seconds**, no narration required. Use short captions and tight cuts.
 
-Aim for the viewer to walk away with:
-1. *What it is* — within 5 seconds.
-2. *That it has depth* — distinct mechanics surfaced per scenario.
-3. *That it's polished* — animations / damage popups / wreckage visible in cuts.
+The viewer should understand:
 
----
+1. This is a Godot tactical hex wargame.
+2. It has real combat depth, not just a map mockup.
+3. Campaign/lounge/conquest connect battles into a larger loop.
+4. The project is validated by automated tests and data checks.
 
-## Shot list
+## Shot List
 
-| Time | Shot | Content | Caption (Chinese / English) |
+| Time | Shot | Content | Caption |
 |---|---|---|---|
-| 0:00 – 0:03 | Title card | Static frame: main menu with "WorldWarII / 戰術六角格戰棋" | `Godot 4 / GDScript` |
-| 0:03 – 0:08 | Menu → list | Cursor clicks 「單次作戰」 → scenario select shows difficulty buttons and the 20-battle list | `Single battles · Easy / Normal / Hard AI` |
-| 0:08 – 0:12 | Briefing | Brief flash of Sedan 1940 briefing screen | `Data-driven scenarios — JSON, no code per battle` |
-| **0:12 – 0:26** | **Scenario 1 — Sedan 1940** | Open with the yellow pulsing objective hex. Move a Pz.IV across road, attack a French AT-gun → see damage popup, wreckage, HP bar drop. End turn → AI defensive AI shuffles French line. | `Hex-based movement · Terrain costs · Capture objective pulse` |
-| **0:26 – 0:40** | **Scenario 2 — Kiev 1941** | Show artillery's 3-tile range overlay. Fire at distant Soviet T-34 from outside its range, so there is no counter. Tanks close in for kill. | `Range 3 indirect-fire artillery · spotted targets over blockers` |
-| **0:40 – 0:52** | **Scenario 3 — Stalingrad 1942** | Player as Soviet defender. Show city blocks (+3 defense tint). German tank attacks Guards infantry → infantry survives in town, counter-attacks. | `Role reversal: defending the city · Town terrain +3 defense` |
-| **0:52 – 1:08** | **Scenario 4 — Kursk 1943** | Wide camera over the tank duel. Tiger / Panther / T-34 trading shots. AT-gun reveals a Panzer's vs_armor weakness. One unit dies, scorch wreckage marker persists into next turn. | `Deterministic combat · vs_armor / armor mechanic · Heuristic AI` |
-| 1:08 – 1:20 | Conquest → battle | Open 「征服」, select a friendly region and adjacent enemy region, click 「攻擊」, cut to the tactical briefing that launches from the map. | `Conquest attacks resolve as real hex battles` |
-| 1:20 – 1:25 | Victory screen | Victory modal pops up. "德軍裝甲軍 獲勝!" then returns to conquest map with ownership updated. | `Battle result updates the world map` |
-| 1:25 – 1:30 | Code montage / end card | Quick pan across `scripts/` and `tools/validate_data.py`, then end card | `102 unit tests · data validator · github.com/Fischer-Zhang/WorldWarII` |
+| 0:00-0:04 | Main menu | Show main menu with Single Battle / Campaign / Conquest / Lounge. | `Godot 4 tactical hex wargame` |
+| 0:04-0:10 | Scenario select | Click Single Battle, show category tabs and difficulty buttons. | `20 scenarios · category tabs · AI difficulty` |
+| 0:10-0:16 | Briefing -> deployment | Open Sedan briefing, then deployment screen. Select a unit and show final stats/source breakdown. | `Deployment: generals, upgrades, final stats` |
+| 0:16-0:31 | Sedan 1940 | Move a Panzer toward objective. Show movement overlay, threat overlay, attack, popup, wreckage. | `Deterministic combat · terrain · capture objectives` |
+| 0:31-0:43 | Kiev / artillery | Show indirect artillery firing at a spotted target over blockers. | `Indirect fire uses spotted targets, not hidden information` |
+| 0:43-0:55 | Stalingrad / defense | Soviet infantry in town survives, counter-attacks, suppression/dig-in visible. | `Urban defense · suppression · rally decisions` |
+| 0:55-1:07 | Kursk / armor | Tank duel with AT gun or Panther/T-34 exchange. Show compact info panel. | `Armor vs anti-armor · live HP affects damage` |
+| 1:07-1:17 | Campaign/lounge | Open campaign map, then lounge. Show resource points and upgrade buttons. | `Campaign progress unlocks general and tech upgrades` |
+| 1:17-1:27 | Conquest -> battle | Open conquest, select source/target. Show battle context lines: attack/defense power, reserves, then cut to briefing/deployment. | `Conquest attacks launch real hex battles` |
+| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `118 headless checks · data validator · UI smoke` |
 
----
+## Capturing
 
-## Capturing the footage
+- Use OBS at **1280x720 / 30 fps**.
+- Capture the game window, not the Godot editor.
+- Keep cursor visible for menu interactions.
+- Use F12 screenshots for README stills.
 
-### Recording
+Linux screenshot path:
 
-- Use **OBS Studio** (free, runs on Linux/Mac/Win) at **1280×720 / 30 fps**. The project's default viewport.
-- Capture the game window, not the editor — set `Capture Method = "Xcomposite Capture"` (Linux) or window capture (Win).
-- Record in MP4 (h264) at high quality; edit later.
-
-### Editing
-
-- **Resolve / DaVinci Resolve Free** is the easiest free editor. Kdenlive on Linux also works.
-- Cut to each milestone above. Speed-up boring camera-pan moments by 1.5–2x.
-- Add 2-second caption overlays in the lower-third using the table's caption column.
-- Background audio: search OpenGameArt for CC0 WW2 march / military drum — keep at low volume so popups stand out.
-
-### Screenshots for the README
-
-In-game press **F12** to capture the current viewport. Files land in:
-
-```
-~/.local/share/godot/app_userdata/WorldWarII/screenshots/    (Linux/WSL)
-%APPDATA%/Godot/app_userdata/WorldWarII/screenshots/         (Windows)
+```text
+~/.local/share/godot/app_userdata/WorldWarII/screenshots/
 ```
 
-Copy the keepers into `docs/screenshots/` and reference from `README.md`. Suggested set:
+Suggested README screenshots:
 
 | Filename | Shot |
 |---|---|
-| `01_main_menu.png` | Main menu, full-bleed |
-| `02_scenario_select.png` | Scenario list with difficulty selector |
-| `03_sedan_objective.png` | Sedan with yellow objective pulse on the target town |
-| `04_combat_resolution.png` | Mid-combat with damage popup visible |
-| `05_kursk_wide.png` | Kursk tank duel, wide camera |
-| `06_victory.png` | Victory modal |
-| `07_conquest.png` | Conquest map with attack target selected |
+| `01_main_menu.png` | Main menu |
+| `02_scenario_select.png` | Scenario select tabs and difficulty |
+| `03_sedan_objective.png` | Sedan objective pulse |
+| `04_deployment_breakdown.png` | Deployment final stats/source breakdown |
+| `05_combat_resolution.png` | Damage popup and wreckage |
+| `06_lounge.png` | Lounge upgrades |
+| `07_conquest.png` | Conquest target with battle context |
 
----
+## Editing Notes
 
-## Suggested narrative beats
+- Let each mechanic appear once; do not explain every rule.
+- Prefer captions over narration.
+- Keep movement/attack animations short; cut once the viewer understands the action.
+- The conquest section should explicitly show the selected regions and the tactical battle launch so it reads as connected, not a separate menu.
+- End on validation because this is a code portfolio piece.
 
-The video doesn't need narration but the on-screen captions should make these points in this order:
+## Caption Pool
 
-1. **What** — turn-based hex wargame in Godot 4 with 20 historical scenarios.
-2. **Tech bones** — data-driven (JSON scenarios), deterministic combat, BFS movement.
-3. **Per-scenario mechanic spotlight** — each clip showcases ONE distinct system:
-   - Sedan → terrain + capture objective
-   - Kiev → artillery range / indirect fire
-   - Stalingrad → role reversal + town defense modifier
-   - Kursk → armor vs anti-armor interaction
-4. **AI** — surface the fact that the AI's behaviour shifts per scenario (defensive at Sedan, aggressive at Stalingrad, holding at Kiev).
-5. **Meta layer** — conquest attacks feed into the same tactical battle loop.
-6. **Code/tests** — end on a quick code pan + `102/102` tests passing plus data validation.
+Use these as lower-third captions:
 
----
+- `JSON scenarios, deterministic rules`
+- `Shared combat rules for player and AI`
+- `Fog of war + line of sight`
+- `ZoC, overwatch, dig-in, suppression, rally`
+- `Generals, veteran XP, tech upgrades`
+- `Conquest strength and production shape the tactical battle`
+- `tools/validate.sh: data, reports, tests, UI smoke`
 
-## Pacing notes
+## Minimal 45s Cut
 
-- 90 seconds is **tight**. Resist the urge to explain rules in-video. Captions, not voice-over.
-- Cut **before** an animation finishes if it's recognisable in the first 60%. Tight cuts feel deliberate.
-- Hold the victory modal on screen for at least 1.5 seconds — it's the closing punch.
-- If you go over time, drop Stalingrad first (Sedan + Kiev + Kursk show the widest mechanic variety together).
+If a shorter clip is needed:
+
+| Time | Shot |
+|---|---|
+| 0:00-0:05 | Main menu + scenario select |
+| 0:05-0:12 | Deployment breakdown |
+| 0:12-0:25 | Sedan move/attack/objective |
+| 0:25-0:34 | Lounge upgrade |
+| 0:34-0:42 | Conquest -> battle |
+| 0:42-0:45 | Validation end card |

@@ -1,242 +1,154 @@
-# WorldWarII — 戰術六角格戰棋
+# WorldWarII
 
-> 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,20 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
+Turn-based WW2 tactical hex wargame built in **Godot 4.2+ / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-102%2F102-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-118%2F118-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
-<!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
-![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
+![Sedan 1940 objective pulse](docs/screenshots/03_sedan_objective.png)
 
----
+## What It Is
 
-## What it is
+WorldWarII is a compact tactical wargame inspired by *Panzer General* and *Advance Wars*: move infantry, armor, guns and artillery across hex maps, exploit terrain, break objectives, and carry campaign progress through a light strategic layer.
 
-A small, focused tactical wargame inspired by *Panzer General* and *Advance Wars*. You command WW2-era infantry, armor and artillery on a hex grid, completing scenarios with distinct victory conditions across the European theatre.
+The project is intentionally data-driven. Units, terrain, scenarios, campaigns and conquest regions live in JSON. The code owns rules and orchestration; content owns the war.
 
-The project was built as a **month-scale portfolio piece** with an explicit constraint: keep the rules and AI small enough to read, and spend the saved time on **scenario authoring**, **deterministic systems** and **game-feel polish**.
+## Current Game Modes
 
-### Built-in scenarios
-
-| Front | Examples | Mechanic spotlight |
+| Mode | Flow | What matters |
 |---|---|---|
-| Early war | Poland, Sedan, Dunkirk, Kiev, Moscow | Breakthroughs, encirclement, winter counterattack |
-| Eastern front | Stalingrad, Kharkov, Kursk, Bagration, Seelow, Berlin | Urban defense, armor duels, late-war offensives |
-| Western front | Normandy, Falaise, Market Garden, Aachen, Hurtgen, Bastogne, Colmar, Remagen | Airborne operations, reinforcements, city/forest fights |
-
-A sandbox scenario for development is also included.
-
----
+| Single Battle | Main Menu -> Scenario Select -> Briefing -> Deployment -> Battle | Pick any scenario, choose AI difficulty, assign generals and deploy before fighting. |
+| Campaign | Campaign Map -> Lounge -> Deployment -> Battle -> Result | Campaign progress persists roster XP and general assignment; victories grant lounge upgrade points. |
+| Conquest | World Map -> Real Hex Battle -> World Map Result | Region attacks launch normal tactical battles. Region strength and production become battle context: attacker veteran edge, defender dig-in, and production reserves. |
 
 ## Highlights
 
-- **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
-- **Three game flows** — single battle goes straight to scenario select + difficulty, campaign chains scenarios with roster persistence, and conquest launches real tactical battles from the world map.
-- **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
-- **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression, Rally** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), heavy fire can pin units, light tanks can spot for artillery suppression, Rally lets suppressed units spend their action recovering, and threat overlays expose dangerous hexes.
-- **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
-- **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead, capture AI values objective hexes, pinned units can choose Rally, artillery values light-tank-spotted targets, and focus-fire scoring prefers wounded or suppressed targets.
-- **Historical generals + veteran XP** — 10 named generals (Rommel, Patton, Zhukov, …) attach to specific units in each scenario, applying quality-tiered stat bonuses to compatible unit types. Units gain XP per kill / damage dealt during a battle, ranking up to ★/★★/★★★ for cumulative attack/defense/move/vision bonuses. Both feed a single modifier pipeline through `CombatResolver` / `CombatModifiers`.
-- **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **102 GDScript unit tests** running headless via `bash tests/run_all.sh`, plus `tools/validate_data.py` for static JSON integrity. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases, attack legality, AI role shaping, conquest result application, reinforcements, hex line drawing, line-of-sight, and scenario data references/stacking.
-- **~2800 LOC** of GDScript across 24 files. Read it top-to-bottom in an afternoon.
+- **20 historical scenarios + sandbox** across early war, eastern front and western front.
+- **Scenario category tabs** for faster single-battle selection.
+- **Pre-battle deployment** with scenario-scoped unit placement, general reassignment and upgrade breakdown.
+- **Deterministic combat**: same position, HP, terrain and modifiers always resolve the same way.
+- **Shared attack legality** for player and AI through `CombatRules`.
+- **Fog of war + LOS** with AI last-known-position memory.
+- **ZoC, overwatch, dig-in, suppression and rally** layered into movement and action economy.
+- **Historical generals, veteran XP, lounge upgrades and tech upgrades** routed through a shared modifier pipeline.
+- **Conquest battles are real tactical battles**, not a separate mini-simulator.
+- **118 headless GDScript checks + static validators**, including UI smoke coverage for all major screens.
 
----
+## Gameplay Loop
 
-## Gameplay flow
-
+```text
+Main Menu
+  -> Single Battle -> Scenario Select -> Briefing -> Deployment -> Battle -> Result
+  -> Campaign      -> Campaign Map -> Lounge/Deployment -> Battle -> Result
+  -> Conquest      -> World Map -> Briefing/Deployment -> Battle -> World Map Result
 ```
-Main menu  →  Single Battle  →  Scenario select + difficulty  →  Briefing  →  Battle  →  Result
-           →  Campaign       →  campaign map / lounge / deployment chain
-           →  Conquest       →  world map attack launches a real tactical battle
-```
 
-In-battle interactions:
+In battle:
 
-| Action | How |
+| Action | Input |
 |---|---|
-| Select your unit | Click it — yellow pulse halo appears, side panel populates with stats |
-| See movement range | Blue overlay on reachable hexes; orange overlay marks visible enemy threat reach |
-| Move | Click a blue hex — unit walks the path hex-by-hex |
-| Attack | After moving, red overlay shows enemies in range — click one |
-| Rally | If suppressed, click `整隊 (R)` after moving/staying to spend the action and recover suppression |
-| Pass | After moving, click anywhere off the red overlay |
-| End turn | Bottom-right button (or wait for animations and click) |
-| Camera | WASD pan / mouse-wheel zoom / middle-click drag |
-| Screenshot | F12 → `user://screenshots/` |
+| Select unit | Click a friendly unit. |
+| Move | Click a blue reachable hex. |
+| Attack | After moving/selecting, click a red target. |
+| Overwatch | Use `進入警戒`. |
+| Rally | Use `整隊` when suppressed. |
+| End turn | Button at the bottom-right. |
+| Camera | WASD, mouse wheel, middle-drag. |
+| Screenshot | F12 to `user://screenshots/`. |
 
----
+## Systems In Brief
 
-## Architecture
+**Combat formula**
 
-Full breakdown in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). High level:
-
-```
-Battle scene
-├── HexMap          tiles, occupancy, range overlays, wreckage, objective pulse
-├── Camera          WASD / wheel / drag
-├── [Units]         faction-colour circle + type letter + HP bar + selection halo
-└── UI              info / status / unit panel / turn banner / end-turn / result
-
-Autoloads
-├── DataLoader      JSON catalog loader
-├── GameState       inter-scene state
-├── AudioBank       lazy .ogg dispatcher (no-ops if file missing)
-└── ScreenshotHelper F12 → PNG
-
-Pure logic  (all static, all deterministic)
-├── HexCoord        axial coord math
-├── Pathfinding     Dijkstra movement range + path reconstruction
-├── CombatResolver  damage formula + counter-attack + combat side effects
-├── VictoryChecker  eliminate / capture / survive
-├── TurnManager     faction rotation + turn count
-├── AIController    heuristic move scoring
-└── UnitFactory     scenario JSON → instantiated units
+```text
+base = max(1, attack + vs_armor_if_target_armored - defense - terrain_defense)
+damage = max(1, round(base * attacker_hp / attacker_max_hp))
 ```
 
-### Combat formula
+Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary.
 
-```
-base   = max(1, attacker.attack
-              + (vs_armor if defender.armor > 0 else 0)
-              - defender.defense
-              - defender_terrain.defense)
-damage = max(1, round(base × attacker.hp / attacker.max_hp))
-```
+**AI**
 
-Counter-attack at half damage if the defender survives, is within its own range, and is not `indirect: true` (artillery cannot counter while defending). Direct attacks require visibility and LOS; indirect attacks still require a spotted target but can fire over LOS blockers. Damaging attacks also apply suppression; MG teams and artillery pin hardest, light tanks spotting the target add +1 artillery suppression, pinned units cannot overwatch or build dig-in, heavy suppression reduces movement/attack, artillery strips one dig-in level on damaging hits, and Rally trades an action for suppression recovery.
+AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. Hard difficulty enables a one-ply lookahead against visible player retaliation.
 
-### AI heuristic
+**Conquest**
 
-For every reachable hex (including "stay in place"), the AI scores:
+Conquest region data is stored in `data/conquest_map.json`. Player attacks choose an existing tactical scenario through `ConquestCatalog`, pass region strength/production through `ConquestBattleContext`, and apply battle results back to ownership and strength through `ConquestManager`.
 
-```
-score = −distance_to_nearest_enemy            × 1.0
-      + best_attack_damage_from_here          × 2.5
-      + 5.0 if attack would kill the target           (kill bonus)
-      − 0.6 × counter_damage_taken                    (avoid bad trades)
-      − exposure_to_enemy_attacks             × 0.5
-      + terrain.defense                       × 0.3
-
-× personality_modifier
-```
-
-Personality modifiers ship in each scenario JSON. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full breakdown.
-
----
-
-## Running it
-
-You need **Godot 4.2 or newer**. Linux/macOS/Windows all supported.
+## Running
 
 ```bash
-git clone git@github.com:Fischer-Zhang/WorldWarII.git
-cd WorldWarII
-
-# Run the game
 godot --path .
+```
 
-# Open in editor instead
-godot -e .
+Run the full validation suite:
 
-# Run the headless test suite (no GUI required)
+```bash
+tools/validate.sh
+```
+
+Fast data/report validation without Godot:
+
+```bash
+tools/validate_fast.sh
+```
+
+Individual headless tests:
+
+```bash
 bash tests/run_all.sh
 ```
 
-### Balance tooling
+## Validation Coverage
 
-Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes; `python3 tools/scenario_probe.py` regenerates tactical probes for suppression sources, artillery coverage, spotter coverage, objective pressure, and reinforcement deltas. `tools/validate_fast.sh` runs JSON/Python/report checks, including `tools/validate_data.py` for scenario references, map bounds, objectives and duplicate unit coordinates. `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
+`tools/validate.sh` runs:
 
-### WSL2 caveats
+- JSON/data validator: unknown refs, bounds, duplicate unit coordinates, campaign references, conquest region graph integrity.
+- Balance reports: unit matrix, scenario pressure report, tactical probe.
+- 118 GDScript checks: combat, AI, pathfinding, visibility, campaign, conquest, deployment, lounge, reinforcements, UI smoke, formatter behavior.
 
-If you see `libasound.so.2: cannot open` on startup, audio falls back to a dummy driver (silent). To enable real audio:
+The UI smoke test loads these screens headlessly: main menu, scenario select, briefing, deployment, battle, campaign, lounge and conquest.
 
-```bash
-sudo apt install libasound2 libpulse0
+## Adding A Scenario
+
+1. Copy a JSON file in `data/scenarios/`.
+2. Change `id`, `title`, `briefing`, `map`, `factions`, `units`, `victory`.
+3. Use odd-r offset coordinates in JSON; runtime converts to axial hex coordinates.
+4. Run `tools/validate_fast.sh`.
+5. Launch the game. The scenario appears automatically in the single-battle list.
+
+## Project Layout
+
+```text
+data/       JSON units, terrains, generals, campaigns, conquest map, scenarios
+scenes/     Godot scenes
+scripts/    autoloads, grid, units, combat, turn AI, scenario managers, UI
+tests/      headless GDScript tests
+tools/      validators and reports
+docs/       architecture, demo script, progress reports, screenshots
 ```
 
-CC0 sound effects can then be dropped into [assets/audio/](assets/audio/) — see [assets/audio/README.md](assets/audio/README.md) for filename conventions and sourcing.
+Detailed system notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
----
-
-## Adding a new scenario
-
-1. Copy any file in [data/scenarios/](data/scenarios/) to a new id, e.g. `05_bastogne_1944.json`.
-2. Edit the `map.tiles` grid (rectangular `tiles[row][col]`, terrains from [data/terrains.json](data/terrains.json)).
-3. Edit `factions[]` (controller `player` or `ai`, optional `ai` personality), `units[]` (positions in odd-r offset), and `victory` (eliminate / capture / survive).
-4. Run `tools/validate_fast.sh` — the data validator catches unknown references, out-of-bounds positions and stacked starting units.
-5. Re-launch — it appears in the scenario select automatically.
-
-No code changes required.
-
----
+Demo capture plan: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 
 ## Roadmap
 
-**Done**
-- [x] Hex grid, BFS movement, combat model, turn cycle
-- [x] AI with three personality presets + three difficulty profiles + 1-ply lookahead on Hard
-- [x] Zone of Control, Overwatch, Dig In, Suppression, Rally
-- [x] 20 historical scenarios + sandbox
-- [x] Single-battle flow, campaign flow, and conquest map launching tactical battles
-- [x] Scheduled reinforcements (Bastogne)
-- [x] Symmetric fog of war + line-of-sight + AI last-known-position memory
-- [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
-- [x] Selection halo, objective pulse, turn-change banner
-- [x] Audio scaffolding (works once .ogg files are added)
-- [x] 102 unit tests, headless runner, fast data validator
+Done:
 
-**Open**
-- [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
-- [ ] Save / load mid-scenario
+- Hex movement, deterministic combat, turn cycle.
+- Fog of war, LOS, ZoC, overwatch, dig-in, suppression, rally.
+- Single battle, campaign, lounge upgrades and conquest-to-battle flow.
+- Deployment setup and upgrade visibility.
+- Conquest battle context from strategic regions.
+- Headless validators and UI smoke coverage.
 
----
+Open:
 
-## Project structure
-
-```
-WorldWarII/
-├── project.godot
-├── README.md                  this file
-├── data/
-│   ├── units.json             unit catalog
-│   ├── terrains.json          terrain catalog
-│   ├── conquest_map.json      region graph for conquest mode
-│   └── scenarios/             one file per battle
-├── scenes/                    Godot scenes (.tscn)
-│   ├── main_menu.tscn
-│   ├── scenario_select.tscn
-│   ├── briefing.tscn
-│   └── battle.tscn
-├── scripts/
-│   ├── autoload/              DataLoader, GameState, AudioBank, ScreenshotHelper
-│   ├── grid/                  hex coord math, hex map renderer, BFS pathfinder
-│   ├── units/                 Unit class + factory
-│   ├── combat/                damage, legality, modifiers, suppression effects
-│   ├── turn/                  turn manager + AI controller
-│   ├── scenario/              campaign/conquest managers, victory checker
-│   ├── ui/                    camera, menus, damage popup
-│   └── battle.gd              battle scene controller (the orchestrator)
-├── assets/
-│   ├── audio/                 .ogg sound effects (placeholder dir)
-│   └── tiles/  units/  ui/    (placeholder dirs for art swap)
-├── tests/                     headless GDScript tests + run_all.sh
-├── tools/                     validation and balance-report tooling
-└── docs/
-    ├── ARCHITECTURE.md        system-by-system walkthrough
-    ├── DEMO_SCRIPT.md         90s portfolio video script
-    └── screenshots/           drop captured PNGs here
-```
-
----
-
-## Credits
-
-- Design + code: built in Godot 4.2 with GDScript.
-- Coordinate math: based on [Red Blob Games — Hexagonal Grids](https://www.redblobgames.com/grids/hexagons/) (no code copied, just the formulas).
-- Built collaboratively with Claude.
-
----
+- Save/load mid-scenario.
+- Art replacement for tiles and units.
+- More conquest-specific scenario selection and regional identity.
+- Better in-game tutorial/onboarding.
 
 ## License
 
-MIT (code). Historical scenario content is original; any third-party CC0 audio/art added later inherits its own license.
+MIT for code. Historical scenario text is original. Any future third-party audio/art should keep its own license notes.
