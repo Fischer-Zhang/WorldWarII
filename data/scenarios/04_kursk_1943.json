@@ -19,8 +19,8 @@
     ]
   },
   "factions": [
-    {"id": "axis",   "name": "德軍第四裝甲軍", "controller": "player", "color": "#7a4a3a"},
-    {"id": "soviet", "name": "蘇軍中央方面軍", "controller": "ai", "ai": "defensive", "color": "#7a3a3a"}
+    {"id": "axis",   "name": "德軍第四裝甲軍", "controller": "player", "color": "#a86632"},
+    {"id": "soviet", "name": "蘇軍中央方面軍", "controller": "ai", "ai": "defensive", "color": "#3f7f4a"}
   ],
   "units": [
     {"faction": "axis", "type": "medium_tank", "name": "Tiger I",    "at": [12, 1], "general": "rommel"},

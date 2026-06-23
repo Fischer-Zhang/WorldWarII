@@ -173,14 +173,14 @@
       "id": "soviet",
       "name": "蘇軍第 1 白俄方面軍",
       "controller": "player",
-      "color": "#7a3a3a"
+      "color": "#3f7f4a"
     },
     {
       "id": "axis",
       "name": "德軍第 9 集團軍",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [

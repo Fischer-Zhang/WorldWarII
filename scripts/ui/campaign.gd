@@ -28,10 +28,10 @@ func _rebuild_campaign_list() -> void:
 	selected_scenario_id = ""
 	GameState.current_campaign_id = ""
 	_clear_list()
-	$Margin/VBox/Title.text = "戰役系列"
-	$Margin/VBox/Hint.text = "選擇一條戰役線。每條系列有獨立進度、老兵與將軍配置。"
-	status_label.text = "共 %d 條系列" % DataLoader.campaigns.size()
-	continue_button.text = "選擇系列"
+	$Margin/VBox/Title.text = "戰爭"
+	$Margin/VBox/Hint.text = "選擇一條持久戰線。每條戰線有獨立進度、老兵與將軍配置。"
+	status_label.text = "共 %d 條戰線" % DataLoader.campaigns.size()
+	continue_button.text = "選擇戰線"
 	continue_button.disabled = true
 	reset_button.text = "重置全部"
 	reset_button.disabled = false
@@ -72,7 +72,7 @@ func _rebuild_scenario_list() -> void:
 	if selected_scenario_id == "" and progress >= ordered.size() and not ordered.is_empty():
 		selected_scenario_id = String(ordered[0])
 	$Margin/VBox/Title.text = String(campaign.get("title", selected_campaign_id))
-	$Margin/VBox/Hint.text = "選擇關卡。已完成關卡可重玩,下一關會推進系列進度。"
+	$Margin/VBox/Hint.text = "選擇作戰。已完成作戰可重玩,下一場勝利會推進戰線。"
 	for i in range(ordered.size()):
 		var sid := String(ordered[i])
 		var scenario: Dictionary = DataLoader.get_scenario(sid)
@@ -102,8 +102,8 @@ func _rebuild_scenario_list() -> void:
 		roster_summary.append("%s %d 名老兵" % [fid, roster_for_faction.size()])
 	if CampaignManager.is_complete(state, selected_campaign_id, ordered):
 		var selected_text := _selected_scenario_status(ordered, progress)
-		status_label.text = selected_text if selected_text != "" else "戰役全通!可重置重新開始。"
-		continue_button.text = "重玩選定關卡"
+		status_label.text = selected_text if selected_text != "" else "戰線已完成!可重置重新開始。"
+		continue_button.text = "重玩選定作戰"
 		continue_button.disabled = selected_scenario_id == ""
 	else:
 		var selected_text := _selected_scenario_status(ordered, progress)
@@ -111,11 +111,11 @@ func _rebuild_scenario_list() -> void:
 			progress, ordered.size(),
 			selected_text if selected_text != "" else ("  ".join(roster_summary) if not roster_summary.is_empty() else "尚無老兵"),
 		]
-		continue_button.text = "開始選定關卡"
+		continue_button.text = "開始選定作戰"
 		continue_button.disabled = selected_scenario_id == ""
-	reset_button.text = "重置此系列"
+	reset_button.text = "重置此戰線"
 	reset_button.disabled = false
-	back_button.text = "返回系列列表"
+	back_button.text = "返回戰線列表"
 
 func _select_scenario(scenario_id: String) -> void:
 	selected_scenario_id = scenario_id
@@ -130,7 +130,7 @@ func _selected_scenario_status(ordered: Array, progress: int) -> String:
 	if idx < progress:
 		return "已選: %s,重玩不會倒退進度" % title
 	if idx == progress:
-		return "已選: %s,勝利後解鎖下一關" % title
+		return "已選: %s,勝利後推進下一場" % title
 	return "已鎖定: %s" % title
 
 func _on_continue_pressed() -> void:

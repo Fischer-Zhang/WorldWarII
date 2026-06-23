@@ -307,7 +307,7 @@ func _handle_game_over(winner: String) -> void:
 				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors
 			)
 		# Steer the Back button to the campaign scene rather than scenario_select.
-		menu_button.text = "返回戰役地圖"
+		menu_button.text = "返回戰爭地圖"
 
 func _populate_battle_summary() -> void:
 	# Build a compact battle-log card for the result panel:

@@ -173,14 +173,14 @@
       "id": "allies",
       "name": "美軍第 9 裝甲師",
       "controller": "player",
-      "color": "#3a5a7a"
+      "color": "#2f6fb0"
     },
     {
       "id": "axis",
       "name": "德軍萊茵防線",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [

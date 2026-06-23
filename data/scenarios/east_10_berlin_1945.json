@@ -173,14 +173,14 @@
       "id": "soviet",
       "name": "蘇軍突擊群",
       "controller": "player",
-      "color": "#7a3a3a"
+      "color": "#3f7f4a"
     },
     {
       "id": "axis",
       "name": "柏林守備隊",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [

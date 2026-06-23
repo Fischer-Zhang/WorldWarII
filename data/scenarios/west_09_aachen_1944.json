@@ -173,14 +173,14 @@
       "id": "allies",
       "name": "美軍第 1 步兵師",
       "controller": "player",
-      "color": "#3a5a7a"
+      "color": "#2f6fb0"
     },
     {
       "id": "axis",
       "name": "亞琛守備隊",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [

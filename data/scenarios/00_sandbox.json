@@ -17,8 +17,8 @@
     ]
   },
   "factions": [
-    {"id": "axis", "name": "Axis", "controller": "player", "color": "#7a4a3a"},
-    {"id": "allies", "name": "Allies", "controller": "ai", "ai": "defensive", "color": "#3a5a7a"}
+    {"id": "axis", "name": "Axis", "controller": "player", "color": "#a86632"},
+    {"id": "allies", "name": "Allies", "controller": "ai", "ai": "defensive", "color": "#2f6fb0"}
   ],
   "units": [
     {"faction": "axis", "type": "medium_tank",  "name": "Pz.IV",   "at": [0, 0]},

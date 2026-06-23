@@ -173,14 +173,14 @@
       "id": "axis",
       "name": "德軍裝甲先遣隊",
       "controller": "player",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     },
     {
       "id": "allies",
       "name": "波蘭波茲南軍團",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#3a5a7a"
+      "color": "#2f6fb0"
     }
   ],
   "units": [

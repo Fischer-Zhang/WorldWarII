@@ -19,8 +19,8 @@
     ]
   },
   "factions": [
-    {"id": "soviet", "name": "蘇軍第 62 軍團", "controller": "player", "color": "#7a3a3a"},
-    {"id": "axis",   "name": "德軍第六軍團",   "controller": "ai", "ai": "aggressive", "color": "#7a4a3a"}
+    {"id": "soviet", "name": "蘇軍第 62 軍團", "controller": "player", "color": "#3f7f4a"},
+    {"id": "axis",   "name": "德軍第六軍團",   "controller": "ai", "ai": "aggressive", "color": "#a86632"}
   ],
   "units": [
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 1",  "at": [11, 1]},

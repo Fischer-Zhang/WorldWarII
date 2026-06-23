@@ -173,14 +173,14 @@
       "id": "allies",
       "name": "法美聯軍",
       "controller": "player",
-      "color": "#3a5a7a"
+      "color": "#2f6fb0"
     },
     {
       "id": "axis",
       "name": "德軍第 19 軍",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [

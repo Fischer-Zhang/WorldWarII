@@ -19,8 +19,8 @@
     ]
   },
   "factions": [
-    {"id": "soviet", "name": "蘇軍第 1 白俄方面軍", "controller": "player", "color": "#7a3a3a"},
-    {"id": "axis",   "name": "德軍中央集團軍",     "controller": "ai", "ai": "defensive", "color": "#7a4a3a"}
+    {"id": "soviet", "name": "蘇軍第 1 白俄方面軍", "controller": "player", "color": "#3f7f4a"},
+    {"id": "axis",   "name": "德軍中央集團軍",     "controller": "ai", "ai": "defensive", "color": "#a86632"}
   ],
   "units": [
     {"faction": "soviet", "type": "medium_tank", "name": "T-34/85 a", "at": [12, 3], "general": "konev"},

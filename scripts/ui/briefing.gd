@@ -6,9 +6,10 @@ extends Control
 @onready var back_button: Button = $Margin/VBox/Buttons/BackButton
 
 func _ready() -> void:
+	back_button.text = "返回戰爭地圖" if GameState.campaign_mode else "返回作戰列表"
 	var scenario := DataLoader.get_scenario(GameState.current_scenario_id)
 	if scenario.is_empty():
-		title_label.text = "(找不到戰役)"
+		title_label.text = "(找不到作戰)"
 		briefing_label.text = "Scenario id 無效:" + GameState.current_scenario_id
 	else:
 		title_label.text = String(scenario.get("title", scenario.get("id", "")))

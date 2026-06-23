@@ -19,8 +19,8 @@
     ]
   },
   "factions": [
-    {"id": "allies", "name": "美 101 空降師", "controller": "player", "color": "#3a5a7a"},
-    {"id": "axis",   "name": "德軍第 5 裝甲軍", "controller": "ai", "ai": "aggressive", "color": "#7a4a3a"}
+    {"id": "allies", "name": "美 101 空降師", "controller": "player", "color": "#2f6fb0"},
+    {"id": "axis",   "name": "德軍第 5 裝甲軍", "controller": "ai", "ai": "aggressive", "color": "#a86632"}
   ],
   "units": [
     {"faction": "allies", "type": "paratrooper", "name": "101 空降 a", "at": [5, 4], "general": "bradley"},

@@ -173,14 +173,14 @@
       "id": "axis",
       "name": "德軍南方集團軍群",
       "controller": "player",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     },
     {
       "id": "soviet",
       "name": "蘇軍沃羅涅日方面軍",
       "controller": "ai",
       "ai": "defensive",
-      "color": "#7a3a3a"
+      "color": "#3f7f4a"
     }
   ],
   "units": [

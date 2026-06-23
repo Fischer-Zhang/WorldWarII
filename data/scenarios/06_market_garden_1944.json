@@ -19,8 +19,8 @@
     ]
   },
   "factions": [
-    {"id": "allies", "name": "美 82 空降師",     "controller": "player", "color": "#3a5a7a"},
-    {"id": "axis",   "name": "德軍第 9 SS 裝甲", "controller": "ai", "ai": "defensive", "color": "#7a4a3a"}
+    {"id": "allies", "name": "美 82 空降師",     "controller": "player", "color": "#2f6fb0"},
+    {"id": "axis",   "name": "德軍第 9 SS 裝甲", "controller": "ai", "ai": "defensive", "color": "#a86632"}
   ],
   "units": [
     {"faction": "allies", "type": "paratrooper", "name": "82 空降 a", "at": [4, 3], "general": "bradley"},

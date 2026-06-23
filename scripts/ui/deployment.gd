@@ -38,10 +38,10 @@ func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
 	scenario = DataLoader.get_scenario(scenario_id)
 	if scenario.is_empty():
-		title_label.text = "找不到戰役"
+		title_label.text = "找不到作戰"
 		status_label.text = scenario_id
 		return
-	title_label.text = "編成: %s" % String(scenario.get("title", scenario_id))
+	title_label.text = "作戰編成: %s" % String(scenario.get("title", scenario_id))
 
 	hex_map.load_from_scenario(scenario)
 	hex_map.hex_clicked.connect(_on_hex_clicked)

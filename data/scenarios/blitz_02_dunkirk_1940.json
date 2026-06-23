@@ -173,14 +173,14 @@
       "id": "allies",
       "name": "英法後衛部隊",
       "controller": "player",
-      "color": "#3a5a7a"
+      "color": "#2f6fb0"
     },
     {
       "id": "axis",
       "name": "德軍裝甲軍",
       "controller": "ai",
       "ai": "aggressive",
-      "color": "#7a4a3a"
+      "color": "#a86632"
     }
   ],
   "units": [
