@@ -2,6 +2,7 @@ extends Control
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
+const ConquestBattleContext := preload("res://scripts/scenario/conquest_battle_context.gd")
 
 const FALLBACK_SCENARIO := "01_sedan_1940"
 const REGION_SCENARIOS := {
@@ -182,6 +183,11 @@ func _update_detail(message: String = "") -> void:
 		if scenario_id != "":
 			var battle_scenario := DataLoader.get_scenario(scenario_id)
 			lines.append("戰術作戰: %s" % String(battle_scenario.get("title", scenario_id)))
+			var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+			var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+			var context := ConquestBattleContext.from_regions(source, target)
+			for summary_line in ConquestBattleContext.battle_summary(context):
+				lines.append(String(summary_line))
 	var can_attack := selected_region_id != "" \
 			and target_region_id != "" \
 			and ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
@@ -213,12 +219,7 @@ func _on_attack_pressed() -> void:
 		return
 	var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
 	var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
-	var context := {
-		"attacker_strength": int(source.get("strength", 0)),
-		"attacker_production": int(source.get("production", 0)),
-		"defender_strength": int(target.get("strength", 0)),
-		"defender_production": int(target.get("production", 0)),
-	}
+	var context := ConquestBattleContext.from_regions(source, target)
 	CampaignManager.save_state(state)
 	GameState.start_conquest_battle(selected_region_id, target_region_id, scenario_id, context)
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")

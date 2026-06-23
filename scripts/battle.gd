@@ -20,6 +20,7 @@ const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spaw
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
+const ConquestBattleContext := preload("res://scripts/scenario/conquest_battle_context.gd")
 const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
@@ -83,6 +84,7 @@ func _ready() -> void:
 	if scenario.is_empty():
 		push_error("Scenario not found: " + scenario_id)
 		return
+	scenario = scenario.duplicate(true)
 	action_log.scenario_id = scenario_id
 
 	hex_map.load_from_scenario(scenario)
@@ -115,6 +117,11 @@ func _ready() -> void:
 		if String(factions[fid].get("controller", "")) == "player":
 			player_faction_id = fid
 			break
+	ConquestBattleContext.apply_to_scenario(
+		scenario,
+		player_faction_id,
+		GameState.pending_conquest_battle if GameState.conquest_mode else {}
+	)
 	_apply_conquest_battle_modifiers()
 
 	# Seed initial enemy memory: every faction starts with intel on
