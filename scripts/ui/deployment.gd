@@ -6,6 +6,7 @@ const Unit := preload("res://scripts/units/unit.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
+const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd")
 
 const DEPLOY_RADIUS := 2
