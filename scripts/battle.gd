@@ -17,6 +17,7 @@ const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
 const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
@@ -95,6 +96,8 @@ func _ready() -> void:
 		var camp_state := CampaignManager.load_state()
 		CampaignManager.apply_roster_to_units(camp_state, units)
 
+	_apply_deployment_overrides(scenario_id)
+
 	# Identify the player's faction once; visibility & objective pulse use it.
 	for fid in factions.keys():
 		if String(factions[fid].get("controller", "")) == "player":
@@ -127,6 +130,13 @@ func _ready() -> void:
 
 	info_label.text = "%s — 點我方單位選取" % scenario.get("title", scenario_id)
 	_update_status()
+
+func _apply_deployment_overrides(scenario_id: String) -> void:
+	var overrides := GameState.get_deployment_overrides(scenario_id)
+	if overrides.is_empty():
+		return
+	DeploymentOverrides.apply(units, hex_map, overrides, HexMap.HEX_SIZE)
+	GameState.clear_deployment_overrides()
 
 # ---------- TURN LIFECYCLE ----------
 
