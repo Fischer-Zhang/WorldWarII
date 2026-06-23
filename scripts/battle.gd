@@ -13,6 +13,7 @@ const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 const DamagePreview := preload("res://scripts/ui/damage_preview.gd")
+const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
 const VictoryChecker := preload("res://scripts/scenario/victory_checker.gd")
 const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spawner.gd")
@@ -898,22 +899,21 @@ func _show_terrain_info(coord: Vector2i, terrain_id: String, unit_here: Unit) ->
 func _update_info_panel_for_unit(unit: Unit) -> void:
 	var u_def := DataLoader.get_unit_def(unit.type_id)
 	var general_def := DataLoader.get_general_def(unit.general_id)
-	var mods: Dictionary = CombatModifiers.for_unit(unit, general_def)
 	info_unit_name.text = unit.display_name
 	var faction_color: Color = factions[unit.faction_id]["color"]
 	info_faction_label.add_theme_color_override("font_color", faction_color)
 	info_faction_label.text = String(factions[unit.faction_id]["name"])
-	# Show modifier deltas inline so the player sees the buffs land.
 	var lines := [
 		"[b]HP[/b]      %d / %d" % [unit.hp, unit.max_hp],
-		"[b]攻擊[/b]    %d%s" % [int(u_def.get("attack", 0)), _mod_suffix(mods.attack)],
-		"[b]防禦[/b]    %d%s" % [int(u_def.get("defense", 0)), _mod_suffix(mods.defense)],
+		"[b]攻擊[/b]    %d" % int(u_def.get("attack", 0)),
+		"[b]防禦[/b]    %d" % int(u_def.get("defense", 0)),
 		"[b]射程[/b]    %d" % int(u_def.get("range", 1)),
-		"[b]視野[/b]    %d%s" % [int(u_def.get("vision", 3)), _mod_suffix(mods.vision)],
-		"[b]移動[/b]    %d%s" % [int(u_def.get("move", 0)), _mod_suffix(mods.move)],
-		"[b]反裝甲[/b]  %d%s" % [int(u_def.get("vs_armor", 0)), _mod_suffix(mods.vs_armor)],
+		"[b]視野[/b]    %d" % int(u_def.get("vision", 3)),
+		"[b]移動[/b]    %d" % int(u_def.get("move", 0)),
+		"[b]反裝甲[/b]  %d" % int(u_def.get("vs_armor", 0)),
 		"[b]裝甲[/b]    %d" % int(u_def.get("armor", 0)),
 	]
+	lines.append_array(UnitDetailFormatter.battle_upgrade_lines(unit, u_def, general_def))
 	if u_def.get("indirect", false):
 		lines.append("[i]間接射擊 — 可越過視線阻擋,但不能反擊[/i]")
 	# General attached to this unit
@@ -948,13 +948,6 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
 	info_stats.text = "\n".join(lines)
 	_update_info_panel_terrain_only(unit.coord, hex_map.terrain_at(unit.coord))
-
-func _mod_suffix(delta: int) -> String:
-	if delta > 0:
-		return " [color=#7afc7a](+%d)[/color]" % delta
-	if delta < 0:
-		return " [color=#fc7a7a](%d)[/color]" % delta
-	return ""
 
 func _suppression_effect_text(value: int) -> String:
 	var parts: Array[String] = []

@@ -19,6 +19,16 @@ static func deployment_upgrade_lines(unit, unit_def: Dictionary, general_def: Di
 		lines.append_array(source_lines)
 	return lines
 
+static func battle_upgrade_lines(unit, unit_def: Dictionary, general_def: Dictionary = {}) -> Array[String]:
+	var lines: Array[String] = []
+	lines.append("[b]最終[/b]    %s" % final_stats_line(unit, unit_def, general_def))
+
+	var source_lines := upgrade_source_lines(unit, general_def, true)
+	if not source_lines.is_empty():
+		lines.append("[b]加成來源[/b]")
+		lines.append_array(source_lines)
+	return lines
+
 static func final_stats_line(unit, unit_def: Dictionary, general_def: Dictionary = {}) -> String:
 	var mods := CombatModifiers.for_unit(unit, general_def)
 	return "攻 %d / 防 %d / 反裝甲 %d / 移動 %d / 視野 %d" % [
