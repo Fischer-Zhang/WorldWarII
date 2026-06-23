@@ -44,6 +44,7 @@ func _refresh_difficulty_buttons() -> void:
 
 func _on_scenario_picked(scenario_id: String) -> void:
 	GameState.current_scenario_id = scenario_id
+	GameState.current_campaign_id = ""
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
 func _on_back_pressed() -> void:

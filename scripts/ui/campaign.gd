@@ -9,21 +9,64 @@ const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 @onready var back_button: Button = $Margin/VBox/Buttons/BackButton
 
 var state: Dictionary = {}
+var selected_campaign_id: String = ""
 
 func _ready() -> void:
 	state = CampaignManager.load_state()
-	_rebuild_list()
+	_rebuild_campaign_list()
 	continue_button.pressed.connect(_on_continue_pressed)
 	reset_button.pressed.connect(_on_reset_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 
-func _rebuild_list() -> void:
+func _clear_list() -> void:
 	for child in list.get_children():
 		child.queue_free()
-	var progress: int = int(state.get("progress", 0))
-	var ordered := CampaignManager.SCENARIO_ORDER
+
+func _rebuild_campaign_list() -> void:
+	selected_campaign_id = ""
+	GameState.current_campaign_id = ""
+	_clear_list()
+	$Margin/VBox/Title.text = "戰役系列"
+	$Margin/VBox/Hint.text = "選擇一條戰役線。每條系列有獨立進度、老兵與將軍配置。"
+	status_label.text = "共 %d 條系列" % DataLoader.campaigns.size()
+	continue_button.text = "選擇系列"
+	continue_button.disabled = true
+	reset_button.text = "重置全部"
+	reset_button.disabled = false
+	back_button.text = "返回主選單"
+	for c in DataLoader.campaigns:
+		var campaign: Dictionary = c
+		var cid := String(campaign.get("id", ""))
+		var order: Array = campaign.get("scenario_order", [])
+		var cstate := CampaignManager.campaign_state(state, cid, order)
+		var progress := int(cstate.get("progress", 0))
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(0, 64)
+		btn.add_theme_font_size_override("font_size", 18)
+		btn.text = "%s  (%d/%d)\n%s" % [
+			String(campaign.get("title", cid)),
+			min(progress, order.size()),
+			order.size(),
+			String(campaign.get("description", "")),
+		]
+		btn.pressed.connect(func(): _select_campaign(cid))
+		list.add_child(btn)
+
+func _select_campaign(campaign_id: String) -> void:
+	selected_campaign_id = campaign_id
+	GameState.current_campaign_id = campaign_id
+	_rebuild_scenario_list()
+
+func _rebuild_scenario_list() -> void:
+	_clear_list()
+	var campaign := DataLoader.get_campaign(selected_campaign_id)
+	var ordered: Array = campaign.get("scenario_order", [])
+	var cstate := CampaignManager.campaign_state(state, selected_campaign_id, ordered)
+	var progress: int = int(cstate.get("progress", 0))
+	$Margin/VBox/Title.text = String(campaign.get("title", selected_campaign_id))
+	$Margin/VBox/Hint.text = String(campaign.get("description", ""))
 	for i in range(ordered.size()):
-		var sid: String = ordered[i]
+		var sid := String(ordered[i])
 		var scenario: Dictionary = DataLoader.get_scenario(sid)
 		var title := String(scenario.get("title", sid))
 		var label := Label.new()
@@ -39,12 +82,12 @@ func _rebuild_list() -> void:
 		label.add_theme_color_override("font_color", color)
 		label.text = "%s  %s — %s" % [prefix, sid, title]
 		list.add_child(label)
-	var roster: Dictionary = state.get("roster", {})
+	var roster: Dictionary = cstate.get("roster", {})
 	var roster_summary: Array[String] = []
 	for fid in roster.keys():
 		var roster_for_faction: Dictionary = roster[fid]
 		roster_summary.append("%s %d 名老兵" % [fid, roster_for_faction.size()])
-	if CampaignManager.is_complete(state):
+	if CampaignManager.is_complete(state, selected_campaign_id, ordered):
 		status_label.text = "戰役全通!可重置重新開始。"
 		continue_button.text = "已完成"
 		continue_button.disabled = true
@@ -55,20 +98,38 @@ func _rebuild_list() -> void:
 		]
 		continue_button.text = "下一場戰役" if progress > 0 else "開始戰役"
 		continue_button.disabled = false
+	reset_button.text = "重置此系列"
+	reset_button.disabled = false
+	back_button.text = "返回系列列表"
 
 func _on_continue_pressed() -> void:
-	var sid := CampaignManager.current_scenario_id(state)
+	if selected_campaign_id == "":
+		return
+	var campaign := DataLoader.get_campaign(selected_campaign_id)
+	var ordered: Array = campaign.get("scenario_order", [])
+	var sid := CampaignManager.current_scenario_id(state, selected_campaign_id, ordered)
 	if sid == "":
 		return
 	GameState.current_scenario_id = sid
+	GameState.current_campaign_id = selected_campaign_id
 	GameState.campaign_mode = true
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
 func _on_reset_pressed() -> void:
-	CampaignManager.reset()
+	if selected_campaign_id == "":
+		CampaignManager.reset()
+	else:
+		CampaignManager.reset_campaign(selected_campaign_id)
 	state = CampaignManager.load_state()
-	_rebuild_list()
+	if selected_campaign_id == "":
+		_rebuild_campaign_list()
+	else:
+		_rebuild_scenario_list()
 
 func _on_back_pressed() -> void:
+	if selected_campaign_id != "":
+		_rebuild_campaign_list()
+		return
 	GameState.campaign_mode = false
+	GameState.current_campaign_id = ""
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

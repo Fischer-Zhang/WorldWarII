@@ -56,7 +56,9 @@ func _ready() -> void:
 
 	if GameState.campaign_mode:
 		var camp_state := CampaignManager.load_state()
-		CampaignManager.apply_roster_to_units(camp_state, units)
+		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
+		var scenario_order: Array = campaign.get("scenario_order", [])
+		CampaignManager.apply_roster_to_units(camp_state, GameState.current_campaign_id, scenario_order, units)
 
 	for fid in factions.keys():
 		if String(factions[fid].get("controller", "")) == "player":
@@ -91,7 +93,10 @@ func _build_general_pool() -> void:
 			found[unit.general_id] = true
 	if GameState.campaign_mode and player_faction_id != "":
 		var state := CampaignManager.load_state()
-		var roster: Dictionary = state.get("roster", {})
+		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
+		var scenario_order: Array = campaign.get("scenario_order", [])
+		var cstate := CampaignManager.campaign_state(state, GameState.current_campaign_id, scenario_order)
+		var roster: Dictionary = cstate.get("roster", {})
 		var faction_roster: Dictionary = roster.get(player_faction_id, {})
 		for name in faction_roster.keys():
 			var saved: Dictionary = faction_roster[name]

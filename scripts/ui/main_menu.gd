@@ -12,6 +12,7 @@ func _ready() -> void:
 
 func _on_begin_pressed() -> void:
 	GameState.campaign_mode = false
+	GameState.current_campaign_id = ""
 	get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
 
 func _on_campaign_pressed() -> void:

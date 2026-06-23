@@ -94,7 +94,9 @@ func _ready() -> void:
 	# (matched by display_name within faction). New units stay fresh.
 	if GameState.campaign_mode:
 		var camp_state := CampaignManager.load_state()
-		CampaignManager.apply_roster_to_units(camp_state, units)
+		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
+		var scenario_order: Array = campaign.get("scenario_order", [])
+		CampaignManager.apply_roster_to_units(camp_state, GameState.current_campaign_id, scenario_order, units)
 
 	_apply_deployment_overrides(scenario_id)
 
@@ -288,13 +290,19 @@ func _handle_game_over(winner: String) -> void:
 	# the same scenario without losing previously accumulated experience.
 	if GameState.campaign_mode:
 		var camp_state := CampaignManager.load_state()
+		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
+		var scenario_order: Array = campaign.get("scenario_order", [])
 		var scenario_id := String(scenario.get("id", ""))
 		var survivors: Array = units.filter(func(u): return u.is_alive())
 		if player_won:
-			CampaignManager.complete_scenario(camp_state, scenario_id, survivors)
+			CampaignManager.complete_scenario(
+				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors
+			)
 		else:
 			# Defeat: snapshot survivors but don't advance progress.
-			CampaignManager.complete_scenario(camp_state, "__no_advance__", survivors)
+			CampaignManager.complete_scenario(
+				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors
+			)
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
 

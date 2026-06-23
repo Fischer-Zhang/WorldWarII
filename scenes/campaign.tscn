@@ -33,7 +33,7 @@ text = "戰役模式"
 
 [node name="Hint" type="Label" parent="Margin/VBox"]
 theme_override_font_sizes/font_size = 14
-text = "5 場歷史戰役依時序連打,存活的單位 (XP/階級/將軍配置) 會帶到下一場。"
+text = "選擇一條戰役線。每條系列有獨立進度、老兵與將軍配置。"
 
 [node name="Spacer1" type="Control" parent="Margin/VBox"]
 custom_minimum_size = Vector2(0, 12)

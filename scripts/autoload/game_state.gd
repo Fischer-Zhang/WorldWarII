@@ -4,6 +4,7 @@ extends Node
 # Holds inter-scene state: current scenario, results, settings.
 
 var current_scenario_id: String = ""
+var current_campaign_id: String = ""
 var last_result: Dictionary = {}
 var difficulty: String = "normal"  # "easy" | "normal" | "hard"
 # Campaign mode: when true, the battle reads/writes campaign_save.json
