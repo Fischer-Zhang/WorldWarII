@@ -17,6 +17,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_transfer_strength():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_conquest_state_survives_campaign_normalise():
 		pass_count += 1
 	else:
@@ -57,6 +62,30 @@ func _test_end_turn_and_country_switch() -> bool:
 			and not messages.is_empty():
 		return true
 	printerr("FAIL: conquest end turn should reinforce and advance turn")
+	return false
+
+func _test_transfer_strength() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	regions["bravo"]["owner"] = "a"
+	regions["bravo"]["strength"] = 2
+	conquest["regions"] = regions
+	state["conquest"] = conquest
+	var before_alpha := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
+	var before_bravo := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
+	if not ConquestManager.can_transfer(state, map_data, "alpha", "bravo"):
+		printerr("FAIL: expected alpha to transfer to adjacent friendly bravo")
+		return false
+	var result := ConquestManager.transfer_strength(state, map_data, "alpha", "bravo", 2)
+	var after_alpha := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
+	var after_bravo := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
+	if bool(result.get("ok", false)) \
+			and after_alpha == before_alpha - 2 \
+			and after_bravo == before_bravo + 2:
+		return true
+	printerr("FAIL: conquest transfer should move strength between adjacent friendly regions")
 	return false
 
 func _test_conquest_state_survives_campaign_normalise() -> bool:

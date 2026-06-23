@@ -49,6 +49,45 @@ static func can_attack(state: Dictionary, map_data: Dictionary, from_id: String,
 	var neighbors: Array = source.get("neighbors", [])
 	return neighbors.has(to_id)
 
+static func can_transfer(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> bool:
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions.get(from_id, {})
+	var target: Dictionary = regions.get(to_id, {})
+	if source.is_empty() or target.is_empty() or from_id == to_id:
+		return false
+	var player_country := String(conquest.get("player_country", ""))
+	if String(source.get("owner", "")) != player_country:
+		return false
+	if String(target.get("owner", "")) != player_country:
+		return false
+	if int(source.get("strength", 0)) <= 1:
+		return false
+	var neighbors: Array = source.get("neighbors", [])
+	return neighbors.has(to_id)
+
+static func transfer_strength(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String, amount: int = 1) -> Dictionary:
+	if not can_transfer(state, map_data, from_id, to_id):
+		return {"ok": false, "message": "無法轉移:需選擇己方相鄰地區,且出發地兵力需大於 1。"}
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions[from_id]
+	var target: Dictionary = regions[to_id]
+	var movable: int = max(0, int(source.get("strength", 0)) - 1)
+	var moved: int = clamp(amount, 1, movable)
+	source["strength"] = int(source.get("strength", 0)) - moved
+	target["strength"] = int(target.get("strength", 0)) + moved
+	regions[from_id] = source
+	regions[to_id] = target
+	conquest["regions"] = regions
+	state["conquest"] = conquest
+	CampaignManager.save_state(state)
+	return {"ok": true, "message": "已從 %s 轉移 %d 兵力到 %s。" % [
+		_region_name(source),
+		moved,
+		_region_name(target),
+	]}
+
 static func player_attack(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> Dictionary:
 	if not can_attack(state, map_data, from_id, to_id):
 		return {"ok": false, "message": "無法攻擊:需從己方且兵力大於 1 的相鄰地區出擊。"}

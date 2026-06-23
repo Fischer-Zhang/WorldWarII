@@ -9,6 +9,7 @@ const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
 @onready var map_grid: GridContainer = $Margin/VBox/Body/MapPanel/MapGrid
 @onready var detail_label: RichTextLabel = $Margin/VBox/Body/DetailPanel/Detail
 @onready var attack_button: Button = $Margin/VBox/Actions/AttackButton
+@onready var transfer_button: Button = $Margin/VBox/Actions/TransferButton
 @onready var end_turn_button: Button = $Margin/VBox/Actions/EndTurnButton
 @onready var reset_button: Button = $Margin/VBox/Actions/ResetButton
 @onready var back_button: Button = $Margin/VBox/Actions/BackButton
@@ -23,6 +24,7 @@ func _ready() -> void:
 	ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	_build_country_options()
 	attack_button.pressed.connect(_on_attack_pressed)
+	transfer_button.pressed.connect(_on_transfer_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	reset_button.pressed.connect(_on_reset_pressed)
 	back_button.pressed.connect(_on_back_pressed)
@@ -102,8 +104,11 @@ func _select_region(region_id: String) -> void:
 	var region := ConquestManager.region_state(state, DataLoader.conquest_map, region_id)
 	var player_country := String(ConquestManager.conquest_state(state, DataLoader.conquest_map).get("player_country", ""))
 	if String(region.get("owner", "")) == player_country:
-		selected_region_id = region_id
-		target_region_id = ""
+		if selected_region_id == "" or selected_region_id == region_id:
+			selected_region_id = region_id
+			target_region_id = ""
+		else:
+			target_region_id = region_id
 	elif selected_region_id != "":
 		target_region_id = region_id
 	else:
@@ -131,7 +136,11 @@ func _update_detail(message: String = "") -> void:
 	var can_attack := selected_region_id != "" \
 			and target_region_id != "" \
 			and ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
+	var can_transfer := selected_region_id != "" \
+			and target_region_id != "" \
+			and ConquestManager.can_transfer(state, DataLoader.conquest_map, selected_region_id, target_region_id)
 	attack_button.disabled = not can_attack or status != ""
+	transfer_button.disabled = not can_transfer or status != ""
 	end_turn_button.disabled = status != ""
 	detail_label.text = "\n".join(lines)
 
@@ -150,6 +159,12 @@ func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 
 func _on_attack_pressed() -> void:
 	var result := ConquestManager.player_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
+	target_region_id = ""
+	_rebuild()
+	_update_detail(String(result.get("message", "")))
+
+func _on_transfer_pressed() -> void:
+	var result := ConquestManager.transfer_strength(state, DataLoader.conquest_map, selected_region_id, target_region_id, 1)
 	target_region_id = ""
 	_rebuild()
 	_update_detail(String(result.get("message", "")))
