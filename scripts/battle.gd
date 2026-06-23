@@ -72,6 +72,7 @@ var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i
 var last_known_positions: Dictionary = {}    # faction_id -> Dictionary[Unit, Vector2i]
 var action_log: ActionLog = ActionLog.new()
 var next_campaign_scenario_id: String = ""
+var campaign_reward_points: int = 0
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -284,6 +285,7 @@ func _handle_game_over(winner: String) -> void:
 	lounge_button.visible = false
 	next_button.visible = false
 	next_campaign_scenario_id = ""
+	campaign_reward_points = 0
 	end_turn_button.disabled = true
 	# Play victory/defeat from the player's perspective
 	var player_won := false
@@ -307,10 +309,17 @@ func _handle_game_over(winner: String) -> void:
 		var scenario_order: Array = campaign.get("scenario_order", [])
 		var scenario_id := String(scenario.get("id", ""))
 		var survivors: Array = units.filter(func(u): return u.is_alive())
+		var progress_before := int(CampaignManager.campaign_state(
+			camp_state, GameState.current_campaign_id, scenario_order
+		).get("progress", 0))
 		if player_won:
 			CampaignManager.complete_scenario(
 				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors
 			)
+			var progress_after := int(CampaignManager.campaign_state(
+				camp_state, GameState.current_campaign_id, scenario_order
+			).get("progress", 0))
+			campaign_reward_points = 2 if progress_after > progress_before else 0
 			next_campaign_scenario_id = CampaignManager.current_scenario_id(
 				camp_state, GameState.current_campaign_id, scenario_order
 			)
@@ -323,6 +332,7 @@ func _handle_game_over(winner: String) -> void:
 		menu_button.text = "返回戰役地圖"
 		lounge_button.visible = true
 		next_button.visible = player_won and next_campaign_scenario_id != ""
+		_populate_battle_summary()
 	elif GameState.conquest_mode:
 		menu_button.text = "返回征服地圖"
 
@@ -333,10 +343,16 @@ func _populate_battle_summary() -> void:
 	#   - log file path on disk
 	var rows: Array = action_log.summary_by_unit()
 	if rows.is_empty():
-		result_summary.text = "[i]無戰鬥行動紀錄[/i]"
+		var empty_lines: Array[String] = []
+		if campaign_reward_points > 0:
+			empty_lines.append("[color=#ffd84a]戰役獎勵: 資源點 +%d。可前往休息室升級。[/color]" % campaign_reward_points)
+		empty_lines.append("[i]無戰鬥行動紀錄[/i]")
+		result_summary.text = "\n".join(empty_lines)
 		return
 	var lines: Array[String] = []
 	lines.append("[b]戰場日誌(前 %d 名)[/b]" % min(8, rows.size()))
+	if campaign_reward_points > 0:
+		lines.append("[color=#ffd84a]戰役獎勵: 資源點 +%d。可前往休息室升級。[/color]" % campaign_reward_points)
 	lines.append("")
 	# Per-unit rows
 	var shown := 0

@@ -35,6 +35,10 @@ text = "休息室"
 theme_override_font_sizes/font_size = 14
 text = "升級將領與科技樹。完成戰役關卡會取得更多資源點。"
 
+[node name="Context" type="Label" parent="Margin/VBox"]
+theme_override_font_sizes/font_size = 15
+text = ""
+
 [node name="Points" type="Label" parent="Margin/VBox"]
 theme_override_font_sizes/font_size = 20
 text = "資源點 0 / 0"

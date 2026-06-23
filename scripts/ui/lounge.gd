@@ -4,6 +4,7 @@ const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 
 @onready var points_label: Label = $Margin/VBox/Points
+@onready var context_label: Label = $Margin/VBox/Context
 @onready var status_label: Label = $Margin/VBox/Status
 @onready var generals_list: VBoxContainer = $Margin/VBox/Body/GeneralsPanel/GeneralsScroll/GeneralsList
 @onready var tech_list: VBoxContainer = $Margin/VBox/Body/TechPanel/TechScroll/TechList
@@ -24,8 +25,31 @@ func _rebuild() -> void:
 		LoungeManager.available_points(state),
 		LoungeManager.total_points(state),
 	]
+	_update_context()
 	_rebuild_generals()
 	_rebuild_techs()
+
+func _update_context() -> void:
+	if not GameState.campaign_mode or GameState.current_campaign_id == "":
+		context_label.text = ""
+		back_button.text = "返回主選單"
+		return
+	var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
+	var order: Array = campaign.get("scenario_order", [])
+	var cstate := CampaignManager.campaign_state(state, GameState.current_campaign_id, order)
+	var progress := int(cstate.get("progress", 0))
+	var next_id := CampaignManager.current_scenario_id(state, GameState.current_campaign_id, order)
+	var next_title := "戰線已完成"
+	if next_id != "":
+		var next_scenario := DataLoader.get_scenario(next_id)
+		next_title = String(next_scenario.get("title", next_id))
+	context_label.text = "%s · 進度 %d/%d · 下一場: %s" % [
+		String(campaign.get("title", GameState.current_campaign_id)),
+		min(progress, order.size()),
+		order.size(),
+		next_title,
+	]
+	back_button.text = "返回戰役地圖"
 
 func _clear_list(list: VBoxContainer) -> void:
 	for child in list.get_children():
