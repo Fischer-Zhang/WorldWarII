@@ -1,8 +1,8 @@
 # WorldWarII — 戰術六角格戰棋
 
-> 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,5 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
+> 二戰戰術級交戰回合制戰棋。資料驅動架構、確定性戰鬥模型、啟發式 AI 含三種性格,20 個歷史戰役關卡。**Godot 4 + 純 GDScript**。
 
-[![Tests](https://img.shields.io/badge/tests-83%2F83-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-102%2F102-brightgreen)]() [![Engine](https://img.shields.io/badge/Godot-4.2%2B-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 <!-- Drop screenshot in docs/screenshots/03_sedan_objective.png to populate -->
 ![Sedan 1940 — objective pulse on the target town, German Panzer line ready to advance](docs/screenshots/03_sedan_objective.png)
@@ -17,13 +17,11 @@ The project was built as a **month-scale portfolio piece** with an explicit cons
 
 ### Built-in scenarios
 
-| # | Title | Mechanic spotlight |
+| Front | Examples | Mechanic spotlight |
 |---|---|---|
-| 1 | **色當突破 1940** | Capture-objective + terrain costs (Ardennes forest, Meuse crossings) |
-| 2 | **基輔包圍戰 1941** | Indirect-fire artillery (range 3, can fire over LOS blockers) |
-| 3 | **史達林格勒巷戰 1942** | Role reversal — player defends; town terrain gives +3 defense |
-| 4 | **庫斯克裝甲決戰 1943** | Tank-on-tank `vs_armor` / `armor` interaction with AT-gun defense in depth |
-| 5 | **突出部:Bastogne 1944** | Survive-until-relief — scripted reinforcements arrive on turn 7 |
+| Early war | Poland, Sedan, Dunkirk, Kiev, Moscow | Breakthroughs, encirclement, winter counterattack |
+| Eastern front | Stalingrad, Kharkov, Kursk, Bagration, Seelow, Berlin | Urban defense, armor duels, late-war offensives |
+| Western front | Normandy, Falaise, Market Garden, Aachen, Hurtgen, Bastogne, Colmar, Remagen | Airborne operations, reinforcements, city/forest fights |
 
 A sandbox scenario for development is also included.
 
@@ -32,13 +30,14 @@ A sandbox scenario for development is also included.
 ## Highlights
 
 - **Data-driven scenarios** — units, terrains, factions and entire battles live in JSON ([data/](data/)). Adding a new battle does **not** touch any `.gd` file.
+- **Three game flows** — single battle goes straight to scenario select + difficulty, campaign chains scenarios with roster persistence, and conquest launches real tactical battles from the world map.
 - **Symmetric fog of war + hex line-of-sight** — units have per-type vision ranges; forests and mountains break LOS. The AI obeys the same fog and keeps a per-faction last-known-position memory of enemies it has seen, so it advances toward your last position rather than cheating.
 - **Tactical depth: Zone of Control, Overwatch, Dig In, Suppression, Rally** — slipping past an enemy costs +2 movement, overwatch punishes movement through fire lanes, staying put compounds entrenchment (+1/+2/+3 defense), heavy fire can pin units, light tanks can spot for artillery suppression, Rally lets suppressed units spend their action recovering, and threat overlays expose dangerous hexes.
 - **Deterministic combat model** — `max(1, atk + vs_armor − def − terrain_def)` scaled by attacker HP ratio. Same inputs → same damage. Tests can assert exact numbers.
 - **AI with three personality presets + three difficulty profiles** — `aggressive` / `defensive` / `hold` per scenario; `easy` / `normal` / `hard` per session. Hard enables a 1-ply lookahead, capture AI values objective hexes, pinned units can choose Rally, artillery values light-tank-spotted targets, and focus-fire scoring prefers wounded or suppressed targets.
 - **Historical generals + veteran XP** — 10 named generals (Rommel, Patton, Zhukov, …) attach to specific units in each scenario, applying quality-tiered stat bonuses to compatible unit types. Units gain XP per kill / damage dealt during a battle, ranking up to ★/★★/★★★ for cumulative attack/defense/move/vision bonuses. Both feed a single modifier pipeline through `CombatResolver` / `CombatModifiers`.
 - **Visual / logic split** — game state mutates immediately; movement tweens, damage popups, death fades, wreckage markers, and audio all play in parallel without blocking the next move.
-- **83 GDScript unit tests** running headless via `bash tests/run_all.sh`. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases (incl. dig-in, suppression, Rally + general modifiers), attack legality, AI role shaping, spotter-assisted artillery, focus fire and lookahead, rank threshold + general modifier aggregation, Bastogne reinforcements, hex line drawing, line-of-sight.
+- **102 GDScript unit tests** running headless via `bash tests/run_all.sh`, plus `tools/validate_data.py` for static JSON integrity. Covers hex math, BFS pathfinding (incl. ZoC), combat formula edge cases, attack legality, AI role shaping, conquest result application, reinforcements, hex line drawing, line-of-sight, and scenario data references/stacking.
 - **~2800 LOC** of GDScript across 24 files. Read it top-to-bottom in an afternoon.
 
 ---
@@ -46,7 +45,9 @@ A sandbox scenario for development is also included.
 ## Gameplay flow
 
 ```
-Main menu  →  Scenario select  →  Briefing  →  Battle  →  Result  →  back to select
+Main menu  →  Single Battle  →  Scenario select + difficulty  →  Briefing  →  Battle  →  Result
+           →  Campaign       →  campaign map / lounge / deployment chain
+           →  Conquest       →  world map attack launches a real tactical battle
 ```
 
 In-battle interactions:
@@ -143,7 +144,7 @@ bash tests/run_all.sh
 
 ### Balance tooling
 
-Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes; `python3 tools/scenario_probe.py` regenerates tactical probes for suppression sources, artillery coverage, spotter coverage, objective pressure, and reinforcement deltas. `tools/validate_fast.sh` runs JSON/Python/report checks without launching Godot, and `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
+Balance changes are report-backed. `python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json` regenerates unit damage, TTK and role diagnostics; `python3 tools/scenario_balance_report.py` regenerates static scenario pressure notes; `python3 tools/scenario_probe.py` regenerates tactical probes for suppression sources, artillery coverage, spotter coverage, objective pressure, and reinforcement deltas. `tools/validate_fast.sh` runs JSON/Python/report checks, including `tools/validate_data.py` for scenario references, map bounds, objectives and duplicate unit coordinates. `tools/validate.sh` adds the full headless GDScript suite used by the local pre-commit hook and GitHub Actions.
 
 ### WSL2 caveats
 
@@ -162,7 +163,8 @@ CC0 sound effects can then be dropped into [assets/audio/](assets/audio/) — se
 1. Copy any file in [data/scenarios/](data/scenarios/) to a new id, e.g. `05_bastogne_1944.json`.
 2. Edit the `map.tiles` grid (rectangular `tiles[row][col]`, terrains from [data/terrains.json](data/terrains.json)).
 3. Edit `factions[]` (controller `player` or `ai`, optional `ai` personality), `units[]` (positions in odd-r offset), and `victory` (eliminate / capture / survive).
-4. Re-launch — it appears in the scenario select automatically.
+4. Run `tools/validate_fast.sh` — the data validator catches unknown references, out-of-bounds positions and stacked starting units.
+5. Re-launch — it appears in the scenario select automatically.
 
 No code changes required.
 
@@ -174,13 +176,14 @@ No code changes required.
 - [x] Hex grid, BFS movement, combat model, turn cycle
 - [x] AI with three personality presets + three difficulty profiles + 1-ply lookahead on Hard
 - [x] Zone of Control, Overwatch, Dig In, Suppression, Rally
-- [x] 5 historical scenarios + sandbox
+- [x] 20 historical scenarios + sandbox
+- [x] Single-battle flow, campaign flow, and conquest map launching tactical battles
 - [x] Scheduled reinforcements (Bastogne)
 - [x] Symmetric fog of war + line-of-sight + AI last-known-position memory
 - [x] Path animation, damage popups, attack lunge, death fade, wreckage markers
 - [x] Selection halo, objective pulse, turn-change banner
 - [x] Audio scaffolding (works once .ogg files are added)
-- [x] 83 unit tests, headless runner
+- [x] 102 unit tests, headless runner, fast data validator
 
 **Open**
 - [ ] CC0 art swap (Kenney hex tiles + unit sprites — currently Polygon2D + label)
@@ -197,6 +200,7 @@ WorldWarII/
 ├── data/
 │   ├── units.json             unit catalog
 │   ├── terrains.json          terrain catalog
+│   ├── conquest_map.json      region graph for conquest mode
 │   └── scenarios/             one file per battle
 ├── scenes/                    Godot scenes (.tscn)
 │   ├── main_menu.tscn
@@ -209,13 +213,14 @@ WorldWarII/
 │   ├── units/                 Unit class + factory
 │   ├── combat/                damage, legality, modifiers, suppression effects
 │   ├── turn/                  turn manager + AI controller
-│   ├── scenario/              victory checker
+│   ├── scenario/              campaign/conquest managers, victory checker
 │   ├── ui/                    camera, menus, damage popup
 │   └── battle.gd              battle scene controller (the orchestrator)
 ├── assets/
 │   ├── audio/                 .ogg sound effects (placeholder dir)
 │   └── tiles/  units/  ui/    (placeholder dirs for art swap)
 ├── tests/                     headless GDScript tests + run_all.sh
+├── tools/                     validation and balance-report tooling
 └── docs/
     ├── ARCHITECTURE.md        system-by-system walkthrough
     ├── DEMO_SCRIPT.md         90s portfolio video script

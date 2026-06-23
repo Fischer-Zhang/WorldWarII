@@ -27,6 +27,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_resolve_real_battle_result():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	print("ConquestManager tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -105,6 +110,27 @@ func _test_conquest_state_survives_campaign_normalise() -> bool:
 			and String(conquest.get("regions", {}).get("alpha", {}).get("owner", "")) == "b":
 		return true
 	printerr("FAIL: conquest state should survive campaign normalise")
+	return false
+
+func _test_resolve_real_battle_result() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	ConquestManager.conquest_state(state, map_data)
+	var win := ConquestManager.resolve_battle_result(state, map_data, "alpha", "bravo", true)
+	var bravo := ConquestManager.region_state(state, map_data, "bravo")
+	if not bool(win.get("ok", false)) or String(bravo.get("owner", "")) != "a":
+		printerr("FAIL: real conquest battle win should capture target")
+		return false
+	state = {"version": 2, "campaigns": {}}
+	ConquestManager.conquest_state(state, map_data)
+	var before := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
+	var loss := ConquestManager.resolve_battle_result(state, map_data, "alpha", "bravo", false)
+	bravo = ConquestManager.region_state(state, map_data, "bravo")
+	if bool(loss.get("ok", false)) \
+			and String(bravo.get("owner", "")) == "b" \
+			and int(bravo.get("strength", 0)) < before:
+		return true
+	printerr("FAIL: real conquest battle loss should weaken but not capture target")
 	return false
 
 func _test_map() -> Dictionary:

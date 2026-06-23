@@ -52,8 +52,10 @@ func _ready() -> void:
 	factions = built["factions"]
 	for u in built["units"]:
 		var unit: Unit = u
-		hex_map.register_unit(unit)
-		units.append(unit)
+		if hex_map.register_unit(unit):
+			units.append(unit)
+		else:
+			push_warning("Skipping stacked scenario unit: %s at %s" % [unit.display_name, unit.coord])
 
 	if GameState.campaign_mode:
 		var camp_state := CampaignManager.load_state()

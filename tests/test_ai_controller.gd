@@ -251,5 +251,29 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: artillery should prefer light-tank-spotted target")
 
+	# 10) Target selection must use the attacker's live HP, not base HP.
+	# At 1/10 HP infantry deals 1 damage, so only the one-HP target is killable.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	var wounded_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 1)
+	var one_hp_target := make_unit("infantry", "allies", Vector2i(1, 0), 1)
+	var two_hp_target := make_unit("infantry", "allies", Vector2i(0, 1), 2)
+	battle.units = [wounded_attacker, one_hp_target, two_hp_target]
+	battle.hex_map.occupants[wounded_attacker.coord] = wounded_attacker
+	var wounded_choice = ai._best_attack_from(
+		wounded_attacker.coord, wounded_attacker.faction_id, wounded_attacker.type_id,
+		[two_hp_target, one_hp_target],
+		ai._get_unit_def(wounded_attacker.type_id),
+		{one_hp_target.coord: true, two_hp_target.coord: true},
+		wounded_attacker
+	)
+	if wounded_choice == one_hp_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: wounded attacker should only apply kill bonus to the target killed by live-HP damage")
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

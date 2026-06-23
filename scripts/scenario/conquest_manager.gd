@@ -99,10 +99,38 @@ static func player_attack(state: Dictionary, map_data: Dictionary, from_id: Stri
 	var defender_strength := int(target.get("strength", 0))
 	var attack_power := attacker_strength + int(source.get("production", 0))
 	var defense_power := defender_strength + int(target.get("production", 0))
+	return _resolve_player_attack(state, map_data, from_id, to_id, attack_power >= defense_power)
+
+static func resolve_battle_result(
+	state: Dictionary,
+	map_data: Dictionary,
+	from_id: String,
+	to_id: String,
+	player_won: bool,
+) -> Dictionary:
+	if not can_attack(state, map_data, from_id, to_id):
+		return {"ok": false, "message": "戰役結果無法套用:征服地圖狀態已變更。"}
+	return _resolve_player_attack(state, map_data, from_id, to_id, player_won)
+
+static func _resolve_player_attack(
+	state: Dictionary,
+	map_data: Dictionary,
+	from_id: String,
+	to_id: String,
+	player_won: bool,
+) -> Dictionary:
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions[from_id]
+	var target: Dictionary = regions[to_id]
+	var attacker_strength := int(source.get("strength", 0))
+	var defender_strength := int(target.get("strength", 0))
+	var attack_power := attacker_strength + int(source.get("production", 0))
+	var defense_power := defender_strength + int(target.get("production", 0))
 	source["strength"] = max(1, attacker_strength - 1)
-	if attack_power >= defense_power:
+	if player_won:
 		target["owner"] = String(conquest.get("player_country", ""))
-		target["strength"] = max(1, attacker_strength - defender_strength + 1)
+		target["strength"] = max(1, attack_power - defense_power + 1)
 		regions[from_id] = source
 		regions[to_id] = target
 		conquest["regions"] = regions

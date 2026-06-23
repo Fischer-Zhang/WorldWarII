@@ -156,10 +156,19 @@ func _clear_overlay_layer(layer: Node2D) -> void:
 	for c in layer.get_children():
 		c.queue_free()
 
-func register_unit(unit: Unit) -> void:
+func register_unit(unit: Unit) -> bool:
+	var existing: Unit = occupants.get(unit.coord)
+	if existing != null and existing != unit:
+		push_error("[HexMap] Duplicate unit coordinate %s: %s conflicts with %s" % [
+			unit.coord,
+			unit.display_name,
+			existing.display_name,
+		])
+		return false
 	occupants[unit.coord] = unit
 	add_child(unit)
 	unit.z_index = 20
+	return true
 
 func unregister_unit(unit: Unit) -> void:
 	if occupants.get(unit.coord) == unit:

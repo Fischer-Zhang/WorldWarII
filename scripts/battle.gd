@@ -88,8 +88,10 @@ func _ready() -> void:
 	factions = built["factions"]
 	for u in built["units"]:
 		var unit: Unit = u
-		hex_map.register_unit(unit)
-		units.append(unit)
+		if hex_map.register_unit(unit):
+			units.append(unit)
+		else:
+			push_warning("Skipping stacked scenario unit: %s at %s" % [unit.display_name, unit.coord])
 
 	# Campaign mode: restore each unit's xp/rank/general from the saved roster
 	# (matched by display_name within faction). New units stay fresh.
@@ -308,6 +310,8 @@ func _handle_game_over(winner: String) -> void:
 			)
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
+	elif GameState.conquest_mode:
+		menu_button.text = "返回征服地圖"
 
 func _populate_battle_summary() -> void:
 	# Build a compact battle-log card for the result panel:
@@ -354,6 +358,8 @@ func _populate_battle_summary() -> void:
 func _on_menu_button_pressed() -> void:
 	if GameState.campaign_mode:
 		get_tree().change_scene_to_file("res://scenes/campaign.tscn")
+	elif GameState.conquest_mode:
+		get_tree().change_scene_to_file("res://scenes/conquest.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
 

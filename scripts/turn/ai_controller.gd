@@ -104,7 +104,7 @@ func plan_for_unit(unit) -> Dictionary:
 	for cand in candidates:
 		var coord: Vector2i = cand
 		var base_score: float = _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, visible_hexes)
-		var target = _best_attack_from(coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes)
+		var target = _best_attack_from(coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes, unit)
 		# Attack score is implicit in base_score (already includes attack_term).
 		# Overwatch is an alternative: subtract the attack contribution (not
 		# attacking this turn) and add the overwatch score.
@@ -166,29 +166,9 @@ func _score_position(
 		var enemy = e
 		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
 			continue
-		var d: int = HexCoord.distance(pos, enemy.coord)
-		var def_def: Dictionary = _get_unit_def(enemy.type_id)
-		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
-		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
-		var def_general: Dictionary = _get_general_def(enemy.general_id)
-		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
-		var atk_mods_effective: Dictionary = atk_mods_for_score.duplicate()
-		atk_mods_effective.attack -= CombatEffects.attack_penalty(unit.suppression)
-		var r: CombatResolver.Result = CombatResolver.resolve(
-			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
-			enemy.dig_in_level, atk_mods_effective, def_mods
+		var dmg_score: float = _attack_candidate_score(
+			unit, pos, unit.faction_id, unit.type_id, enemy, atk_def, atk_mods_for_score
 		)
-		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
-			unit.faction_id, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
-		)
-		var dmg_score := float(r.damage_to_defender)
-		if r.defender_dies:
-			dmg_score += _kill_bonus
-		dmg_score += _target_role_score(unit.type_id, def_def)
-		dmg_score += _target_focus_score(enemy, def_def)
-		dmg_score += float(suppression) * W_SUPPRESSION
-		dmg_score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
-		dmg_score -= 0.6 * float(r.counter_damage)
 		attack_term = max(attack_term, dmg_score)
 	attack_term *= _attack_w
 
@@ -259,29 +239,9 @@ func _best_attack_value(
 		var enemy = e
 		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
 			continue
-		var d: int = HexCoord.distance(pos, enemy.coord)
-		var def_def: Dictionary = _get_unit_def(enemy.type_id)
-		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
-		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
-		var def_general: Dictionary = _get_general_def(enemy.general_id)
-		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
-		var atk_mods_effective: Dictionary = atk_mods_local.duplicate()
-		atk_mods_effective.attack -= CombatEffects.attack_penalty(unit.suppression)
-		var r: CombatResolver.Result = CombatResolver.resolve(
-			atk_def, def_def, unit.hp, enemy.hp, atk_terr, def_terr, d,
-			enemy.dig_in_level, atk_mods_effective, def_mods
+		var dmg: float = _attack_candidate_score(
+			unit, pos, unit.faction_id, unit.type_id, enemy, atk_def, atk_mods_local
 		)
-		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
-			unit.faction_id, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
-		)
-		var dmg := float(r.damage_to_defender)
-		if r.defender_dies:
-			dmg += _kill_bonus
-		dmg += _target_role_score(unit.type_id, def_def)
-		dmg += _target_focus_score(enemy, def_def)
-		dmg += float(suppression) * W_SUPPRESSION
-		dmg += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
-		dmg -= 0.6 * float(r.counter_damage)
 		best = max(best, dmg)
 	return best * _attack_w
 
@@ -333,37 +293,77 @@ func _best_attack_from(
 	enemies: Array,
 	atk_def: Dictionary,
 	visible_hexes: Dictionary,
+	attacker = null,
 ) -> Variant:
-	var hex_map = battle.hex_map
 	var best = null
 	var best_dmg := 0.0
+	var attacker_unit = attacker if attacker != null else _unit_at(pos, attacker_faction, attacker_type)
+	var attacker_mods: Dictionary = {}
+	if attacker_unit != null:
+		var atk_general: Dictionary = _get_general_def(attacker_unit.general_id)
+		attacker_mods = CombatModifiers.for_unit(attacker_unit, atk_general)
 	for e in enemies:
 		var enemy = e
-		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, hex_map, visible_hexes):
+		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, battle.hex_map, visible_hexes):
 			continue
-		var d: int = HexCoord.distance(pos, enemy.coord)
-		var def_def: Dictionary = _get_unit_def(enemy.type_id)
-		var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
-		var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
-		var atk_hp := int(atk_def.get("hp", 1))
-		var def_general: Dictionary = _get_general_def(enemy.general_id)
-		var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
-		var r: CombatResolver.Result = CombatResolver.resolve(
-			atk_def, def_def, atk_hp, enemy.hp, atk_terr, def_terr, d,
-			enemy.dig_in_level, {}, def_mods
+		var dmg: float = _attack_candidate_score(
+			attacker_unit, pos, attacker_faction, attacker_type, enemy, atk_def, attacker_mods
 		)
-		var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
-			attacker_faction, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
-		)
-		var dmg: float = r.damage_to_defender + (10 if r.defender_dies else 0) \
-			+ _target_role_score(attacker_type, def_def) \
-			+ _target_focus_score(enemy, def_def) \
-			+ float(suppression) * W_SUPPRESSION \
-			+ float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 		if dmg > best_dmg:
 			best_dmg = dmg
 			best = enemy
 	return best
+
+func _attack_candidate_score(
+	attacker,
+	pos: Vector2i,
+	attacker_faction: String,
+	attacker_type: String,
+	enemy,
+	atk_def: Dictionary,
+	attacker_mods: Dictionary = {},
+) -> float:
+	var hex_map = battle.hex_map
+	var d: int = HexCoord.distance(pos, enemy.coord)
+	var def_def: Dictionary = _get_unit_def(enemy.type_id)
+	var def_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(enemy.coord))
+	var atk_terr: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
+	var def_general: Dictionary = _get_general_def(enemy.general_id)
+	var def_mods: Dictionary = CombatModifiers.for_unit(enemy, def_general)
+	var atk_mods_effective: Dictionary = attacker_mods.duplicate()
+	var attacker_hp := int(atk_def.get("hp", 1))
+	var attacker_suppression := 0
+	if attacker != null:
+		attacker_hp = int(attacker.hp)
+		attacker_suppression = int(attacker.suppression)
+	atk_mods_effective.attack = int(atk_mods_effective.get("attack", 0)) \
+		- CombatEffects.attack_penalty(attacker_suppression)
+	var r: CombatResolver.Result = CombatResolver.resolve(
+		atk_def, def_def, attacker_hp, enemy.hp, atk_terr, def_terr, d,
+		enemy.dig_in_level, atk_mods_effective, def_mods
+	)
+	var suppression := r.suppression_to_defender + _spotter_suppression_bonus(
+		attacker_faction, enemy.coord, atk_def, r.damage_to_defender, r.defender_dies
+	)
+	var score: float = float(r.damage_to_defender)
+	if r.defender_dies:
+		score += _kill_bonus
+	score += _target_role_score(attacker_type, def_def)
+	score += _target_focus_score(enemy, def_def)
+	score += float(suppression) * W_SUPPRESSION
+	score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
+	score -= 0.6 * float(r.counter_damage)
+	return score
+
+func _unit_at(pos: Vector2i, faction_id: String, type_id: String):
+	var occupant = battle.hex_map.occupants.get(pos)
+	if occupant != null and occupant.faction_id == faction_id and occupant.type_id == type_id:
+		return occupant
+	for u in battle.units:
+		var unit = u
+		if unit.coord == pos and unit.faction_id == faction_id and unit.type_id == type_id and unit.is_alive():
+			return unit
+	return null
 
 func _spotter_suppression_bonus(
 	attacker_faction: String,

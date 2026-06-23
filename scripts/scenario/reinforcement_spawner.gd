@@ -31,7 +31,11 @@ static func spawn_for_turn(
 			unit.queue_free()
 			spawned_reinforcements[i] = true
 			continue
-		hex_map.register_unit(unit)
+		var registered: Variant = hex_map.register_unit(unit)
+		if registered == false:
+			unit.queue_free()
+			spawned_reinforcements[i] = true
+			continue
 		units.append(unit)
 		unit.reset_for_new_turn()
 		spawned_reinforcements[i] = true

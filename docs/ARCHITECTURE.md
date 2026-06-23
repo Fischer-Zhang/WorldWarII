@@ -6,7 +6,7 @@ A short walkthrough of the systems and the rationale behind each. Read top-to-bo
 
 ## Design tenets
 
-1. **Data-driven scenarios.** Units, terrains, factions and entire battles are JSON. Adding a new scenario must not require touching any `.gd` file. Code is the runtime; content is the data layer.
+1. **Data-driven scenarios.** Units, terrains, factions, conquest regions and entire battles are JSON. Adding a new scenario must not require touching any `.gd` file. Code is the runtime; content is the data layer.
 2. **Determinism.** Combat, AI scoring and victory checking are pure functions of game state. No RNG — same inputs, same outputs. This keeps tests reliable and AI evaluation honest.
 3. **Visual / logic split.** Game state mutates immediately when an action resolves; visuals (movement tweens, damage popups, death fade-outs, wreckage) play in parallel and never block logic. The AI's next move never waits for a previous animation to finish.
 4. **Static methods over orchestration objects.** `Pathfinding`, `CombatResolver`, `VictoryChecker` are stateless `RefCounted` classes with pure static methods. The Battle scene is the only owner of mutable state.
@@ -35,8 +35,8 @@ Battle (scenes/battle.tscn, scripts/battle.gd)
     └── ResultPanel (modal, end of game)
 
 Autoloads (singletons)
-├── DataLoader — loads units.json / terrains.json / scenarios/*.json once
-├── GameState  — inter-scene state (current scenario id, last result)
+├── DataLoader — loads units / terrain / campaign / conquest / scenario JSON once
+├── GameState  — inter-scene state (scenario, difficulty, campaign/conquest result routing)
 ├── AudioBank  — lazy .ogg loader, no-op for missing files
 └── ScreenshotHelper — F12 → user://screenshots/
 
@@ -44,7 +44,9 @@ Pure logic (RefCounted, all static methods)
 ├── HexCoord       — axial coordinate math + pixel conversion
 ├── Pathfinding    — Dijkstra movement range + path reconstruction
 ├── CombatResolver — attack damage formula + counter-attack
-├── VictoryChecker — eliminate / capture / survive evaluators
+├── VictoryChecker  — eliminate / capture / survive evaluators
+├── CampaignManager — persistent campaign roster/progress
+├── ConquestManager — persistent region ownership/strength rules
 ├── TurnManager    — faction rotation + turn counter
 ├── AIController   — heuristic per-unit move scoring
 └── UnitFactory    — scenario JSON → instantiated Units
@@ -120,8 +122,7 @@ For each AI unit on its faction's turn:
 2. For each candidate hex (including "stay in place"), score:
    ```
    score = -dist_to_nearest_enemy        × 1.0   (advance toward objective)
-         + best_damage_from_here         × 2.5   (reward attacks)
-         + 5.0 if attack would kill              (finish bonus)
+         + best_attack_value_from_here           (damage, kill bonus, counter penalty)
          - 0.6 × counter_damage_we'd_eat         (avoid bad trades)
          + wounded/suppressed target focus       (finish damaged units)
          + suppression / dig-in break value      (prefer pinning and siege hits)
@@ -133,7 +134,7 @@ For each AI unit on its faction's turn:
    ```
 3. Pick the highest-scoring destination, move there, attack best target if in range.
 
-The "best target from here" reuses the same `CombatResolver.resolve` the player's hits go through — so the AI's evaluation matches the actual damage that would happen.
+The "best target from here" reuses the same attack-score helper as movement scoring and calls the same `CombatResolver.resolve` the player's hits go through. It uses the attacker's live HP and the active difficulty's kill bonus, so a wounded unit no longer receives target-selection credit for kills it cannot actually make.
 
 Role shaping keeps specialist units from collapsing back into raw damage math:
 
@@ -385,6 +386,20 @@ When `TurnManager` rolls into turn `at_turn` AND the current faction is the rein
 
 If the spawn hex is already occupied, the reinforcement is silently dropped (with a `push_warning`) — caller can adjust map design rather than us picking a random fallback hex.
 
+Starting units are stricter: `HexMap.register_unit` rejects duplicate occupancy, and scene load callsites skip the later stacked unit after logging an error. `tools/validate_data.py` catches the same problem before Godot runs, along with unknown unit/terrain/general/faction references, out-of-bounds coordinates, bad objective targets, campaign references and conquest-map neighbor references.
+
+---
+
+## Game Flows
+
+The main menu routes to three related flows:
+
+- **Single Battle:** `main_menu.gd` sets `GameState.campaign_mode = false` and opens `scenario_select.tscn`. The scenario-select screen is the only difficulty picker; it stores `GameState.difficulty`, then opens briefing/deployment/battle.
+- **Campaign:** `campaign.gd` selects a campaign and scenario from `data/campaigns.json`. Battle victory advances campaign progress and persists roster XP/general assignments through `CampaignManager`.
+- **Conquest:** `conquest.gd` loads the persistent region graph from `data/conquest_map.json`. Player attacks choose a theatre-appropriate existing scenario, store `{from,to,scenario_id}` in `GameState.pending_conquest_battle`, and launch the normal briefing/deployment/battle flow. When the result panel returns to conquest, `ConquestManager.resolve_battle_result` applies the tactical winner to region ownership/strength. AI-country attacks still use the lightweight deterministic region resolver during `end_turn`.
+
+This keeps tactical battle rules in one place: conquest does not own a second combat simulator for player attacks.
+
 ---
 
 ## Fog of war + line-of-sight
@@ -491,13 +506,20 @@ Headless GDScript tests, run with `bash tests/run_all.sh`:
 |---|---|---|
 | `test_hex_coord` | Axial math, neighbors, distance, range size, pixel round-trip | 7 |
 | `test_pathfinding` | Open / blocked / terrain-cost / off-map / start-excluded / ZoC + reconstruction | 10 |
-| `test_combat_resolver` | Damage formula, counters, dig-in, modifiers, suppression output, artillery dig-in break | 16 |
+| `test_combat_resolver` | Damage formula, counters, dig-in, modifiers, suppression output, artillery dig-in break | 17 |
 | `test_combat_effects` | Suppression amount, pin thresholds, cap/recovery, movement/attack penalties, Rally, lethal/no-damage handling, spotter bonus guardrails | 9 |
 | `test_combat_modifiers` | Rank thresholds and general modifier aggregation | 9 |
 | `test_combat_rules` | Direct/indirect attack legality, visibility, LOS blockers, faction/dead/range filters, candidate-position checks | 10 |
 | `test_visibility` | Hex line + LOS through forest / endpoints / adjacency | 7 |
-| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action, focus fire, spotter-assisted artillery target choice | 9 |
+| `test_ai_controller` | AT armor target priority, artillery standoff, light-tank scout positioning, Hard 1-ply lookahead, suppression/dig-in target value, capture objective pressure, Rally action, focus fire, spotter-assisted artillery target choice, wounded-attacker live-HP target choice | 10 |
 | `test_reinforcements` | Bastogne scheduled turn 7 spawn, coordinate conversion, ready-to-act state, no duplicate spawn, occupied-hex skip | 6 |
-| **Total** | | **83 ✓** |
+| `test_campaign_manager` | Campaign progress, roster persistence and normalisation | 4 |
+| `test_conquest_manager` | Region attack/transfer/end-turn, campaign-state coexistence, real battle result application | 5 |
+| `test_deployment` | Scenario-scoped deployment overrides, occupied-target fallback | 3 |
+| `test_lounge_manager` | Upgrade availability/application and roster aggregation | 4 |
+| `test_scenario_colors` | Scenario faction colors parse cleanly | 1 |
+| **Total** | | **102 ✓** |
 
 The Battle scene itself is exercised by booting each scene headless (`godot --headless --main-scene SCENE --quit-after 30`) — proves the parser + autoload chain + scene load are clean even when no GUI test exists.
+
+Fast validation without Godot is `tools/validate_fast.sh`: Python compilation, JSON parsing, `tools/validate_data.py`, balance reports, scenario reports and `git diff --check`.

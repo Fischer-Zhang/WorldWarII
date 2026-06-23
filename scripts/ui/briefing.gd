@@ -6,7 +6,12 @@ extends Control
 @onready var back_button: Button = $Margin/VBox/Buttons/BackButton
 
 func _ready() -> void:
-	back_button.text = "返回戰役地圖" if GameState.campaign_mode else "返回作戰列表"
+	if GameState.campaign_mode:
+		back_button.text = "返回戰役地圖"
+	elif GameState.conquest_mode:
+		back_button.text = "返回征服地圖"
+	else:
+		back_button.text = "返回作戰列表"
 	var scenario := DataLoader.get_scenario(GameState.current_scenario_id)
 	if scenario.is_empty():
 		title_label.text = "(找不到作戰)"
@@ -23,5 +28,8 @@ func _on_begin_pressed() -> void:
 func _on_back_pressed() -> void:
 	if GameState.campaign_mode:
 		get_tree().change_scene_to_file("res://scenes/campaign.tscn")
+	elif GameState.conquest_mode:
+		GameState.clear_conquest_battle()
+		get_tree().change_scene_to_file("res://scenes/conquest.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")

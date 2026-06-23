@@ -10,6 +10,8 @@ var difficulty: String = "normal"  # "easy" | "normal" | "hard"
 # Campaign mode: when true, the battle reads/writes campaign_save.json
 # (unit roster carryover, progress advancement on victory).
 var campaign_mode: bool = false
+var conquest_mode: bool = false
+var pending_conquest_battle: Dictionary = {}
 var deployment_scenario_id: String = ""
 var deployment_overrides: Dictionary = {}
 
@@ -36,3 +38,18 @@ func get_deployment_overrides(scenario_id: String) -> Dictionary:
 func clear_deployment_overrides() -> void:
 	deployment_scenario_id = ""
 	deployment_overrides.clear()
+
+func start_conquest_battle(from_region_id: String, to_region_id: String, scenario_id: String) -> void:
+	conquest_mode = true
+	campaign_mode = false
+	current_campaign_id = ""
+	current_scenario_id = scenario_id
+	pending_conquest_battle = {
+		"from": from_region_id,
+		"to": to_region_id,
+		"scenario_id": scenario_id,
+	}
+
+func clear_conquest_battle() -> void:
+	conquest_mode = false
+	pending_conquest_battle.clear()
