@@ -95,4 +95,7 @@ func _upgrade_tech(tech_id: String) -> void:
 
 func _on_back_pressed() -> void:
 	CampaignManager.save_state(state)
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	if GameState.campaign_mode:
+		get_tree().change_scene_to_file("res://scenes/campaign.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

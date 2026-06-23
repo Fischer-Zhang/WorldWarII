@@ -42,6 +42,8 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var result_summary: RichTextLabel = $UI/ResultPanel/ResultSummary
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
+@onready var lounge_button: Button = $UI/ResultPanel/LoungeButton
+@onready var next_button: Button = $UI/ResultPanel/NextButton
 @onready var info_unit_name: Label = $UI/InfoPanel/VBox/UnitName
 @onready var info_faction_label: Label = $UI/InfoPanel/VBox/FactionLabel
 @onready var info_stats: RichTextLabel = $UI/InfoPanel/VBox/StatsLabel
@@ -69,6 +71,7 @@ var player_faction_id: String = ""
 var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
 var last_known_positions: Dictionary = {}    # faction_id -> Dictionary[Unit, Vector2i]
 var action_log: ActionLog = ActionLog.new()
+var next_campaign_scenario_id: String = ""
 
 func _ready() -> void:
 	var scenario_id := GameState.current_scenario_id
@@ -124,6 +127,8 @@ func _ready() -> void:
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
+	lounge_button.pressed.connect(_on_lounge_button_pressed)
+	next_button.pressed.connect(_on_next_button_pressed)
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	rally_button.pressed.connect(_on_rally_pressed)
 	skill_button.pressed.connect(_on_skill_pressed)
@@ -276,6 +281,9 @@ func _handle_game_over(winner: String) -> void:
 	var winner_name := String(factions.get(winner, {}).get("name", winner))
 	result_label.text = "%s 獲勝!" % winner_name
 	result_panel.visible = true
+	lounge_button.visible = false
+	next_button.visible = false
+	next_campaign_scenario_id = ""
 	end_turn_button.disabled = true
 	# Play victory/defeat from the player's perspective
 	var player_won := false
@@ -303,6 +311,9 @@ func _handle_game_over(winner: String) -> void:
 			CampaignManager.complete_scenario(
 				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors
 			)
+			next_campaign_scenario_id = CampaignManager.current_scenario_id(
+				camp_state, GameState.current_campaign_id, scenario_order
+			)
 		else:
 			# Defeat: snapshot survivors but don't advance progress.
 			CampaignManager.complete_scenario(
@@ -310,6 +321,8 @@ func _handle_game_over(winner: String) -> void:
 			)
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
+		lounge_button.visible = true
+		next_button.visible = player_won and next_campaign_scenario_id != ""
 	elif GameState.conquest_mode:
 		menu_button.text = "返回征服地圖"
 
@@ -362,6 +375,15 @@ func _on_menu_button_pressed() -> void:
 		get_tree().change_scene_to_file("res://scenes/conquest.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
+
+func _on_lounge_button_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/lounge.tscn")
+
+func _on_next_button_pressed() -> void:
+	if next_campaign_scenario_id == "":
+		return
+	GameState.current_scenario_id = next_campaign_scenario_id
+	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
 # ---------- INPUT / STATE MACHINE ----------
 

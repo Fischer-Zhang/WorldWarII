@@ -30,6 +30,9 @@ func _on_conquest_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/conquest.tscn")
 
 func _on_lounge_pressed() -> void:
+	GameState.campaign_mode = false
+	GameState.clear_conquest_battle()
+	GameState.current_campaign_id = ""
 	get_tree().change_scene_to_file("res://scenes/lounge.tscn")
 
 func _on_quit_pressed() -> void:
