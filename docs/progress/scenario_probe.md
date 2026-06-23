@@ -10,3 +10,5 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 20/140 (14%) | axis 65/140 (46%), spots 0 | n/a | none |
 | 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 24/140 (17%); soviet 27/140 (19%) | axis 43/140 (31%), spots 2 | axis target 5,2 own min 7 enemy min 0 | none |
 | 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 37/140 (26%); axis 27/140 (19%) | none | axis target 6,4 own min 3 enemy min 0 | allies +129.5; T7 3 units |
+| 06_market_garden_1944 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 37/140 (26%); axis 33/140 (24%) | none | allies target 5,5 own min 1 enemy min 3 | allies +129.5; T7 3 units |
+| 07_bagration_1944 | axis artillery:1, mg_team:1; soviet artillery:2, mg_team:1 | axis 24/140 (17%); soviet 32/140 (23%) | none | soviet target 2,4 own min 10 enemy min 1 | soviet +77.6; T6 2 units |

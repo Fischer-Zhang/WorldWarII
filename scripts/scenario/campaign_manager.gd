@@ -23,6 +23,8 @@ const SCENARIO_ORDER := [
 	"03_stalingrad_1942",
 	"04_kursk_1943",
 	"05_bastogne_1944",
+	"06_market_garden_1944",
+	"07_bagration_1944",
 ]
 const VERSION := 1
 

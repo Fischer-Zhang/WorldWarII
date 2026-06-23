@@ -231,18 +231,22 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | 01_sedan_1940 | 5 | 2 | 1 | 1 | 3 | 1 | 0 | 0 |
 | 02_kiev_1941 | 5 | 1 | 2 | 1 | 4 | 2 | 0 | 0 |
 | 03_stalingrad_1942 | 6 | 3 | 2 | 1 | 1 | 1 | 0 | 0 |
-| 04_kursk_1943 | 3 | 0 | 4 | 1 | 7 | 2 | 0 | 0 |
+| 04_kursk_1943 | 3 | 0 | 4 | 1 | 8 | 2 | 0 | 0 |
 | 05_bastogne_1944 | 4 | 1 | 1 | 0 | 5 | 2 | 2 | 1 |
-| TOTAL | 25 | 8 | 11 | 5 | 22 | 9 | 2 | 1 |
+| 06_market_garden_1944 | 3 | 2 | 2 | 0 | 4 | 2 | 3 | 1 |
+| 07_bagration_1944 | 5 | 2 | 3 | 0 | 6 | 3 | 0 | 0 |
+| TOTAL | 33 | 12 | 16 | 5 | 33 | 14 | 5 | 2 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
 | 00_sandbox | 80 | plain 69%, forest 11%, road 8% |
-| 01_sedan_1940 | 140 | plain 59%, forest 25%, river 8% |
+| 01_sedan_1940 | 140 | plain 59%, forest 23%, river 8% |
 | 02_kiev_1941 | 140 | plain 76%, road 9%, river 7% |
 | 03_stalingrad_1942 | 140 | plain 46%, town 44%, river 5% |
-| 04_kursk_1943 | 140 | plain 87%, forest 6%, road 6% |
+| 04_kursk_1943 | 140 | plain 84%, forest 6%, road 6% |
 | 05_bastogne_1944 | 140 | plain 63%, forest 18%, road 16% |
+| 06_market_garden_1944 | 140 | plain 67%, road 12%, river 9% |
+| 07_bagration_1944 | 140 | plain 81%, forest 7%, road 6% |
 
 ## Rule Risks
 
