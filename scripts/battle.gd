@@ -959,14 +959,18 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 	info_faction_label.add_theme_color_override("font_color", faction_color)
 	info_faction_label.text = String(factions[unit.faction_id]["name"])
 	var lines := [
-		"[b]HP[/b]      %d / %d" % [unit.hp, unit.max_hp],
-		"[b]攻擊[/b]    %d" % int(u_def.get("attack", 0)),
-		"[b]防禦[/b]    %d" % int(u_def.get("defense", 0)),
-		"[b]射程[/b]    %d" % int(u_def.get("range", 1)),
-		"[b]視野[/b]    %d" % int(u_def.get("vision", 3)),
-		"[b]移動[/b]    %d" % int(u_def.get("move", 0)),
-		"[b]反裝甲[/b]  %d" % int(u_def.get("vs_armor", 0)),
-		"[b]裝甲[/b]    %d" % int(u_def.get("armor", 0)),
+		"[b]HP[/b]  %d / %d" % [unit.hp, unit.max_hp],
+		"[b]基礎[/b]  攻%d 防%d 反%d" % [
+			int(u_def.get("attack", 0)),
+			int(u_def.get("defense", 0)),
+			int(u_def.get("vs_armor", 0)),
+		],
+		"[b]機動[/b]  射程%d 移%d 視%d 裝%d" % [
+			int(u_def.get("range", 1)),
+			int(u_def.get("move", 0)),
+			int(u_def.get("vision", 3)),
+			int(u_def.get("armor", 0)),
+		],
 	]
 	lines.append_array(UnitDetailFormatter.battle_upgrade_lines(unit, u_def, general_def))
 	if u_def.get("indirect", false):
