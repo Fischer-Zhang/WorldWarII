@@ -244,6 +244,8 @@ def validate_conquest(errors: list[str]) -> None:
     if str(conquest.get("start_country", "")) not in countries:
         fail(errors, path, "start_country must reference countries")
     region_ids: set[str] = set()
+    region_by_id: dict[str, Any] = {}
+    coords: dict[tuple[int, int], str] = {}
     for region in regions if isinstance(regions, list) else []:
         if not isinstance(region, dict):
             fail(errors, path, "region entries must be objects")
@@ -255,15 +257,31 @@ def validate_conquest(errors: list[str]) -> None:
         if region_id in region_ids:
             fail(errors, path, f"duplicate region id {region_id!r}")
         region_ids.add(region_id)
+        region_by_id[region_id] = region
         if str(region.get("owner", "")) not in countries:
             fail(errors, path, f"region {region_id!r} owner is unknown")
+        if int(region.get("production", 0)) <= 0:
+            fail(errors, path, f"region {region_id!r} production must be positive")
+        try:
+            coord = (int(region.get("x", -1)), int(region.get("y", -1)))
+        except (TypeError, ValueError):
+            fail(errors, path, f"region {region_id!r} x/y must be integers")
+            continue
+        if coord in coords:
+            fail(errors, path, f"region {region_id!r} overlaps {coords[coord]!r} at {coord!r}")
+        coords[coord] = region_id
     for region in regions if isinstance(regions, list) else []:
         if not isinstance(region, dict):
             continue
         region_id = str(region.get("id", ""))
         for neighbor in region.get("neighbors", []):
-            if str(neighbor) not in region_ids:
-                fail(errors, path, f"region {region_id!r} references unknown neighbor {neighbor!r}")
+            neighbor_id = str(neighbor)
+            if neighbor_id not in region_ids:
+                fail(errors, path, f"region {region_id!r} references unknown neighbor {neighbor_id!r}")
+                continue
+            neighbor_region = region_by_id.get(neighbor_id, {})
+            if isinstance(neighbor_region, dict) and region_id not in [str(n) for n in neighbor_region.get("neighbors", [])]:
+                fail(errors, path, f"region {region_id!r} neighbor {neighbor_id!r} must be reciprocal")
 
 
 def main() -> int:

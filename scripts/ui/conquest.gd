@@ -3,37 +3,7 @@ extends Control
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
 const ConquestBattleContext := preload("res://scripts/scenario/conquest_battle_context.gd")
-
-const FALLBACK_SCENARIO := "01_sedan_1940"
-const REGION_SCENARIOS := {
-	"north_america": "west_08_normandy_cobra_1944",
-	"atlantic": "west_08_falaise_1944",
-	"britain": "blitz_02_dunkirk_1940",
-	"west_europe": "01_sedan_1940",
-	"germany": "west_10_remagen_1945",
-	"north_sea": "west_08_normandy_cobra_1944",
-	"east_europe": "02_kiev_1941",
-	"moscow": "blitz_03_moscow_1941",
-	"siberia": "07_bagration_1944",
-	"north_africa": "01_sedan_1940",
-	"mediterranean": "west_11_colmar_1945",
-	"middle_east": "east_05_kharkov_1943",
-	"central_asia": "04_kursk_1943",
-	"india": "06_market_garden_1944",
-	"china": "07_bagration_1944",
-	"manchuria": "east_09_seelow_1945",
-	"japan_home": "east_10_berlin_1945",
-	"southeast_asia": "06_market_garden_1944",
-	"pacific": "06_market_garden_1944",
-}
-const COUNTRY_SIDE := {
-	"germany": "axis",
-	"soviet": "soviet",
-	"britain": "allies",
-	"usa": "allies",
-	"china": "soviet",
-	"japan": "axis",
-}
+const ConquestCatalog := preload("res://scripts/scenario/conquest_catalog.gd")
 
 @onready var title_label: Label = $Margin/VBox/Header/Title
 @onready var country_option: OptionButton = $Margin/VBox/Header/CountryOption
@@ -268,15 +238,15 @@ func _scenario_for_attack(from_id: String, to_id: String) -> String:
 	if source.is_empty():
 		return ""
 	var player_country := String(conquest.get("player_country", ""))
-	var side := String(COUNTRY_SIDE.get(player_country, "axis"))
-	var preferred := String(REGION_SCENARIOS.get(to_id, FALLBACK_SCENARIO))
+	var side := String(ConquestCatalog.COUNTRY_SIDE.get(player_country, "axis"))
+	var preferred := String(ConquestCatalog.REGION_SCENARIOS.get(to_id, ConquestCatalog.FALLBACK_SCENARIO))
 	if _scenario_player_faction(preferred) == side:
 		return preferred
 	for scenario in DataLoader.scenarios:
 		var scenario_id := String(scenario.get("id", ""))
 		if _scenario_player_faction(scenario_id) == side:
 			return scenario_id
-	return FALLBACK_SCENARIO
+	return ConquestCatalog.FALLBACK_SCENARIO
 
 func _scenario_player_faction(scenario_id: String) -> String:
 	var battle_scenario := DataLoader.get_scenario(scenario_id)

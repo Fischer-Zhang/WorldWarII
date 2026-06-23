@@ -101,7 +101,7 @@
       "x": 5,
       "y": 1,
       "production": 6,
-      "neighbors": ["east_europe", "siberia", "central_asia"]
+      "neighbors": ["east_europe", "siberia", "central_asia", "middle_east"]
     },
     {
       "id": "siberia",
