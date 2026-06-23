@@ -64,8 +64,11 @@ text = ""
 [node name="Spacer1" type="Control" parent="Margin/VBox"]
 custom_minimum_size = Vector2(0, 12)
 
-[node name="List" type="VBoxContainer" parent="Margin/VBox"]
+[node name="ListScroll" type="ScrollContainer" parent="Margin/VBox"]
 size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="Margin/VBox/ListScroll"]
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="Spacer2" type="Control" parent="Margin/VBox"]

@@ -6,7 +6,7 @@ const DIFFICULTY_HINTS := {
 	"hard":   "啟用 1 步 lookahead,AI 會評估「我走這步後玩家最強反擊」",
 }
 
-@onready var list: VBoxContainer = $Margin/VBox/List
+@onready var list: VBoxContainer = $Margin/VBox/ListScroll/List
 @onready var back_button: Button = $Margin/VBox/BackButton
 @onready var easy_btn: Button = $Margin/VBox/DifficultyRow/EasyButton
 @onready var normal_btn: Button = $Margin/VBox/DifficultyRow/NormalButton

@@ -2,7 +2,7 @@ extends Control
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 
-@onready var list: VBoxContainer = $Margin/VBox/List
+@onready var list: VBoxContainer = $Margin/VBox/ListScroll/List
 @onready var status_label: Label = $Margin/VBox/Status
 @onready var continue_button: Button = $Margin/VBox/Buttons/ContinueButton
 @onready var reset_button: Button = $Margin/VBox/Buttons/ResetButton

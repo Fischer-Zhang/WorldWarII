@@ -49,6 +49,7 @@ var state: Dictionary = {}
 var selected_region_id := ""
 var target_region_id := ""
 var _refreshing_country := false
+var _map_button_size := Vector2(116, 74)
 
 func _ready() -> void:
 	state = CampaignManager.load_state()
@@ -99,12 +100,13 @@ func _rebuild() -> void:
 	]
 	var regions: Dictionary = conquest.get("regions", {})
 	map_grid.columns = 9
+	_update_map_button_size()
 	for y in range(5):
 		for x in range(9):
 			var region := _region_at(regions, x, y)
 			var btn := Button.new()
-			btn.custom_minimum_size = Vector2(116, 74)
-			btn.add_theme_font_size_override("font_size", 14)
+			btn.custom_minimum_size = _map_button_size
+			btn.add_theme_font_size_override("font_size", 12 if _map_button_size.x < 100.0 else 14)
 			if region.is_empty():
 				btn.text = ""
 				btn.disabled = true
@@ -123,6 +125,15 @@ func _rebuild() -> void:
 				btn.pressed.connect(func(): _select_region(rid))
 			map_grid.add_child(btn)
 	_update_detail()
+
+func _update_map_button_size() -> void:
+	var body_width: float = max(720.0, $Margin/VBox/Body.size.x)
+	var detail_width: float = 330.0
+	var body_sep: float = 18.0
+	var grid_gap: float = 8.0
+	var available_width: float = body_width - detail_width - body_sep - grid_gap * 8.0
+	var cell_width: float = clamp(floor(available_width / 9.0), 72.0, 116.0)
+	_map_button_size = Vector2(cell_width, clamp(floor(cell_width * 0.64), 48.0, 74.0))
 
 func _clear_map() -> void:
 	for child in map_grid.get_children():
