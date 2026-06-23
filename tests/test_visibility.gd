@@ -3,6 +3,9 @@ extends SceneTree
 # Standalone tests for HexCoord.line and Visibility.has_los.
 # Run with: godot --headless --script res://tests/test_visibility.gd
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const Visibility := preload("res://scripts/grid/visibility.gd")
+
 class StubHexMap:
 	var tiles: Dictionary = {}
 	var blockers: Dictionary = {"forest": true, "mountain": true}

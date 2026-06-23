@@ -3,6 +3,8 @@ extends SceneTree
 # Lightweight standalone test for HexCoord.
 # Run with: godot --headless --script res://tests/test_hex_coord.gd
 
+const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+
 func _init() -> void:
 	var pass_count := 0
 	var fail_count := 0

@@ -3,6 +3,8 @@ extends SceneTree
 # Standalone test for Pathfinding. Uses a stub hex_map with a fixed terrain layout.
 # Run with: godot --headless --script res://tests/test_pathfinding.gd
 
+const Pathfinding := preload("res://scripts/grid/pathfinding.gd")
+
 class StubHexMap:
 	var tiles: Dictionary = {}
 	var costs: Dictionary = {"plain": 1, "forest": 2, "river": 4}

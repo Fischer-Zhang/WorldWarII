@@ -3,6 +3,8 @@ extends SceneTree
 # Standalone tests for CombatResolver — no DataLoader needed (defs passed in directly).
 # Run with: godot --headless --script res://tests/test_combat_resolver.gd
 
+const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
+
 func _init() -> void:
 	var pass_count := 0
 	var fail_count := 0
