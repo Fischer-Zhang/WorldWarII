@@ -1,0 +1,313 @@
+{
+  "id": "west_08_normandy_cobra_1944",
+  "title": "諾曼第突破:眼鏡蛇行動 1944",
+  "briefing": "1944 年 7 月。盟軍在諾曼第灘頭僵持數週後,美軍發動「眼鏡蛇行動」,企圖從聖洛一帶撕開德軍防線,把灘頭戰轉為機動戰。\n\n你的任務:作為美軍裝甲縱隊,在 12 個回合內突破西側道路出口。德軍若守住道路與林帶,盟軍仍會被困在樹籬地形中。\n\n戰術提示:森林代表樹籬與村落阻礙。先用砲兵壓制 AT,再讓 Sherman 沿道路穿插。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "美軍第 3 裝甲師",
+      "controller": "player",
+      "color": "#3a5a7a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍諾曼第防線",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 a",
+      "at": [
+        2,
+        7
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 b",
+      "at": [
+        1,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        2,
+        4
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57 mm AT",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        0,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 1",
+      "at": [
+        2,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 2",
+      "at": [
+        3,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        1,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40",
+      "at": [
+        3,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV",
+      "at": [
+        4,
+        4
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        12,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        2,
+        2
+      ],
+      "by_turn": 12
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 12
+    }
+  }
+}

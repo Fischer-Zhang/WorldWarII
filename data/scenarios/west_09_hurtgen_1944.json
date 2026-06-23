@@ -1,0 +1,313 @@
+{
+  "id": "west_09_hurtgen_1944",
+  "title": "赫特根森林 1944",
+  "briefing": "1944 年秋冬。美軍在德國邊境的赫特根森林中陷入漫長消耗戰。密林、砲兵與機槍讓每一條林道都變成殺傷區。\n\n你的任務:作為美軍步兵指揮官,在 13 個回合內奪取森林道路交會點。德軍只要守住,盟軍推進將繼續被森林吞噬。\n\n戰術提示:森林阻擋視線又提高防禦。步兵慢慢推進,用砲兵壓制 MG;裝甲在森林中不是主角。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "美軍步兵師",
+      "controller": "player",
+      "color": "#3a5a7a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍森林防線",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 a",
+      "at": [
+        2,
+        7
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 b",
+      "at": [
+        1,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        2,
+        4
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57 mm AT",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        0,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 1",
+      "at": [
+        5,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 2",
+      "at": [
+        6,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        4,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40",
+      "at": [
+        6,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV",
+      "at": [
+        7,
+        6
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        12,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        5,
+        4
+      ],
+      "by_turn": 13
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 13
+    }
+  }
+}

@@ -1,0 +1,331 @@
+{
+  "id": "east_05_kharkov_1943",
+  "title": "第三次哈爾科夫 1943",
+  "briefing": "1943 年 3 月。史達林格勒後,蘇軍一路向西推進,但鋒線被拉長。曼施坦因集結裝甲部隊反擊,企圖在哈爾科夫周邊切斷蘇軍先鋒並重奪城市。\n\n你的任務:作為德軍指揮官,在 12 個回合內奪回哈爾科夫城區。蘇軍若撐住,就能保住冬季攻勢成果。\n\n戰術提示:這是裝甲反擊關。用 Panther/Pz.IV 打開側翼,步兵跟上進城;不要讓反戰車砲在森林邊緣白白吃掉你的戰車。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "road",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "axis",
+      "name": "德軍南方集團軍群",
+      "controller": "player",
+      "color": "#7a4a3a"
+    },
+    {
+      "id": "soviet",
+      "name": "蘇軍沃羅涅日方面軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a3a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Panther",
+      "at": [
+        12,
+        7
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV a",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV b",
+      "at": [
+        12,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "Pz.III",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "裝甲擲彈兵 1",
+      "at": [
+        11,
+        6
+      ],
+      "general": "manstein"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "裝甲擲彈兵 2",
+      "at": [
+        13,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "Wespe",
+      "at": [
+        13,
+        5
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34 a",
+      "at": [
+        4,
+        2
+      ],
+      "general": "konev"
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34 b",
+      "at": [
+        5,
+        4
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        3,
+        2
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        4,
+        4
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "Maxim",
+      "at": [
+        5,
+        3
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "76 mm AT",
+      "at": [
+        2,
+        3
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "122 mm",
+      "at": [
+        1,
+        5
+      ]
+    }
+  ],
+  "victory": {
+    "axis": {
+      "type": "capture",
+      "target": [
+        4,
+        3
+      ],
+      "by_turn": 12
+    },
+    "soviet": {
+      "type": "survive",
+      "by_turn": 12
+    }
+  }
+}

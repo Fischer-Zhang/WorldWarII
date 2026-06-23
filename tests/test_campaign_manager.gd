@@ -65,12 +65,18 @@ func _init() -> void:
 	}
 	var migrated := CampaignManager._normalise_state(legacy)
 	var blitz_state: Dictionary = CampaignManager.campaign_state(
-		migrated, "blitzkrieg_early_war", ["01_sedan_1940", "02_kiev_1941"]
+		migrated, "blitzkrieg_early_war", [
+			"blitz_00_poland_1939",
+			"01_sedan_1940",
+			"blitz_02_dunkirk_1940",
+			"02_kiev_1941",
+			"blitz_03_moscow_1941",
+		]
 	)
 	var eastern_state: Dictionary = CampaignManager.campaign_state(
 		migrated, "eastern_front", ["03_stalingrad_1942", "04_kursk_1943"]
 	)
-	if int(blitz_state.get("progress", 0)) == 2 \
+	if int(blitz_state.get("progress", 0)) == 4 \
 			and int(eastern_state.get("progress", 0)) == 0 \
 			and not Dictionary(blitz_state.get("roster", {})).is_empty():
 		pass_count += 1

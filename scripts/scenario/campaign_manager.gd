@@ -103,11 +103,9 @@ static func _empty_campaign_state(state: Dictionary, scenario_order: Array) -> D
 		var legacy_progress := int(state.get("legacy_progress", 0))
 		for i in range(min(legacy_progress, LEGACY_SCENARIO_ORDER.size())):
 			completed[LEGACY_SCENARIO_ORDER[i]] = true
-		for sid in scenario_order:
-			if completed.has(String(sid)):
-				progress += 1
-			else:
-				break
+		for i in range(scenario_order.size()):
+			if completed.has(String(scenario_order[i])):
+				progress = i + 1
 	return {
 		"progress": progress,
 		"roster": state.get("legacy_roster", {}).duplicate(true),

@@ -235,7 +235,19 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | 05_bastogne_1944 | 4 | 1 | 1 | 0 | 5 | 2 | 2 | 1 |
 | 06_market_garden_1944 | 3 | 2 | 2 | 0 | 4 | 2 | 3 | 1 |
 | 07_bagration_1944 | 5 | 2 | 3 | 0 | 6 | 3 | 0 | 0 |
-| TOTAL | 33 | 12 | 16 | 5 | 33 | 14 | 5 | 2 |
+| blitz_00_poland_1939 | 5 | 1 | 1 | 2 | 1 | 2 | 0 | 0 |
+| blitz_02_dunkirk_1940 | 5 | 1 | 1 | 1 | 2 | 2 | 0 | 0 |
+| blitz_03_moscow_1941 | 4 | 1 | 2 | 0 | 4 | 2 | 0 | 0 |
+| east_05_kharkov_1943 | 4 | 1 | 1 | 1 | 5 | 2 | 0 | 0 |
+| east_09_seelow_1945 | 4 | 1 | 2 | 0 | 4 | 3 | 0 | 0 |
+| east_10_berlin_1945 | 5 | 2 | 1 | 0 | 3 | 2 | 0 | 1 |
+| west_08_falaise_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| west_08_normandy_cobra_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| west_09_aachen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
+| TOTAL | 84 | 25 | 36 | 9 | 70 | 39 | 5 | 3 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -247,6 +259,18 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | 05_bastogne_1944 | 140 | plain 63%, forest 18%, road 16% |
 | 06_market_garden_1944 | 140 | plain 67%, road 12%, river 9% |
 | 07_bagration_1944 | 140 | plain 81%, forest 7%, road 6% |
+| blitz_00_poland_1939 | 140 | plain 73%, road 11%, forest 8% |
+| blitz_02_dunkirk_1940 | 140 | plain 74%, road 11%, river 7% |
+| blitz_03_moscow_1941 | 140 | plain 69%, forest 15%, road 13% |
+| east_05_kharkov_1943 | 140 | plain 73%, road 11%, forest 7% |
+| east_09_seelow_1945 | 140 | plain 73%, road 11%, mountain 7% |
+| east_10_berlin_1945 | 140 | town 59%, plain 22%, road 19% |
+| west_08_falaise_1944 | 140 | plain 72%, road 11%, forest 10% |
+| west_08_normandy_cobra_1944 | 140 | plain 72%, road 11%, forest 10% |
+| west_09_aachen_1944 | 140 | plain 72%, road 11%, forest 10% |
+| west_09_hurtgen_1944 | 140 | plain 72%, road 11%, forest 10% |
+| west_10_remagen_1945 | 140 | plain 72%, road 11%, forest 10% |
+| west_11_colmar_1945 | 140 | plain 72%, road 11%, forest 10% |
 
 ## Rule Risks
 

@@ -1,0 +1,313 @@
+{
+  "id": "west_08_falaise_1944",
+  "title": "法萊茲包圍圈 1944",
+  "briefing": "1944 年 8 月。諾曼第德軍主力向東撤退,盟軍試圖在法萊茲至阿爾讓唐間合攏包圍圈。少數道路與村鎮成為德軍逃出生天的關鍵。\n\n你的任務:作為盟軍封鎖部隊,在 12 個回合內奪取並守住東側出口村鎮。德軍若拖到時限,大量部隊將逃出包圍圈。\n\n戰術提示:德軍裝甲仍危險,但隊形分散。用 AT 和 MG 卡住道路,讓 Sherman 從側翼切斷退路。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "盟軍封鎖部隊",
+      "controller": "player",
+      "color": "#3a5a7a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍撤退縱隊",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 a",
+      "at": [
+        2,
+        7
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 b",
+      "at": [
+        1,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        2,
+        4
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57 mm AT",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        0,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 1",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 2",
+      "at": [
+        12,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40",
+      "at": [
+        12,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV",
+      "at": [
+        13,
+        6
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        12,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        11,
+        4
+      ],
+      "by_turn": 12
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 12
+    }
+  }
+}

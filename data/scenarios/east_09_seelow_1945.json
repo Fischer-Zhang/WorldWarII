@@ -1,0 +1,331 @@
+{
+  "id": "east_09_seelow_1945",
+  "title": "澤洛高地 1945",
+  "briefing": "1945 年 4 月。柏林以東的澤洛高地是德軍最後的大型防線之一。蘇軍砲兵與戰車集群準備強攻,但高地、反戰車砲與城鎮節點讓每一步都付出代價。\n\n你的任務:作為蘇軍第 1 白俄方面軍,在 14 個回合內突破高地村鎮。德軍只要守住高地到時限,柏林防衛就能多撐一段時間。\n\n戰術提示:山地 +3 防禦且移動消耗高。先用炮兵削弱 AT 和 MG,再讓步兵上山;戰車適合沿道路突破側翼。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "town",
+        "mountain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "town",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "soviet",
+      "name": "蘇軍第 1 白俄方面軍",
+      "controller": "player",
+      "color": "#7a3a3a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍第 9 集團軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34/85 a",
+      "at": [
+        1,
+        7
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34/85 b",
+      "at": [
+        2,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "IS-2",
+      "at": [
+        0,
+        5
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步 1",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步 2",
+      "at": [
+        3,
+        8
+      ],
+      "general": "chuikov"
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "152 mm",
+      "at": [
+        0,
+        8
+      ],
+      "general": "zhukov"
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "喀秋莎",
+      "at": [
+        1,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "國民擲彈兵 1",
+      "at": [
+        8,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "國民擲彈兵 2",
+      "at": [
+        8,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        9,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 a",
+      "at": [
+        7,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 b",
+      "at": [
+        9,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "StuG III",
+      "at": [
+        10,
+        5
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        11,
+        1
+      ]
+    }
+  ],
+  "victory": {
+    "soviet": {
+      "type": "capture",
+      "target": [
+        8,
+        3
+      ],
+      "by_turn": 14
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 14
+    }
+  }
+}

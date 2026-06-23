@@ -3,25 +3,37 @@
     "title": "閃電戰與東進 1940-1941",
     "description": "德軍從西線突破到東線包圍戰的早期高速攻勢。適合裝甲機動、包抄與突破節奏。",
     "scenario_order": [
+      "blitz_00_poland_1939",
       "01_sedan_1940",
-      "02_kiev_1941"
+      "blitz_02_dunkirk_1940",
+      "02_kiev_1941",
+      "blitz_03_moscow_1941"
     ]
   },
   "eastern_front": {
-    "title": "東線決戰 1942-1944",
-    "description": "從史達林格勒巷戰到庫斯克裝甲戰,再到巴格拉基昂的大縱深反攻。",
+    "title": "東線決戰 1942-1945",
+    "description": "從史達林格勒巷戰到庫斯克裝甲戰、巴格拉基昂大縱深反攻,一路推進到澤洛高地與柏林終局。",
     "scenario_order": [
       "03_stalingrad_1942",
+      "east_05_kharkov_1943",
       "04_kursk_1943",
-      "07_bagration_1944"
+      "07_bagration_1944",
+      "east_09_seelow_1945",
+      "east_10_berlin_1945"
     ]
   },
   "western_front": {
-    "title": "西線反攻 1944",
-    "description": "盟軍空降、裝甲增援與德軍反擊交錯的西歐戰役線。",
+    "title": "西線反攻 1944-1945",
+    "description": "從諾曼第突破到萊茵河橋頭堡,串起盟軍空降、裝甲突破、城市攻堅與德軍反擊。",
     "scenario_order": [
+      "west_08_normandy_cobra_1944",
+      "west_08_falaise_1944",
+      "06_market_garden_1944",
+      "west_09_aachen_1944",
+      "west_09_hurtgen_1944",
       "05_bastogne_1944",
-      "06_market_garden_1944"
+      "west_11_colmar_1945",
+      "west_10_remagen_1945"
     ]
   }
 }

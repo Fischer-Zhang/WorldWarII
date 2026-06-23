@@ -1,0 +1,313 @@
+{
+  "id": "west_10_remagen_1945",
+  "title": "雷馬根大橋 1945",
+  "briefing": "1945 年 3 月。美軍抵達萊茵河畔雷馬根,意外發現魯登道夫大橋尚未被炸毀。奪橋並建立橋頭堡,將讓盟軍快速越過萊茵河。\n\n你的任務:作為美軍先遣隊,在 10 個回合內奪取東岸橋頭城鎮。德軍若守住或拖到時限,橋頭堡將難以建立。\n\n戰術提示:河流會限制機動,道路是關鍵。先清橋西岸火力點,再用戰車和步兵壓過橋頭。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "美軍第 9 裝甲師",
+      "controller": "player",
+      "color": "#3a5a7a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍萊茵防線",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 a",
+      "at": [
+        2,
+        7
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 b",
+      "at": [
+        1,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        2,
+        4
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57 mm AT",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        0,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 1",
+      "at": [
+        7,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 2",
+      "at": [
+        8,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        6,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40",
+      "at": [
+        8,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV",
+      "at": [
+        9,
+        6
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        12,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        7,
+        4
+      ],
+      "by_turn": 10
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 10
+    }
+  }
+}

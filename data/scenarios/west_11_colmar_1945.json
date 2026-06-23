@@ -1,0 +1,313 @@
+{
+  "id": "west_11_colmar_1945",
+  "title": "科爾馬口袋 1945",
+  "briefing": "1945 年 1 月。德軍第 19 軍在阿爾薩斯形成科爾馬口袋,威脅盟軍萊茵河西岸側翼。法軍與美軍部隊協同進攻,試圖清除突出部。\n\n你的任務:作為法美聯軍,在 13 個回合內奪取科爾馬外圍城鎮。德軍若守住,口袋仍能牽制大量盟軍兵力。\n\n戰術提示:村鎮和森林構成連續防線。用法軍步兵固定守軍,美軍裝甲沿道路突破。",
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tiles": [
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "法美聯軍",
+      "controller": "player",
+      "color": "#3a5a7a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍第 19 軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#7a4a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 a",
+      "at": [
+        2,
+        7
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "M4 雪曼 b",
+      "at": [
+        1,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 1",
+      "at": [
+        2,
+        4
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "步兵 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57 mm AT",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        0,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 1",
+      "at": [
+        9,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "擲彈兵 2",
+      "at": [
+        10,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG 42",
+      "at": [
+        8,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV",
+      "at": [
+        11,
+        7
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "105 mm",
+      "at": [
+        12,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        9,
+        5
+      ],
+      "by_turn": 13
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 13
+    }
+  }
+}

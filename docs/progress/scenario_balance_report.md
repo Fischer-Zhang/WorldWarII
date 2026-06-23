@@ -14,6 +14,18 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | 05_bastogne_1944 | 突出部戰役:Bastogne 1944 | plain 63%, forest 18%, road 16%; def>=2 21%; move>=3 0% | axis->6,4 min 3 avg 5.2 | no major static risks |
 | 06_market_garden_1944 | 市場花園作戰:奈梅亨橋 1944 | plain 67%, road 12%, river 9%; def>=2 11%; move>=3 9% | allies->5,5 min 1 avg 1.9 | river crossings may dominate tempo |
 | 07_bagration_1944 | 巴格拉基昂行動:明斯克突破 1944 | plain 81%, forest 7%, road 6%; def>=2 9%; move>=3 5% | soviet->2,4 min 10 avg 11.2 | force power ratio above 1.35: check victory-clock compensation; soviet artillery-heavy: watch standoff dominance |
+| blitz_00_poland_1939 | 波蘭戰役:布楚拉反擊 1939 | plain 73%, road 11%, forest 8%; def>=2 10%; move>=3 6% | axis->1,1 min 13 avg 13.8 | no major static risks |
+| blitz_02_dunkirk_1940 | 敦克爾克外圍防線 1940 | plain 74%, road 11%, river 7%; def>=2 8%; move>=3 7% | axis->5,0 min 8 avg 9.5 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
+| blitz_03_moscow_1941 | 莫斯科門前 1941 | plain 69%, forest 15%, road 13%; def>=2 16%; move>=3 2% | soviet->6,2 min 6 avg 7.7 | no major static risks |
+| east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 73%, road 11%, forest 7%; def>=2 13%; move>=3 3% | axis->4,3 min 8 avg 9.4 | no major static risks |
+| east_09_seelow_1945 | 澤洛高地 1945 | plain 73%, road 11%, mountain 7%; def>=2 14%; move>=3 9% | soviet->8,3 min 8 avg 9.1 | soviet artillery-heavy: watch standoff dominance |
+| east_10_berlin_1945 | 柏林終局 1945 | town 59%, plain 22%, road 19%; def>=2 59%; move>=3 0% | soviet->9,4 min 7 avg 8.8 | high town density: dig-in pacing risk |
+| west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->11,4 min 8 avg 10.2 | no major static risks |
+| west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->2,2 min 2 avg 4.7 | no major static risks |
+| west_09_aachen_1944 | 亞琛巷戰 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->5,5 min 2 avg 4.3 | no major static risks |
+| west_09_hurtgen_1944 | 赫特根森林 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->5,4 min 3 avg 4.3 | no major static risks |
+| west_10_remagen_1945 | 雷馬根大橋 1945 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->7,4 min 4 avg 6.2 | no major static risks |
+| west_11_colmar_1945 | 科爾馬口袋 1945 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->9,5 min 6 avg 8.3 | no major static risks |
 
 ## 00_sandbox
 
@@ -70,3 +82,87 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍第 1 白俄方面軍 | player | 11 | 406.2 | anti_armor:1, armor:4, artillery:2, infantry:3, support:1 |
 | axis | 德軍中央集團軍 | ai | 8 | 264.4 | anti_armor:2, armor:2, artillery:1, infantry:2, support:1 |
+
+## blitz_00_poland_1939
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| axis | 德軍裝甲先遣隊 | player | 6 | 217.9 | armor:1, artillery:1, infantry:2, scout_armor:2 |
+| allies | 波蘭波茲南軍團 | ai | 6 | 162.2 | anti_armor:1, artillery:1, infantry:3, support:1 |
+
+## blitz_02_dunkirk_1940
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 英法後衛部隊 | player | 6 | 162.2 | anti_armor:1, artillery:1, infantry:3, support:1 |
+| axis | 德軍裝甲軍 | ai | 6 | 230.7 | armor:2, artillery:1, infantry:2, scout_armor:1 |
+
+## blitz_03_moscow_1941
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| soviet | 蘇軍西方面軍 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍中央集團軍群 | ai | 7 | 240.3 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
+
+## east_05_kharkov_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| axis | 德軍南方集團軍群 | player | 7 | 282.6 | armor:3, artillery:1, infantry:2, scout_armor:1 |
+| soviet | 蘇軍沃羅涅日方面軍 | ai | 7 | 240.3 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
+
+## east_09_seelow_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| soviet | 蘇軍第 1 白俄方面軍 | player | 7 | 279.9 | armor:3, artillery:2, infantry:2 |
+| axis | 德軍第 9 集團軍 | ai | 7 | 212.5 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+
+## east_10_berlin_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| soviet | 蘇軍突擊群 | player | 6 | 212.5 | armor:2, artillery:1, engineer:1, infantry:2 |
+| axis | 柏林守備隊 | ai | 8 | 238.7 | anti_armor:1, armor:1, artillery:1, infantry:3, support:2 |
+
+## west_08_falaise_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 盟軍封鎖部隊 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍撤退縱隊 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_08_normandy_cobra_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍第 3 裝甲師 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍諾曼第防線 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_09_aachen_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍第 1 步兵師 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 亞琛守備隊 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_09_hurtgen_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍步兵師 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍森林防線 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_10_remagen_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍第 9 裝甲師 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍萊茵防線 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_11_colmar_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 法美聯軍 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
+| axis | 德軍第 19 軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
