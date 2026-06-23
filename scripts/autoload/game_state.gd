@@ -39,7 +39,12 @@ func clear_deployment_overrides() -> void:
 	deployment_scenario_id = ""
 	deployment_overrides.clear()
 
-func start_conquest_battle(from_region_id: String, to_region_id: String, scenario_id: String) -> void:
+func start_conquest_battle(
+	from_region_id: String,
+	to_region_id: String,
+	scenario_id: String,
+	context: Dictionary = {},
+) -> void:
 	conquest_mode = true
 	campaign_mode = false
 	current_campaign_id = ""
@@ -49,6 +54,8 @@ func start_conquest_battle(from_region_id: String, to_region_id: String, scenari
 		"to": to_region_id,
 		"scenario_id": scenario_id,
 	}
+	for key in context.keys():
+		pending_conquest_battle[key] = context[key]
 
 func clear_conquest_battle() -> void:
 	conquest_mode = false

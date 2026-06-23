@@ -72,5 +72,30 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: occupied deployment target should fall back to original coord")
 
+	var conquest_state := GameStateScript.new()
+	conquest_state.start_conquest_battle("alpha", "bravo", "01_sedan", {
+		"attacker_strength": 9,
+		"attacker_production": 4,
+		"defender_strength": 12,
+		"defender_production": 3,
+	})
+	var pending: Dictionary = conquest_state.pending_conquest_battle
+	if conquest_state.conquest_mode \
+			and conquest_state.current_scenario_id == "01_sedan" \
+			and String(pending.get("from", "")) == "alpha" \
+			and String(pending.get("to", "")) == "bravo" \
+			and int(pending.get("attacker_strength", 0)) == 9 \
+			and int(pending.get("defender_strength", 0)) == 12:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: conquest battle context should persist in GameState")
+	conquest_state.clear_conquest_battle()
+	if not conquest_state.conquest_mode and conquest_state.pending_conquest_battle.is_empty():
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: clearing conquest battle should reset pending context")
+
 	print("Deployment tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

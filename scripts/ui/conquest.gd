@@ -211,8 +211,16 @@ func _on_attack_pressed() -> void:
 	if scenario_id == "":
 		_update_detail("找不到可用的戰術作戰。")
 		return
+	var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+	var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+	var context := {
+		"attacker_strength": int(source.get("strength", 0)),
+		"attacker_production": int(source.get("production", 0)),
+		"defender_strength": int(target.get("strength", 0)),
+		"defender_production": int(target.get("production", 0)),
+	}
 	CampaignManager.save_state(state)
-	GameState.start_conquest_battle(selected_region_id, target_region_id, scenario_id)
+	GameState.start_conquest_battle(selected_region_id, target_region_id, scenario_id, context)
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
 func _on_transfer_pressed() -> void:

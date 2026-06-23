@@ -115,6 +115,7 @@ func _ready() -> void:
 		if String(factions[fid].get("controller", "")) == "player":
 			player_faction_id = fid
 			break
+	_apply_conquest_battle_modifiers()
 
 	# Seed initial enemy memory: every faction starts with intel on
 	# where their opponents are deployed (briefing-table knowledge).
@@ -151,6 +152,53 @@ func _apply_deployment_overrides(scenario_id: String) -> void:
 		return
 	DeploymentOverrides.apply(units, hex_map, overrides, HexMap.HEX_SIZE)
 	GameState.clear_deployment_overrides()
+
+func _apply_conquest_battle_modifiers() -> void:
+	if not GameState.conquest_mode or GameState.pending_conquest_battle.is_empty():
+		return
+	var pending: Dictionary = GameState.pending_conquest_battle
+	var attacker_strength := int(pending.get("attacker_strength", 0))
+	var defender_strength := int(pending.get("defender_strength", 0))
+	var attacker_power := attacker_strength + int(pending.get("attacker_production", 0))
+	var defender_power := defender_strength + int(pending.get("defender_production", 0))
+	var attacker_rank := _conquest_attacker_rank(attacker_power)
+	var defender_dig_in := _conquest_defender_dig_in(defender_power)
+	if attacker_rank <= 0 and defender_dig_in <= 0:
+		return
+
+	var attacker_vanguard := 1 if attacker_power < 12 else 2
+	var ranked := 0
+	for u in units:
+		var unit: Unit = u
+		if unit.faction_id == player_faction_id and unit.is_alive() and attacker_rank > 0:
+			unit.xp = max(unit.xp, int(CombatModifiers.RANK_THRESHOLDS[attacker_rank]))
+			unit.rank = max(unit.rank, attacker_rank)
+			unit.queue_redraw()
+			ranked += 1
+			if ranked >= attacker_vanguard:
+				break
+
+	if defender_dig_in <= 0:
+		return
+	for u in units:
+		var unit: Unit = u
+		if unit.faction_id != player_faction_id and unit.is_alive():
+			unit.dig_in_level = max(unit.dig_in_level, defender_dig_in)
+			unit.queue_redraw()
+
+func _conquest_attacker_rank(strength: int) -> int:
+	if strength >= 12:
+		return 2
+	if strength >= 8:
+		return 1
+	return 0
+
+func _conquest_defender_dig_in(strength: int) -> int:
+	if strength >= 12:
+		return 2
+	if strength >= 8:
+		return 1
+	return 0
 
 # ---------- TURN LIFECYCLE ----------
 
