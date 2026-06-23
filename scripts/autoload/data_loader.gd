@@ -8,12 +8,14 @@ const TERRAINS_PATH := "res://data/terrains.json"
 const GENERALS_PATH := "res://data/generals.json"
 const TECH_TREE_PATH := "res://data/tech_tree.json"
 const CAMPAIGNS_PATH := "res://data/campaigns.json"
+const CONQUEST_MAP_PATH := "res://data/conquest_map.json"
 const SCENARIOS_DIR := "res://data/scenarios/"
 
 var units: Dictionary = {}
 var terrains: Dictionary = {}
 var generals: Dictionary = {}
 var tech_tree: Dictionary = {}
+var conquest_map: Dictionary = {}
 var campaigns: Array[Dictionary] = []
 var scenarios: Array[Dictionary] = []
 
@@ -22,10 +24,12 @@ func _ready() -> void:
 	terrains = _with_catalog_ids(_load_json(TERRAINS_PATH))
 	generals = _with_catalog_ids(_load_json(GENERALS_PATH))
 	tech_tree = _with_catalog_ids(_load_json(TECH_TREE_PATH))
+	conquest_map = _load_json(CONQUEST_MAP_PATH)
 	campaigns = _load_campaigns()
 	scenarios = _load_scenarios()
-	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d techs, %d campaigns, %d scenarios" % [
-		units.size(), terrains.size(), generals.size(), tech_tree.size(), campaigns.size(), scenarios.size(),
+	print("[DataLoader] loaded %d unit types, %d terrains, %d generals, %d techs, %d conquest regions, %d campaigns, %d scenarios" % [
+		units.size(), terrains.size(), generals.size(), tech_tree.size(),
+		conquest_map.get("regions", []).size(), campaigns.size(), scenarios.size(),
 	])
 
 func get_unit_def(type_id: String) -> Dictionary:

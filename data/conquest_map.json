@@ -1,0 +1,206 @@
+{
+  "start_country": "germany",
+  "countries": {
+    "germany": {
+      "name_zh": "德國",
+      "color": "#a86632"
+    },
+    "soviet": {
+      "name_zh": "蘇聯",
+      "color": "#3f7f4a"
+    },
+    "britain": {
+      "name_zh": "英國",
+      "color": "#2f6fb0"
+    },
+    "usa": {
+      "name_zh": "美國",
+      "color": "#3b65c7"
+    },
+    "japan": {
+      "name_zh": "日本",
+      "color": "#b44f5a"
+    },
+    "china": {
+      "name_zh": "中國",
+      "color": "#c0a23a"
+    },
+    "neutral": {
+      "name_zh": "中立勢力",
+      "color": "#6f7882"
+    }
+  },
+  "regions": [
+    {
+      "id": "north_america",
+      "name_zh": "北美",
+      "owner": "usa",
+      "x": 0,
+      "y": 1,
+      "production": 5,
+      "neighbors": ["atlantic", "pacific"]
+    },
+    {
+      "id": "atlantic",
+      "name_zh": "大西洋",
+      "owner": "britain",
+      "x": 1,
+      "y": 1,
+      "production": 2,
+      "neighbors": ["north_america", "britain", "west_europe", "north_africa"]
+    },
+    {
+      "id": "britain",
+      "name_zh": "不列顛",
+      "owner": "britain",
+      "x": 2,
+      "y": 0,
+      "production": 4,
+      "neighbors": ["atlantic", "west_europe", "north_sea"]
+    },
+    {
+      "id": "west_europe",
+      "name_zh": "西歐",
+      "owner": "germany",
+      "x": 2,
+      "y": 1,
+      "production": 5,
+      "neighbors": ["atlantic", "britain", "germany", "north_africa"]
+    },
+    {
+      "id": "germany",
+      "name_zh": "德國本土",
+      "owner": "germany",
+      "x": 3,
+      "y": 1,
+      "production": 6,
+      "neighbors": ["west_europe", "north_sea", "east_europe", "mediterranean"]
+    },
+    {
+      "id": "north_sea",
+      "name_zh": "北海",
+      "owner": "germany",
+      "x": 3,
+      "y": 0,
+      "production": 2,
+      "neighbors": ["britain", "germany", "east_europe"]
+    },
+    {
+      "id": "east_europe",
+      "name_zh": "東歐",
+      "owner": "soviet",
+      "x": 4,
+      "y": 1,
+      "production": 5,
+      "neighbors": ["north_sea", "germany", "moscow", "middle_east"]
+    },
+    {
+      "id": "moscow",
+      "name_zh": "莫斯科",
+      "owner": "soviet",
+      "x": 5,
+      "y": 1,
+      "production": 6,
+      "neighbors": ["east_europe", "siberia", "central_asia"]
+    },
+    {
+      "id": "siberia",
+      "name_zh": "西伯利亞",
+      "owner": "soviet",
+      "x": 6,
+      "y": 1,
+      "production": 3,
+      "neighbors": ["moscow", "manchuria"]
+    },
+    {
+      "id": "north_africa",
+      "name_zh": "北非",
+      "owner": "britain",
+      "x": 2,
+      "y": 2,
+      "production": 3,
+      "neighbors": ["atlantic", "west_europe", "mediterranean", "middle_east"]
+    },
+    {
+      "id": "mediterranean",
+      "name_zh": "地中海",
+      "owner": "germany",
+      "x": 3,
+      "y": 2,
+      "production": 2,
+      "neighbors": ["germany", "north_africa", "middle_east"]
+    },
+    {
+      "id": "middle_east",
+      "name_zh": "中東",
+      "owner": "neutral",
+      "x": 4,
+      "y": 2,
+      "production": 4,
+      "neighbors": ["east_europe", "moscow", "north_africa", "mediterranean", "india"]
+    },
+    {
+      "id": "central_asia",
+      "name_zh": "中亞",
+      "owner": "soviet",
+      "x": 5,
+      "y": 2,
+      "production": 3,
+      "neighbors": ["moscow", "india", "china"]
+    },
+    {
+      "id": "india",
+      "name_zh": "印度",
+      "owner": "britain",
+      "x": 5,
+      "y": 3,
+      "production": 4,
+      "neighbors": ["middle_east", "central_asia", "china", "southeast_asia"]
+    },
+    {
+      "id": "china",
+      "name_zh": "中國",
+      "owner": "china",
+      "x": 6,
+      "y": 3,
+      "production": 5,
+      "neighbors": ["central_asia", "india", "manchuria", "southeast_asia"]
+    },
+    {
+      "id": "manchuria",
+      "name_zh": "滿洲",
+      "owner": "japan",
+      "x": 7,
+      "y": 2,
+      "production": 4,
+      "neighbors": ["siberia", "china", "japan_home"]
+    },
+    {
+      "id": "japan_home",
+      "name_zh": "日本本土",
+      "owner": "japan",
+      "x": 8,
+      "y": 2,
+      "production": 5,
+      "neighbors": ["manchuria", "southeast_asia", "pacific"]
+    },
+    {
+      "id": "southeast_asia",
+      "name_zh": "東南亞",
+      "owner": "japan",
+      "x": 7,
+      "y": 4,
+      "production": 4,
+      "neighbors": ["india", "china", "japan_home", "pacific"]
+    },
+    {
+      "id": "pacific",
+      "name_zh": "太平洋",
+      "owner": "usa",
+      "x": 8,
+      "y": 4,
+      "production": 2,
+      "neighbors": ["north_america", "japan_home", "southeast_asia"]
+    }
+  ]
+}

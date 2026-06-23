@@ -18,6 +18,11 @@ extends RefCounted
 #         "soviet": { "T-34": { "xp": 3, "rank": 1, "general_id": "konev" } }
 #       }
 #     }
+#   },
+#   "conquest": {
+#     "turn": 1,
+#     "player_country": "germany",
+#     "regions": {}
 #   }
 # }
 #
@@ -67,6 +72,8 @@ static func _normalise_state(state: Dictionary) -> Dictionary:
 	var out := {"version": VERSION, "campaigns": campaigns}
 	if state.has("lounge") and state["lounge"] is Dictionary:
 		out["lounge"] = state["lounge"]
+	if state.has("conquest") and state["conquest"] is Dictionary:
+		out["conquest"] = state["conquest"]
 	return out
 
 static func campaign_state(state: Dictionary, campaign_id: String, scenario_order: Array) -> Dictionary:

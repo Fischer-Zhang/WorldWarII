@@ -28,8 +28,8 @@ func _rebuild_campaign_list() -> void:
 	selected_scenario_id = ""
 	GameState.current_campaign_id = ""
 	_clear_list()
-	$Margin/VBox/Title.text = "戰爭"
-	$Margin/VBox/Hint.text = "選擇一條持久戰線。每條戰線有獨立進度、老兵與將軍配置。"
+	$Margin/VBox/Title.text = "戰役"
+	$Margin/VBox/Hint.text = "選擇一條戰役線。每條戰線有獨立進度、老兵與將軍配置。"
 	status_label.text = "共 %d 條戰線" % DataLoader.campaigns.size()
 	continue_button.text = "選擇戰線"
 	continue_button.disabled = true

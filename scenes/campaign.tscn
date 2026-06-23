@@ -29,11 +29,11 @@ theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="Margin/VBox"]
 theme_override_font_sizes/font_size = 32
-text = "戰爭"
+text = "戰役"
 
 [node name="Hint" type="Label" parent="Margin/VBox"]
 theme_override_font_sizes/font_size = 14
-text = "選擇一條持久戰線。每條戰線有獨立進度、老兵與將軍配置。"
+text = "選擇一條戰役線。每條戰線有獨立進度、老兵與將軍配置。"
 
 [node name="Spacer1" type="Control" parent="Margin/VBox"]
 custom_minimum_size = Vector2(0, 12)
