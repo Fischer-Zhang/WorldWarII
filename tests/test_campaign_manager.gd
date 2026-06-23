@@ -58,12 +58,12 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: campaign roster should restore xp/rank/general")
 
-	var legacy := {
+	var old_save := {
 		"version": 1,
 		"progress": 2,
 		"roster": {"axis": {"Pz.IV": {"xp": 3, "rank": 1, "general_id": "guderian"}}},
 	}
-	var migrated := CampaignManager._normalise_state(legacy)
+	var migrated := CampaignManager._normalise_state(old_save)
 	var blitz_state: Dictionary = CampaignManager.campaign_state(
 		migrated, "blitzkrieg_early_war", [
 			"blitz_00_poland_1939",
@@ -76,13 +76,15 @@ func _init() -> void:
 	var eastern_state: Dictionary = CampaignManager.campaign_state(
 		migrated, "eastern_front", ["03_stalingrad_1942", "04_kursk_1943"]
 	)
-	if int(blitz_state.get("progress", 0)) == 4 \
+	if int(blitz_state.get("progress", 0)) == 0 \
 			and int(eastern_state.get("progress", 0)) == 0 \
-			and not Dictionary(blitz_state.get("roster", {})).is_empty():
+			and Dictionary(blitz_state.get("roster", {})).is_empty() \
+			and not migrated.has("progress") \
+			and not migrated.has("roster"):
 		pass_count += 1
 	else:
 		fail_count += 1
-		printerr("FAIL: v1 save should migrate completed prefix into matching series")
+		printerr("FAIL: old linear save should not affect series state")
 
 	print("CampaignManager tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

@@ -55,7 +55,7 @@ theme_override_constants/separation = 12
 [node name="ContinueButton" type="Button" parent="Margin/VBox/Buttons"]
 custom_minimum_size = Vector2(220, 44)
 theme_override_font_sizes/font_size = 18
-text = "下一場戰役"
+text = "開始選定關卡"
 
 [node name="ResetButton" type="Button" parent="Margin/VBox/Buttons"]
 custom_minimum_size = Vector2(160, 44)

@@ -19,15 +19,6 @@ extends RefCounted
 # Each campaign series keeps independent progress and roster carryover.
 
 const SAVE_PATH := "user://campaign_save.json"
-const LEGACY_SCENARIO_ORDER := [
-	"01_sedan_1940",
-	"02_kiev_1941",
-	"03_stalingrad_1942",
-	"04_kursk_1943",
-	"05_bastogne_1944",
-	"06_market_garden_1944",
-	"07_bagration_1944",
-]
 const VERSION := 2
 
 static func load_state() -> Dictionary:
@@ -67,22 +58,8 @@ static func _empty_state() -> Dictionary:
 	return {"version": VERSION, "campaigns": {}}
 
 static func _normalise_state(state: Dictionary) -> Dictionary:
-	# v1 saves had a single chronological progress/roster. Migrate by
-	# deriving per-series progress from the old completed prefix when callers
-	# first touch each campaign; keep the old roster as a fallback snapshot.
-	if not state.has("campaigns"):
-		var old_progress := int(state.get("progress", 0))
-		var old_roster: Dictionary = state.get("roster", {})
-		return {
-			"version": VERSION,
-			"campaigns": {},
-			"legacy_progress": old_progress,
-			"legacy_roster": old_roster,
-		}
-	state["version"] = VERSION
-	if not state.has("campaigns"):
-		state["campaigns"] = {}
-	return state
+	var campaigns: Dictionary = state.get("campaigns", {})
+	return {"version": VERSION, "campaigns": campaigns}
 
 static func campaign_state(state: Dictionary, campaign_id: String, scenario_order: Array) -> Dictionary:
 	var campaigns: Dictionary = state.get("campaigns", {})
@@ -96,19 +73,10 @@ static func campaign_state(state: Dictionary, campaign_id: String, scenario_orde
 		cstate["roster"] = {}
 	return cstate
 
-static func _empty_campaign_state(state: Dictionary, scenario_order: Array) -> Dictionary:
-	var progress := 0
-	if state.has("legacy_progress"):
-		var completed := {}
-		var legacy_progress := int(state.get("legacy_progress", 0))
-		for i in range(min(legacy_progress, LEGACY_SCENARIO_ORDER.size())):
-			completed[LEGACY_SCENARIO_ORDER[i]] = true
-		for i in range(scenario_order.size()):
-			if completed.has(String(scenario_order[i])):
-				progress = i + 1
+static func _empty_campaign_state(_state: Dictionary, _scenario_order: Array) -> Dictionary:
 	return {
-		"progress": progress,
-		"roster": state.get("legacy_roster", {}).duplicate(true),
+		"progress": 0,
+		"roster": {},
 	}
 
 static func is_complete(state: Dictionary, campaign_id: String, scenario_order: Array) -> bool:

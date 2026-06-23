@@ -20,4 +20,7 @@ func _on_begin_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/deployment.tscn")
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
+	if GameState.campaign_mode:
+		get_tree().change_scene_to_file("res://scenes/campaign.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/scenario_select.tscn")
