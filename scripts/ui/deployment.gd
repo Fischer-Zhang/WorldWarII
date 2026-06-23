@@ -6,7 +6,7 @@ const Unit := preload("res://scripts/units/unit.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
-const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
+const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd")
 
 const DEPLOY_RADIUS := 2
 
@@ -212,21 +212,10 @@ func _update_detail() -> void:
 			String(g.get("title_zh", "")),
 			"" if applies else " [color=#ff8a6a](不適配此兵種)[/color]",
 		])
-		lines.append("加成: 攻 %+d / 防 %+d / 反裝甲 %+d / 移動 %+d / 視野 %+d" % [
-			int(g.get("attack_bonus", 0)),
-			int(g.get("defense_bonus", 0)),
-			int(g.get("vs_armor_bonus", 0)),
-			int(g.get("move_bonus", 0)),
-			int(g.get("vision_bonus", 0)),
-		])
-		var level := int(selected_unit.general_upgrade_levels.get(selected_unit.general_id, 0))
-		if level > 0:
-			lines.append("將領升級 Lv %d: %s" % [
-				level,
-				LoungeManager.describe_mods(LoungeManager.general_upgrade_mods(g, level)),
-			])
-	if not selected_unit.tech_mods.is_empty():
-		lines.append("科技加成: %s" % LoungeManager.describe_mods(selected_unit.tech_mods))
+	var general_def := {}
+	if selected_unit.general_id != "":
+		general_def = DataLoader.get_general_def(selected_unit.general_id)
+	lines.append_array(UnitDetailFormatter.deployment_upgrade_lines(selected_unit, unit_def, general_def))
 	lines.append("")
 	lines.append("藍色格為可部署區。選取單位只能在原部署點附近移動; 點我方單位切換; 點已佔用格可交換。")
 	status_label.text = "部署區半徑 %d · 可重派 %d 名將軍" % [DEPLOY_RADIUS, general_pool.size()]
