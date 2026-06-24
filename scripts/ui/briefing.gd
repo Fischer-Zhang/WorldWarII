@@ -29,14 +29,20 @@ func _ready() -> void:
 func _show_conquest_briefing(scenario: Dictionary) -> void:
 	var p := GameState.pending_conquest_battle
 	var loc := String(p.get("battle_location", scenario.get("title", "")))
-	var attacker := String(p.get("player_name", "我軍"))
-	var defender := String(p.get("enemy_name", "敵軍"))
+	var me := String(p.get("player_name", "我軍"))
+	var foe := String(p.get("enemy_name", "敵軍"))
 	var my_n: int = (p.get("attacker_garrison", []) as Array).size()
-	var enemy_n: int = (p.get("defender_types", []) as Array).size()
-	title_label.text = "%s 進攻 %s" % [attacker, defender]
-	briefing_label.text = "戰場:%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n殲滅所有守軍即可佔領該地。若守軍撐過 12 回合,你的攻勢將被擊退。" % [
-		loc, attacker, my_n, defender, enemy_n,
-	]
+	var foe_n: int = (p.get("defender_types", []) as Array).size()
+	if String(p.get("role", "attack")) == "defend":
+		title_label.text = "%s 來犯 — 防守 %s" % [foe, loc]
+		briefing_label.text = "戰場:%s\n\n%s 出動約 %d 支部隊進攻;你以 %d 支部隊據守。\n\n守住 12 回合或殲滅來犯者即可保住此地;守軍被殲滅則該地失守。" % [
+			loc, foe, foe_n, my_n,
+		]
+	else:
+		title_label.text = "%s 進攻 %s" % [me, foe]
+		briefing_label.text = "戰場:%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n殲滅所有守軍即可佔領此地;守軍撐過 12 回合則擊退你。" % [
+			loc, me, my_n, foe, foe_n,
+		]
 
 func _on_begin_pressed() -> void:
 	# Conquest battles field a fixed recruited army, so they skip the pre-battle

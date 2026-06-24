@@ -35,7 +35,10 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	country_option.item_selected.connect(_on_country_selected)
 	_rebuild()
-	if return_message != "":
+	# If we returned from a defensive battle mid-enemy-phase, resume the AI queue.
+	if ConquestManager.is_enemy_phase(state, DataLoader.conquest_map):
+		_advance_enemy_turn(return_message)
+	elif return_message != "":
 		_update_detail(return_message)
 
 func _build_country_options() -> void:
@@ -335,10 +338,55 @@ func _on_transfer_pressed() -> void:
 	_update_detail(String(result.get("message", "")))
 
 func _on_end_turn_pressed() -> void:
-	var messages := ConquestManager.end_turn(state, DataLoader.conquest_map)
+	_advance_enemy_turn()
+
+func _advance_enemy_turn(prefix: String = "") -> void:
+	# Drives the re-entrant enemy phase: keeps processing AI actions until the
+	# phase finishes, or an AI attack on one of our regions needs a defensive
+	# battle (which we launch and resume from afterwards).
+	var step := ConquestManager.end_turn(state, DataLoader.conquest_map)
+	if String(step.get("status", "")) == "defend":
+		_launch_defense_battle(step)
+		return
 	target_region_id = ""
 	_rebuild()
-	_update_detail("\n".join(messages))
+	var lines: Array[String] = []
+	if prefix != "":
+		lines.append(prefix)
+	for m in step.get("messages", []):
+		lines.append(String(m))
+	_update_detail("\n".join(lines))
+
+func _launch_defense_battle(step: Dictionary) -> void:
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var regions: Dictionary = conquest.get("regions", {})
+	var from_id := String(step.get("from", ""))            # enemy attacker region
+	var to_id := String(step.get("to", ""))                # our region under attack
+	var attacker_country := String(step.get("attacker_country", ""))
+	var atk_region: Dictionary = regions.get(from_id, {})
+	var def_region: Dictionary = regions.get(to_id, {})
+	var player_country := String(conquest.get("player_country", ""))
+	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
+	# Defend with the region's garrison; if it has none, a militia turns out.
+	var defenders: Array = (def_region.get("garrison", []) as Array).duplicate(true)
+	if defenders.is_empty():
+		for t in ConquestRecruit.generate_force(int(def_region.get("strength", 0))):
+			defenders.append({"id": -1, "type": String(t), "xp": 0, "rank": 0, "name": "民兵"})
+	var context := {
+		"player_faction": player_country,
+		"enemy_faction": attacker_country,
+		"player_color": String(countries.get(player_country, {}).get("color", "#cccccc")),
+		"enemy_color": String(countries.get(attacker_country, {}).get("color", "#cccccc")),
+		"player_name": String(countries.get(player_country, {}).get("name_zh", player_country)),
+		"enemy_name": String(countries.get(attacker_country, {}).get("name_zh", attacker_country)),
+		"battle_location": String(def_region.get("name_zh", "")),
+		"attacker_garrison": defenders,
+		"defender_types": ConquestRecruit.generate_force(int(atk_region.get("strength", 0))),
+		"role": "defend",
+	}
+	CampaignManager.save_state(state)
+	GameState.start_conquest_battle(from_id, to_id, _scenario_for_attack(from_id, to_id), context)
+	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
 func _on_reset_pressed() -> void:
 	ConquestManager.reset_conquest(state, DataLoader.conquest_map)
@@ -378,21 +426,27 @@ func _apply_pending_battle_result() -> String:
 	var pending := GameState.pending_conquest_battle.duplicate(true)
 	var from_id := String(pending.get("from", ""))
 	var to_id := String(pending.get("to", ""))
-	var scenario_id := String(pending.get("scenario_id", ""))
 	var player_faction := String(pending.get("player_faction", ""))
+	var role := String(pending.get("role", "attack"))
 	var result: Dictionary = GameState.last_result
 	var winner := String(result.get("winner", ""))
 	var player_won := winner != "" and winner == player_faction
 	var survivors: Array = result.get("conquest_survivors", [])
+	GameState.clear_conquest_battle()
+	GameState.last_result = {}
+	target_region_id = ""
+	if role == "defend":
+		var attacker_country := String(pending.get("enemy_faction", ""))
+		var applied_def := ConquestManager.resolve_defense_result(
+			state, DataLoader.conquest_map, attacker_country, from_id, to_id, player_won, survivors
+		)
+		selected_region_id = to_id if player_won else ""
+		return String(applied_def.get("message", ""))
+	# Attack: surviving army holds the captured region on a win, retreats on loss.
 	var applied := ConquestManager.resolve_battle_result(
 		state, DataLoader.conquest_map, from_id, to_id, player_won, survivors
 	)
-	GameState.clear_conquest_battle()
-	target_region_id = ""
-	# After a win the surviving army holds the captured region; after a loss it
-	# falls back to where it set out from.
 	selected_region_id = to_id if player_won else from_id
-	GameState.last_result = {}
 	if not bool(applied.get("ok", false)):
 		return String(applied.get("message", "戰役結果無法套用。"))
 	return String(applied.get("message", ""))

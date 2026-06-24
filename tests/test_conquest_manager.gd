@@ -32,6 +32,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_defense_result():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	print("ConquestManager tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -73,14 +78,27 @@ func _test_end_turn_and_country_switch() -> bool:
 	if String(ConquestManager.conquest_state(state, map_data).get("player_country", "")) != "b":
 		printerr("FAIL: conquest player country switch")
 		return false
+	ConquestManager.set_player_country(state, map_data, "a")
+	# AI b owns bravo and attacks alpha (player a): end_turn regens, then pauses
+	# for a player-fought defensive battle.
 	var before := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
-	var messages := ConquestManager.end_turn(state, map_data)
+	var step := ConquestManager.end_turn(state, map_data)
 	var after := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
-	if int(ConquestManager.conquest_state(state, map_data).get("turn", 0)) == 2 \
-			and after > before \
-			and not messages.is_empty():
+	if String(step.get("status", "")) != "defend" or after <= before:
+		printerr("FAIL: AI attack on a player region should regen then pause for defense")
+		return false
+	if String(step.get("to", "")) != "alpha" or String(step.get("attacker_country", "")) != "b":
+		printerr("FAIL: defense step should target player's alpha, attacker b")
+		return false
+	# No enemy-owned regions: the phase finishes and the turn advances.
+	state = {"version": 2, "campaigns": {}}
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["bravo"]["owner"] = "a"
+	var done := ConquestManager.end_turn(state, map_data)
+	if String(done.get("status", "")) == "done" \
+			and int(ConquestManager.conquest_state(state, map_data).get("turn", 0)) == 2:
 		return true
-	printerr("FAIL: conquest end turn should reinforce and advance turn")
+	printerr("FAIL: with no enemy targets end_turn should finish and advance the turn")
 	return false
 
 func _test_transfer_strength() -> bool:
@@ -165,6 +183,41 @@ func _test_resolve_real_battle_result() -> bool:
 			and (alpha.get("garrison", []) as Array).size() == 1:
 		return true
 	printerr("FAIL: conquest loss should retreat survivors and weaken the enemy target")
+	return false
+
+func _test_defense_result() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "d1"},
+		{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "d2"},
+	]
+	# Held: region stays ours, only the surviving defender remains.
+	var held := ConquestManager.resolve_defense_result(
+		state, map_data, "b", "bravo", "alpha", true, [{"roster_id": 1, "xp": 2, "rank": 0}]
+	)
+	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(held.get("ok", false)) \
+			or String(alpha.get("owner", "")) != "a" \
+			or (alpha.get("garrison", []) as Array).size() != 1:
+		printerr("FAIL: held defense should keep the region and surviving defenders")
+		return false
+	# Fell: region captured by the attacker, defenders wiped.
+	state = {"version": 2, "campaigns": {}}
+	conquest = ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "d1"},
+	]
+	var fell := ConquestManager.resolve_defense_result(
+		state, map_data, "b", "bravo", "alpha", false, []
+	)
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if bool(fell.get("ok", false)) \
+			and String(alpha.get("owner", "")) == "b" \
+			and (alpha.get("garrison", []) as Array).is_empty():
+		return true
+	printerr("FAIL: lost defense should hand the region to the attacker")
 	return false
 
 func _test_map() -> Dictionary:

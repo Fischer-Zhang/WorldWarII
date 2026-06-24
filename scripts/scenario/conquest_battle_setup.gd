@@ -56,12 +56,18 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	]
 	scenario["units"] = player_entries + enemy_entries
 	scenario["reinforcements"] = []
-	# Player (attacker) must wipe the defenders; the AI side "wins" by holding
-	# out to the turn limit.
-	scenario["victory"] = {
-		player_faction: {"type": "eliminate"},
-		enemy_faction: {"type": "survive", "by_turn": DEFENDER_SURVIVE_TURNS},
-	}
+	# The attacking side must wipe the defenders; the defending side wins by
+	# holding out to the turn limit. On a "defend" the AI is the attacker.
+	if role == "attack":
+		scenario["victory"] = {
+			player_faction: {"type": "eliminate"},
+			enemy_faction: {"type": "survive", "by_turn": DEFENDER_SURVIVE_TURNS},
+		}
+	else:
+		scenario["victory"] = {
+			enemy_faction: {"type": "eliminate"},
+			player_faction: {"type": "survive", "by_turn": DEFENDER_SURVIVE_TURNS},
+		}
 
 # --- helpers ---
 

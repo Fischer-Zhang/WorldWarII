@@ -149,44 +149,122 @@ static func _apply_survivors(garrison: Array, survivors: Array) -> Array:
 			kept.append(record)
 	return kept
 
-static func end_turn(state: Dictionary, map_data: Dictionary) -> Array[String]:
+static func is_enemy_phase(state: Dictionary, map_data: Dictionary) -> bool:
+	return bool(conquest_state(state, map_data).get("ai_phase", false))
+
+static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
+	# Re-entrant enemy phase. Starts a fresh phase (strength regen + AI queue) if
+	# none is in progress, then processes queued AI countries until the queue
+	# drains ("done") or an AI attack targets a PLAYER-owned region ("defend"),
+	# at which point it pauses so the player can fight the defensive battle. The
+	# caller invokes end_turn again after the battle to resume the queue.
 	var conquest := conquest_state(state, map_data)
 	var regions: Dictionary = conquest.get("regions", {})
-	var messages: Array[String] = []
-	for region_id in regions.keys():
-		var region: Dictionary = regions[region_id]
-		region["strength"] = int(region.get("strength", 0)) + max(1, int(region.get("production", 0)) / 2)
-		regions[region_id] = region
-	var countries: Dictionary = map_data.get("countries", {})
 	var player_country := String(conquest.get("player_country", ""))
-	for country_id in countries.keys():
-		var cid := String(country_id)
-		if cid == player_country:
-			continue
+	var countries: Dictionary = map_data.get("countries", {})
+	if not bool(conquest.get("ai_phase", false)):
+		for region_id in regions.keys():
+			var region: Dictionary = regions[region_id]
+			region["strength"] = int(region.get("strength", 0)) + max(1, int(region.get("production", 0)) / 2)
+			regions[region_id] = region
+		conquest["ai_queue"] = _enemy_countries(regions, player_country)
+		conquest["ai_messages"] = []
+		conquest["ai_phase"] = true
+	var queue: Array = conquest.get("ai_queue", [])
+	var messages: Array = conquest.get("ai_messages", [])
+	while not queue.is_empty():
+		var cid := String(queue.pop_front())
 		var attack := _best_ai_attack(regions, cid)
 		if attack.is_empty():
 			continue
-		var source: Dictionary = regions[attack["from"]]
-		var target: Dictionary = regions[attack["to"]]
+		var from_id := String(attack["from"])
+		var to_id := String(attack["to"])
+		var source: Dictionary = regions[from_id]
+		var target: Dictionary = regions[to_id]
+		if String(target.get("owner", "")) == player_country:
+			# Pause for a player-fought defensive battle; resume on re-entry.
+			conquest["ai_queue"] = queue
+			conquest["ai_messages"] = messages
+			state["conquest"] = conquest
+			CampaignManager.save_state(state)
+			return {
+				"status": "defend",
+				"from": from_id,
+				"to": to_id,
+				"attacker_country": cid,
+				"messages": messages.duplicate(),
+			}
+		# AI-vs-AI / neutral: abstract strength resolution (no player involved).
 		var attack_power := int(source.get("strength", 0)) + int(source.get("production", 0))
 		var defense_power := int(target.get("strength", 0)) + int(target.get("production", 0))
 		source["strength"] = max(1, int(source.get("strength", 0)) - 1)
 		if attack_power > defense_power:
 			target["owner"] = cid
 			target["strength"] = max(1, int(source.get("strength", 0)) - int(target.get("strength", 0)) + 1)
+			target["garrison"] = []
 			messages.append("%s 佔領 %s。" % [
 				String(countries.get(cid, {}).get("name_zh", cid)),
 				_region_name(target),
 			])
-		regions[attack["from"]] = source
-		regions[attack["to"]] = target
+		regions[from_id] = source
+		regions[to_id] = target
+	# Queue drained — finish the enemy phase.
 	conquest["turn"] = int(conquest.get("turn", 1)) + 1
+	conquest["ai_phase"] = false
+	conquest["ai_queue"] = []
 	conquest["regions"] = regions
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
 	if messages.is_empty():
 		messages.append("各國整補兵力,戰線暫無重大變化。")
-	return messages
+	return {"status": "done", "messages": messages}
+
+static func _enemy_countries(regions: Dictionary, player_country: String) -> Array:
+	# Countries (excluding the player and neutral) owning at least one region.
+	var seen := {}
+	var out: Array = []
+	for region in regions.values():
+		var owner := String(region.get("owner", ""))
+		if owner == player_country or owner == "neutral" or owner == "":
+			continue
+		if not seen.has(owner):
+			seen[owner] = true
+			out.append(owner)
+	return out
+
+static func resolve_defense_result(
+	state: Dictionary,
+	map_data: Dictionary,
+	attacker_country: String,
+	from_id: String,
+	to_id: String,
+	player_defended: bool,
+	survivors: Array = [],
+) -> Dictionary:
+	# Applies a player-fought defensive battle: held -> surviving defenders stay
+	# and the attacker is bloodied; fell -> the region is captured by the enemy.
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions.get(from_id, {})
+	var target: Dictionary = regions.get(to_id, {})
+	if source.is_empty() or target.is_empty():
+		return {"ok": false, "message": "防守結果無法套用。"}
+	var message := ""
+	if player_defended:
+		target["garrison"] = _apply_survivors(target.get("garrison", []), survivors)
+		source["strength"] = maxi(1, int(source.get("strength", 0)) - 2)
+		message = "守住了 %s。" % _region_name(target)
+	else:
+		target["owner"] = attacker_country
+		target["garrison"] = []
+		target["strength"] = maxi(1, int(target.get("production", 1)))
+		message = "%s 失守,落入敵手。" % _region_name(target)
+	regions[from_id] = source
+	regions[to_id] = target
+	conquest["regions"] = regions
+	state["conquest"] = conquest
+	CampaignManager.save_state(state)
+	return {"ok": true, "message": message}
 
 static func victory_status(state: Dictionary, map_data: Dictionary) -> String:
 	var conquest := conquest_state(state, map_data)
