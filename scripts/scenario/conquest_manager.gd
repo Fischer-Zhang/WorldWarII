@@ -3,6 +3,7 @@ extends RefCounted
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
+const AI_MIN_ATTACK_STRENGTH := 3
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var conquest: Dictionary = state.get("conquest", {})
@@ -168,11 +169,11 @@ static func is_enemy_phase(state: Dictionary, map_data: Dictionary) -> bool:
 	return bool(conquest_state(state, map_data).get("ai_phase", false))
 
 static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
-	# Re-entrant enemy phase. Starts a fresh phase (strength regen + AI queue) if
-	# none is in progress, then processes queued AI countries until the queue
-	# drains ("done") or an AI attack targets a PLAYER-owned region ("defend"),
-	# at which point it pauses so the player can fight the defensive battle. The
-	# caller invokes end_turn again after the battle to resume the queue.
+	# Re-entrant enemy phase. A fresh phase regenerates strength, consolidates
+	# reserves toward the front, and budgets several AI actions; each step then
+	# resolves the strongest profitable AI attack until the budget runs out
+	# ("done") or an AI attack hits a PLAYER region ("defend"), pausing so the
+	# player can fight the defensive battle. The caller re-invokes to resume.
 	var conquest := conquest_state(state, map_data)
 	var regions: Dictionary = conquest.get("regions", {})
 	var player_country := String(conquest.get("player_country", ""))
@@ -180,53 +181,40 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	if not bool(conquest.get("ai_phase", false)):
 		for region_id in regions.keys():
 			var region: Dictionary = regions[region_id]
-			region["strength"] = int(region.get("strength", 0)) + max(1, int(region.get("production", 0)) / 2)
+			region["strength"] = int(region.get("strength", 0)) + maxi(1, int(region.get("production", 0)) / 2)
 			regions[region_id] = region
-		conquest["ai_queue"] = _enemy_countries(regions, player_country)
+		_ai_consolidate(regions, player_country)
+		conquest["ai_actions_left"] = _ai_action_budget(regions, player_country)
 		conquest["ai_messages"] = []
 		conquest["ai_phase"] = true
-	var queue: Array = conquest.get("ai_queue", [])
+	var actions_left := int(conquest.get("ai_actions_left", 0))
 	var messages: Array = conquest.get("ai_messages", [])
-	while not queue.is_empty():
-		var cid := String(queue.pop_front())
-		var attack := _best_ai_attack(regions, cid)
+	while actions_left > 0:
+		var attack := _best_ai_attack_global(regions, player_country)
 		if attack.is_empty():
-			continue
+			break
 		var from_id := String(attack["from"])
 		var to_id := String(attack["to"])
+		var cid := String(attack["country"])
 		var source: Dictionary = regions[from_id]
 		var target: Dictionary = regions[to_id]
 		if String(target.get("owner", "")) == player_country:
-			# Pause for a player-fought defensive battle; resume on re-entry.
-			conquest["ai_queue"] = queue
+			conquest["ai_actions_left"] = actions_left - 1
 			conquest["ai_messages"] = messages
 			state["conquest"] = conquest
 			CampaignManager.save_state(state)
-			return {
-				"status": "defend",
-				"from": from_id,
-				"to": to_id,
-				"attacker_country": cid,
-				"messages": messages.duplicate(),
-			}
-		# AI-vs-AI / neutral: abstract strength resolution (no player involved).
-		var attack_power := int(source.get("strength", 0)) + int(source.get("production", 0))
-		var defense_power := int(target.get("strength", 0)) + int(target.get("production", 0))
-		source["strength"] = max(1, int(source.get("strength", 0)) - 1)
-		if attack_power > defense_power:
-			target["owner"] = cid
-			target["strength"] = max(1, int(source.get("strength", 0)) - int(target.get("strength", 0)) + 1)
-			target["garrison"] = []
-			messages.append("%s 佔領 %s。" % [
-				String(countries.get(cid, {}).get("name_zh", cid)),
-				_region_name(target),
-			])
+			return {"status": "defend", "from": from_id, "to": to_id, "attacker_country": cid, "messages": messages.duplicate()}
+		source["strength"] = maxi(1, int(source.get("strength", 0)) - 1)
+		target["owner"] = cid
+		target["strength"] = maxi(1, int(source.get("strength", 0)) - int(target.get("strength", 0)) + 1)
+		target["garrison"] = []
+		messages.append("%s 佔領 %s。" % [String(countries.get(cid, {}).get("name_zh", cid)), _region_name(target)])
 		regions[from_id] = source
 		regions[to_id] = target
-	# Queue drained — finish the enemy phase.
+		actions_left -= 1
 	conquest["turn"] = int(conquest.get("turn", 1)) + 1
 	conquest["ai_phase"] = false
-	conquest["ai_queue"] = []
+	conquest["ai_actions_left"] = 0
 	conquest["regions"] = regions
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
@@ -234,18 +222,51 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 		messages.append("各國整補兵力,戰線暫無重大變化。")
 	return {"status": "done", "messages": messages}
 
-static func _enemy_countries(regions: Dictionary, player_country: String) -> Array:
-	# Countries (excluding the player and neutral) owning at least one region.
-	var seen := {}
-	var out: Array = []
+static func _ai_action_budget(regions: Dictionary, player_country: String) -> int:
+	var enemy_regions := 0
 	for region in regions.values():
 		var owner := String(region.get("owner", ""))
+		if owner != player_country and owner != "neutral" and owner != "":
+			enemy_regions += 1
+	return clampi(int(enemy_regions / 2), 2, 6)
+
+static func _ai_consolidate(regions: Dictionary, player_country: String) -> void:
+	# Safe interior AI regions ship spare strength to an adjacent friendly border
+	# region, massing reserves at the front over successive turns.
+	for region_id in regions.keys():
+		var source: Dictionary = regions[region_id]
+		var owner := String(source.get("owner", ""))
 		if owner == player_country or owner == "neutral" or owner == "":
 			continue
-		if not seen.has(owner):
-			seen[owner] = true
-			out.append(owner)
-	return out
+		var interior := true
+		var border_friend := ""
+		for nb in source.get("neighbors", []):
+			var t: Dictionary = regions.get(String(nb), {})
+			var t_owner := String(t.get("owner", ""))
+			if t_owner != owner:
+				interior = false
+			elif border_friend == "" and _borders_enemy(regions, String(nb), owner):
+				border_friend = String(nb)
+		if not interior or border_friend == "":
+			continue
+		var spare := int(source.get("strength", 0)) - 3
+		if spare < 2:
+			continue
+		var move := int(spare / 2)
+		source["strength"] = int(source.get("strength", 0)) - move
+		var dest: Dictionary = regions[border_friend]
+		dest["strength"] = int(dest.get("strength", 0)) + move
+		regions[region_id] = source
+		regions[border_friend] = dest
+
+static func _borders_enemy(regions: Dictionary, region_id: String, owner: String) -> bool:
+	var r: Dictionary = regions.get(region_id, {})
+	for nb in r.get("neighbors", []):
+		var t: Dictionary = regions.get(String(nb), {})
+		var t_owner := String(t.get("owner", ""))
+		if t_owner != owner and t_owner != "":
+			return true
+	return false
 
 static func resolve_defense_result(
 	state: Dictionary,
@@ -324,21 +345,36 @@ static func _initial_regions(map_data: Dictionary) -> Dictionary:
 		}
 	return out
 
-static func _best_ai_attack(regions: Dictionary, country_id: String) -> Dictionary:
+static func _best_ai_attack_global(regions: Dictionary, player_country: String) -> Dictionary:
+	# Best AI attack across all enemy countries. AI-vs-AI attacks are returned
+	# only when the attacker would win the abstract resolution; attacks on a
+	# player region are returned when the attacker fields a real force — the hex
+	# battle then decides the outcome.
 	var best := {}
 	var best_score := -999999
 	for region_id in regions.keys():
 		var source: Dictionary = regions[region_id]
-		if String(source.get("owner", "")) != country_id or int(source.get("strength", 0)) <= 1:
+		var owner := String(source.get("owner", ""))
+		if owner == player_country or owner == "neutral" or owner == "":
 			continue
+		if int(source.get("strength", 0)) < AI_MIN_ATTACK_STRENGTH:
+			continue
+		var attack_power := int(source.get("strength", 0)) + int(source.get("production", 0))
 		for neighbor_id in source.get("neighbors", []):
-			var target: Dictionary = regions.get(String(neighbor_id), {})
-			if target.is_empty() or String(target.get("owner", "")) == country_id:
+			var to_id := String(neighbor_id)
+			var target: Dictionary = regions.get(to_id, {})
+			if target.is_empty() or String(target.get("owner", "")) == owner:
 				continue
-			var score := int(source.get("strength", 0)) + int(target.get("production", 0)) - int(target.get("strength", 0))
+			var defense_power := int(target.get("strength", 0)) + int(target.get("production", 0))
+			var is_player := String(target.get("owner", "")) == player_country
+			if not is_player and attack_power <= defense_power:
+				continue
+			var score := (attack_power - defense_power) + int(target.get("production", 0))
+			if is_player:
+				score += 2
 			if score > best_score:
 				best_score = score
-				best = {"from": String(region_id), "to": String(neighbor_id)}
+				best = {"from": region_id, "to": to_id, "country": owner}
 	return best
 
 static func _region_name(region: Dictionary) -> String:

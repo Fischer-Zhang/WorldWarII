@@ -37,6 +37,16 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_ai_multi_attack_favorable():
+		pass_count += 1
+	else:
+		fail_count += 1
+
+	if _test_ai_consolidate():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	print("ConquestManager tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -228,6 +238,55 @@ func _test_defense_result() -> bool:
 			and (alpha.get("garrison", []) as Array).is_empty():
 		return true
 	printerr("FAIL: lost defense should hand the region to the attacker")
+	return false
+
+func _test_ai_multi_attack_favorable() -> bool:
+	var map_data := {
+		"start_country": "p",
+		"countries": {"p": {"name_zh": "P"}, "c": {"name_zh": "C"}, "d": {"name_zh": "D"}, "neutral": {"name_zh": "N"}},
+		"regions": [
+			{"id": "home", "owner": "c", "x": 0, "y": 0, "production": 5, "neighbors": ["w1", "w2", "citadel"]},
+			{"id": "w1", "owner": "d", "x": 1, "y": 0, "production": 1, "neighbors": ["home"]},
+			{"id": "w2", "owner": "d", "x": 2, "y": 0, "production": 1, "neighbors": ["home"]},
+			{"id": "citadel", "owner": "neutral", "x": 3, "y": 0, "production": 5, "neighbors": ["home"]},
+			{"id": "cap", "owner": "p", "x": 4, "y": 0, "production": 3, "neighbors": []},
+		],
+	}
+	var state := {"version": 2, "campaigns": {}}
+	ConquestManager.set_player_country(state, map_data, "p")
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["home"]["strength"] = 30
+	conquest["regions"]["w1"]["strength"] = 1
+	conquest["regions"]["w2"]["strength"] = 1
+	conquest["regions"]["citadel"]["strength"] = 60
+	var step := ConquestManager.end_turn(state, map_data)
+	if String(step.get("status", "")) != "done":
+		printerr("FAIL: AI turn with no player-adjacent attack should complete, got %s" % str(step))
+		return false
+	var w1 := ConquestManager.region_state(state, map_data, "w1")
+	var w2 := ConquestManager.region_state(state, map_data, "w2")
+	var citadel := ConquestManager.region_state(state, map_data, "citadel")
+	# Takes both weak neighbours in one turn (multi-attack); leaves the too-strong
+	# citadel alone (only winnable attacks).
+	if String(w1.get("owner", "")) == "c" \
+			and String(w2.get("owner", "")) == "c" \
+			and String(citadel.get("owner", "")) == "neutral":
+		return true
+	printerr("FAIL: strong AI should take both weak neighbours and skip the too-strong citadel")
+	return false
+
+func _test_ai_consolidate() -> bool:
+	var regions := {
+		"interior": {"id": "interior", "owner": "c", "strength": 11, "production": 2, "neighbors": ["front"]},
+		"front": {"id": "front", "owner": "c", "strength": 2, "production": 2, "neighbors": ["interior", "enemyR"]},
+		"enemyR": {"id": "enemyR", "owner": "d", "strength": 5, "production": 2, "neighbors": ["front"]},
+	}
+	ConquestManager._ai_consolidate(regions, "p")
+	if int(regions["interior"]["strength"]) == 7 and int(regions["front"]["strength"]) == 6:
+		return true
+	printerr("FAIL: consolidation should ship spare interior strength to the border (interior=%d front=%d)" % [
+		int(regions["interior"]["strength"]), int(regions["front"]["strength"]),
+	])
 	return false
 
 func _test_map() -> Dictionary:
