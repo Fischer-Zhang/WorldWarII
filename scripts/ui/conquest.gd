@@ -20,6 +20,7 @@ const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 var state: Dictionary = {}
 var selected_region_id := ""
 var target_region_id := ""
+var _selected_units: Dictionary = {}
 var _refreshing_country := false
 var _map_button_size := Vector2(116, 74)
 
@@ -99,6 +100,10 @@ func _rebuild() -> void:
 					btn.text += "\n守:%d" % gsize
 				btn.modulate = Color(String(owner_def.get("color", "#777777")))
 				var rid := String(region.get("id", ""))
+				if rid == selected_region_id:
+					btn.text = "▶ " + btn.text
+				elif rid == target_region_id:
+					btn.text = "◎ " + btn.text
 				btn.disabled = false
 				btn.pressed.connect(func(): _select_region(rid))
 			map_grid.add_child(btn)
@@ -135,11 +140,13 @@ func _select_region(region_id: String) -> void:
 	if region_id == selected_region_id:
 		selected_region_id = ""
 		target_region_id = ""
+		_selected_units.clear()
 	elif selected_region_id == "":
 		# No source yet. An own region becomes the source (keeping any target
 		# the player already tapped); an enemy region is remembered as target.
 		if is_own:
 			selected_region_id = region_id
+			_selected_units.clear()
 			if target_region_id == region_id:
 				target_region_id = ""
 		else:
@@ -185,13 +192,14 @@ func _update_detail(message: String = "") -> void:
 			and ConquestManager.can_transfer(state, DataLoader.conquest_map, selected_region_id, target_region_id)
 	attack_button.disabled = not can_attack or status != ""
 	transfer_button.disabled = not can_transfer or status != ""
+	_refresh_transfer_button_label()
 	end_turn_button.disabled = status != ""
 	# Tell the player what to do next / why the action is greyed out, so a
 	# disabled Attack button never looks like a dead end.
 	if status == "":
 		if selected_region_id != "" and target_region_id == "":
 			lines.append("")
-			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 轉移。[/color]")
+			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 調動。[/color]")
 		elif selected_region_id != "" and target_region_id != "" and not can_attack and not can_transfer:
 			lines.append("")
 			lines.append("[color=#d88]%s[/color]" % _unavailable_reason())
@@ -204,13 +212,13 @@ func _unavailable_reason() -> String:
 	var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
 	if String(source.get("owner", "")) != player_country:
 		return "出擊地必須是己方地區。"
-	if int(source.get("strength", 0)) <= 1:
-		return "出擊地兵力不足(需 > 1)才能出擊。"
+	if (source.get("garrison", []) as Array).is_empty():
+		return "出擊地沒有駐軍,請先徵兵。"
 	var neighbors: Array = source.get("neighbors", [])
 	if not neighbors.has(target_region_id):
 		return "目標與出擊地不相鄰。"
 	if String(target.get("owner", "")) == player_country:
-		return "目標為己方地區:可改用轉移,或選敵區進攻。"
+		return "目標為己方地區:可改用調動,或選敵區進攻。"
 	return "此目標目前無法行動。"
 
 func _rebuild_recruit_panel() -> void:
@@ -248,13 +256,31 @@ func _rebuild_recruit_panel() -> void:
 	recruit_list.add_child(ghdr)
 	for rec in garrison:
 		var record: Dictionary = rec
-		var rank := int(record.get("rank", 0))
-		var row := Button.new()
-		row.text = "解散 %s%s" % [String(record.get("name", "")), " ★".repeat(rank)]
-		row.add_theme_font_size_override("font_size", 12)
 		var uid := int(record.get("id", -1))
-		row.pressed.connect(_on_disband_pressed.bind(uid))
+		var rank := int(record.get("rank", 0))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		var cb := CheckBox.new()
+		cb.button_pressed = _selected_units.has(uid)
+		cb.add_theme_font_size_override("font_size", 12)
+		cb.toggled.connect(_on_unit_check_toggled.bind(uid))
+		row.add_child(cb)
+		var name_lbl := Label.new()
+		name_lbl.text = "%s%s" % [String(record.get("name", "")), " ★".repeat(rank)]
+		name_lbl.add_theme_font_size_override("font_size", 12)
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(name_lbl)
+		var dis_btn := Button.new()
+		dis_btn.text = "解散"
+		dis_btn.add_theme_font_size_override("font_size", 11)
+		dis_btn.pressed.connect(_on_disband_pressed.bind(uid))
+		row.add_child(dis_btn)
 		recruit_list.add_child(row)
+	if not garrison.is_empty():
+		var tip := Label.new()
+		tip.text = "勾選後選相鄰己方目標,按「調動」送選取(未勾=全部)"
+		tip.add_theme_font_size_override("font_size", 11)
+		recruit_list.add_child(tip)
 
 func _add_recruit_hint(text: String) -> void:
 	var hint := Label.new()
@@ -331,8 +357,23 @@ func _on_attack_pressed() -> void:
 	GameState.start_conquest_battle(selected_region_id, target_region_id, scenario_id, context)
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
 
+func _on_unit_check_toggled(toggled_on: bool, unit_id: int) -> void:
+	if toggled_on:
+		_selected_units[unit_id] = true
+	else:
+		_selected_units.erase(unit_id)
+	_refresh_transfer_button_label()
+
+func _refresh_transfer_button_label() -> void:
+	var n := _selected_units.size()
+	transfer_button.text = "調動 (%d)" % n if n > 0 else "調動"
+
 func _on_transfer_pressed() -> void:
-	var result := ConquestManager.transfer_strength(state, DataLoader.conquest_map, selected_region_id, target_region_id, 1)
+	# Move the ticked units, or the whole garrison if none are ticked.
+	var ids: Array = _selected_units.keys()
+	var result := ConquestManager.transfer_units(state, DataLoader.conquest_map, selected_region_id, target_region_id, ids)
+	_selected_units.clear()
+	_refresh_transfer_button_label()
 	target_region_id = ""
 	_rebuild()
 	_update_detail(String(result.get("message", "")))

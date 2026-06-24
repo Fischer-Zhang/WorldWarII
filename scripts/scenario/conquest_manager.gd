@@ -2,6 +2,7 @@ class_name ConquestManager
 extends RefCounted
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var conquest: Dictionary = state.get("conquest", {})
@@ -68,32 +69,46 @@ static func can_transfer(state: Dictionary, map_data: Dictionary, from_id: Strin
 		return false
 	if String(target.get("owner", "")) != player_country:
 		return false
-	if int(source.get("strength", 0)) <= 1:
+	if (source.get("garrison", []) as Array).is_empty():
 		return false
 	var neighbors: Array = source.get("neighbors", [])
 	return neighbors.has(to_id)
 
-static func transfer_strength(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String, amount: int = 1) -> Dictionary:
+static func transfer_units(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String, ids: Array = []) -> Dictionary:
+	# Relocate recruited army units between adjacent owned regions. `ids` selects
+	# which garrison units move; an empty `ids` moves the whole garrison. Strength
+	# is NOT moved — it stays as each region's local recruitment pool.
 	if not can_transfer(state, map_data, from_id, to_id):
-		return {"ok": false, "message": "無法轉移:需選擇己方相鄰地區,且出發地兵力需大於 1。"}
+		return {"ok": false, "message": "無法調動:需選擇相鄰的兩塊己方地區,且出發地要有駐軍。"}
 	var conquest := conquest_state(state, map_data)
 	var regions: Dictionary = conquest.get("regions", {})
 	var source: Dictionary = regions[from_id]
 	var target: Dictionary = regions[to_id]
-	var movable: int = max(0, int(source.get("strength", 0)) - 1)
-	var moved: int = clamp(amount, 1, movable)
-	source["strength"] = int(source.get("strength", 0)) - moved
-	target["strength"] = int(target.get("strength", 0)) + moved
+	var src_g: Array = source.get("garrison", [])
+	var tgt_g: Array = target.get("garrison", [])
+	var move_all := ids.is_empty()
+	var want := {}
+	for uid in ids:
+		want[int(uid)] = true
+	var kept: Array = []
+	var moved := 0
+	for rec in src_g:
+		var r: Dictionary = rec
+		if (move_all or want.has(int(r.get("id", -1)))) and tgt_g.size() < ConquestRecruit.GARRISON_CAP:
+			tgt_g.append(r)
+			moved += 1
+		else:
+			kept.append(r)
+	if moved == 0:
+		return {"ok": false, "message": "%s 的守備已滿,無法再進駐。" % _region_name(target)}
+	source["garrison"] = kept
+	target["garrison"] = tgt_g
 	regions[from_id] = source
 	regions[to_id] = target
 	conquest["regions"] = regions
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
-	return {"ok": true, "message": "已從 %s 轉移 %d 兵力到 %s。" % [
-		_region_name(source),
-		moved,
-		_region_name(target),
-	]}
+	return {"ok": true, "message": "已將 %d 支部隊從 %s 調往 %s。" % [moved, _region_name(source), _region_name(target)]}
 
 static func resolve_battle_result(
 	state: Dictionary,

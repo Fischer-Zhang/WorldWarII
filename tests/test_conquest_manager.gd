@@ -17,7 +17,7 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
-	if _test_transfer_strength():
+	if _test_transfer_units():
 		pass_count += 1
 	else:
 		fail_count += 1
@@ -101,28 +101,38 @@ func _test_end_turn_and_country_switch() -> bool:
 	printerr("FAIL: with no enemy targets end_turn should finish and advance the turn")
 	return false
 
-func _test_transfer_strength() -> bool:
+func _test_transfer_units() -> bool:
 	var state := {"version": 2, "campaigns": {}}
 	var map_data := _test_map()
 	var conquest := ConquestManager.conquest_state(state, map_data)
-	var regions: Dictionary = conquest.get("regions", {})
-	regions["bravo"]["owner"] = "a"
-	regions["bravo"]["strength"] = 2
-	conquest["regions"] = regions
-	state["conquest"] = conquest
-	var before_alpha := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
-	var before_bravo := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
-	if not ConquestManager.can_transfer(state, map_data, "alpha", "bravo"):
-		printerr("FAIL: expected alpha to transfer to adjacent friendly bravo")
+	conquest["regions"]["bravo"]["owner"] = "a"
+	# An empty source garrison has no troops to move.
+	if ConquestManager.can_transfer(state, map_data, "alpha", "bravo"):
+		printerr("FAIL: empty garrison should not be transferable")
 		return false
-	var result := ConquestManager.transfer_strength(state, map_data, "alpha", "bravo", 2)
-	var after_alpha := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
-	var after_bravo := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"},
+		{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "a2"},
+	]
+	if not ConquestManager.can_transfer(state, map_data, "alpha", "bravo"):
+		printerr("FAIL: garrisoned alpha should transfer troops to adjacent friendly bravo")
+		return false
+	# Move a single unit first (partial transfer).
+	var one := ConquestManager.transfer_units(state, map_data, "alpha", "bravo", [1])
+	if not bool(one.get("ok", false)) \
+			or (ConquestManager.region_state(state, map_data, "alpha").get("garrison", []) as Array).size() != 1 \
+			or (ConquestManager.region_state(state, map_data, "bravo").get("garrison", []) as Array).size() != 1:
+		printerr("FAIL: single-unit transfer should move exactly one unit")
+		return false
+	# Move the remaining army.
+	var result := ConquestManager.transfer_units(state, map_data, "alpha", "bravo")
+	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	var bravo := ConquestManager.region_state(state, map_data, "bravo")
 	if bool(result.get("ok", false)) \
-			and after_alpha == before_alpha - 2 \
-			and after_bravo == before_bravo + 2:
+			and (alpha.get("garrison", []) as Array).is_empty() \
+			and (bravo.get("garrison", []) as Array).size() == 2:
 		return true
-	printerr("FAIL: conquest transfer should move strength between adjacent friendly regions")
+	printerr("FAIL: transfer should move troops (one then the rest) from alpha to bravo")
 	return false
 
 func _test_conquest_state_survives_campaign_normalise() -> bool:

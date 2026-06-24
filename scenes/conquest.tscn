@@ -84,7 +84,7 @@ text = "攻擊"
 
 [node name="TransferButton" type="Button" parent="Margin/VBox/Actions"]
 custom_minimum_size = Vector2(150, 44)
-text = "轉移"
+text = "調動"
 
 [node name="EndTurnButton" type="Button" parent="Margin/VBox/Actions"]
 custom_minimum_size = Vector2(150, 44)
