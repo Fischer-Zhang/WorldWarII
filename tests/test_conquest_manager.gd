@@ -42,14 +42,28 @@ func _test_initial_state_and_attack() -> bool:
 	if int(conquest.get("turn", 0)) != 1 or String(conquest.get("player_country", "")) != "a":
 		printerr("FAIL: conquest initial state")
 		return false
-	if not ConquestManager.can_attack(state, map_data, "alpha", "bravo"):
-		printerr("FAIL: expected alpha to attack bravo")
+	# An empty garrison cannot attack — you must recruit an army first.
+	if ConquestManager.can_attack(state, map_data, "alpha", "bravo"):
+		printerr("FAIL: empty garrison should not be able to attack")
 		return false
-	var result := ConquestManager.player_attack(state, map_data, "alpha", "bravo")
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "步兵 #1"},
+	]
+	if not ConquestManager.can_attack(state, map_data, "alpha", "bravo"):
+		printerr("FAIL: garrisoned alpha should be able to attack bravo")
+		return false
+	# A won battle captures bravo; the survivor (with gained xp) garrisons it.
+	var result := ConquestManager.resolve_battle_result(
+		state, map_data, "alpha", "bravo", true, [{"roster_id": 1, "xp": 3, "rank": 1}]
+	)
 	var bravo := ConquestManager.region_state(state, map_data, "bravo")
-	if bool(result.get("ok", false)) and String(bravo.get("owner", "")) == "a":
+	var garrison: Array = bravo.get("garrison", [])
+	if bool(result.get("ok", false)) \
+			and String(bravo.get("owner", "")) == "a" \
+			and garrison.size() == 1 \
+			and int((garrison[0] as Dictionary).get("xp", 0)) == 3:
 		return true
-	printerr("FAIL: conquest attack should capture adjacent weaker region")
+	printerr("FAIL: won battle should capture bravo and garrison it with the survivor")
 	return false
 
 func _test_end_turn_and_country_switch() -> bool:
@@ -115,22 +129,42 @@ func _test_conquest_state_survives_campaign_normalise() -> bool:
 func _test_resolve_real_battle_result() -> bool:
 	var state := {"version": 2, "campaigns": {}}
 	var map_data := _test_map()
-	ConquestManager.conquest_state(state, map_data)
-	var win := ConquestManager.resolve_battle_result(state, map_data, "alpha", "bravo", true)
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"},
+		{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "a2"},
+	]
+	# Win: only the survivor advances into the captured region; source emptied.
+	var win := ConquestManager.resolve_battle_result(
+		state, map_data, "alpha", "bravo", true, [{"roster_id": 1, "xp": 2, "rank": 0}]
+	)
 	var bravo := ConquestManager.region_state(state, map_data, "bravo")
-	if not bool(win.get("ok", false)) or String(bravo.get("owner", "")) != "a":
-		printerr("FAIL: real conquest battle win should capture target")
+	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(win.get("ok", false)) \
+			or String(bravo.get("owner", "")) != "a" \
+			or (bravo.get("garrison", []) as Array).size() != 1 \
+			or not (alpha.get("garrison", []) as Array).is_empty():
+		printerr("FAIL: conquest win should move survivor into target and empty the source")
 		return false
+	# Loss: survivors retreat to source, target stays enemy and is weakened.
 	state = {"version": 2, "campaigns": {}}
-	ConquestManager.conquest_state(state, map_data)
+	conquest = ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"},
+		{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "a2"},
+	]
 	var before := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
-	var loss := ConquestManager.resolve_battle_result(state, map_data, "alpha", "bravo", false)
+	var loss := ConquestManager.resolve_battle_result(
+		state, map_data, "alpha", "bravo", false, [{"roster_id": 2, "xp": 1, "rank": 0}]
+	)
 	bravo = ConquestManager.region_state(state, map_data, "bravo")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
 	if bool(loss.get("ok", false)) \
 			and String(bravo.get("owner", "")) == "b" \
-			and int(bravo.get("strength", 0)) < before:
+			and int(bravo.get("strength", 0)) < before \
+			and (alpha.get("garrison", []) as Array).size() == 1:
 		return true
-	printerr("FAIL: real conquest battle loss should weaken but not capture target")
+	printerr("FAIL: conquest loss should retreat survivors and weaken the enemy target")
 	return false
 
 func _test_map() -> Dictionary:

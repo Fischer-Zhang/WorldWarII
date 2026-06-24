@@ -15,6 +15,10 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | blitz_00_poland_1939 | allies artillery:1, mg_team:1; axis artillery:1 | allies 18/140 (13%); axis 24/140 (17%) | axis 51/140 (36%), spots 0 | axis target 1,1 own min 13 enemy min 0 | none |
 | blitz_02_dunkirk_1940 | allies artillery:1, mg_team:1; axis artillery:1 | allies 27/140 (19%); axis 15/140 (11%) | axis 43/140 (31%), spots 0 | axis target 5,0 own min 8 enemy min 0 | none |
 | blitz_03_moscow_1941 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 28/140 (20%); soviet 12/140 (9%) | none | soviet target 6,2 own min 6 enemy min 0 | none |
+| conq_cbi_jungle | allies mg_team:1; axis artillery:1, mg_team:1 | axis 27/117 (23%) | none | n/a | none |
+| conq_desert_north_africa | allies artillery:1; axis artillery:1, mg_team:1 | allies 24/117 (21%); axis 27/117 (23%) | allies 51/117 (44%), spots 0 | n/a | none |
+| conq_mediterranean_coast | allies artillery:1; axis artillery:1, mg_team:1 | allies 24/117 (21%); axis 32/117 (27%) | none | n/a | none |
+| conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 34/117 (29%) | allies 53/117 (45%), spots 0 | n/a | none |
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 20/140 (14%); soviet 31/140 (22%) | axis 56/140 (40%), spots 0 | axis target 4,3 own min 8 enemy min 1 | none |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:2 | axis 25/140 (18%); soviet 20/140 (14%) | none | soviet target 8,3 own min 8 enemy min 0 | none |
 | east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 27/140 (19%); soviet 15/140 (11%) | none | soviet target 9,4 own min 7 enemy min 0 | none |

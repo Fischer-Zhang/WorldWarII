@@ -11,6 +11,13 @@ static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionar
 		conquest["player_country"] = String(map_data.get("start_country", "germany"))
 	if not conquest.has("regions"):
 		conquest["regions"] = _initial_regions(map_data)
+	if not conquest.has("next_unit_id"):
+		conquest["next_unit_id"] = 1
+	# Lazy-migrate saves that predate per-region garrisons.
+	for rid in conquest.get("regions", {}).keys():
+		var region: Dictionary = conquest["regions"][rid]
+		if not region.has("garrison"):
+			region["garrison"] = []
 	state["conquest"] = conquest
 	return conquest
 
@@ -44,7 +51,7 @@ static func can_attack(state: Dictionary, map_data: Dictionary, from_id: String,
 		return false
 	if String(target.get("owner", "")) == String(conquest.get("player_country", "")):
 		return false
-	if int(source.get("strength", 0)) <= 1:
+	if (source.get("garrison", []) as Array).is_empty():
 		return false
 	var neighbors: Array = source.get("neighbors", [])
 	return neighbors.has(to_id)
@@ -88,62 +95,59 @@ static func transfer_strength(state: Dictionary, map_data: Dictionary, from_id: 
 		_region_name(target),
 	]}
 
-static func player_attack(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> Dictionary:
-	if not can_attack(state, map_data, from_id, to_id):
-		return {"ok": false, "message": "無法攻擊:需從己方且兵力大於 1 的相鄰地區出擊。"}
-	var conquest := conquest_state(state, map_data)
-	var regions: Dictionary = conquest.get("regions", {})
-	var source: Dictionary = regions[from_id]
-	var target: Dictionary = regions[to_id]
-	var attacker_strength := int(source.get("strength", 0))
-	var defender_strength := int(target.get("strength", 0))
-	var attack_power := attacker_strength + int(source.get("production", 0))
-	var defense_power := defender_strength + int(target.get("production", 0))
-	return _resolve_player_attack(state, map_data, from_id, to_id, attack_power >= defense_power)
-
 static func resolve_battle_result(
 	state: Dictionary,
 	map_data: Dictionary,
 	from_id: String,
 	to_id: String,
 	player_won: bool,
+	survivors: Array = [],
 ) -> Dictionary:
+	# Applies a fought conquest battle to the strategic map. The attacking
+	# region's garrison is reduced to the survivors (keeping their gained xp);
+	# on a win the survivors advance into and hold the captured region, on a
+	# loss they retreat to the source.
 	if not can_attack(state, map_data, from_id, to_id):
 		return {"ok": false, "message": "戰役結果無法套用:征服地圖狀態已變更。"}
-	return _resolve_player_attack(state, map_data, from_id, to_id, player_won)
-
-static func _resolve_player_attack(
-	state: Dictionary,
-	map_data: Dictionary,
-	from_id: String,
-	to_id: String,
-	player_won: bool,
-) -> Dictionary:
 	var conquest := conquest_state(state, map_data)
 	var regions: Dictionary = conquest.get("regions", {})
 	var source: Dictionary = regions[from_id]
 	var target: Dictionary = regions[to_id]
-	var attacker_strength := int(source.get("strength", 0))
-	var defender_strength := int(target.get("strength", 0))
-	var attack_power := attacker_strength + int(source.get("production", 0))
-	var defense_power := defender_strength + int(target.get("production", 0))
-	source["strength"] = max(1, attacker_strength - 1)
+	var player_country := String(conquest.get("player_country", ""))
+	var survived := _apply_survivors(source.get("garrison", []), survivors)
+	var message := ""
 	if player_won:
-		target["owner"] = String(conquest.get("player_country", ""))
-		target["strength"] = max(1, attack_power - defense_power + 1)
-		regions[from_id] = source
-		regions[to_id] = target
-		conquest["regions"] = regions
-		state["conquest"] = conquest
-		CampaignManager.save_state(state)
-		return {"ok": true, "message": "%s 攻佔 %s。" % [_region_name(source), _region_name(target)]}
-	target["strength"] = max(1, defender_strength - max(1, int(attacker_strength / 2)))
+		target["owner"] = player_country
+		target["garrison"] = survived
+		target["strength"] = maxi(1, int(target.get("production", 1)))
+		source["garrison"] = []
+		message = "%s 攻佔 %s,%d 支部隊進駐。" % [_region_name(source), _region_name(target), survived.size()]
+	else:
+		source["garrison"] = survived
+		target["strength"] = maxi(1, int(target.get("strength", 0)) - 1)
+		message = "%s 進攻受挫,殘部撤回(剩 %d 支)。" % [_region_name(source), survived.size()]
 	regions[from_id] = source
 	regions[to_id] = target
 	conquest["regions"] = regions
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
-	return {"ok": true, "message": "%s 進攻受挫,%s 守軍削弱。" % [_region_name(source), _region_name(target)]}
+	return {"ok": true, "message": message}
+
+static func _apply_survivors(garrison: Array, survivors: Array) -> Array:
+	# Keep only the garrison records whose unit survived, updating xp/rank from
+	# the battle outcome. Casualties are dropped.
+	var by_id := {}
+	for s in survivors:
+		by_id[int((s as Dictionary).get("roster_id", -1))] = s
+	var kept: Array = []
+	for rec in garrison:
+		var record: Dictionary = rec
+		if by_id.has(int(record.get("id", -1))):
+			var surv: Dictionary = by_id[int(record.get("id", -1))]
+			record["xp"] = int(surv.get("xp", record.get("xp", 0)))
+			record["rank"] = int(surv.get("rank", record.get("rank", 0)))
+			kept.append(record)
+	return kept
 
 static func end_turn(state: Dictionary, map_data: Dictionary) -> Array[String]:
 	var conquest := conquest_state(state, map_data)
@@ -222,6 +226,7 @@ static func _initial_regions(map_data: Dictionary) -> Dictionary:
 			"y": int(region.get("y", 0)),
 			"production": int(region.get("production", 1)),
 			"strength": int(region.get("production", 1)) + 2,
+			"garrison": [],
 			"neighbors": region.get("neighbors", []),
 		}
 	return out

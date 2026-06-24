@@ -50,4 +50,5 @@ static func create_unit(data: Dictionary, factions: Dictionary) -> Unit:
 	var general_id := String(data.get("general", ""))
 	if general_id != "":
 		unit.general_id = general_id
+	unit.roster_id = int(data.get("roster_id", -1))
 	return unit

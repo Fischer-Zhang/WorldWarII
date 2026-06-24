@@ -20,7 +20,7 @@ const ReinforcementSpawner := preload("res://scripts/scenario/reinforcement_spaw
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
-const ConquestBattleContext := preload("res://scripts/scenario/conquest_battle_context.gd")
+const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
 const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
@@ -91,6 +91,11 @@ func _ready() -> void:
 	hex_map.hex_clicked.connect(_on_hex_clicked)
 	hex_map.hex_hovered.connect(_on_hex_hovered)
 
+	# Conquest battles run on the themed map but replace factions/units/victory
+	# so the player fights its recruited army — must happen before build.
+	if GameState.conquest_mode and not GameState.pending_conquest_battle.is_empty():
+		ConquestBattleSetup.apply(scenario, GameState.pending_conquest_battle)
+
 	var built := UnitFactory.build(scenario, hex_map)
 	factions = built["factions"]
 	for u in built["units"]:
@@ -117,12 +122,7 @@ func _ready() -> void:
 		if String(factions[fid].get("controller", "")) == "player":
 			player_faction_id = fid
 			break
-	ConquestBattleContext.apply_to_scenario(
-		scenario,
-		player_faction_id,
-		GameState.pending_conquest_battle if GameState.conquest_mode else {}
-	)
-	_apply_conquest_battle_modifiers()
+	_apply_conquest_garrison_xp()
 
 	# Seed initial enemy memory: every faction starts with intel on
 	# where their opponents are deployed (briefing-table knowledge).
@@ -160,52 +160,25 @@ func _apply_deployment_overrides(scenario_id: String) -> void:
 	DeploymentOverrides.apply(units, hex_map, overrides, HexMap.HEX_SIZE)
 	GameState.clear_deployment_overrides()
 
-func _apply_conquest_battle_modifiers() -> void:
-	if not GameState.conquest_mode or GameState.pending_conquest_battle.is_empty():
+func _apply_conquest_garrison_xp() -> void:
+	# Conquest battles: restore each recruited unit's veteran xp/rank from its
+	# garrison record (matched by roster_id). Fresh recruits stay at xp 0.
+	if not GameState.conquest_mode:
 		return
-	var pending: Dictionary = GameState.pending_conquest_battle
-	var attacker_strength := int(pending.get("attacker_strength", 0))
-	var defender_strength := int(pending.get("defender_strength", 0))
-	var attacker_power := attacker_strength + int(pending.get("attacker_production", 0))
-	var defender_power := defender_strength + int(pending.get("defender_production", 0))
-	var attacker_rank := _conquest_attacker_rank(attacker_power)
-	var defender_dig_in := _conquest_defender_dig_in(defender_power)
-	if attacker_rank <= 0 and defender_dig_in <= 0:
+	var garrison: Array = GameState.pending_conquest_battle.get("attacker_garrison", [])
+	if garrison.is_empty():
 		return
-
-	var attacker_vanguard := 1 if attacker_power < 12 else 2
-	var ranked := 0
+	var by_id := {}
+	for rec in garrison:
+		by_id[int((rec as Dictionary).get("id", -1))] = rec
 	for u in units:
 		var unit: Unit = u
-		if unit.faction_id == player_faction_id and unit.is_alive() and attacker_rank > 0:
-			unit.xp = max(unit.xp, int(CombatModifiers.RANK_THRESHOLDS[attacker_rank]))
-			unit.rank = max(unit.rank, attacker_rank)
-			unit.queue_redraw()
-			ranked += 1
-			if ranked >= attacker_vanguard:
-				break
-
-	if defender_dig_in <= 0:
-		return
-	for u in units:
-		var unit: Unit = u
-		if unit.faction_id != player_faction_id and unit.is_alive():
-			unit.dig_in_level = max(unit.dig_in_level, defender_dig_in)
-			unit.queue_redraw()
-
-func _conquest_attacker_rank(strength: int) -> int:
-	if strength >= 12:
-		return 2
-	if strength >= 8:
-		return 1
-	return 0
-
-func _conquest_defender_dig_in(strength: int) -> int:
-	if strength >= 12:
-		return 2
-	if strength >= 8:
-		return 1
-	return 0
+		if unit.roster_id < 0 or not by_id.has(unit.roster_id):
+			continue
+		var record: Dictionary = by_id[unit.roster_id]
+		unit.xp = int(record.get("xp", 0))
+		unit.rank = int(record.get("rank", 0))
+		unit.queue_redraw()
 
 # ---------- TURN LIFECYCLE ----------
 
@@ -391,6 +364,16 @@ func _handle_game_over(winner: String) -> void:
 		_populate_battle_summary()
 	elif GameState.conquest_mode:
 		menu_button.text = "返回征服地圖"
+		# Hand surviving recruited units (with battle-gained xp) back to conquest
+		# so the garrison persists and veterans level up.
+		var conquest_survivors: Array = []
+		for u in units:
+			var unit: Unit = u
+			if unit.is_alive() and unit.faction_id == player_faction_id and unit.roster_id >= 0:
+				conquest_survivors.append({
+					"roster_id": unit.roster_id, "xp": unit.xp, "rank": unit.rank,
+				})
+		GameState.last_result["conquest_survivors"] = conquest_survivors
 
 func _populate_battle_summary() -> void:
 	# Build a compact battle-log card for the result panel:

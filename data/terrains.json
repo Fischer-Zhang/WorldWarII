@@ -42,5 +42,26 @@
     "blocks_los": false,
     "road_bonus": true,
     "color": "#a89060"
+  },
+  "desert": {
+    "name_zh": "沙漠",
+    "move_cost": 1,
+    "defense": 0,
+    "blocks_los": false,
+    "color": "#d9c48a"
+  },
+  "jungle": {
+    "name_zh": "叢林",
+    "move_cost": 2,
+    "defense": 2,
+    "blocks_los": true,
+    "color": "#1f4a28"
+  },
+  "sea": {
+    "name_zh": "海洋",
+    "move_cost": 9,
+    "defense": 0,
+    "blocks_los": false,
+    "color": "#2a5a8a"
   }
 }

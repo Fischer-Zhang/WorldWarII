@@ -238,6 +238,10 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | blitz_00_poland_1939 | 5 | 1 | 1 | 2 | 1 | 2 | 0 | 0 |
 | blitz_02_dunkirk_1940 | 5 | 1 | 1 | 1 | 2 | 2 | 0 | 0 |
 | blitz_03_moscow_1941 | 4 | 1 | 2 | 0 | 4 | 2 | 0 | 0 |
+| conq_cbi_jungle | 6 | 2 | 2 | 0 | 0 | 1 | 0 | 1 |
+| conq_desert_north_africa | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
+| conq_mediterranean_coast | 5 | 1 | 2 | 0 | 2 | 2 | 0 | 0 |
+| conq_pacific_island | 6 | 2 | 2 | 1 | 0 | 1 | 0 | 0 |
 | east_05_kharkov_1943 | 4 | 1 | 1 | 1 | 5 | 2 | 0 | 0 |
 | east_09_seelow_1945 | 4 | 1 | 2 | 0 | 4 | 3 | 0 | 0 |
 | east_10_berlin_1945 | 5 | 2 | 1 | 0 | 3 | 2 | 0 | 1 |
@@ -247,7 +251,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
-| TOTAL | 84 | 25 | 36 | 9 | 70 | 39 | 5 | 3 |
+| TOTAL | 105 | 31 | 44 | 11 | 74 | 45 | 5 | 4 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -262,6 +266,10 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | blitz_00_poland_1939 | 140 | plain 73%, road 11%, forest 8% |
 | blitz_02_dunkirk_1940 | 140 | plain 74%, road 11%, river 7% |
 | blitz_03_moscow_1941 | 140 | plain 69%, forest 15%, road 13% |
+| conq_cbi_jungle | 117 | jungle 89%, river 5%, plain 3% |
+| conq_desert_north_africa | 117 | desert 82%, road 11%, mountain 5% |
+| conq_mediterranean_coast | 117 | plain 62%, sea 22%, road 11% |
+| conq_pacific_island | 117 | plain 60%, sea 34%, jungle 5% |
 | east_05_kharkov_1943 | 140 | plain 73%, road 11%, forest 7% |
 | east_09_seelow_1945 | 140 | plain 73%, road 11%, mountain 7% |
 | east_10_berlin_1945 | 140 | town 59%, plain 22%, road 19% |

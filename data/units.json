@@ -1,6 +1,7 @@
 {
   "infantry": {
     "name_zh": "步兵",
+    "cost": 1,
     "hp": 10,
     "attack": 4,
     "defense": 2,
@@ -12,6 +13,7 @@
   },
   "mg_team": {
     "name_zh": "機槍組",
+    "cost": 1,
     "hp": 8,
     "attack": 6,
     "defense": 1,
@@ -23,6 +25,7 @@
   },
   "at_gun": {
     "name_zh": "反戰車砲",
+    "cost": 2,
     "hp": 6,
     "attack": 5,
     "defense": 1,
@@ -34,6 +37,7 @@
   },
   "light_tank": {
     "name_zh": "輕戰車",
+    "cost": 2,
     "hp": 12,
     "attack": 5,
     "defense": 4,
@@ -45,6 +49,7 @@
   },
   "medium_tank": {
     "name_zh": "中戰車",
+    "cost": 3,
     "hp": 16,
     "attack": 7,
     "defense": 5,
@@ -56,6 +61,7 @@
   },
   "artillery": {
     "name_zh": "砲兵",
+    "cost": 2,
     "hp": 8,
     "attack": 7,
     "defense": 1,
@@ -68,6 +74,7 @@
   },
   "paratrooper": {
     "name_zh": "傘兵",
+    "cost": 2,
     "hp": 8,
     "attack": 5,
     "defense": 2,
@@ -80,6 +87,7 @@
   },
   "engineer": {
     "name_zh": "工兵",
+    "cost": 1,
     "hp": 8,
     "attack": 3,
     "defense": 2,

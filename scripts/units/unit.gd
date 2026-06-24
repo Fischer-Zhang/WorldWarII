@@ -47,6 +47,9 @@ var xp: int = 0
 var rank: int = 0
 # Optional attached general (data lookup via DataLoader.get_general_def).
 var general_id: String = ""
+# Conquest-mode garrison identity: maps a battlefield unit back to its
+# persistent recruited record (region garrison). -1 = not a conquest unit.
+var roster_id: int = -1
 var general_upgrade_levels: Dictionary = {}
 var tech_mods: Dictionary = {}
 # Temporary effects from general's active skill. Each entry:

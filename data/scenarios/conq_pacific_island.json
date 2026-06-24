@@ -1,0 +1,280 @@
+{
+  "id": "conq_pacific_island",
+  "title": "太平洋島嶼登陸",
+  "briefing": "四面環海的島嶼,叢林遮蔽視線。搶下中央港鎮,把守軍逼進海邊。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "jungle",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        2,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 2",
+      "at": [
+        2,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "mg_team 3",
+      "at": [
+        3,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "light_tank 4",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 5",
+      "at": [
+        3,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 6",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        10,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 2",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        9,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        10,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        10,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        9,
+        6
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

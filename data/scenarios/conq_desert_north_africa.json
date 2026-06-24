@@ -1,0 +1,280 @@
+{
+  "id": "conq_desert_north_africa",
+  "title": "北非沙漠戰場",
+  "briefing": "開闊沙漠,掩蔽稀少。靠機動側翼與火力壓制決勝;城鎮綠洲是僅有的堅固據點。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "town",
+        "desert",
+        "desert"
+      ],
+      [
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "town",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "mountain",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ],
+      [
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert",
+        "desert"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        1,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "light_tank 2",
+      "at": [
+        1,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        2,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 2",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 4",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        11,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 6",
+      "at": [
+        10,
+        6
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

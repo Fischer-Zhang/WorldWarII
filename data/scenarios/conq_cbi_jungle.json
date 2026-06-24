@@ -1,0 +1,280 @@
+{
+  "id": "conq_cbi_jungle",
+  "title": "緬印叢林戰場",
+  "briefing": "濃密叢林封鎖視線與機動,河流橫貫戰場。爭奪渡口與村鎮,近距離纏鬥。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "town",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "jungle",
+        "road",
+        "jungle",
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "town",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "river",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ],
+      [
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle",
+        "jungle"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        1,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 2",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "engineer 3",
+      "at": [
+        1,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "mg_team 4",
+      "at": [
+        2,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        11,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 2",
+      "at": [
+        10,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 3",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 4",
+      "at": [
+        11,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 5",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        11,
+        2
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

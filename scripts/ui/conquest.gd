@@ -2,14 +2,15 @@ extends Control
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
-const ConquestBattleContext := preload("res://scripts/scenario/conquest_battle_context.gd")
 const ConquestCatalog := preload("res://scripts/scenario/conquest_catalog.gd")
+const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 
 @onready var title_label: Label = $Margin/VBox/Header/Title
 @onready var country_option: OptionButton = $Margin/VBox/Header/CountryOption
 @onready var turn_label: Label = $Margin/VBox/Header/TurnLabel
 @onready var map_grid: GridContainer = $Margin/VBox/Body/MapPanel/MapGrid
 @onready var detail_label: RichTextLabel = $Margin/VBox/Body/DetailPanel/Detail
+@onready var recruit_list: VBoxContainer = $Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList
 @onready var attack_button: Button = $Margin/VBox/Actions/AttackButton
 @onready var transfer_button: Button = $Margin/VBox/Actions/TransferButton
 @onready var end_turn_button: Button = $Margin/VBox/Actions/EndTurnButton
@@ -90,6 +91,9 @@ func _rebuild() -> void:
 					int(region.get("strength", 0)),
 					int(region.get("production", 0)),
 				]
+				var gsize: int = (region.get("garrison", []) as Array).size()
+				if gsize > 0:
+					btn.text += "\n守:%d" % gsize
 				btn.modulate = Color(String(owner_def.get("color", "#777777")))
 				var rid := String(region.get("id", ""))
 				btn.disabled = false
@@ -117,16 +121,26 @@ func _region_at(regions: Dictionary, x: int, y: int) -> Dictionary:
 	return {}
 
 func _select_region(region_id: String) -> void:
-	var region := ConquestManager.region_state(state, DataLoader.conquest_map, region_id)
+	# Order-independent selection. Tap a region to set the source (出擊地);
+	# tap any other region to set the target. Choosing the source does NOT
+	# clear an already-picked target, so "tap the enemy, then tap my region"
+	# works exactly like the reverse order. Tapping the current source again
+	# clears the whole selection so you can start over.
 	var player_country := String(ConquestManager.conquest_state(state, DataLoader.conquest_map).get("player_country", ""))
-	if String(region.get("owner", "")) == player_country:
-		if selected_region_id == "" or selected_region_id == region_id:
+	var region := ConquestManager.region_state(state, DataLoader.conquest_map, region_id)
+	var is_own := String(region.get("owner", "")) == player_country
+	if region_id == selected_region_id:
+		selected_region_id = ""
+		target_region_id = ""
+	elif selected_region_id == "":
+		# No source yet. An own region becomes the source (keeping any target
+		# the player already tapped); an enemy region is remembered as target.
+		if is_own:
 			selected_region_id = region_id
-			target_region_id = ""
+			if target_region_id == region_id:
+				target_region_id = ""
 		else:
 			target_region_id = region_id
-	elif selected_region_id != "":
-		target_region_id = region_id
 	else:
 		target_region_id = region_id
 	_update_detail()
@@ -153,11 +167,13 @@ func _update_detail(message: String = "") -> void:
 		if scenario_id != "":
 			var battle_scenario := DataLoader.get_scenario(scenario_id)
 			lines.append("戰術作戰: %s" % String(battle_scenario.get("title", scenario_id)))
-			var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
-			var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
-			var context := ConquestBattleContext.from_regions(source, target)
-			for summary_line in ConquestBattleContext.battle_summary(context):
-				lines.append(String(summary_line))
+			var src := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+			var tgt := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+			var my_force: int = (src.get("garrison", []) as Array).size()
+			var enemy_force: int = ConquestRecruit.generate_force(int(tgt.get("strength", 0))).size()
+			lines.append("我軍 %d 部隊 vs 敵軍約 %d 部隊" % [my_force, enemy_force])
+			if my_force == 0:
+				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
 	var can_attack := selected_region_id != "" \
 			and target_region_id != "" \
 			and ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
@@ -167,7 +183,105 @@ func _update_detail(message: String = "") -> void:
 	attack_button.disabled = not can_attack or status != ""
 	transfer_button.disabled = not can_transfer or status != ""
 	end_turn_button.disabled = status != ""
+	# Tell the player what to do next / why the action is greyed out, so a
+	# disabled Attack button never looks like a dead end.
+	if status == "":
+		if selected_region_id != "" and target_region_id == "":
+			lines.append("")
+			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 轉移。[/color]")
+		elif selected_region_id != "" and target_region_id != "" and not can_attack and not can_transfer:
+			lines.append("")
+			lines.append("[color=#d88]%s[/color]" % _unavailable_reason())
 	detail_label.text = "\n".join(lines)
+	_rebuild_recruit_panel()
+
+func _unavailable_reason() -> String:
+	var player_country := String(ConquestManager.conquest_state(state, DataLoader.conquest_map).get("player_country", ""))
+	var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+	var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+	if String(source.get("owner", "")) != player_country:
+		return "出擊地必須是己方地區。"
+	if int(source.get("strength", 0)) <= 1:
+		return "出擊地兵力不足(需 > 1)才能出擊。"
+	var neighbors: Array = source.get("neighbors", [])
+	if not neighbors.has(target_region_id):
+		return "目標與出擊地不相鄰。"
+	if String(target.get("owner", "")) == player_country:
+		return "目標為己方地區:可改用轉移,或選敵區進攻。"
+	return "此目標目前無法行動。"
+
+func _rebuild_recruit_panel() -> void:
+	for child in recruit_list.get_children():
+		child.queue_free()
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var player_country := String(conquest.get("player_country", ""))
+	if selected_region_id == "":
+		_add_recruit_hint("選擇己方地區以徵召部隊。")
+		return
+	var region: Dictionary = conquest.get("regions", {}).get(selected_region_id, {})
+	if region.is_empty() or String(region.get("owner", "")) != player_country:
+		_add_recruit_hint("(僅能在己方地區徵兵)")
+		return
+	var header := Label.new()
+	header.text = "徵兵 — %s (兵力 %d)" % [String(region.get("name_zh", "")), int(region.get("strength", 0))]
+	header.add_theme_font_size_override("font_size", 15)
+	recruit_list.add_child(header)
+	var type_ids := DataLoader.units.keys()
+	type_ids.sort()
+	for tid in type_ids:
+		var type_id := String(tid)
+		var def: Dictionary = DataLoader.units[type_id]
+		var cost := ConquestRecruit.unit_cost(DataLoader.units, type_id)
+		var btn := Button.new()
+		btn.text = "徵 %s (%d)" % [String(def.get("name_zh", type_id)), cost]
+		btn.add_theme_font_size_override("font_size", 13)
+		btn.disabled = not ConquestRecruit.can_recruit(region, DataLoader.units, type_id)
+		btn.pressed.connect(_on_recruit_pressed.bind(type_id))
+		recruit_list.add_child(btn)
+	var garrison: Array = region.get("garrison", [])
+	var ghdr := Label.new()
+	ghdr.text = "守備軍 (%d/%d)" % [garrison.size(), ConquestRecruit.GARRISON_CAP]
+	ghdr.add_theme_font_size_override("font_size", 14)
+	recruit_list.add_child(ghdr)
+	for rec in garrison:
+		var record: Dictionary = rec
+		var rank := int(record.get("rank", 0))
+		var row := Button.new()
+		row.text = "解散 %s%s" % [String(record.get("name", "")), " ★".repeat(rank)]
+		row.add_theme_font_size_override("font_size", 12)
+		var uid := int(record.get("id", -1))
+		row.pressed.connect(_on_disband_pressed.bind(uid))
+		recruit_list.add_child(row)
+
+func _add_recruit_hint(text: String) -> void:
+	var hint := Label.new()
+	hint.text = text
+	hint.add_theme_font_size_override("font_size", 13)
+	recruit_list.add_child(hint)
+
+func _on_recruit_pressed(type_id: String) -> void:
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var region: Dictionary = conquest.get("regions", {}).get(selected_region_id, {})
+	if region.is_empty():
+		return
+	var next_id := int(conquest.get("next_unit_id", 1))
+	var result := ConquestRecruit.recruit(region, DataLoader.units, type_id, next_id)
+	if bool(result.get("ok", false)):
+		conquest["next_unit_id"] = next_id + 1
+		CampaignManager.save_state(state)
+		_rebuild()
+	_update_detail(String(result.get("message", "")))
+
+func _on_disband_pressed(unit_id: int) -> void:
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var region: Dictionary = conquest.get("regions", {}).get(selected_region_id, {})
+	if region.is_empty():
+		return
+	var result := ConquestRecruit.disband(region, DataLoader.units, unit_id)
+	if bool(result.get("ok", false)):
+		CampaignManager.save_state(state)
+		_rebuild()
+	_update_detail(String(result.get("message", "")))
 
 func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	if region.is_empty():
@@ -187,9 +301,29 @@ func _on_attack_pressed() -> void:
 	if scenario_id == "":
 		_update_detail("找不到可用的戰術作戰。")
 		return
-	var source := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
-	var target := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
-	var context := ConquestBattleContext.from_regions(source, target)
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions.get(selected_region_id, {})
+	var target: Dictionary = regions.get(target_region_id, {})
+	var attacker_garrison: Array = (source.get("garrison", []) as Array).duplicate(true)
+	if attacker_garrison.is_empty():
+		_update_detail("此地區沒有駐軍可出擊,請先徵兵。")
+		return
+	var player_country := String(conquest.get("player_country", ""))
+	var enemy_country := String(target.get("owner", ""))
+	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
+	var context := {
+		"player_faction": player_country,
+		"enemy_faction": enemy_country,
+		"player_color": String(countries.get(player_country, {}).get("color", "#cccccc")),
+		"enemy_color": String(countries.get(enemy_country, {}).get("color", "#cccccc")),
+		"player_name": String(countries.get(player_country, {}).get("name_zh", player_country)),
+		"enemy_name": String(countries.get(enemy_country, {}).get("name_zh", enemy_country)),
+		"battle_location": String(target.get("name_zh", "")),
+		"attacker_garrison": attacker_garrison,
+		"defender_types": ConquestRecruit.generate_force(int(target.get("strength", 0))),
+		"role": "attack",
+	}
 	CampaignManager.save_state(state)
 	GameState.start_conquest_battle(selected_region_id, target_region_id, scenario_id, context)
 	get_tree().change_scene_to_file("res://scenes/briefing.tscn")
@@ -230,31 +364,13 @@ func _on_back_pressed() -> void:
 	GameState.clear_conquest_battle()
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
-func _scenario_for_attack(from_id: String, to_id: String) -> String:
-	if from_id == "" or to_id == "":
+func _scenario_for_attack(_from_id: String, to_id: String) -> String:
+	if to_id == "":
 		return ""
-	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
-	var source: Dictionary = conquest.get("regions", {}).get(from_id, {})
-	if source.is_empty():
-		return ""
-	var player_country := String(conquest.get("player_country", ""))
-	var side := String(ConquestCatalog.COUNTRY_SIDE.get(player_country, "axis"))
-	var preferred := String(ConquestCatalog.REGION_SCENARIOS.get(to_id, ConquestCatalog.FALLBACK_SCENARIO))
-	if _scenario_player_faction(preferred) == side:
-		return preferred
-	for scenario in DataLoader.scenarios:
-		var scenario_id := String(scenario.get("id", ""))
-		if _scenario_player_faction(scenario_id) == side:
-			return scenario_id
-	return ConquestCatalog.FALLBACK_SCENARIO
-
-func _scenario_player_faction(scenario_id: String) -> String:
-	var battle_scenario := DataLoader.get_scenario(scenario_id)
-	for faction in battle_scenario.get("factions", []):
-		var f: Dictionary = faction
-		if String(f.get("controller", "")) == "player":
-			return String(f.get("id", ""))
-	return ""
+	# The battlefield is fixed per region (terrain only). Forces and the player's
+	# controlled side are assigned by ConquestBattleSetup, so the scenario's
+	# authored player-faction no longer matters.
+	return String(ConquestCatalog.REGION_SCENARIOS.get(to_id, ConquestCatalog.FALLBACK_SCENARIO))
 
 func _apply_pending_battle_result() -> String:
 	if not GameState.conquest_mode or GameState.pending_conquest_battle.is_empty():
@@ -263,22 +379,20 @@ func _apply_pending_battle_result() -> String:
 	var from_id := String(pending.get("from", ""))
 	var to_id := String(pending.get("to", ""))
 	var scenario_id := String(pending.get("scenario_id", ""))
+	var player_faction := String(pending.get("player_faction", ""))
 	var result: Dictionary = GameState.last_result
 	var winner := String(result.get("winner", ""))
-	var player_won := winner != "" and winner == _scenario_player_faction(scenario_id)
+	var player_won := winner != "" and winner == player_faction
+	var survivors: Array = result.get("conquest_survivors", [])
 	var applied := ConquestManager.resolve_battle_result(
-		state, DataLoader.conquest_map, from_id, to_id, player_won
+		state, DataLoader.conquest_map, from_id, to_id, player_won, survivors
 	)
 	GameState.clear_conquest_battle()
 	target_region_id = ""
-	selected_region_id = from_id
+	# After a win the surviving army holds the captured region; after a loss it
+	# falls back to where it set out from.
+	selected_region_id = to_id if player_won else from_id
+	GameState.last_result = {}
 	if not bool(applied.get("ok", false)):
-		GameState.last_result = {}
 		return String(applied.get("message", "戰役結果無法套用。"))
-	var message := String(applied.get("message", ""))
-	GameState.last_result = {
-		"winner": winner,
-		"summary": result.get("summary", {}),
-		"message": message,
-	}
-	return message
+	return String(applied.get("message", ""))

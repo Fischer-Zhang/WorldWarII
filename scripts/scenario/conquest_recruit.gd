@@ -1,0 +1,93 @@
+class_name ConquestRecruit
+extends RefCounted
+
+# Recruitment + force-generation helpers for Conquest mode.
+#
+# Pure functions over a region dict + a units catalog (DataLoader.units shape:
+# { type_id: { "cost": int, "name_zh": String, ... } }). Kept data-injected
+# (no autoload reference) so tests can pass a stub catalog.
+#
+# "Strength" is the recruitment currency. Recruited units live in
+# region["garrison"] as records: { id:int, type:String, xp:int, rank:int, name:String }.
+# Mutations are persisted by the caller via CampaignManager.save_state().
+
+const DEFAULT_COST := 2
+const GARRISON_CAP := 8
+
+static func unit_cost(units_catalog: Dictionary, type_id: String) -> int:
+	var def: Dictionary = units_catalog.get(type_id, {})
+	return max(1, int(def.get("cost", DEFAULT_COST)))
+
+static func garrison_of(region: Dictionary) -> Array:
+	return region.get("garrison", [])
+
+static func can_recruit(region: Dictionary, units_catalog: Dictionary, type_id: String) -> bool:
+	if not units_catalog.has(type_id):
+		return false
+	if garrison_of(region).size() >= GARRISON_CAP:
+		return false
+	return int(region.get("strength", 0)) >= unit_cost(units_catalog, type_id)
+
+static func recruit(region: Dictionary, units_catalog: Dictionary, type_id: String, next_id: int) -> Dictionary:
+	# Mutates region (strength -, garrison +). Returns { ok, message, record? }.
+	# `next_id` is a caller-owned monotonic id (conquest["next_unit_id"]).
+	if not can_recruit(region, units_catalog, type_id):
+		return {"ok": false, "message": "兵力不足或編制已滿,無法徵召。"}
+	var cost := unit_cost(units_catalog, type_id)
+	var def: Dictionary = units_catalog.get(type_id, {})
+	var label := String(def.get("name_zh", type_id))
+	var record := {
+		"id": next_id,
+		"type": type_id,
+		"xp": 0,
+		"rank": 0,
+		"name": "%s #%d" % [label, next_id],
+	}
+	region["strength"] = int(region.get("strength", 0)) - cost
+	var garrison: Array = region.get("garrison", [])
+	garrison.append(record)
+	region["garrison"] = garrison
+	return {"ok": true, "message": "已徵召 %s。" % String(record["name"]), "record": record}
+
+static func disband(region: Dictionary, units_catalog: Dictionary, unit_id: int) -> Dictionary:
+	# Refunds the unit's cost and removes it from the garrison.
+	var garrison: Array = region.get("garrison", [])
+	for i in range(garrison.size()):
+		var rec: Dictionary = garrison[i]
+		if int(rec.get("id", -1)) == unit_id:
+			var cost := unit_cost(units_catalog, String(rec.get("type", "")))
+			region["strength"] = int(region.get("strength", 0)) + cost
+			garrison.remove_at(i)
+			region["garrison"] = garrison
+			return {"ok": true, "message": "已解散 %s,返還 %d 兵力。" % [String(rec.get("name", "")), cost]}
+	return {"ok": false, "message": "找不到該部隊。"}
+
+static func garrison_types(region: Dictionary) -> Array:
+	# Ordered list of type ids currently garrisoned (for battle roster build).
+	var out: Array = []
+	for rec in garrison_of(region):
+		out.append(String(rec.get("type", "")))
+	return out
+
+static func generate_force(strength: int) -> Array:
+	# Strength -> an AI/militia roster (array of type ids). Tiered and capped so
+	# a strong region fields a meatier force than a weak one. Defenders that the
+	# player never garrisoned, and every AI-controlled side, use this.
+	var out: Array = []
+	var s := maxi(1, strength)
+	# Heavier/support units first so the size cap never strips them.
+	if s >= 7:
+		out.append("medium_tank")
+	if s >= 9:
+		out.append("artillery")
+	if s >= 5:
+		out.append("at_gun")
+	if s >= 4:
+		out.append("mg_team")
+	# Infantry fills the remainder up to a total of 6.
+	var infantry_count: int = clampi(int(s / 2), 1, 4)
+	for _i in range(infantry_count):
+		if out.size() >= 6:
+			break
+		out.append("infantry")
+	return out

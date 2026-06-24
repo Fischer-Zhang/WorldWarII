@@ -1,0 +1,280 @@
+{
+  "id": "conq_mediterranean_coast",
+  "title": "地中海海岸",
+  "briefing": "由海岸向內陸推進。北面丘陵是守軍據點,沿海公路與港鎮是進攻軸線。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "medium_tank 2",
+      "at": [
+        3,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        4,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        2,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        5,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 1",
+      "at": [
+        8,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 2",
+      "at": [
+        9,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "medium_tank 3",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        8,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        10,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        7,
+        3
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}
