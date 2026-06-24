@@ -238,9 +238,15 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | blitz_00_poland_1939 | 5 | 1 | 1 | 2 | 1 | 2 | 0 | 0 |
 | blitz_02_dunkirk_1940 | 5 | 1 | 1 | 1 | 2 | 2 | 0 | 0 |
 | blitz_03_moscow_1941 | 4 | 1 | 2 | 0 | 4 | 2 | 0 | 0 |
+| conq_atlantic_convoy | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
 | conq_cbi_jungle | 6 | 2 | 2 | 0 | 0 | 1 | 0 | 1 |
+| conq_china_plains | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
 | conq_desert_north_africa | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
+| conq_home_islands | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
 | conq_mediterranean_coast | 5 | 1 | 2 | 0 | 2 | 2 | 0 | 0 |
+| conq_middle_east_oilfields | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
+| conq_north_sea_raid | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
+| conq_pacific_carrier | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 |
 | conq_pacific_island | 6 | 2 | 2 | 1 | 0 | 1 | 0 | 0 |
 | east_05_kharkov_1943 | 4 | 1 | 1 | 1 | 5 | 2 | 0 | 0 |
 | east_09_seelow_1945 | 4 | 1 | 2 | 0 | 4 | 3 | 0 | 0 |
@@ -251,7 +257,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 |
-| TOTAL | 105 | 31 | 44 | 11 | 74 | 45 | 5 | 4 |
+| TOTAL | 129 | 37 | 56 | 17 | 86 | 57 | 5 | 4 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -266,9 +272,15 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | blitz_00_poland_1939 | 140 | plain 73%, road 11%, forest 8% |
 | blitz_02_dunkirk_1940 | 140 | plain 74%, road 11%, river 7% |
 | blitz_03_moscow_1941 | 140 | plain 69%, forest 15%, road 13% |
+| conq_atlantic_convoy | 117 | plain 58%, sea 31%, forest 7% |
 | conq_cbi_jungle | 117 | jungle 89%, river 5%, plain 3% |
+| conq_china_plains | 117 | plain 72%, forest 10%, road 9% |
 | conq_desert_north_africa | 117 | desert 82%, road 11%, mountain 5% |
+| conq_home_islands | 117 | plain 63%, mountain 13%, sea 10% |
 | conq_mediterranean_coast | 117 | plain 62%, sea 22%, road 11% |
+| conq_middle_east_oilfields | 117 | desert 79%, road 9%, river 5% |
+| conq_north_sea_raid | 117 | plain 53%, sea 39%, town 4% |
+| conq_pacific_carrier | 117 | sea 56%, plain 39%, town 3% |
 | conq_pacific_island | 117 | plain 60%, sea 34%, jungle 5% |
 | east_05_kharkov_1943 | 140 | plain 73%, road 11%, forest 7% |
 | east_09_seelow_1945 | 140 | plain 73%, road 11%, mountain 7% |

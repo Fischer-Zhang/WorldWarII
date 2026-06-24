@@ -1,0 +1,280 @@
+{
+  "id": "conq_china_plains",
+  "title": "中原會戰",
+  "briefing": "一望無際的華中平原,大河自中央縱貫而下。橋樑與渡口決定勝負;丟掉河防,平原上再無屏障。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "road",
+        "road",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "road",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "road",
+        "road"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "river",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        1,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "light_tank 2",
+      "at": [
+        1,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        2,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 2",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 4",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        11,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 6",
+      "at": [
+        10,
+        6
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

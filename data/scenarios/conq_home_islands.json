@@ -1,0 +1,280 @@
+{
+  "id": "conq_home_islands",
+  "title": "本土防衛戰",
+  "briefing": "層巒疊嶂的本土島嶼。中央山脊與要塞城鎮構成縱深防線,守軍據險而守;進攻方必須繞過山地或硬啃要塞。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "sea",
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea",
+        "sea"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "mountain",
+        "town",
+        "mountain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "mountain",
+        "town",
+        "mountain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "sea",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "sea"
+      ],
+      [
+        "sea",
+        "sea",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        1,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "light_tank 2",
+      "at": [
+        1,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        2,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 2",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 4",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        11,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 6",
+      "at": [
+        10,
+        6
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

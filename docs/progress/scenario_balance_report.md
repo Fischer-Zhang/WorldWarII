@@ -17,9 +17,15 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | blitz_00_poland_1939 | 波蘭戰役:布楚拉反擊 1939 | plain 73%, road 11%, forest 8%; def>=2 10%; move>=3 6% | axis->1,1 min 13 avg 13.8 | no major static risks |
 | blitz_02_dunkirk_1940 | 敦克爾克外圍防線 1940 | plain 74%, road 11%, river 7%; def>=2 8%; move>=3 7% | axis->5,0 min 8 avg 9.5 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
 | blitz_03_moscow_1941 | 莫斯科門前 1941 | plain 69%, forest 15%, road 13%; def>=2 16%; move>=3 2% | soviet->6,2 min 6 avg 7.7 | no major static risks |
+| conq_atlantic_convoy | 大西洋護航戰 | plain 58%, sea 31%, forest 7%; def>=2 9%; move>=3 31% | n/a | no major static risks |
 | conq_cbi_jungle | 緬印叢林戰場 | jungle 89%, river 5%, plain 3%; def>=2 91%; move>=3 5% | n/a | no major static risks |
+| conq_china_plains | 中原會戰 | plain 72%, forest 10%, road 9%; def>=2 14%; move>=3 5% | n/a | no major static risks |
 | conq_desert_north_africa | 北非沙漠戰場 | desert 82%, road 11%, mountain 5%; def>=2 7%; move>=3 5% | n/a | no major static risks |
+| conq_home_islands | 本土防衛戰 | plain 63%, mountain 13%, sea 10%; def>=2 25%; move>=3 23% | n/a | no major static risks |
 | conq_mediterranean_coast | 地中海海岸 | plain 62%, sea 22%, road 11%; def>=2 5%; move>=3 26% | n/a | no major static risks |
+| conq_middle_east_oilfields | 中東油田爭奪 | desert 79%, road 9%, river 5%; def>=2 7%; move>=3 9% | n/a | no major static risks |
+| conq_north_sea_raid | 北海沿岸突擊 | plain 53%, sea 39%, town 4%; def>=2 8%; move>=3 39% | n/a | no major static risks |
+| conq_pacific_carrier | 太平洋海空決戰 | sea 56%, plain 39%, town 3%; def>=2 4%; move>=3 56% | n/a | no major static risks |
 | conq_pacific_island | 太平洋島嶼登陸 | plain 60%, sea 34%, jungle 5%; def>=2 6%; move>=3 34% | n/a | no major static risks |
 | east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 73%, road 11%, forest 7%; def>=2 13%; move>=3 3% | axis->4,3 min 8 avg 9.4 | no major static risks |
 | east_09_seelow_1945 | 澤洛高地 1945 | plain 73%, road 11%, mountain 7%; def>=2 14%; move>=3 9% | soviet->8,3 min 8 avg 9.1 | soviet artillery-heavy: watch standoff dominance |
@@ -108,6 +114,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | soviet | 蘇軍西方面軍 | player | 6 | 215.7 | anti_armor:1, armor:2, artillery:1, infantry:2 |
 | axis | 德軍中央集團軍群 | ai | 7 | 240.3 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
 
+## conq_atlantic_convoy
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
 ## conq_cbi_jungle
 
 | faction | name | controller | units | power | roles |
@@ -115,7 +128,21 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | allies | 進攻軍 | player | 6 | 146.7 | anti_armor:1, engineer:1, infantry:3, support:1 |
 | axis | 守備軍 | ai | 6 | 162.2 | anti_armor:1, artillery:1, infantry:3, support:1 |
 
+## conq_china_plains
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
 ## conq_desert_north_africa
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## conq_home_islands
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
@@ -127,6 +154,27 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | allies | 進攻軍 | player | 6 | 189.5 | anti_armor:1, armor:1, artillery:1, infantry:3 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## conq_middle_east_oilfields
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## conq_north_sea_raid
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
+| axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
+
+## conq_pacific_carrier
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 進攻軍 | player | 6 | 202.9 | anti_armor:1, armor:1, artillery:1, infantry:2, scout_armor:1 |
 | axis | 守備軍 | ai | 6 | 188.4 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
 
 ## conq_pacific_island

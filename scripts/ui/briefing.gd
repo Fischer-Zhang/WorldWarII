@@ -33,15 +33,20 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 	var foe := String(p.get("enemy_name", "敵軍"))
 	var my_n: int = (p.get("attacker_garrison", []) as Array).size()
 	var foe_n: int = (p.get("defender_types", []) as Array).size()
+	# The themed scenario's own briefing describes the region's terrain — surface
+	# it so each theatre's battlefield reads distinctly even though the matchup
+	# text is generated.
+	var terrain := String(scenario.get("briefing", ""))
+	var terrain_line := ("\n\n地形:%s" % terrain) if terrain != "" else ""
 	if String(p.get("role", "attack")) == "defend":
 		title_label.text = "%s 來犯 — 防守 %s" % [foe, loc]
-		briefing_label.text = "戰場:%s\n\n%s 出動約 %d 支部隊進攻;你以 %d 支部隊據守。\n\n守住 12 回合或殲滅來犯者即可保住此地;守軍被殲滅則該地失守。" % [
-			loc, foe, foe_n, my_n,
+		briefing_label.text = "戰場:%s%s\n\n%s 出動約 %d 支部隊進攻;你以 %d 支部隊據守。\n\n守住 12 回合或殲滅來犯者即可保住此地;守軍被殲滅則該地失守。" % [
+			loc, terrain_line, foe, foe_n, my_n,
 		]
 	else:
 		title_label.text = "%s 進攻 %s" % [me, foe]
-		briefing_label.text = "戰場:%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n殲滅所有守軍即可佔領此地;守軍撐過 12 回合則擊退你。" % [
-			loc, me, my_n, foe, foe_n,
+		briefing_label.text = "戰場:%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n殲滅所有守軍即可佔領此地;守軍撐過 12 回合則擊退你。" % [
+			loc, terrain_line, me, my_n, foe, foe_n,
 		]
 
 func _on_begin_pressed() -> void:

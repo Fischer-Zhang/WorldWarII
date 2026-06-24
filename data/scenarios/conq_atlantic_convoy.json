@@ -1,0 +1,280 @@
+{
+  "id": "conq_atlantic_convoy",
+  "title": "大西洋護航戰",
+  "briefing": "跨海護航的兩岸灘頭。中央海道把戰場切成兩半,唯有港鎮與海岸通道能讓裝甲推進;搶下港口才能掌握補給線。",
+  "map": {
+    "width": 13,
+    "height": 9,
+    "tiles": [
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "進攻軍",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "守備軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        1,
+        2
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "light_tank 2",
+      "at": [
+        1,
+        4
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        2,
+        3
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "at_gun 4",
+      "at": [
+        2,
+        5
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        1,
+        6
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "infantry 6",
+      "at": [
+        2,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "medium_tank 1",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "at_gun 2",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 3",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "infantry 4",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "artillery 5",
+      "at": [
+        11,
+        6
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "mg_team 6",
+      "at": [
+        10,
+        6
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "eliminate"
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

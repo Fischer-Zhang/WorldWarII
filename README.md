@@ -140,13 +140,13 @@ Done:
 - Single battle, campaign, lounge upgrades and conquest-to-battle flow.
 - Deployment setup and upgrade visibility.
 - Conquest battle context from strategic regions.
+- Per-region conquest battlefields — one themed map per region, with its terrain note surfaced in the briefing.
 - Headless validators and UI smoke coverage.
 
 Open:
 
 - Save/load mid-scenario.
 - Art replacement for tiles and units.
-- More conquest-specific scenario selection and regional identity.
 - Better in-game tutorial/onboarding.
 
 ## License
