@@ -21,6 +21,7 @@ var state: Dictionary = {}
 var selected_region_id := ""
 var target_region_id := ""
 var _selected_units: Dictionary = {}
+var _recruit_expanded := false
 var _refreshing_country := false
 var _map_button_size := Vector2(116, 74)
 
@@ -233,22 +234,26 @@ func _rebuild_recruit_panel() -> void:
 	if region.is_empty() or String(region.get("owner", "")) != player_country:
 		_add_recruit_hint("(僅能在己方地區徵兵)")
 		return
-	var header := Label.new()
-	header.text = "徵兵 — %s (兵力 %d)" % [String(region.get("name_zh", "")), int(region.get("strength", 0))]
+	var header := Button.new()
+	header.flat = true
+	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	header.text = "%s 徵兵 — %s (兵力 %d)" % ["▼" if _recruit_expanded else "▶", String(region.get("name_zh", "")), int(region.get("strength", 0))]
 	header.add_theme_font_size_override("font_size", 15)
+	header.pressed.connect(_on_recruit_header_pressed)
 	recruit_list.add_child(header)
-	var type_ids := DataLoader.units.keys()
-	type_ids.sort()
-	for tid in type_ids:
-		var type_id := String(tid)
-		var def: Dictionary = DataLoader.units[type_id]
-		var cost := ConquestRecruit.unit_cost(DataLoader.units, type_id)
-		var btn := Button.new()
-		btn.text = "徵 %s (%d)" % [String(def.get("name_zh", type_id)), cost]
-		btn.add_theme_font_size_override("font_size", 13)
-		btn.disabled = not ConquestRecruit.can_recruit(region, DataLoader.units, type_id)
-		btn.pressed.connect(_on_recruit_pressed.bind(type_id))
-		recruit_list.add_child(btn)
+	if _recruit_expanded:
+		var type_ids := DataLoader.units.keys()
+		type_ids.sort()
+		for tid in type_ids:
+			var type_id := String(tid)
+			var def: Dictionary = DataLoader.units[type_id]
+			var cost := ConquestRecruit.unit_cost(DataLoader.units, type_id)
+			var btn := Button.new()
+			btn.text = "徵 %s (%d)" % [String(def.get("name_zh", type_id)), cost]
+			btn.add_theme_font_size_override("font_size", 13)
+			btn.disabled = not ConquestRecruit.can_recruit(region, DataLoader.units, type_id)
+			btn.pressed.connect(_on_recruit_pressed.bind(type_id))
+			recruit_list.add_child(btn)
 	var garrison: Array = region.get("garrison", [])
 	var ghdr := Label.new()
 	ghdr.text = "守備軍 (%d/%d)" % [garrison.size(), ConquestRecruit.GARRISON_CAP]
@@ -287,6 +292,10 @@ func _add_recruit_hint(text: String) -> void:
 	hint.text = text
 	hint.add_theme_font_size_override("font_size", 13)
 	recruit_list.add_child(hint)
+
+func _on_recruit_header_pressed() -> void:
+	_recruit_expanded = not _recruit_expanded
+	_rebuild_recruit_panel()
 
 func _on_recruit_pressed(type_id: String) -> void:
 	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
