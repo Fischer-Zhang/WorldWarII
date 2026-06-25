@@ -23,7 +23,9 @@
     {"id": "soviet", "name": "蘇軍中央方面軍", "controller": "ai", "ai": "defensive", "color": "#3f7f4a"}
   ],
   "units": [
-    {"faction": "axis", "type": "medium_tank", "name": "Tiger I",    "at": [12, 1], "general": "rommel"},
+    {"faction": "axis", "type": "tank_destroyer", "name": "Ferdinand", "at": [12, 0]},
+    {"faction": "soviet", "type": "tank_destroyer", "name": "SU-152", "at": [4, 0]},
+    {"faction": "axis", "type": "heavy_tank", "name": "Tiger I",    "at": [12, 1], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Panther",    "at": [13, 3]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV a",    "at": [12, 5]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV b",    "at": [13, 7]},

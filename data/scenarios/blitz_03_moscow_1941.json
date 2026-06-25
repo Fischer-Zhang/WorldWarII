@@ -184,6 +184,7 @@
     }
   ],
   "units": [
+    {"faction": "soviet", "type": "rocket_artillery", "name": "喀秋莎", "at": [11, 0]},
     {
       "faction": "soviet",
       "type": "medium_tank",

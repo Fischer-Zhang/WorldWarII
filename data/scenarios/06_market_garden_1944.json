@@ -23,6 +23,7 @@
     {"id": "axis",   "name": "德軍第 9 SS 裝甲", "controller": "ai", "ai": "defensive", "color": "#a86632"}
   ],
   "units": [
+    {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [6, 0]},
     {"faction": "allies", "type": "paratrooper", "name": "82 空降 a", "at": [4, 3], "general": "bradley"},
     {"faction": "allies", "type": "paratrooper", "name": "82 空降 b", "at": [5, 3]},
     {"faction": "allies", "type": "paratrooper", "name": "82 空降 c", "at": [6, 3]},

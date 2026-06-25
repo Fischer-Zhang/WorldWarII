@@ -23,6 +23,8 @@
     {"id": "axis",   "name": "德軍第 5 裝甲軍", "controller": "ai", "ai": "aggressive", "color": "#a86632"}
   ],
   "units": [
+    {"faction": "axis", "type": "heavy_tank", "name": "虎王", "at": [8, 1]},
+    {"faction": "allies", "type": "tank_destroyer", "name": "M18 地獄貓", "at": [5, 0]},
     {"faction": "allies", "type": "paratrooper", "name": "101 空降 a", "at": [5, 4], "general": "bradley"},
     {"faction": "allies", "type": "paratrooper", "name": "101 空降 b", "at": [6, 4]},
     {"faction": "allies", "type": "infantry",    "name": "101 空降 c", "at": [5, 5]},

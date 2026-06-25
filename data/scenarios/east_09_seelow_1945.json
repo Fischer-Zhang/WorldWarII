@@ -204,7 +204,7 @@
     },
     {
       "faction": "soviet",
-      "type": "medium_tank",
+      "type": "heavy_tank",
       "name": "IS-2",
       "at": [
         0,
@@ -242,7 +242,7 @@
     },
     {
       "faction": "soviet",
-      "type": "artillery",
+      "type": "rocket_artillery",
       "name": "喀秋莎",
       "at": [
         1,
@@ -296,7 +296,7 @@
     },
     {
       "faction": "axis",
-      "type": "medium_tank",
+      "type": "tank_destroyer",
       "name": "StuG III",
       "at": [
         10,

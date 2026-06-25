@@ -23,6 +23,8 @@
     {"id": "axis",   "name": "德軍第六軍團",   "controller": "ai", "ai": "aggressive", "color": "#a86632"}
   ],
   "units": [
+    {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [1, 0]},
+    {"faction": "soviet", "type": "rocket_artillery", "name": "喀秋莎", "at": [11, 0]},
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 1",  "at": [11, 1]},
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 2",  "at": [10, 4], "general": "chuikov"},
     {"faction": "soviet", "type": "infantry",  "name": "近衛步 3",  "at": [11, 7]},

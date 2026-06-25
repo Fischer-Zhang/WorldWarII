@@ -23,6 +23,7 @@
     {"id": "soviet", "name": "蘇軍殘部",     "controller": "ai", "ai": "hold", "color": "#3f7f4a"}
   ],
   "units": [
+    {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [12, 0]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",      "at": [12, 2], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III a",   "at": [13, 4]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III b",   "at": [12, 6]},
