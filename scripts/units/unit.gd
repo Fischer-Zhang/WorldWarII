@@ -15,6 +15,9 @@ const SHORT_LABELS := {
 	"artillery": "砲",
 	"paratrooper": "傘",
 	"engineer": "工",
+	"tank_destroyer": "殲",
+	"heavy_tank": "重",
+	"rocket_artillery": "箭",
 }
 
 const MAX_DIG_IN := 3

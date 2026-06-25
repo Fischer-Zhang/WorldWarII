@@ -829,6 +829,10 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		attacker.has_attacked = true
 		attacker.queue_redraw()
 
+	var splashed := _apply_splash(attacker, atk_def, defender.coord, defender)
+	if splashed > 0:
+		msg += " — 範圍波及 %d 單位" % splashed
+
 	# Garbage-collect dead units from our roster
 	units = units.filter(func(u): return u.is_alive())
 
@@ -846,6 +850,58 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
 	if winner != "":
 		_handle_game_over(winner)
+
+func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primary: Unit) -> int:
+	# Splash/AoE units (rocket artillery) also hit enemies within splash_radius of
+	# the primary target for a fraction of the direct damage, plus the same
+	# suppression / dig-in effects. Indirect, so splash targets never counter.
+	var radius := int(atk_def.get("splash_radius", 0))
+	if radius <= 0 or not attacker.is_alive():
+		return 0
+	var pct := int(atk_def.get("splash_damage_pct", CombatEffects.SPLASH_DAMAGE_PCT))
+	var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(attacker.coord))
+	var atk_general := DataLoader.get_general_def(attacker.general_id)
+	var atk_mods: Dictionary = CombatModifiers.for_unit(attacker, atk_general)
+	atk_mods.attack -= CombatEffects.attack_penalty(attacker.suppression)
+	var victims: Array[Unit] = []
+	for u in units:
+		var unit: Unit = u
+		if unit == primary or unit == attacker or not unit.is_alive():
+			continue
+		if unit.faction_id == attacker.faction_id:
+			continue
+		if HexCoord.distance(center, unit.coord) <= radius:
+			victims.append(unit)
+	var hit := 0
+	for unit in victims:
+		var def_def := DataLoader.get_unit_def(unit.type_id)
+		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(unit.coord))
+		var def_general := DataLoader.get_general_def(unit.general_id)
+		var def_mods: Dictionary = CombatModifiers.for_unit(unit, def_general)
+		var dist := HexCoord.distance(attacker.coord, unit.coord)
+		var result := CombatResolver.resolve(
+			atk_def, def_def, attacker.hp, unit.hp,
+			atk_terr, def_terr, dist, unit.dig_in_level,
+			atk_mods, def_mods, true,
+		)
+		var dmg := CombatEffects.splash_damage(result.damage_to_defender, pct)
+		if dmg <= 0:
+			continue
+		unit.take_damage(dmg)
+		unit.add_suppression(result.suppression_to_defender)
+		unit.reduce_dig_in(result.defender_dig_in_loss)
+		DamagePopup.spawn(hex_map, unit.position, dmg, Color(1.0, 0.6, 0.2))
+		hit += 1
+		if attacker.is_alive():
+			attacker.gain_xp(3 if not unit.is_alive() else 1)
+		if not unit.is_alive():
+			hex_map.unregister_unit(unit)
+			hex_map.place_wreckage(unit.coord, unit.faction_color)
+			unit.play_death_animation()
+			AudioBank.play("death")
+	if hit > 0:
+		units = units.filter(func(u): return u.is_alive())
+	return hit
 
 func _visible_attack_targets(attacker: Unit, atk_def: Dictionary) -> Array:
 	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
@@ -886,6 +942,8 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 		parts.append("偵察校射 +%d壓制" % spotter_bonus)
 	if result.defender_dig_in_loss > 0:
 		parts.append("構工 -%d" % result.defender_dig_in_loss)
+	if int(atk_def.get("splash_radius", 0)) > 0:
+		parts.append("範圍殺傷 %d%%" % int(atk_def.get("splash_damage_pct", CombatEffects.SPLASH_DAMAGE_PCT)))
 	var future_suppression := CombatEffects.apply_suppression(defender.suppression, total_suppression)
 	if future_suppression != defender.suppression:
 		parts.append("目標壓制 %d→%d" % [defender.suppression, future_suppression])

@@ -8,6 +8,7 @@ const MAX_SUPPRESSION := 5
 const RALLY_RECOVERY := 2
 const RALLY_COVER_BONUS := 1
 const SPOTTER_SUPPRESSION_BONUS := 1
+const SPLASH_DAMAGE_PCT := 50  # default falloff for splash targets when a unit omits splash_damage_pct
 
 const SUPPRESSION_BY_TYPE := {
 	"infantry": 1,
@@ -55,6 +56,13 @@ static func rally_recovery_for_terrain(terrain_def: Dictionary) -> int:
 
 static func rally_suppression(current: int, terrain_def: Dictionary) -> int:
 	return max(0, current - rally_recovery_for_terrain(terrain_def))
+
+static func splash_damage(full_damage: int, pct: int) -> int:
+	# Damage to a unit caught in a splash/AoE attack: a percentage of what a
+	# direct hit would have done, floored at 1 when a direct hit would land.
+	if full_damage <= 0:
+		return 0
+	return max(1, int(round(full_damage * pct / 100.0)))
 
 static func is_pinned(suppression: int) -> bool:
 	return suppression >= SUPPRESSION_PIN_THRESHOLD

@@ -96,5 +96,15 @@ func _init() -> void:
 			% [direct, lethal_spotted, no_damage_spotted]
 		)
 
+	# 10) Splash damage is a floored percentage of a direct hit; no base = no splash.
+	if CombatEffects.splash_damage(8, 50) == 4 \
+			and CombatEffects.splash_damage(1, 50) == 1 \
+			and CombatEffects.splash_damage(5, 100) == 5 \
+			and CombatEffects.splash_damage(0, 50) == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: splash_damage did not match expected falloff")
+
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

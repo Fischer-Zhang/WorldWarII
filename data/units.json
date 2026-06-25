@@ -29,7 +29,7 @@
     "hp": 6,
     "attack": 5,
     "defense": 1,
-    "range": 1,
+    "range": 2,
     "move": 1,
     "vision": 2,
     "vs_armor": 6,
@@ -65,7 +65,7 @@
     "hp": 8,
     "attack": 7,
     "defense": 1,
-    "range": 3,
+    "range": 4,
     "move": 2,
     "vision": 5,
     "vs_armor": 1,
@@ -104,5 +104,44 @@
       "duration": 1,
       "instant_dig_in": 1
     }
+  },
+  "tank_destroyer": {
+    "name_zh": "驅逐戰車",
+    "cost": 3,
+    "hp": 12,
+    "attack": 5,
+    "defense": 4,
+    "range": 1,
+    "move": 3,
+    "vision": 3,
+    "vs_armor": 7,
+    "armor": 3
+  },
+  "heavy_tank": {
+    "name_zh": "重戰車",
+    "cost": 4,
+    "hp": 22,
+    "attack": 9,
+    "defense": 5,
+    "range": 1,
+    "move": 3,
+    "vision": 4,
+    "vs_armor": 7,
+    "armor": 6
+  },
+  "rocket_artillery": {
+    "name_zh": "火箭砲",
+    "cost": 3,
+    "hp": 8,
+    "attack": 6,
+    "defense": 1,
+    "range": 3,
+    "move": 2,
+    "vision": 4,
+    "vs_armor": 0,
+    "armor": 0,
+    "indirect": true,
+    "splash_radius": 1,
+    "splash_damage_pct": 50
   }
 }

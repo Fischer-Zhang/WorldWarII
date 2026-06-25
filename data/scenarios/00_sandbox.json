@@ -21,14 +21,21 @@
     {"id": "allies", "name": "Allies", "controller": "ai", "ai": "defensive", "color": "#2f6fb0"}
   ],
   "units": [
-    {"faction": "axis", "type": "medium_tank",  "name": "Pz.IV",   "at": [0, 0]},
-    {"faction": "axis", "type": "light_tank",   "name": "Pz.II",   "at": [1, 1]},
-    {"faction": "axis", "type": "infantry",     "name": "擲彈兵",  "at": [0, 2]},
-    {"faction": "axis", "type": "artillery",    "name": "Wespe",   "at": [0, 3]},
-    {"faction": "allies", "type": "medium_tank","name": "M4 雪曼", "at": [9, 0]},
-    {"faction": "allies", "type": "infantry",   "name": "美 1 步", "at": [9, 2]},
-    {"faction": "allies", "type": "at_gun",     "name": "57 mm",   "at": [8, 3]},
-    {"faction": "allies", "type": "mg_team",    "name": "M1919",   "at": [9, 5]}
+    {"faction": "axis", "type": "medium_tank",     "name": "Pz.IV",      "at": [0, 0]},
+    {"faction": "axis", "type": "heavy_tank",       "name": "Tiger",      "at": [2, 0]},
+    {"faction": "axis", "type": "tank_destroyer",   "name": "Marder",     "at": [1, 0]},
+    {"faction": "axis", "type": "light_tank",       "name": "Pz.II",      "at": [1, 1]},
+    {"faction": "axis", "type": "infantry",         "name": "擲彈兵",     "at": [0, 2]},
+    {"faction": "axis", "type": "artillery",        "name": "Wespe",      "at": [0, 3]},
+    {"faction": "axis", "type": "rocket_artillery", "name": "Nebelwerfer","at": [0, 4]},
+    {"faction": "allies", "type": "medium_tank",    "name": "M4 雪曼",    "at": [9, 0]},
+    {"faction": "allies", "type": "heavy_tank",     "name": "IS-2",       "at": [7, 0]},
+    {"faction": "allies", "type": "tank_destroyer", "name": "M10",        "at": [8, 0]},
+    {"faction": "allies", "type": "infantry",       "name": "美 1 步",    "at": [9, 2]},
+    {"faction": "allies", "type": "infantry",       "name": "美 2 步",    "at": [9, 3]},
+    {"faction": "allies", "type": "rocket_artillery","name": "Katyusha",  "at": [9, 4]},
+    {"faction": "allies", "type": "at_gun",         "name": "57 mm",      "at": [8, 3]},
+    {"faction": "allies", "type": "mg_team",        "name": "M1919",      "at": [9, 5]}
   ],
   "victory": {
     "axis": {"type": "eliminate", "by_turn": 99},
