@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-118%2F118-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-141%2F141-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -19,7 +19,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 30 scenario JSON files: 29 playable scenarios plus `00_sandbox` |
 | Catalogs | 8 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 3 campaigns and a 19-region conquest map |
-| Tests | 118 headless GDScript checks plus static data/report validators |
+| Tests | 141 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -203,9 +203,9 @@ tools/validate.sh
 - `tools/validate_data.py` for unknown refs, bounds, duplicate coordinates, campaign references and conquest graph integrity.
 - Balance reports: unit matrix, scenario pressure report and tactical probe.
 - `git diff --check`.
-- 118 headless GDScript checks through `bash tests/run_all.sh`.
+- 141 headless GDScript checks through `bash tests/run_all.sh`.
 
-The UI smoke test loads these screens headlessly: main menu, scenario select, briefing, deployment, battle, campaign, lounge and conquest.
+The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest.
 
 Install the local pre-commit validation hook:
 
@@ -273,13 +273,14 @@ Done:
 - Single battle, campaign, lounge upgrades and conquest-to-battle flow.
 - Deployment setup and upgrade visibility.
 - Per-region conquest battlefields with terrain notes surfaced in briefing.
+- In-game how-to-play screen and battlefield legend (rules, combat formula, terrain/unit tables, status glossary).
 - Headless validators, balance reports and UI smoke coverage.
 
 Open:
 
 - Save/load mid-scenario.
 - Art replacement for tiles and units.
-- Better in-game tutorial/onboarding.
+- Guided, step-by-step first-battle tutorial (the static how-to-play reference now ships; an interactive guided battle does not yet).
 - Packaged release workflow for generated desktop/web builds.
 
 ## License

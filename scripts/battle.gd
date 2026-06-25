@@ -25,6 +25,7 @@ const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
+const HelpContent := preload("res://scripts/ui/help_content.gd")
 
 # Battle scene controller — owns the per-turn state machine.
 
@@ -53,6 +54,10 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
 @onready var turn_banner: Label = $UI/TurnBanner
 @onready var damage_preview_panel: Panel = $UI/DamagePreviewPanel
 @onready var damage_preview_content: RichTextLabel = $UI/DamagePreviewPanel/Content
+@onready var legend_button: Button = $UI/LegendButton
+@onready var legend_panel: Panel = $UI/LegendPanel
+@onready var legend_text: RichTextLabel = $UI/LegendPanel/LegendScroll/LegendText
+@onready var legend_close_button: Button = $UI/LegendPanel/LegendCloseButton
 
 const AI_STEP_DELAY := 0.6
 const MOVE_TWEEN_DURATION := 0.22
@@ -142,6 +147,10 @@ func _ready() -> void:
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	rally_button.pressed.connect(_on_rally_pressed)
 	skill_button.pressed.connect(_on_skill_pressed)
+	legend_button.pressed.connect(_toggle_legend)
+	legend_close_button.pressed.connect(_close_legend)
+	legend_text.text = HelpContent.legend_bbcode()
+	legend_panel.visible = false
 	result_panel.visible = false
 	_apply_player_objective_pulse()
 	_recompute_visibility()
@@ -152,6 +161,12 @@ func _ready() -> void:
 
 	info_label.text = "%s — 點我方單位選取" % scenario.get("title", scenario_id)
 	_update_status()
+
+func _toggle_legend() -> void:
+	legend_panel.visible = not legend_panel.visible
+
+func _close_legend() -> void:
+	legend_panel.visible = false
 
 func _apply_deployment_overrides(scenario_id: String) -> void:
 	var overrides := GameState.get_deployment_overrides(scenario_id)

@@ -156,6 +156,13 @@ offset_right = 1260.0
 offset_bottom = 710.0
 text = "結束回合"
 
+[node name="LegendButton" type="Button" parent="UI"]
+offset_left = 1168.0
+offset_top = 10.0
+offset_right = 1268.0
+offset_bottom = 42.0
+text = "圖例"
+
 [node name="ResultPanel" type="Panel" parent="UI"]
 visible = false
 offset_left = 290.0
@@ -207,3 +214,41 @@ offset_top = 540.0
 offset_right = 484.0
 offset_bottom = 584.0
 text = "下一場作戰"
+
+[node name="LegendPanel" type="Panel" parent="UI"]
+visible = false
+offset_left = 340.0
+offset_top = 70.0
+offset_right = 940.0
+offset_bottom = 650.0
+modulate = Color(1, 1, 1, 0.97)
+
+[node name="LegendTitle" type="Label" parent="UI/LegendPanel"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 584.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 22
+text = "圖例與說明"
+
+[node name="LegendScroll" type="ScrollContainer" parent="UI/LegendPanel"]
+offset_left = 16.0
+offset_top = 52.0
+offset_right = 584.0
+offset_bottom = 520.0
+
+[node name="LegendText" type="RichTextLabel" parent="UI/LegendPanel/LegendScroll"]
+custom_minimum_size = Vector2(560, 460)
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 15
+text = ""
+
+[node name="LegendCloseButton" type="Button" parent="UI/LegendPanel"]
+offset_left = 16.0
+offset_top = 530.0
+offset_right = 160.0
+offset_bottom = 568.0
+text = "關閉"

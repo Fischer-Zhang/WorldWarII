@@ -4,6 +4,7 @@ extends Control
 @onready var single_battle_button: Button = $VBox/SingleBattleButton
 @onready var conquest_button: Button = $VBox/ConquestButton
 @onready var lounge_button: Button = $VBox/LoungeButton
+@onready var help_button: Button = $VBox/HelpButton
 @onready var quit_button: Button = $VBox/QuitButton
 
 func _ready() -> void:
@@ -11,6 +12,7 @@ func _ready() -> void:
 	single_battle_button.pressed.connect(_on_single_battle_pressed)
 	conquest_button.pressed.connect(_on_conquest_pressed)
 	lounge_button.pressed.connect(_on_lounge_pressed)
+	help_button.pressed.connect(_on_help_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	campaign_button.grab_focus()
 
@@ -34,6 +36,9 @@ func _on_lounge_pressed() -> void:
 	GameState.clear_conquest_battle()
 	GameState.current_campaign_id = ""
 	get_tree().change_scene_to_file("res://scenes/lounge.tscn")
+
+func _on_help_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/help.tscn")
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

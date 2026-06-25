@@ -7,7 +7,15 @@ const SCENE_CASES := [
 		"scenario_id": "",
 		"campaign_mode": false,
 		"conquest_mode": false,
-		"required": ["VBox", "VBox/SingleBattleButton", "VBox/CampaignButton", "VBox/ConquestButton"],
+		"required": ["VBox", "VBox/SingleBattleButton", "VBox/CampaignButton", "VBox/ConquestButton", "VBox/HelpButton"],
+	},
+	{
+		"name": "help",
+		"path": "res://scenes/help.tscn",
+		"scenario_id": "",
+		"campaign_mode": false,
+		"conquest_mode": false,
+		"required": ["Margin/VBox/Title", "Margin/VBox/HelpScroll/HelpText", "Margin/VBox/BackButton"],
 	},
 	{
 		"name": "scenario_select",
@@ -39,7 +47,7 @@ const SCENE_CASES := [
 		"scenario_id": "01_sedan_1940",
 		"campaign_mode": false,
 		"conquest_mode": false,
-		"required": ["UI/InfoPanel", "UI/EndTurnButton", "UI/ResultPanel"],
+		"required": ["UI/InfoPanel", "UI/EndTurnButton", "UI/ResultPanel", "UI/LegendButton", "UI/LegendPanel/LegendScroll/LegendText"],
 	},
 	{
 		"name": "campaign",
