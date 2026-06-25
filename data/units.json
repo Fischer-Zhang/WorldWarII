@@ -84,7 +84,15 @@
     "vs_armor": 2,
     "armor": 0,
     "airdrop": true,
-    "requires_tech": {"id": "infantry_doctrine", "level": 2}
+    "requires_tech": {"id": "infantry_doctrine", "level": 2},
+    "skill": {
+      "id": "airdrop",
+      "name_zh": "空降",
+      "description_zh": "一次性:跳轉到 5 格內任一空地,無視地形與管制區;落地即結束本回合(需在尚未移動時使用)。",
+      "cooldown": 99,
+      "duration": 0,
+      "airdrop_range": 5
+    }
   },
   "engineer": {
     "name_zh": "工兵",

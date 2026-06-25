@@ -31,7 +31,7 @@ const HelpContent := preload("res://scripts/ui/help_content.gd")
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"
 
-enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER }
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
@@ -71,6 +71,7 @@ var phase: Phase = Phase.IDLE
 var selected_unit: Unit = null
 var movement_range: Dictionary = {}
 var attack_targets: Array = []
+var airdrop_targets: Array = []  # valid drop hexes while phase == AIRDROP_TARGET
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var player_faction_id: String = ""
@@ -595,6 +596,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			selected_unit.has_attacked = true
 			selected_unit.queue_redraw()
 			_deselect()
+		Phase.AIRDROP_TARGET:
+			if clicked_unit == null and coord in airdrop_targets:
+				_do_airdrop(selected_unit, coord)
+			else:
+				_cancel_airdrop()
 
 func _select_unit(unit: Unit) -> void:
 	if selected_unit != null and selected_unit != unit:
@@ -669,6 +675,10 @@ func _refresh_skill_button(unit: Unit) -> void:
 	if skill.is_empty():
 		skill_button.visible = false
 		return
+	# Airdrop is a relocation, so it replaces the move — only offer it before moving.
+	if skill.has("airdrop_range") and unit.has_moved:
+		skill_button.visible = false
+		return
 	var skill_id := String(skill.get("id", ""))
 	var ready: bool = unit.skill_ready(skill_id, turn_manager.turn_number)
 	if ready:
@@ -690,6 +700,10 @@ func _on_skill_pressed() -> void:
 		return
 	var skill_id := String(skill.get("id", ""))
 	if not selected_unit.skill_ready(skill_id, turn_manager.turn_number):
+		return
+	# Airdrop needs a target hex — hand off to the targeting sub-phase.
+	if skill.has("airdrop_range"):
+		_begin_airdrop(selected_unit, skill)
 		return
 	# Special instant effects (e.g. engineer's Fortify) are applied
 	# immediately, in addition to recording the active_effect entry so the
@@ -727,6 +741,56 @@ func _on_skill_pressed() -> void:
 	selected_unit.queue_redraw()
 	_deselect()
 	_update_status()
+
+func _begin_airdrop(unit: Unit, skill: Dictionary) -> void:
+	# Enter the drop-target sub-phase: highlight every open hex within range and
+	# wait for the player to pick a landing spot (or click elsewhere to cancel).
+	if unit.has_moved:
+		return
+	var radius := int(skill.get("airdrop_range", 5))
+	airdrop_targets = []
+	for h in HexCoord.range_within(unit.coord, radius):
+		if h != unit.coord and _is_open_drop_hex(h):
+			airdrop_targets.append(h)
+	if airdrop_targets.is_empty():
+		info_label.text = "%s 周圍無可用空降落點" % unit.display_name
+		return
+	phase = Phase.AIRDROP_TARGET
+	overwatch_button.visible = false
+	rally_button.visible = false
+	skill_button.visible = false
+	damage_preview_panel.visible = false
+	hex_map.show_movement_range(airdrop_targets)
+	hex_map.highlight_coord(unit.coord)
+	info_label.text = "空降:點藍色落點(無視地形/管制),或點別處取消"
+
+func _is_open_drop_hex(coord: Vector2i) -> bool:
+	var terrain := hex_map.terrain_at(coord)
+	if terrain == "" or terrain == "sea":
+		return false
+	return hex_map.unit_at(coord) == null
+
+func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
+	var skill := _resolve_active_skill(unit)
+	hex_map.move_unit(unit, dest, 0.25)  # move_to sets coord + has_moved + animates
+	unit.use_skill(skill, turn_manager.turn_number)  # starts the (battle-long) cooldown
+	unit.has_attacked = true  # lands and is spent for the turn
+	unit.queue_redraw()
+	action_log.record_skill(unit, String(skill.get("id", "airdrop")), turn_manager.turn_number)
+	AudioBank.play("select")
+	airdrop_targets.clear()
+	hex_map.clear_movement_range()
+	info_label.text = "★ %s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y]
+	_recompute_visibility()
+	_deselect()
+	_update_status()
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	if winner != "":
+		_handle_game_over(winner)
+
+func _cancel_airdrop() -> void:
+	airdrop_targets.clear()
+	_enter_attack_phase()
 
 func _on_overwatch_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
@@ -985,6 +1049,7 @@ func _deselect() -> void:
 	selected_unit = null
 	movement_range.clear()
 	attack_targets.clear()
+	airdrop_targets.clear()
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
