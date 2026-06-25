@@ -589,7 +589,7 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			_deselect()
 			_show_terrain_info(coord, terrain_id, clicked_unit)
 		Phase.ATTACK_PHASE:
-			if clicked_unit != null and clicked_unit in attack_targets:
+			if clicked_unit != null and clicked_unit in attack_targets and not selected_unit.has_attacked:
 				_resolve_attack(selected_unit, clicked_unit)
 				return
 			# Click anywhere else → wait (skip attack)
@@ -629,6 +629,19 @@ func _select_unit(unit: Unit) -> void:
 func _enter_attack_phase() -> void:
 	phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
+	# One action per turn (attack/overwatch/rally/skill all set has_attacked). A
+	# ranged unit can fire before moving — has_attacked true, has_moved false —
+	# which leaves it re-selectable so it can still move. But once it has acted it
+	# must not get a second action, even after that follow-up move.
+	if selected_unit.has_attacked:
+		attack_targets = []
+		hex_map.show_attack_targets([])
+		overwatch_button.visible = false
+		rally_button.visible = false
+		skill_button.visible = false
+		damage_preview_panel.visible = false
+		info_label.text = "%s 本回合已行動 — 點空地結束" % selected_unit.display_name
+		return
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
 	attack_targets = _visible_attack_targets(selected_unit, atk_def)
 	hex_map.show_attack_targets(attack_targets.map(func(u): return u.coord))
