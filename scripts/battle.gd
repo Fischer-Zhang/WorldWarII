@@ -592,10 +592,16 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			if clicked_unit != null and clicked_unit in attack_targets and not selected_unit.has_attacked:
 				_resolve_attack(selected_unit, clicked_unit)
 				return
-			# Click anywhere else → wait (skip attack)
-			selected_unit.has_attacked = true
-			selected_unit.queue_redraw()
-			_deselect()
+			# Switch to another ready friendly unit; otherwise just back out.
+			# Backing out must NOT spend the action — only a real action (attack/
+			# overwatch/rally/skill) ends the turn — so inspecting attack options or
+			# switching units never wastes a turn or locks a unit's movement.
+			if clicked_unit != null and clicked_unit != selected_unit \
+					and clicked_unit.faction_id == current_faction \
+					and not clicked_unit.is_done_for_turn():
+				_select_unit(clicked_unit)
+			else:
+				_deselect()
 		Phase.AIRDROP_TARGET:
 			if clicked_unit == null and coord in airdrop_targets:
 				_do_airdrop(selected_unit, coord)

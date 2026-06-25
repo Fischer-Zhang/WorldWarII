@@ -91,6 +91,23 @@ func _run() -> void:
 			printerr("FAIL: a unit that has fired should be done (no move after firing)")
 			fail_count += 1
 
+		# Backing out of the attack menu (clicking empty) must NOT spend the action.
+		player_unit.has_moved = false
+		player_unit.has_attacked = false
+		battle.selected_unit = player_unit
+		battle._enter_attack_phase()
+		var empty_hex := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) == null:
+				empty_hex = c
+				break
+		battle._on_hex_clicked(empty_hex, battle.hex_map.terrain_at(empty_hex))
+		if not player_unit.has_attacked:
+			pass_count += 1
+		else:
+			printerr("FAIL: backing out of the attack menu spent the unit's action")
+			fail_count += 1
+
 	battle.queue_free()
 	await process_frame
 	print("Battle action economy tests: %d pass, %d fail" % [pass_count, fail_count])
