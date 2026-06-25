@@ -242,6 +242,7 @@ func _rebuild_recruit_panel() -> void:
 	header.pressed.connect(_on_recruit_header_pressed)
 	recruit_list.add_child(header)
 	if _recruit_expanded:
+		var tech_levels: Dictionary = state.get("lounge", {}).get("tech_levels", {})
 		var type_ids := DataLoader.units.keys()
 		type_ids.sort()
 		for tid in type_ids:
@@ -249,10 +250,18 @@ func _rebuild_recruit_panel() -> void:
 			var def: Dictionary = DataLoader.units[type_id]
 			var cost := ConquestRecruit.unit_cost(DataLoader.units, type_id)
 			var btn := Button.new()
-			btn.text = "徵 %s (%d)" % [String(def.get("name_zh", type_id)), cost]
 			btn.add_theme_font_size_override("font_size", 13)
-			btn.disabled = not ConquestRecruit.can_recruit(region, DataLoader.units, type_id)
-			btn.pressed.connect(_on_recruit_pressed.bind(type_id))
+			if not ConquestRecruit.is_unlocked(DataLoader.units, type_id, tech_levels):
+				# Locked behind a tech track — show what's needed, leave disabled.
+				btn.text = "%s — %s" % [
+					String(def.get("name_zh", type_id)),
+					ConquestRecruit.requirement_text(DataLoader.units, type_id, DataLoader.tech_tree),
+				]
+				btn.disabled = true
+			else:
+				btn.text = "徵 %s (%d)" % [String(def.get("name_zh", type_id)), cost]
+				btn.disabled = not ConquestRecruit.can_recruit(region, DataLoader.units, type_id, tech_levels)
+				btn.pressed.connect(_on_recruit_pressed.bind(type_id))
 			recruit_list.add_child(btn)
 	var garrison: Array = region.get("garrison", [])
 	var ghdr := Label.new()
@@ -303,7 +312,8 @@ func _on_recruit_pressed(type_id: String) -> void:
 	if region.is_empty():
 		return
 	var next_id := int(conquest.get("next_unit_id", 1))
-	var result := ConquestRecruit.recruit(region, DataLoader.units, type_id, next_id)
+	var tech_levels: Dictionary = state.get("lounge", {}).get("tech_levels", {})
+	var result := ConquestRecruit.recruit(region, DataLoader.units, type_id, next_id, tech_levels)
 	if bool(result.get("ok", false)):
 		conquest["next_unit_id"] = next_id + 1
 		CampaignManager.save_state(state)

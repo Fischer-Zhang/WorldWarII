@@ -36,6 +36,7 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
     terrains = load_json(DATA / "terrains.json")
     generals = load_json(DATA / "generals.json")
     campaigns = load_json(DATA / "campaigns.json")
+    tech_tree = load_json(DATA / "tech_tree.json")
 
     for unit_id, unit in units.items():
         path = DATA / "units.json"
@@ -49,6 +50,16 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
                 fail(errors, path, f"unit {unit_id!r} has negative {key!r}")
         if int(unit.get("hp", 0)) <= 0:
             fail(errors, path, f"unit {unit_id!r} hp must be positive")
+        req = unit.get("requires_tech")
+        if req is not None:
+            if not isinstance(req, dict) or "id" not in req or "level" not in req:
+                fail(errors, path, f"unit {unit_id!r} requires_tech must be an object with id and level")
+            elif str(req["id"]) not in tech_tree:
+                fail(errors, path, f"unit {unit_id!r} requires_tech references unknown tech {req['id']!r}")
+            else:
+                max_level = len(tech_tree[str(req["id"])].get("levels", []))
+                if not (1 <= int(req["level"]) <= max_level):
+                    fail(errors, path, f"unit {unit_id!r} requires_tech level {req['level']} out of range 1..{max_level}")
 
     for terrain_id, terrain in terrains.items():
         path = DATA / "terrains.json"

@@ -83,7 +83,8 @@
     "vision": 4,
     "vs_armor": 2,
     "armor": 0,
-    "airdrop": true
+    "airdrop": true,
+    "requires_tech": {"id": "infantry_doctrine", "level": 2}
   },
   "engineer": {
     "name_zh": "工兵",
@@ -115,7 +116,8 @@
     "move": 3,
     "vision": 3,
     "vs_armor": 7,
-    "armor": 3
+    "armor": 3,
+    "requires_tech": {"id": "armored_logistics", "level": 2}
   },
   "heavy_tank": {
     "name_zh": "重戰車",
@@ -127,7 +129,8 @@
     "move": 3,
     "vision": 4,
     "vs_armor": 7,
-    "armor": 6
+    "armor": 6,
+    "requires_tech": {"id": "armored_logistics", "level": 3}
   },
   "rocket_artillery": {
     "name_zh": "火箭砲",
@@ -142,6 +145,7 @@
     "armor": 0,
     "indirect": true,
     "splash_radius": 1,
-    "splash_damage_pct": 50
+    "splash_damage_pct": 50,
+    "requires_tech": {"id": "artillery_coordination", "level": 2}
   }
 }

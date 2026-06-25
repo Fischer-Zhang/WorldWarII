@@ -9,6 +9,7 @@ const CATALOG := {
 	"infantry": {"name_zh": "步兵", "cost": 1},
 	"at_gun": {"name_zh": "反戰車砲", "cost": 2},
 	"medium_tank": {"name_zh": "中戰車", "cost": 3},
+	"heavy_tank": {"name_zh": "重戰車", "cost": 4, "requires_tech": {"id": "armored_logistics", "level": 3}},
 }
 
 func _init() -> void:
@@ -25,6 +26,8 @@ func _init() -> void:
 	if _test_disband_refunds_and_removes(): pass_count += 1
 	else: fail_count += 1
 	if _test_generate_force_tiers(): pass_count += 1
+	else: fail_count += 1
+	if _test_tech_gating(): pass_count += 1
 	else: fail_count += 1
 	print("ConquestRecruit tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
@@ -92,6 +95,36 @@ func _test_disband_refunds_and_removes() -> bool:
 		return false
 	if not region.get("garrison", []).is_empty():
 		printerr("FAIL: disband should remove the unit from garrison")
+		return false
+	return true
+
+func _test_tech_gating() -> bool:
+	var region := {"strength": 99, "garrison": []}
+	# Basic units are unlocked with no tech.
+	if not ConquestRecruit.is_unlocked(CATALOG, "infantry", {}):
+		printerr("FAIL: basic unit should be unlocked with no tech")
+		return false
+	# Advanced unit is locked without the required tech level, despite ample strength.
+	if ConquestRecruit.is_unlocked(CATALOG, "heavy_tank", {}):
+		printerr("FAIL: heavy_tank should be locked with no tech")
+		return false
+	if ConquestRecruit.can_recruit(region, CATALOG, "heavy_tank", {}):
+		printerr("FAIL: can_recruit should reject a locked unit despite ample strength")
+		return false
+	var locked := ConquestRecruit.recruit(region, CATALOG, "heavy_tank", 1, {})
+	if bool(locked.get("ok", false)) or not region.get("garrison", []).is_empty():
+		printerr("FAIL: recruit should reject a locked unit and not mutate")
+		return false
+	# Below the required level it stays locked; at the level it unlocks.
+	if ConquestRecruit.is_unlocked(CATALOG, "heavy_tank", {"armored_logistics": 2}):
+		printerr("FAIL: heavy_tank should stay locked below required level")
+		return false
+	if not ConquestRecruit.is_unlocked(CATALOG, "heavy_tank", {"armored_logistics": 3}):
+		printerr("FAIL: heavy_tank should unlock at the required level")
+		return false
+	var ok := ConquestRecruit.recruit(region, CATALOG, "heavy_tank", 1, {"armored_logistics": 3})
+	if not bool(ok.get("ok", false)) or region.get("garrison", []).size() != 1:
+		printerr("FAIL: recruit should succeed once the required tech is reached")
 		return false
 	return true
 

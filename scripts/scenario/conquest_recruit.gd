@@ -18,20 +18,45 @@ static func unit_cost(units_catalog: Dictionary, type_id: String) -> int:
 	var def: Dictionary = units_catalog.get(type_id, {})
 	return max(1, int(def.get("cost", DEFAULT_COST)))
 
+# Tech gating: advanced unit types carry a `requires_tech: {id, level}` and can
+# only be recruited once the player's tech track has reached that level.
+# `tech_levels` is the {tech_id: level} map (LoungeManager lounge state). Basic
+# units have no requirement and are always unlocked.
+static func unit_requires_tech(units_catalog: Dictionary, type_id: String) -> Dictionary:
+	return units_catalog.get(type_id, {}).get("requires_tech", {})
+
+static func is_unlocked(units_catalog: Dictionary, type_id: String, tech_levels: Dictionary) -> bool:
+	var req: Dictionary = unit_requires_tech(units_catalog, type_id)
+	if req.is_empty():
+		return true
+	return int(tech_levels.get(String(req.get("id", "")), 0)) >= int(req.get("level", 0))
+
+static func requirement_text(units_catalog: Dictionary, type_id: String, tech_catalog: Dictionary) -> String:
+	var req: Dictionary = unit_requires_tech(units_catalog, type_id)
+	if req.is_empty():
+		return ""
+	var tid := String(req.get("id", ""))
+	var tname := String(tech_catalog.get(tid, {}).get("name_zh", tid))
+	return "需 %s Lv.%d" % [tname, int(req.get("level", 0))]
+
 static func garrison_of(region: Dictionary) -> Array:
 	return region.get("garrison", [])
 
-static func can_recruit(region: Dictionary, units_catalog: Dictionary, type_id: String) -> bool:
+static func can_recruit(region: Dictionary, units_catalog: Dictionary, type_id: String, tech_levels: Dictionary = {}) -> bool:
 	if not units_catalog.has(type_id):
+		return false
+	if not is_unlocked(units_catalog, type_id, tech_levels):
 		return false
 	if garrison_of(region).size() >= GARRISON_CAP:
 		return false
 	return int(region.get("strength", 0)) >= unit_cost(units_catalog, type_id)
 
-static func recruit(region: Dictionary, units_catalog: Dictionary, type_id: String, next_id: int) -> Dictionary:
+static func recruit(region: Dictionary, units_catalog: Dictionary, type_id: String, next_id: int, tech_levels: Dictionary = {}) -> Dictionary:
 	# Mutates region (strength -, garrison +). Returns { ok, message, record? }.
 	# `next_id` is a caller-owned monotonic id (conquest["next_unit_id"]).
-	if not can_recruit(region, units_catalog, type_id):
+	if not can_recruit(region, units_catalog, type_id, tech_levels):
+		if not is_unlocked(units_catalog, type_id, tech_levels):
+			return {"ok": false, "message": "科技未達標,尚無法徵召此兵種。"}
 		return {"ok": false, "message": "兵力不足或編制已滿,無法徵召。"}
 	var cost := unit_cost(units_catalog, type_id)
 	var def: Dictionary = units_catalog.get(type_id, {})
