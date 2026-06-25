@@ -2,7 +2,7 @@
 # Runs all GDScript headless tests. Requires `godot` (4.2+) on PATH.
 # Exits non-zero if any test reports a failure.
 
-set -eu
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"

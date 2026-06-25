@@ -55,7 +55,7 @@ This repository is currently validated in the following environment:
 
 Recommended setup on any device:
 
-1. Install Godot 4.2.2 stable or newer Godot 4.x. CI uses 4.2.2, so use that version when you need exact parity.
+1. Install Godot **4.2.2 stable** — this is the version the project is pinned to (CI and `validate_fast.sh` both expect it). Do **not** open the project in a newer Godot 4.x editor on a shared device: it silently rewrites `project.godot` (e.g. the `config/features` tag) and can introduce cross-device-breaking changes such as the native Wayland backend.
 2. Make sure the Godot executable is available as `godot` on `PATH`.
 3. Install Python 3.10+.
 4. Use Git with LF line endings for this repo. `.gitattributes` keeps project text files and shell scripts normalized.
@@ -81,7 +81,7 @@ Key settings in `project.godot`:
 | Camera input | WASD actions mapped as `ui_camera_pan_*` |
 | CI engine | GitHub Actions downloads Godot `4.2.2-stable` |
 
-`project.godot` currently contains a Godot feature tag for `4.6`, which can be written by newer editors. The repository still validates with Godot 4.2.2 stable locally and in CI; use 4.2.2 when you need exact cross-device parity, and avoid committing unrelated editor rewrites from newer Godot versions.
+The project is pinned to Godot 4.2.2: `config/features` is `PackedStringArray("4.2", "GL Compatibility")`, and `tools/validate_fast.sh` fails if that tag drifts. If you open the project in a newer Godot editor it will rewrite this tag (and may rewrite other settings) — revert those edits before committing so every device runs the same engine.
 
 ## Running Locally
 
@@ -107,6 +107,28 @@ Useful controls:
 | End turn | Bottom-right button |
 | Camera | WASD, mouse wheel, middle-drag |
 | Screenshot | F12 |
+
+### Troubleshooting: only a taskbar icon, no window (native Linux)
+
+If launching shows a taskbar icon but the window never appears, the project config is not the cause (no script touches the window; `[display]` sets only size + stretch). It is almost always the local engine/driver/display-server. Diagnose from a terminal so you can read stderr:
+
+```bash
+# Run from a terminal and capture the exit code — never silently double-click.
+godot --path . --verbose ; echo "exit=$?"          # or, for an exported build:
+./WorldWarII.x86_64.console --verbose ; echo "exit=$?"
+# exit 139 (SIGSEGV) / 134 (SIGABRT) → GL context failed to create
+# exit 0 / still running but invisible → window opened off-screen
+
+echo "session=$XDG_SESSION_TYPE display=$DISPLAY wayland=$WAYLAND_DISPLAY"
+
+# Universal first fix — force the validated X11 + OpenGL path.
+# Pass all three flags together: --rendering-driver alone can flip the method to forward_plus.
+godot --path . --display-driver x11 --rendering-driver opengl3 --rendering-method gl_compatibility
+```
+
+- Window appears only with `--display-driver x11` → it was the native Wayland backend (Godot 4.3+). Keep X11, or set GNOME scaling to an integer multiple.
+- Crash with `OpenGL`/`GLX`/`FBConfig` in the log → driver issue: `sudo apt install --reinstall mesa-utils libgl1-mesa-dri libglx-mesa0`, then check `glxinfo | grep -E 'OpenGL version|direct rendering'` (need ≥ 3.3, direct: Yes). Dual-GPU laptops: prefix `DRI_PRIME=1` (Mesa) or `__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia`.
+- Process alive but invisible → off-screen window: `wmctrl -lG` to find it, `wmctrl -r WorldWarII -e 0,50,50,1280,720` to pull it back.
 
 ## Cross-Device Workflow
 
