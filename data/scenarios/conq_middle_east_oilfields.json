@@ -3,144 +3,25 @@
   "title": "中東油田爭奪",
   "briefing": "兩河之間的沙漠油田。河流橫亙戰場,油井城鎮是僅有的掩蔽與目標;誰握住油田與渡橋,誰就掌握補給。",
   "map": {
-    "width": 13,
-    "height": 9,
+    "width": 24,
+    "height": 16,
     "tiles": [
-      [
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "desert",
-        "mountain",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "mountain",
-        "desert",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "town",
-        "desert",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "desert",
-        "town",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert"
-      ],
-      [
-        "road",
-        "road",
-        "road",
-        "road",
-        "road",
-        "desert",
-        "road",
-        "desert",
-        "road",
-        "road",
-        "road",
-        "road",
-        "road"
-      ],
-      [
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "town",
-        "desert",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "desert",
-        "town",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "desert",
-        "mountain",
-        "desert",
-        "desert",
-        "river",
-        "desert",
-        "desert",
-        "mountain",
-        "desert",
-        "desert",
-        "desert"
-      ],
-      [
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert",
-        "desert"
-      ]
+      ["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "town", "desert", "desert", "desert", "road", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["desert", "desert", "desert", "mountain", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "river", "desert", "desert", "mountain", "desert", "desert", "desert"],
+      ["desert", "desert", "town", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "mountain", "desert", "river", "desert", "desert", "desert", "town", "desert", "desert"],
+      ["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "road", "desert", "road", "river", "desert", "desert", "town", "road", "desert", "river", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["road", "desert", "desert", "desert", "town", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "town", "river", "desert", "desert", "desert", "desert", "mountain", "desert", "desert", "desert", "desert", "desert"],
+      ["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "town", "desert", "desert", "desert", "road", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["road", "desert", "desert", "desert", "town", "road", "desert", "desert", "desert", "mountain", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "road", "desert", "desert", "desert", "road"],
+      ["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "mountain", "desert", "desert", "desert", "desert", "desert", "mountain", "desert", "desert", "desert", "road", "river", "desert", "desert", "desert", "desert"],
+      ["desert", "desert", "desert", "town", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["desert", "desert", "river", "river", "desert", "desert", "road", "desert", "road", "town", "desert", "desert", "desert", "road", "town", "road", "desert", "desert", "desert", "desert", "road", "desert", "desert", "desert"],
+      ["desert", "desert", "town", "desert", "desert", "mountain", "desert", "road", "river", "river", "desert", "desert", "road", "desert", "desert", "road", "town", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["road", "road", "road", "road", "road", "desert", "desert", "desert", "desert", "desert", "desert", "road", "river", "road", "desert", "desert", "desert", "road", "desert", "road", "road", "road", "road", "road"],
+      ["desert", "desert", "desert", "desert", "desert", "desert", "road", "desert", "desert", "mountain", "road", "desert", "desert", "desert", "desert", "desert", "desert", "river", "desert", "desert", "desert", "desert", "desert", "desert"],
+      ["desert", "desert", "town", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "road", "desert", "desert", "desert", "desert", "desert", "desert", "river", "desert", "desert", "desert", "town", "desert", "desert"],
+      ["desert", "desert", "desert", "mountain", "desert", "desert", "road", "desert", "desert", "river", "road", "desert", "desert", "desert", "desert", "desert", "desert", "river", "desert", "desert", "mountain", "desert", "desert", "desert"],
+      ["desert", "desert", "desert", "desert", "desert", "desert", "river", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"]
     ]
   },
   "factions": [
@@ -159,114 +40,18 @@
     }
   ],
   "units": [
-    {
-      "faction": "allies",
-      "type": "medium_tank",
-      "name": "medium_tank 1",
-      "at": [
-        1,
-        2
-      ]
-    },
-    {
-      "faction": "allies",
-      "type": "light_tank",
-      "name": "light_tank 2",
-      "at": [
-        1,
-        4
-      ]
-    },
-    {
-      "faction": "allies",
-      "type": "infantry",
-      "name": "infantry 3",
-      "at": [
-        2,
-        3
-      ]
-    },
-    {
-      "faction": "allies",
-      "type": "at_gun",
-      "name": "at_gun 4",
-      "at": [
-        2,
-        5
-      ]
-    },
-    {
-      "faction": "allies",
-      "type": "artillery",
-      "name": "artillery 5",
-      "at": [
-        1,
-        6
-      ]
-    },
-    {
-      "faction": "allies",
-      "type": "infantry",
-      "name": "infantry 6",
-      "at": [
-        2,
-        6
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "medium_tank",
-      "name": "medium_tank 1",
-      "at": [
-        11,
-        2
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "at_gun",
-      "name": "at_gun 2",
-      "at": [
-        11,
-        4
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "infantry",
-      "name": "infantry 3",
-      "at": [
-        10,
-        3
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "infantry",
-      "name": "infantry 4",
-      "at": [
-        11,
-        5
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "artillery",
-      "name": "artillery 5",
-      "at": [
-        11,
-        6
-      ]
-    },
-    {
-      "faction": "axis",
-      "type": "mg_team",
-      "name": "mg_team 6",
-      "at": [
-        10,
-        6
-      ]
-    }
+    {"faction": "allies", "type": "medium_tank", "name": "medium_tank 1", "at": [1, 2]},
+    {"faction": "allies", "type": "light_tank", "name": "light_tank 2", "at": [1, 11]},
+    {"faction": "allies", "type": "infantry", "name": "infantry 3", "at": [2, 3]},
+    {"faction": "allies", "type": "at_gun", "name": "at_gun 4", "at": [2, 12]},
+    {"faction": "allies", "type": "artillery", "name": "artillery 5", "at": [1, 13]},
+    {"faction": "allies", "type": "infantry", "name": "infantry 6", "at": [2, 13]},
+    {"faction": "axis", "type": "medium_tank", "name": "medium_tank 1", "at": [22, 2]},
+    {"faction": "axis", "type": "at_gun", "name": "at_gun 2", "at": [22, 11]},
+    {"faction": "axis", "type": "infantry", "name": "infantry 3", "at": [21, 3]},
+    {"faction": "axis", "type": "infantry", "name": "infantry 4", "at": [22, 12]},
+    {"faction": "axis", "type": "artillery", "name": "artillery 5", "at": [22, 13]},
+    {"faction": "axis", "type": "mg_team", "name": "mg_team 6", "at": [21, 13]}
   ],
   "victory": {
     "allies": {

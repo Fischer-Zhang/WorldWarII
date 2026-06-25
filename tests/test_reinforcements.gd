@@ -67,6 +67,10 @@ func _find_unit(units: Array, display_name: String):
 			return unit
 	return null
 
+func _offset_to_axial(at: Array) -> Vector2i:
+	# Mirrors StubUnit: scenario offset (col, row) -> battlefield axial coord.
+	return Vector2i(int(at[0]) - (int(at[1]) >> 1), int(at[1]))
+
 func _init() -> void:
 	var pass_count := 0
 	var fail_count := 0
@@ -97,11 +101,21 @@ func _init() -> void:
 
 	var sherman = _find_unit(units, "M4 雪曼 a")
 	var infantry = _find_unit(units, "第 3 軍援")
-	if sherman != null and sherman.type_id == "medium_tank" and sherman.coord == Vector2i(1, 9) and infantry != null and infantry.coord == Vector2i(2, 9):
+	# Expected spawn hexes are derived from the scenario, so map edits can't desync them.
+	var reinf: Array = scenario.get("reinforcements", [])
+	var exp_sherman := Vector2i.ZERO
+	var exp_infantry := Vector2i.ZERO
+	for r in reinf:
+		if String(r.get("name", "")) == "M4 雪曼 a":
+			exp_sherman = _offset_to_axial(r.get("at", [0, 0]))
+		elif String(r.get("name", "")) == "第 3 軍援":
+			exp_infantry = _offset_to_axial(r.get("at", [0, 0]))
+	if sherman != null and sherman.type_id == "medium_tank" and sherman.coord == exp_sherman \
+			and infantry != null and infantry.coord == exp_infantry:
 		pass_count += 1
 	else:
 		fail_count += 1
-		printerr("FAIL: Bastogne reinforcement names/types/odd-r coordinates should match scenario")
+		printerr("FAIL: Bastogne reinforcement names/types/coordinates should match scenario")
 
 	var ready_ok := true
 	for unit in fresh:
@@ -126,7 +140,8 @@ func _init() -> void:
 	var blocked_map := StubHexMap.new()
 	var blocked_units: Array = []
 	var blocked_spawned: Dictionary = {}
-	blocked_map.occupants[Vector2i(1, 9)] = Object.new()
+	# Block the first reinforcement's own spawn hex (derived from the scenario).
+	blocked_map.occupants[_offset_to_axial(reinf[0].get("at", [0, 0]))] = Object.new()
 	var blocked_fresh: Array = ReinforcementSpawner.spawn_for_turn(
 		scenario, factions, blocked_map, blocked_units, blocked_spawned, "allies", 7, StubUnitFactory
 	)

@@ -345,36 +345,36 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
-| 00_sandbox | 80 | plain 69%, forest 11%, road 8% |
-| 01_sedan_1940 | 140 | plain 59%, forest 23%, river 8% |
-| 02_kiev_1941 | 140 | plain 76%, road 9%, river 7% |
-| 03_stalingrad_1942 | 140 | plain 46%, town 44%, river 5% |
-| 04_kursk_1943 | 140 | plain 84%, forest 6%, road 6% |
-| 05_bastogne_1944 | 140 | plain 63%, forest 18%, road 16% |
-| 06_market_garden_1944 | 140 | plain 67%, road 12%, river 9% |
-| 07_bagration_1944 | 140 | plain 81%, forest 7%, road 6% |
-| blitz_00_poland_1939 | 140 | plain 73%, road 11%, forest 8% |
-| blitz_02_dunkirk_1940 | 140 | plain 74%, road 11%, river 7% |
-| blitz_03_moscow_1941 | 140 | plain 69%, forest 15%, road 13% |
-| conq_atlantic_convoy | 117 | plain 58%, sea 31%, forest 7% |
-| conq_cbi_jungle | 117 | jungle 89%, river 5%, plain 3% |
-| conq_china_plains | 117 | plain 72%, forest 10%, road 9% |
-| conq_desert_north_africa | 117 | desert 82%, road 11%, mountain 5% |
-| conq_home_islands | 117 | plain 63%, mountain 13%, sea 10% |
-| conq_mediterranean_coast | 117 | plain 62%, sea 22%, road 11% |
-| conq_middle_east_oilfields | 117 | desert 79%, road 9%, river 5% |
-| conq_north_sea_raid | 117 | plain 53%, sea 39%, town 4% |
-| conq_pacific_carrier | 117 | sea 56%, plain 39%, town 3% |
-| conq_pacific_island | 117 | plain 60%, sea 34%, jungle 5% |
-| east_05_kharkov_1943 | 140 | plain 73%, road 11%, forest 7% |
-| east_09_seelow_1945 | 140 | plain 73%, road 11%, mountain 7% |
-| east_10_berlin_1945 | 140 | town 59%, plain 22%, road 19% |
-| west_08_falaise_1944 | 140 | plain 72%, road 11%, forest 10% |
-| west_08_normandy_cobra_1944 | 140 | plain 72%, road 11%, forest 10% |
-| west_09_aachen_1944 | 140 | plain 72%, road 11%, forest 10% |
-| west_09_hurtgen_1944 | 140 | plain 72%, road 11%, forest 10% |
-| west_10_remagen_1945 | 140 | plain 72%, road 11%, forest 10% |
-| west_11_colmar_1945 | 140 | plain 72%, road 11%, forest 10% |
+| 00_sandbox | 384 | plain 71%, forest 11%, road 7% |
+| 01_sedan_1940 | 384 | plain 62%, forest 21%, road 6% |
+| 02_kiev_1941 | 384 | plain 78%, forest 7%, road 7% |
+| 03_stalingrad_1942 | 384 | plain 47%, town 42%, river 6% |
+| 04_kursk_1943 | 384 | plain 83%, forest 7%, road 6% |
+| 05_bastogne_1944 | 384 | plain 63%, forest 18%, road 16% |
+| 06_market_garden_1944 | 384 | plain 67%, river 11%, road 10% |
+| 07_bagration_1944 | 384 | plain 79%, road 9%, forest 6% |
+| blitz_00_poland_1939 | 384 | plain 71%, road 12%, forest 8% |
+| blitz_02_dunkirk_1940 | 384 | plain 71%, road 11%, river 7% |
+| blitz_03_moscow_1941 | 384 | plain 76%, forest 13%, road 10% |
+| conq_atlantic_convoy | 384 | plain 75%, forest 11%, sea 9% |
+| conq_cbi_jungle | 384 | jungle 88%, river 4%, plain 4% |
+| conq_china_plains | 384 | plain 74%, road 10%, forest 9% |
+| conq_desert_north_africa | 384 | desert 82%, road 10%, mountain 7% |
+| conq_home_islands | 384 | plain 69%, mountain 12%, forest 10% |
+| conq_mediterranean_coast | 384 | plain 74%, road 14%, sea 7% |
+| conq_middle_east_oilfields | 384 | desert 79%, road 10%, river 4% |
+| conq_north_sea_raid | 384 | plain 77%, sea 12%, town 7% |
+| conq_pacific_carrier | 384 | plain 73%, sea 17%, town 6% |
+| conq_pacific_island | 384 | plain 80%, sea 10%, jungle 8% |
+| east_05_kharkov_1943 | 384 | plain 72%, road 13%, forest 7% |
+| east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 8% |
+| east_10_berlin_1945 | 384 | town 60%, plain 22%, road 18% |
+| west_08_falaise_1944 | 384 | plain 72%, forest 12%, road 10% |
+| west_08_normandy_cobra_1944 | 384 | plain 73%, road 10%, forest 10% |
+| west_09_aachen_1944 | 384 | plain 74%, road 11%, forest 9% |
+| west_09_hurtgen_1944 | 384 | plain 70%, road 12%, forest 11% |
+| west_10_remagen_1945 | 384 | plain 71%, road 11%, forest 10% |
+| west_11_colmar_1945 | 384 | plain 71%, road 12%, forest 10% |
 
 ## Rule Risks
 

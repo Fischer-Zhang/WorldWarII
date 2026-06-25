@@ -3,46 +3,68 @@
   "title": "史達林格勒巷戰 1942",
   "briefing": "1942 年 10 月。德國第六軍團在伏爾加河西岸的廢墟城市中一棟一棟地推進。崔可夫的第 62 軍團死守河岸的最後幾百公尺。每一棟工廠、每一條街道都化為血肉磨坊。\n\n你的任務:身為紅軍指揮官,守住東半部三座關鍵建築區直到第 12 回合結束。德軍只要在時限內肅清你的部隊便算勝利。\n\n戰術提示:大量的「城鎮」格給你 +3 防禦修正,但移動消耗只有 1。把反戰車砲和機槍埋在建築群裡是教科書打法。\n德軍裝甲在城內因為視野和側翼被破壞,效能會大幅下降。",
   "map": {
-    "width": 14,
-    "height": 10,
+    "width": 24,
+    "height": 16,
     "tiles": [
-      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
-      ["plain", "town",  "town",  "town",  "plain", "plain", "town",  "town",  "plain", "plain", "town",  "town",  "town",  "plain"],
-      ["plain", "town",  "town",  "town",  "plain", "town",  "town",  "town",  "town",  "plain", "town",  "town",  "town",  "plain"],
-      ["plain", "town",  "plain", "plain", "plain", "town",  "town",  "town",  "town",  "plain", "plain", "town",  "town",  "river"],
-      ["plain", "road",  "road",  "road",  "road",  "road",  "town",  "town",  "town",  "road",  "road",  "town",  "town",  "river"],
-      ["plain", "plain", "plain", "town",  "town",  "town",  "town",  "town",  "town",  "town",  "town",  "town",  "plain", "river"],
-      ["plain", "town",  "town",  "town",  "town",  "plain", "plain", "town",  "town",  "town",  "town",  "town",  "town",  "river"],
-      ["plain", "town",  "town",  "town",  "plain", "plain", "plain", "town",  "town",  "town",  "town",  "town",  "town",  "river"],
-      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "town",  "town",  "town",  "plain", "plain", "river"],
-      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "river"]
+      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "town", "town", "plain", "plain", "town", "plain", "road", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
+      ["plain", "town", "town", "town", "plain", "plain", "town", "town", "plain", "river", "plain", "plain", "plain", "town", "town", "plain", "town", "town", "plain", "plain", "town", "town", "town", "plain"],
+      ["plain", "town", "town", "town", "plain", "town", "town", "town", "town", "river", "plain", "plain", "river", "town", "plain", "town", "plain", "town", "town", "plain", "town", "town", "town", "plain"],
+      ["plain", "town", "plain", "plain", "plain", "town", "town", "town", "town", "town", "town", "plain", "plain", "plain", "plain", "plain", "road", "town", "town", "plain", "plain", "town", "town", "river"],
+      ["plain", "road", "road", "road", "road", "road", "town", "town", "town", "town", "town", "plain", "town", "town", "town", "town", "plain", "town", "town", "road", "road", "town", "town", "river"],
+      ["town", "town", "plain", "plain", "plain", "plain", "town", "town", "road", "town", "town", "town", "town", "town", "plain", "river", "town", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
+      ["town", "river", "town", "plain", "plain", "plain", "town", "town", "plain", "town", "plain", "town", "plain", "plain", "plain", "town", "town", "town", "plain", "town", "town", "road", "plain", "plain"],
+      ["town", "plain", "river", "town", "plain", "town", "plain", "town", "town", "town", "town", "plain", "town", "town", "river", "plain", "plain", "town", "plain", "plain", "plain", "plain", "town", "plain"],
+      ["plain", "plain", "town", "town", "river", "plain", "plain", "town", "plain", "town", "plain", "town", "plain", "town", "town", "plain", "town", "plain", "town", "town", "plain", "town", "plain", "plain"],
+      ["plain", "plain", "town", "plain", "plain", "plain", "town", "plain", "road", "plain", "plain", "road", "plain", "town", "river", "town", "road", "town", "town", "road", "town", "town", "town", "town"],
+      ["plain", "road", "plain", "plain", "plain", "town", "plain", "town", "town", "plain", "river", "plain", "plain", "town", "town", "plain", "river", "river", "town", "town", "plain", "plain", "town", "town"],
+      ["plain", "plain", "plain", "town", "town", "town", "town", "town", "plain", "town", "river", "town", "plain", "plain", "plain", "road", "plain", "town", "town", "town", "town", "town", "plain", "river"],
+      ["plain", "town", "town", "town", "town", "plain", "plain", "plain", "town", "town", "plain", "town", "plain", "river", "plain", "plain", "town", "town", "town", "town", "town", "town", "town", "river"],
+      ["plain", "town", "town", "town", "plain", "plain", "plain", "town", "plain", "town", "river", "town", "town", "plain", "river", "town", "road", "town", "town", "town", "town", "town", "town", "river"],
+      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "town", "plain", "town", "river", "plain", "plain", "plain", "town", "town", "town", "plain", "plain", "river"],
+      ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "town", "town", "plain", "plain", "plain", "plain", "road", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "river"]
     ]
   },
   "factions": [
-    {"id": "soviet", "name": "蘇軍第 62 軍團", "controller": "player", "color": "#3f7f4a"},
-    {"id": "axis",   "name": "德軍第六軍團",   "controller": "ai", "ai": "aggressive", "color": "#a86632"}
+    {
+      "id": "soviet",
+      "name": "蘇軍第 62 軍團",
+      "controller": "player",
+      "color": "#3f7f4a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍第六軍團",
+      "controller": "ai",
+      "ai": "aggressive",
+      "color": "#a86632"
+    }
   ],
   "units": [
     {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [1, 0]},
-    {"faction": "soviet", "type": "rocket_artillery", "name": "喀秋莎", "at": [11, 0]},
-    {"faction": "soviet", "type": "infantry",  "name": "近衛步 1",  "at": [11, 1]},
-    {"faction": "soviet", "type": "infantry",  "name": "近衛步 2",  "at": [10, 4], "general": "chuikov"},
-    {"faction": "soviet", "type": "infantry",  "name": "近衛步 3",  "at": [11, 7]},
-    {"faction": "soviet", "type": "mg_team",   "name": "Maxim a",  "at": [12, 2]},
-    {"faction": "soviet", "type": "mg_team",   "name": "Maxim b",  "at": [12, 6]},
-    {"faction": "soviet", "type": "at_gun",    "name": "45 mm AT", "at": [9, 5]},
-    {"faction": "soviet", "type": "at_gun",    "name": "76 mm AT", "at": [11, 5]},
-
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV",    "at": [1, 1]},
-    {"faction": "axis", "type": "light_tank",  "name": "Pz.III",   "at": [2, 4]},
-    {"faction": "axis", "type": "infantry",    "name": "擲彈兵 1", "at": [1, 3], "general": "manstein"},
-    {"faction": "axis", "type": "infantry",    "name": "擲彈兵 2", "at": [1, 6]},
-    {"faction": "axis", "type": "infantry",    "name": "擲彈兵 3", "at": [3, 8]},
-    {"faction": "axis", "type": "mg_team",     "name": "MG 42",    "at": [2, 2]},
-    {"faction": "axis", "type": "artillery",   "name": "Wespe",    "at": [0, 4]}
+    {"faction": "soviet", "type": "rocket_artillery", "name": "喀秋莎", "at": [21, 0]},
+    {"faction": "soviet", "type": "infantry", "name": "近衛步 1", "at": [21, 1]},
+    {"faction": "soviet", "type": "infantry", "name": "近衛步 2", "at": [20, 4], "general": "chuikov"},
+    {"faction": "soviet", "type": "infantry", "name": "近衛步 3", "at": [21, 13]},
+    {"faction": "soviet", "type": "mg_team", "name": "Maxim a", "at": [22, 2]},
+    {"faction": "soviet", "type": "mg_team", "name": "Maxim b", "at": [22, 12]},
+    {"faction": "soviet", "type": "at_gun", "name": "45 mm AT", "at": [19, 11]},
+    {"faction": "soviet", "type": "at_gun", "name": "76 mm AT", "at": [21, 11]},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [1, 1]},
+    {"faction": "axis", "type": "light_tank", "name": "Pz.III", "at": [2, 4]},
+    {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [1, 3], "general": "manstein"},
+    {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [1, 12]},
+    {"faction": "axis", "type": "infantry", "name": "擲彈兵 3", "at": [3, 14]},
+    {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [2, 2]},
+    {"faction": "axis", "type": "artillery", "name": "Wespe", "at": [0, 4]}
   ],
   "victory": {
-    "soviet": {"type": "survive",   "by_turn": 12},
-    "axis":   {"type": "eliminate", "by_turn": 12}
+    "soviet": {
+      "type": "survive",
+      "by_turn": 12
+    },
+    "axis": {
+      "type": "eliminate",
+      "by_turn": 12
+    }
   }
 }

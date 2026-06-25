@@ -6,36 +6,36 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | scenario | title | terrain pressure | objective distance | risk notes |
 | --- | --- | --- | --- | --- |
-| 00_sandbox | 沙盒測試地圖 | plain 69%, forest 11%, road 8%; def>=2 19%; move>=3 10% | n/a | no major static risks |
-| 01_sedan_1940 | 色當突破 1940 | plain 59%, forest 23%, river 8%; def>=2 26%; move>=3 10% | axis->10,8 min 2 avg 4.7 | high forest density: LOS and breakthrough tempo risk; river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
-| 02_kiev_1941 | 基輔包圍戰 1941 | plain 76%, road 9%, river 7%; def>=2 8%; move>=3 7% | n/a | river crossings may dominate tempo; axis artillery-heavy: watch standoff dominance |
-| 03_stalingrad_1942 | 史達林格勒巷戰 1942 | plain 46%, town 44%, river 5%; def>=2 44%; move>=3 5% | n/a | high town density: dig-in pacing risk |
-| 04_kursk_1943 | 庫斯克裝甲決戰 1943 | plain 84%, forest 6%, road 6%; def>=2 10%; move>=3 3% | axis->5,2 min 7 avg 9.2 | axis lacks AT against 3 enemy armor units |
-| 05_bastogne_1944 | 突出部戰役:Bastogne 1944 | plain 63%, forest 18%, road 16%; def>=2 21%; move>=3 0% | axis->6,4 min 3 avg 5.0 | no major static risks |
-| 06_market_garden_1944 | 市場花園作戰:奈梅亨橋 1944 | plain 67%, road 12%, river 9%; def>=2 11%; move>=3 9% | allies->5,5 min 1 avg 1.9 | river crossings may dominate tempo |
-| 07_bagration_1944 | 巴格拉基昂行動:明斯克突破 1944 | plain 81%, forest 7%, road 6%; def>=2 9%; move>=3 5% | soviet->2,4 min 10 avg 11.3 | force power ratio above 1.35: check victory-clock compensation |
-| blitz_00_poland_1939 | 波蘭戰役:布楚拉反擊 1939 | plain 73%, road 11%, forest 8%; def>=2 10%; move>=3 6% | axis->1,1 min 13 avg 13.8 | no major static risks |
-| blitz_02_dunkirk_1940 | 敦克爾克外圍防線 1940 | plain 74%, road 11%, river 7%; def>=2 8%; move>=3 7% | axis->5,0 min 8 avg 9.5 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
-| blitz_03_moscow_1941 | 莫斯科門前 1941 | plain 69%, forest 15%, road 13%; def>=2 16%; move>=3 2% | soviet->6,2 min 6 avg 7.4 | no major static risks |
-| conq_atlantic_convoy | 大西洋護航戰 | plain 58%, sea 31%, forest 7%; def>=2 9%; move>=3 31% | n/a | no major static risks |
-| conq_cbi_jungle | 緬印叢林戰場 | jungle 89%, river 5%, plain 3%; def>=2 91%; move>=3 5% | n/a | no major static risks |
-| conq_china_plains | 中原會戰 | plain 72%, forest 10%, road 9%; def>=2 14%; move>=3 5% | n/a | no major static risks |
-| conq_desert_north_africa | 北非沙漠戰場 | desert 82%, road 11%, mountain 5%; def>=2 7%; move>=3 5% | n/a | no major static risks |
-| conq_home_islands | 本土防衛戰 | plain 63%, mountain 13%, sea 10%; def>=2 25%; move>=3 23% | n/a | no major static risks |
-| conq_mediterranean_coast | 地中海海岸 | plain 62%, sea 22%, road 11%; def>=2 5%; move>=3 26% | n/a | no major static risks |
-| conq_middle_east_oilfields | 中東油田爭奪 | desert 79%, road 9%, river 5%; def>=2 7%; move>=3 9% | n/a | no major static risks |
-| conq_north_sea_raid | 北海沿岸突擊 | plain 53%, sea 39%, town 4%; def>=2 8%; move>=3 39% | n/a | no major static risks |
-| conq_pacific_carrier | 太平洋海空決戰 | sea 56%, plain 39%, town 3%; def>=2 4%; move>=3 56% | n/a | no major static risks |
-| conq_pacific_island | 太平洋島嶼登陸 | plain 60%, sea 34%, jungle 5%; def>=2 6%; move>=3 34% | n/a | no major static risks |
-| east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 73%, road 11%, forest 7%; def>=2 13%; move>=3 3% | axis->4,3 min 8 avg 9.3 | force power ratio above 1.35: check victory-clock compensation |
-| east_09_seelow_1945 | 澤洛高地 1945 | plain 73%, road 11%, mountain 7%; def>=2 14%; move>=3 9% | soviet->8,3 min 8 avg 9.1 | force power ratio above 1.35: check victory-clock compensation |
-| east_10_berlin_1945 | 柏林終局 1945 | town 59%, plain 22%, road 19%; def>=2 59%; move>=3 0% | soviet->9,4 min 7 avg 8.8 | high town density: dig-in pacing risk |
-| west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->11,4 min 8 avg 10.3 | no major static risks |
-| west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->2,2 min 2 avg 4.3 | no major static risks |
-| west_09_aachen_1944 | 亞琛巷戰 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->5,5 min 2 avg 4.6 | no major static risks |
-| west_09_hurtgen_1944 | 赫特根森林 1944 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->5,4 min 3 avg 4.4 | no major static risks |
-| west_10_remagen_1945 | 雷馬根大橋 1945 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->7,4 min 4 avg 6.3 | no major static risks |
-| west_11_colmar_1945 | 科爾馬口袋 1945 | plain 72%, road 11%, forest 10%; def>=2 14%; move>=3 3% | allies->9,5 min 6 avg 8.6 | no major static risks |
+| 00_sandbox | 沙盒測試地圖 | plain 71%, forest 11%, road 7%; def>=2 19%; move>=3 8% | n/a | no major static risks |
+| 01_sedan_1940 | 色當突破 1940 | plain 62%, forest 21%, road 6%; def>=2 26%; move>=3 7% | axis->20,14 min 2 avg 7.3 | high forest density: LOS and breakthrough tempo risk; force power ratio above 1.35: check victory-clock compensation |
+| 02_kiev_1941 | 基輔包圍戰 1941 | plain 78%, forest 7%, road 7%; def>=2 8%; move>=3 7% | n/a | river crossings may dominate tempo; axis artillery-heavy: watch standoff dominance |
+| 03_stalingrad_1942 | 史達林格勒巷戰 1942 | plain 47%, town 42%, river 6%; def>=2 42%; move>=3 6% | n/a | high town density: dig-in pacing risk |
+| 04_kursk_1943 | 庫斯克裝甲決戰 1943 | plain 83%, forest 7%, road 6%; def>=2 11%; move>=3 4% | axis->5,2 min 17 avg 20.9 | axis lacks AT against 3 enemy armor units |
+| 05_bastogne_1944 | 突出部戰役:Bastogne 1944 | plain 63%, forest 18%, road 16%; def>=2 21%; move>=3 0% | axis->6,4 min 3 avg 12.6 | no major static risks |
+| 06_market_garden_1944 | 市場花園作戰:奈梅亨橋 1944 | plain 67%, river 11%, road 10%; def>=2 12%; move>=3 11% | allies->5,11 min 7 avg 7.6 | river crossings may dominate tempo |
+| 07_bagration_1944 | 巴格拉基昂行動:明斯克突破 1944 | plain 79%, road 9%, forest 6%; def>=2 8%; move>=3 6% | soviet->2,4 min 20 avg 22.8 | force power ratio above 1.35: check victory-clock compensation |
+| blitz_00_poland_1939 | 波蘭戰役:布楚拉反擊 1939 | plain 71%, road 12%, forest 8%; def>=2 10%; move>=3 7% | axis->1,1 min 23 avg 26.3 | no major static risks |
+| blitz_02_dunkirk_1940 | 敦克爾克外圍防線 1940 | plain 71%, road 11%, river 7%; def>=2 11%; move>=3 7% | axis->5,0 min 18 avg 21.0 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
+| blitz_03_moscow_1941 | 莫斯科門前 1941 | plain 76%, forest 13%, road 10%; def>=2 13%; move>=3 2% | soviet->6,2 min 16 avg 19.6 | no major static risks |
+| conq_atlantic_convoy | 大西洋護航戰 | plain 75%, forest 11%, sea 9%; def>=2 14%; move>=3 9% | n/a | no major static risks |
+| conq_cbi_jungle | 緬印叢林戰場 | jungle 88%, river 4%, plain 4%; def>=2 91%; move>=3 4% | n/a | no major static risks |
+| conq_china_plains | 中原會戰 | plain 74%, road 10%, forest 9%; def>=2 13%; move>=3 3% | n/a | no major static risks |
+| conq_desert_north_africa | 北非沙漠戰場 | desert 82%, road 10%, mountain 7%; def>=2 9%; move>=3 7% | n/a | no major static risks |
+| conq_home_islands | 本土防衛戰 | plain 69%, mountain 12%, forest 10%; def>=2 24%; move>=3 15% | n/a | no major static risks |
+| conq_mediterranean_coast | 地中海海岸 | plain 74%, road 14%, sea 7%; def>=2 6%; move>=3 11% | n/a | no major static risks |
+| conq_middle_east_oilfields | 中東油田爭奪 | desert 79%, road 10%, river 4%; def>=2 7%; move>=3 7% | n/a | no major static risks |
+| conq_north_sea_raid | 北海沿岸突擊 | plain 77%, sea 12%, town 7%; def>=2 11%; move>=3 12% | n/a | no major static risks |
+| conq_pacific_carrier | 太平洋海空決戰 | plain 73%, sea 17%, town 6%; def>=2 10%; move>=3 17% | n/a | no major static risks |
+| conq_pacific_island | 太平洋島嶼登陸 | plain 80%, sea 10%, jungle 8%; def>=2 10%; move>=3 10% | n/a | no major static risks |
+| east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 72%, road 13%, forest 7%; def>=2 12%; move>=3 3% | axis->4,3 min 19 avg 21.7 | force power ratio above 1.35: check victory-clock compensation |
+| east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 8%; def>=2 14%; move>=3 9% | soviet->18,3 min 21 avg 22.1 | force power ratio above 1.35: check victory-clock compensation |
+| east_10_berlin_1945 | 柏林終局 1945 | town 60%, plain 22%, road 18%; def>=2 60%; move>=3 0% | soviet->19,4 min 20 avg 21.8 | high town density: dig-in pacing risk |
+| west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, forest 12%, road 10%; def>=2 17%; move>=3 2% | allies->21,4 min 19 avg 22.4 | no major static risks |
+| west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 73%, road 10%, forest 10%; def>=2 13%; move>=3 4% | allies->2,2 min 2 avg 8.6 | no major static risks |
+| west_09_aachen_1944 | 亞琛巷戰 1944 | plain 74%, road 11%, forest 9%; def>=2 12%; move>=3 3% | allies->5,11 min 2 avg 5.7 | no major static risks |
+| west_09_hurtgen_1944 | 赫特根森林 1944 | plain 70%, road 12%, forest 11%; def>=2 16%; move>=3 2% | allies->5,4 min 3 avg 7.7 | no major static risks |
+| west_10_remagen_1945 | 雷馬根大橋 1945 | plain 71%, road 11%, forest 10%; def>=2 13%; move>=3 4% | allies->17,4 min 15 avg 18.4 | no major static risks |
+| west_11_colmar_1945 | 科爾馬口袋 1945 | plain 71%, road 12%, forest 10%; def>=2 14%; move>=3 3% | allies->19,11 min 16 avg 19.4 | no major static risks |
 
 ## 00_sandbox
 
