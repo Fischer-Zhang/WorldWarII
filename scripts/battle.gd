@@ -168,6 +168,30 @@ func _toggle_legend() -> void:
 func _close_legend() -> void:
 	legend_panel.visible = false
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	# Keyboard shortcuts mirror the on-screen buttons. O/R only fire when their
+	# button is actually available (same gating as a click); H toggles the
+	# legend and Esc closes it.
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	match key.keycode:
+		KEY_H:
+			_toggle_legend()
+			get_viewport().set_input_as_handled()
+		KEY_ESCAPE:
+			if legend_panel.visible:
+				_close_legend()
+				get_viewport().set_input_as_handled()
+		KEY_O:
+			if overwatch_button.visible and not overwatch_button.disabled:
+				_on_overwatch_pressed()
+				get_viewport().set_input_as_handled()
+		KEY_R:
+			if rally_button.visible and not rally_button.disabled:
+				_on_rally_pressed()
+				get_viewport().set_input_as_handled()
+
 func _apply_deployment_overrides(scenario_id: String) -> void:
 	var overrides := GameState.get_deployment_overrides(scenario_id)
 	if overrides.is_empty():

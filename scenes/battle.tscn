@@ -157,11 +157,11 @@ offset_bottom = 710.0
 text = "結束回合"
 
 [node name="LegendButton" type="Button" parent="UI"]
-offset_left = 1168.0
+offset_left = 1156.0
 offset_top = 10.0
 offset_right = 1268.0
 offset_bottom = 42.0
-text = "圖例"
+text = "圖例 (H)"
 
 [node name="ResultPanel" type="Panel" parent="UI"]
 visible = false
