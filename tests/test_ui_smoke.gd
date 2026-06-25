@@ -42,6 +42,28 @@ const SCENE_CASES := [
 		"required": ["UI/Root/Body/LeftPanel/UnitScroll/UnitList", "UI/Root/Body/RightPanel/Detail", "UI/Root/BottomBar/BeginButton"],
 	},
 	{
+		"name": "deployment_conquest",
+		"path": "res://scenes/deployment.tscn",
+		"scenario_id": "01_sedan_1940",
+		"campaign_mode": false,
+		"conquest_mode": true,
+		"pending": {
+			"player_faction": "germany",
+			"enemy_faction": "soviet",
+			"player_name": "德軍",
+			"enemy_name": "蘇軍",
+			"player_color": "#a86632",
+			"enemy_color": "#2f6fb0",
+			"role": "attack",
+			"attacker_garrison": [
+				{"id": 1, "type": "infantry", "name": "步兵 #1", "xp": 0, "rank": 0},
+				{"id": 2, "type": "tank_destroyer", "name": "驅逐戰車 #2", "xp": 0, "rank": 0},
+			],
+			"defender_types": ["infantry", "at_gun"],
+		},
+		"required": ["UI/Root/Body/LeftPanel/UnitScroll/UnitList", "UI/Root/Body/RightPanel/Detail", "UI/Root/BottomBar/BeginButton"],
+	},
+	{
 		"name": "battle",
 		"path": "res://scenes/battle.tscn",
 		"scenario_id": "01_sedan_1940",
@@ -104,6 +126,9 @@ func _run_scene_case(scene_case: Dictionary) -> bool:
 	game_state.clear_conquest_battle()
 	if bool(scene_case.get("conquest_mode", false)):
 		game_state.conquest_mode = true
+	if scene_case.has("pending"):
+		# duplicate: the case dict is a const (read-only); GameState later .clear()s it.
+		game_state.pending_conquest_battle = (scene_case["pending"] as Dictionary).duplicate(true)
 
 	var packed := load(String(scene_case.get("path", "")))
 	if packed == null:

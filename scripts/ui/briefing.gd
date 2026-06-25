@@ -50,12 +50,9 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 		]
 
 func _on_begin_pressed() -> void:
-	# Conquest battles field a fixed recruited army, so they skip the pre-battle
-	# deployment editor (which operates on the themed scenario's authored units).
-	if GameState.conquest_mode:
-		get_tree().change_scene_to_file("res://scenes/battle.tscn")
-	else:
-		get_tree().change_scene_to_file("res://scenes/deployment.tscn")
+	# Every mode now routes through deployment; for conquest the editor builds the
+	# recruited army onto the themed map (see deployment.gd / ConquestBattleSetup).
+	get_tree().change_scene_to_file("res://scenes/deployment.tscn")
 
 func _on_back_pressed() -> void:
 	if GameState.campaign_mode:

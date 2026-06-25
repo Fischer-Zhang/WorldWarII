@@ -6,6 +6,7 @@ const Unit := preload("res://scripts/units/unit.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
+const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
 const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd")
 
@@ -42,7 +43,17 @@ func _ready() -> void:
 		title_label.text = "找不到作戰"
 		status_label.text = scenario_id
 		return
-	title_label.text = "作戰編成: %s" % String(scenario.get("title", scenario_id))
+	scenario = scenario.duplicate(true)
+	# Conquest battles route through deployment too: build the player's recruited
+	# army onto the themed scenario before placement, the same way battle.gd does.
+	# (ConquestBattleSetup mutates the scenario, hence the duplicate above.)
+	if GameState.conquest_mode and not GameState.pending_conquest_battle.is_empty():
+		ConquestBattleSetup.apply(scenario, GameState.pending_conquest_battle)
+		title_label.text = "戰前部署: %s" % String(
+			GameState.pending_conquest_battle.get("battle_location", scenario.get("title", scenario_id))
+		)
+	else:
+		title_label.text = "作戰編成: %s" % String(scenario.get("title", scenario_id))
 
 	hex_map.load_from_scenario(scenario)
 	hex_map.hex_clicked.connect(_on_hex_clicked)
