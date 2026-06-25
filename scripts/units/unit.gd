@@ -83,7 +83,11 @@ func is_alive() -> bool:
 	return hp > 0
 
 func is_done_for_turn() -> bool:
-	return has_moved and has_attacked
+	# Acting ends the turn: attack / overwatch / rally / skill (and an explicit
+	# wait) all set has_attacked. A unit may move BEFORE acting, but once it has
+	# acted it is spent — no move-after-firing. Moving alone does not end the turn,
+	# so a moved-but-not-yet-acted unit can still take its action.
+	return has_attacked
 
 func reset_for_new_turn() -> void:
 	has_moved = false

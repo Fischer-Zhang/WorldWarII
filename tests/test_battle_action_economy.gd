@@ -83,6 +83,14 @@ func _run() -> void:
 			printerr("FAIL: action buttons still visible after the unit has acted")
 			fail_count += 1
 
+		# A unit that has fired (even without moving) is done — it cannot move after.
+		player_unit.has_moved = false
+		if player_unit.is_done_for_turn():
+			pass_count += 1
+		else:
+			printerr("FAIL: a unit that has fired should be done (no move after firing)")
+			fail_count += 1
+
 	battle.queue_free()
 	await process_frame
 	print("Battle action economy tests: %d pass, %d fail" % [pass_count, fail_count])
