@@ -147,6 +147,7 @@ static func _unit_table(units: Dictionary) -> String:
 		parts.append("攻 %d" % int(u.get("attack", 0)))
 		parts.append("防 %d" % int(u.get("defense", 0)))
 		parts.append("射程 %d" % int(u.get("range", 1)))
+		parts.append("視野 %d" % int(u.get("vision", 3)))
 		parts.append("移動 %d" % int(u.get("move", 0)))
 		if int(u.get("vs_armor", 0)) > 0:
 			parts.append("反裝甲 %d" % int(u.get("vs_armor", 0)))

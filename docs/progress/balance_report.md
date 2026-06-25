@@ -12,12 +12,12 @@ Generated from `data/units.json`, `data/terrains.json`, and `data/scenarios/*.js
 | at_gun | 反戰車砲 | 6 | 5 | 1 | 2 | 1 | 2 | 6 | 0 |  |
 | light_tank | 輕戰車 | 12 | 5 | 4 | 1 | 5 | 5 | 2 | 2 |  |
 | medium_tank | 中戰車 | 16 | 7 | 5 | 1 | 4 | 4 | 4 | 4 |  |
-| artillery | 砲兵 | 8 | 7 | 1 | 4 | 2 | 5 | 1 | 0 | yes |
+| artillery | 砲兵 | 8 | 7 | 1 | 4 | 2 | 2 | 1 | 0 | yes |
 | paratrooper | 傘兵 | 8 | 5 | 2 | 1 | 3 | 4 | 2 | 0 |  |
 | engineer | 工兵 | 8 | 3 | 2 | 1 | 2 | 3 | 1 | 0 |  |
 | tank_destroyer | 驅逐戰車 | 12 | 5 | 4 | 1 | 3 | 3 | 7 | 3 |  |
 | heavy_tank | 重戰車 | 22 | 9 | 5 | 1 | 3 | 4 | 7 | 6 |  |
-| rocket_artillery | 火箭砲 | 8 | 6 | 1 | 3 | 2 | 4 | 0 | 0 | yes |
+| rocket_artillery | 火箭砲 | 8 | 6 | 1 | 3 | 2 | 2 | 0 | 0 | yes |
 
 ## Plain Damage / Counter
 
@@ -255,7 +255,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | --- | --- | --- |
 | at_gun | 反戰車砲 | attack 7->5 (-2)<br>range 1->2 (+1)<br>vs_armor 5->6 (+1) |
 | light_tank | 輕戰車 | vision 4->5 (+1) |
-| artillery | 砲兵 | attack 8->7 (-1)<br>range 3->4 (+1)<br>vs_armor 2->1 (-1) |
+| artillery | 砲兵 | attack 8->7 (-1)<br>range 3->4 (+1)<br>vision 5->2 (-3)<br>vs_armor 2->1 (-1) |
 | paratrooper | 傘兵 | new unit |
 | engineer | 工兵 | new unit |
 | tank_destroyer | 驅逐戰車 | new unit |

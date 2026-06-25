@@ -67,7 +67,7 @@
     "defense": 1,
     "range": 4,
     "move": 2,
-    "vision": 5,
+    "vision": 2,
     "vs_armor": 1,
     "armor": 0,
     "indirect": true
@@ -148,7 +148,7 @@
     "defense": 1,
     "range": 3,
     "move": 2,
-    "vision": 4,
+    "vision": 2,
     "vs_armor": 0,
     "armor": 0,
     "indirect": true,
