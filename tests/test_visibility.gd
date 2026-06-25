@@ -8,12 +8,20 @@ const Visibility := preload("res://scripts/grid/visibility.gd")
 
 class StubHexMap:
 	var tiles: Dictionary = {}
+	var occupants: Dictionary = {}
 	var blockers: Dictionary = {"forest": true, "mountain": true}
 	func terrain_at(coord: Vector2i) -> String:
 		return tiles.get(coord, "")
 	func blocks_los_at(coord: Vector2i) -> bool:
 		var t: String = tiles.get(coord, "")
 		return blockers.get(t, false) if t != "" else false
+	func unit_at(coord: Vector2i):
+		return occupants.get(coord)
+
+class StubUnit:
+	var faction_id: String
+	func _init(f: String) -> void:
+		faction_id = f
 
 func _init() -> void:
 	var pass_count := 0
@@ -90,6 +98,29 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: adjacent hexes should always see each other")
+
+	# 8) Unit blocking: enemy units block vision, friendly units do not, and any
+	#    unit blocks direct fire (block_all_units).
+	var ustub := StubHexMap.new()
+	for x in range(3):
+		ustub.tiles[Vector2i(x, 0)] = "plain"
+	ustub.occupants[Vector2i(1, 0)] = StubUnit.new("allies")  # enemy mid-line
+	if not Visibility.has_los(Vector2i(0, 0), Vector2i(2, 0), ustub, "axis"):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: an enemy unit should block vision")
+	ustub.occupants[Vector2i(1, 0)] = StubUnit.new("axis")  # friendly mid-line
+	if Visibility.has_los(Vector2i(0, 0), Vector2i(2, 0), ustub, "axis"):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: a friendly unit should NOT block vision")
+	if not Visibility.has_los(Vector2i(0, 0), Vector2i(2, 0), ustub, "axis", true):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: any unit should block direct fire when block_all_units is set")
 
 	print("Visibility tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

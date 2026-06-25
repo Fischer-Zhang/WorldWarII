@@ -35,7 +35,9 @@ static func can_attack_from_coord(
 		return false
 	if not visible_hexes.has(target.coord):
 		return false
-	if not atk_def.get("indirect", false) and not Visibility.has_los(attacker_coord, target.coord, hex_map):
+	# Direct fire needs a clear lane: terrain AND any intervening unit block it.
+	if not atk_def.get("indirect", false) \
+			and not Visibility.has_los(attacker_coord, target.coord, hex_map, attacker_faction, true):
 		return false
 	return true
 

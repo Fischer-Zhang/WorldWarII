@@ -7,12 +7,15 @@ const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 
 class StubHexMap:
 	var tiles: Dictionary = {}
+	var occupants: Dictionary = {}
 	var blockers: Dictionary = {"forest": true, "mountain": true}
 	func terrain_at(coord: Vector2i) -> String:
 		return tiles.get(coord, "")
 	func blocks_los_at(coord: Vector2i) -> bool:
 		var t: String = tiles.get(coord, "")
 		return blockers.get(t, false) if t != "" else false
+	func unit_at(coord: Vector2i):
+		return occupants.get(coord)
 
 class StubUnit:
 	var coord: Vector2i
@@ -117,6 +120,21 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: filtered target list wrong: ", targets)
+
+	# 11) Direct fire cannot shoot through an intervening unit (screening).
+	stub.occupants[Vector2i(1, 0)] = StubUnit.new(Vector2i(1, 0), "allies")
+	if not CombatRules.can_attack_target(attacker, enemy, direct, stub, visible):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: direct fire should be blocked by an intervening unit")
+	# ...but indirect fire still shoots over the screening unit.
+	if CombatRules.can_attack_target(attacker, enemy, indirect, stub, visible):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: indirect fire should ignore an intervening unit")
+	stub.occupants.erase(Vector2i(1, 0))
 
 	print("CombatRules tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
