@@ -19,13 +19,13 @@ color = Color(0.10, 0.12, 0.14, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 80
-theme_override_constants/margin_right = 80
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_bottom = 50
+theme_override_constants/margin_left = 56
+theme_override_constants/margin_right = 56
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_bottom = 36
 
 [node name="VBox" type="VBoxContainer" parent="Margin"]
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Margin/VBox"]
 theme_override_font_sizes/font_size = 32
@@ -49,7 +49,7 @@ text = ""
 
 [node name="Body" type="HBoxContainer" parent="Margin/VBox"]
 size_flags_vertical = 3
-theme_override_constants/separation = 18
+theme_override_constants/separation = 14
 
 [node name="GeneralsPanel" type="VBoxContainer" parent="Margin/VBox/Body"]
 size_flags_horizontal = 3

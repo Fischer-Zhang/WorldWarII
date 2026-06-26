@@ -81,7 +81,7 @@ func _rebuild_scenario_list() -> void:
 			continue
 		var btn := Button.new()
 		btn.text = "%s — %s" % [scenario.get("id", ""), scenario.get("title", "(無標題)")]
-		btn.custom_minimum_size = Vector2(0, 48)
+		btn.custom_minimum_size = Vector2(0, 44)
 		btn.add_theme_font_size_override("font_size", 18)
 		btn.pressed.connect(func(): _on_scenario_picked(scenario_id))
 		list.add_child(btn)

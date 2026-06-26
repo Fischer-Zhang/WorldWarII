@@ -20,9 +20,9 @@ anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -160.0
-offset_top = 72.0
+offset_top = 48.0
 offset_right = 160.0
-offset_bottom = -72.0
+offset_bottom = -48.0
 theme_override_constants/separation = 12
 alignment = 1
 

@@ -65,7 +65,7 @@ func _rebuild_generals() -> void:
 		var cost := LoungeManager.general_upgrade_cost(level)
 		var mods := LoungeManager.general_upgrade_mods(general_def, min(level + 1, LoungeManager.MAX_GENERAL_LEVEL))
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 76)
+		btn.custom_minimum_size = Vector2(0, 70)
 		btn.add_theme_font_size_override("font_size", 16)
 		btn.text = "%s「%s」  Lv %d/%d\n%s\n%s" % [
 			String(general_def.get("name_zh", gid)),
@@ -90,7 +90,7 @@ func _rebuild_techs() -> void:
 		var cost := LoungeManager.tech_upgrade_cost(tech_def, level)
 		var next_mods: Dictionary = levels[level] if level < levels.size() else {}
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 86)
+		btn.custom_minimum_size = Vector2(0, 78)
 		btn.add_theme_font_size_override("font_size", 16)
 		btn.text = "%s  Lv %d/%d\n%s\n%s" % [
 			String(tech_def.get("name_zh", tid)),

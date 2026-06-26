@@ -43,7 +43,7 @@ func _rebuild_campaign_list() -> void:
 		var cstate := CampaignManager.campaign_state(state, cid, order)
 		var progress := int(cstate.get("progress", 0))
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 64)
+		btn.custom_minimum_size = Vector2(0, 58)
 		btn.add_theme_font_size_override("font_size", 18)
 		btn.text = "%s  (%d/%d)\n%s" % [
 			String(campaign.get("title", cid)),
@@ -78,7 +78,7 @@ func _rebuild_scenario_list() -> void:
 		var scenario: Dictionary = DataLoader.get_scenario(sid)
 		var title := String(scenario.get("title", sid))
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 54)
+		btn.custom_minimum_size = Vector2(0, 50)
 		btn.add_theme_font_size_override("font_size", 18)
 		var prefix := "[?]"
 		var color := Color(0.6, 0.6, 0.6)

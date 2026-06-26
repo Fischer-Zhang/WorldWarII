@@ -19,10 +19,10 @@ color = Color(0.12, 0.14, 0.16, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 80
-theme_override_constants/margin_right = 80
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_bottom = 50
+theme_override_constants/margin_left = 56
+theme_override_constants/margin_right = 56
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_bottom = 40
 
 [node name="VBox" type="VBoxContainer" parent="Margin"]
 theme_override_constants/separation = 16
@@ -65,7 +65,7 @@ theme_override_font_sizes/font_size = 13
 text = ""
 
 [node name="Spacer1" type="Control" parent="Margin/VBox"]
-custom_minimum_size = Vector2(0, 12)
+custom_minimum_size = Vector2(0, 4)
 
 [node name="ListScroll" type="ScrollContainer" parent="Margin/VBox"]
 size_flags_vertical = 3
@@ -75,7 +75,7 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="Spacer2" type="Control" parent="Margin/VBox"]
-custom_minimum_size = Vector2(0, 12)
+custom_minimum_size = Vector2(0, 4)
 
 [node name="BackButton" type="Button" parent="Margin/VBox"]
 custom_minimum_size = Vector2(0, 40)

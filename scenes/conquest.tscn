@@ -19,10 +19,10 @@ color = Color(0.09, 0.11, 0.13, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 48
-theme_override_constants/margin_right = 48
-theme_override_constants/margin_top = 40
-theme_override_constants/margin_bottom = 40
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_bottom = 32
 
 [node name="VBox" type="VBoxContainer" parent="Margin"]
 theme_override_constants/separation = 14
@@ -31,7 +31,7 @@ theme_override_constants/separation = 14
 theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="Margin/VBox/Header"]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(120, 40)
 theme_override_font_sizes/font_size = 32
 text = "征服"
 
@@ -59,7 +59,7 @@ theme_override_constants/v_separation = 8
 columns = 9
 
 [node name="DetailPanel" type="VBoxContainer" parent="Margin/VBox/Body"]
-custom_minimum_size = Vector2(330, 0)
+custom_minimum_size = Vector2(300, 0)
 
 [node name="Detail" type="RichTextLabel" parent="Margin/VBox/Body/DetailPanel"]
 size_flags_vertical = 3
@@ -68,7 +68,7 @@ theme_override_font_sizes/normal_font_size = 16
 text = ""
 
 [node name="RecruitScroll" type="ScrollContainer" parent="Margin/VBox/Body/DetailPanel"]
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(0, 220)
 horizontal_scroll_mode = 0
 
 [node name="RecruitList" type="VBoxContainer" parent="Margin/VBox/Body/DetailPanel/RecruitScroll"]
@@ -79,21 +79,21 @@ theme_override_constants/separation = 4
 theme_override_constants/separation = 12
 
 [node name="AttackButton" type="Button" parent="Margin/VBox/Actions"]
-custom_minimum_size = Vector2(150, 44)
+custom_minimum_size = Vector2(132, 44)
 text = "攻擊"
 
 [node name="TransferButton" type="Button" parent="Margin/VBox/Actions"]
-custom_minimum_size = Vector2(150, 44)
+custom_minimum_size = Vector2(132, 44)
 text = "調動"
 
 [node name="EndTurnButton" type="Button" parent="Margin/VBox/Actions"]
-custom_minimum_size = Vector2(150, 44)
+custom_minimum_size = Vector2(132, 44)
 text = "結束回合"
 
 [node name="ResetButton" type="Button" parent="Margin/VBox/Actions"]
-custom_minimum_size = Vector2(150, 44)
+custom_minimum_size = Vector2(132, 44)
 text = "重置征服"
 
 [node name="BackButton" type="Button" parent="Margin/VBox/Actions"]
-custom_minimum_size = Vector2(150, 44)
+custom_minimum_size = Vector2(132, 44)
 text = "返回主選單"
