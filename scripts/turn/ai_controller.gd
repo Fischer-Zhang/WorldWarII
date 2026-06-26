@@ -8,6 +8,7 @@ const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
+const SecondaryObjectiveRules := preload("res://scripts/scenario/secondary_objective_rules.gd")
 
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
 # moves there, attacks if a target is available.
@@ -149,6 +150,51 @@ func plan_for_unit(unit) -> Dictionary:
 		"reachable": reachable,
 	}
 
+func plan_trace_for_unit(unit) -> Dictionary:
+	# Diagnostic mirror of plan_for_unit. It returns the selected plan plus
+	# deterministic per-candidate score components without changing AI state.
+	var plan: Dictionary = plan_for_unit(unit)
+	var atk_def: Dictionary = _get_unit_def(unit.type_id)
+	var known: Array = battle.get_known_enemies(unit.faction_id)
+	var visible_enemies: Array = []
+	for k in known:
+		if k.get("visible", false):
+			visible_enemies.append(k["unit"])
+	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
+	var candidates: Array = [unit.coord]
+	var reachable: Dictionary = plan.get("reachable", {})
+	for c in reachable.keys():
+		candidates.append(c)
+	var traces: Array[Dictionary] = []
+	for cand in candidates:
+		var coord: Vector2i = cand
+		var breakdown := _score_position_breakdown(
+			unit, coord, known, visible_enemies, battle.hex_map, atk_def, visible_hexes
+		)
+		var target = _best_attack_from(
+			coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes, unit
+		)
+		var attack_value: float = _best_attack_value(unit, coord, visible_enemies, battle.hex_map, atk_def, visible_hexes)
+		var overwatch_value: float = _overwatch_score(unit, coord, visible_enemies, battle.hex_map, atk_def, int(atk_def.get("range", 1)))
+		var rally_value: float = _rally_score(unit, coord, battle.hex_map, atk_def)
+		traces.append({
+			"coord": coord,
+			"target": target,
+			"base_score": float(breakdown.total),
+			"overwatch_score": float(breakdown.total) - attack_value + overwatch_value,
+			"rally_score": rally_value,
+			"components": breakdown,
+		})
+	traces.sort_custom(func(a, b):
+		return _trace_sort_score(a) > _trace_sort_score(b)
+	)
+	_player_reach_cache.clear()
+	return {
+		"unit": unit,
+		"plan": plan,
+		"candidates": traces,
+	}
+
 func _score_position(
 	unit,
 	pos: Vector2i,
@@ -158,6 +204,19 @@ func _score_position(
 	atk_def: Dictionary,
 	visible_hexes: Dictionary,
 ) -> float:
+	return float(_score_position_breakdown(
+		unit, pos, known, visible_enemies, hex_map, atk_def, visible_hexes
+	).total)
+
+func _score_position_breakdown(
+	unit,
+	pos: Vector2i,
+	known: Array,
+	visible_enemies: Array,
+	hex_map,
+	atk_def: Dictionary,
+	visible_hexes: Dictionary,
+) -> Dictionary:
 	# Distance term: use the best known position (memory or current).
 	var nearest := 9999
 	for k in known:
@@ -205,8 +264,25 @@ func _score_position(
 		var counter_dmg: int = _lookahead_counter_damage(unit, pos, visible_enemies, hex_map, atk_def)
 		lookahead_term = -float(counter_dmg) * W_LOOKAHEAD
 
-	var total: float = dist_term + attack_term + exposure_term + terrain_term + role_term + objective_term + lookahead_term
-	return _apply_personality(total, attack_term, exposure_term)
+	var raw_total: float = dist_term + attack_term + exposure_term + terrain_term + role_term + objective_term + lookahead_term
+	var total := _apply_personality(raw_total, attack_term, exposure_term)
+	return {
+		"distance": dist_term,
+		"attack": attack_term,
+		"exposure": exposure_term,
+		"terrain": terrain_term,
+		"role": role_term,
+		"objective": objective_term,
+		"lookahead": lookahead_term,
+		"raw_total": raw_total,
+		"total": total,
+	}
+
+func _trace_sort_score(trace: Dictionary) -> float:
+	return max(
+		float(trace.get("base_score", -INF)),
+		max(float(trace.get("overwatch_score", -INF)), float(trace.get("rally_score", -INF)))
+	)
 
 func _rally_score(unit, pos: Vector2i, hex_map, atk_def: Dictionary) -> float:
 	if unit.suppression <= 0 or pos != unit.coord:
@@ -534,13 +610,12 @@ func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> f
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
-		var objective_faction := String(objective.get("faction", faction_id))
-		if objective_faction != "" and objective_faction != faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
-		var target_coord_value: Variant = _secondary_objective_target_coord(objective)
+		var target_coord_value: Variant = SecondaryObjectiveRules.target_coord(objective, battle.units)
 		if target_coord_value == null:
 			continue
 		var target_coord: Vector2i = target_coord_value
@@ -552,26 +627,13 @@ func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> f
 	return best
 
 func _secondary_objective_position_weight(objective: Dictionary) -> float:
-	match String(objective.get("type", "capture")):
+	match SecondaryObjectiveRules.objective_type(objective):
 		"recon_hex":
 			return W_SECONDARY_RECON_OBJECTIVE
 		"destroy_unit":
 			return W_SECONDARY_DESTROY_OBJECTIVE
 		_:
 			return W_SECONDARY_OBJECTIVE
-
-func _secondary_objective_target_coord(objective: Dictionary) -> Variant:
-	if String(objective.get("type", "capture")) == "destroy_unit":
-		var target_unit = _secondary_objective_target_unit(objective)
-		if target_unit != null:
-			return target_unit.coord
-		return null
-	var target: Variant = objective.get("target", [])
-	if typeof(target) != TYPE_ARRAY or target.size() < 2:
-		return null
-	var col := int(target[0])
-	var row := int(target[1])
-	return Vector2i(col - (row >> 1), row)
 
 func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
 	if enemy == null:
@@ -587,40 +649,16 @@ func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
-		if String(objective.get("type", "capture")) != "destroy_unit":
+		if SecondaryObjectiveRules.objective_type(objective) != "destroy_unit":
 			continue
-		var objective_faction := String(objective.get("faction", faction_id))
-		if objective_faction != "" and objective_faction != faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
-		if _secondary_target_matches_unit(objective, enemy):
+		if SecondaryObjectiveRules.target_matches_unit(objective, enemy):
 			return SECONDARY_DESTROY_TARGET_BONUS
 	return 0.0
-
-func _secondary_objective_target_unit(objective: Dictionary):
-	for u in battle.units:
-		var unit = u
-		if unit.is_alive() and _secondary_target_matches_unit(objective, unit):
-			return unit
-	return null
-
-func _secondary_target_matches_unit(objective: Dictionary, unit) -> bool:
-	var target_unit := String(objective.get("target_unit", ""))
-	if target_unit == "":
-		return false
-	var scenario_unit_id := ""
-	var scenario_id_value: Variant = unit.get("scenario_unit_id")
-	if typeof(scenario_id_value) == TYPE_STRING:
-		scenario_unit_id = String(scenario_id_value)
-	if target_unit == scenario_unit_id:
-		return true
-	if target_unit == String(unit.get("display_name")):
-		return true
-	if target_unit == "%s:%s" % [String(unit.get("faction_id")), String(unit.get("display_name"))]:
-		return true
-	return false
 
 # ---------- 1-ply lookahead ----------
 

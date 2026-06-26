@@ -456,5 +456,39 @@ func _init() -> void:
 			% [toward_urban, toward_plain]
 		)
 
+	# 16) Plan trace should explain the same selected plan without changing the decision.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var trace_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var trace_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	battle.units = [trace_attacker, trace_target]
+	battle.hex_map.occupants[trace_attacker.coord] = trace_attacker
+	battle.hex_map.occupants[trace_target.coord] = trace_target
+	battle.visibility_by_faction = {"axis": {trace_target.coord: true}}
+	var trace: Dictionary = ai.plan_trace_for_unit(trace_attacker)
+	var traced_plan: Dictionary = trace.get("plan", {})
+	var direct_plan: Dictionary = ai.plan_for_unit(trace_attacker)
+	var candidates: Array = trace.get("candidates", [])
+	var top: Dictionary = candidates[0] if not candidates.is_empty() else {}
+	var components: Dictionary = top.get("components", {})
+	if traced_plan.get("move_to") == direct_plan.get("move_to") \
+			and traced_plan.get("action") == direct_plan.get("action") \
+			and traced_plan.get("attack") == direct_plan.get("attack") \
+			and not candidates.is_empty() \
+			and top.has("coord") \
+			and components.has("distance") \
+			and components.has("attack") \
+			and components.has("total") \
+			and abs(float(traced_plan.get("score", 0.0)) - float(top.get("base_score", 0.0))) < 0.001:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: plan trace should mirror direct plan and expose score components, trace=%s direct=%s" % [
+			str(trace), str(direct_plan),
+		])
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

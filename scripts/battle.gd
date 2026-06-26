@@ -21,6 +21,7 @@ const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
 const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
+const SecondaryObjectiveRules := preload("res://scripts/scenario/secondary_objective_rules.gd")
 const ActionLog := preload("res://scripts/scenario/action_log.gd")
 const AIController := preload("res://scripts/turn/ai_controller.gd")
 const DamagePopup := preload("res://scripts/ui/damage_popup.gd")
@@ -1392,7 +1393,7 @@ func _apply_player_objective_pulse() -> void:
 			continue
 		var v: Dictionary = victory_cfg.get(fid, {})
 		if String(v.get("type", "")) == "capture":
-			var coord_value: Variant = _coord_from_offset_array(v.get("target", []))
+			var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(v.get("target", []))
 			if coord_value != null:
 				markers.append({"coord": coord_value, "kind": "primary", "label": "勝利格"})
 		break
@@ -1401,11 +1402,10 @@ func _apply_player_objective_pulse() -> void:
 		if typeof(secondary_objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = secondary_objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		var objective_faction := String(objective.get("faction", player_faction_id))
-		if objective_faction != "" and objective_faction != player_faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, player_faction_id, player_faction_id):
 			continue
 		var coord_value: Variant = _secondary_objective_marker_coord(objective)
 		if coord_value != null:
@@ -1416,19 +1416,8 @@ func _apply_player_objective_pulse() -> void:
 			})
 	hex_map.set_objective_markers(markers)
 
-func _coord_from_offset_array(value) -> Variant:
-	if typeof(value) != TYPE_ARRAY or value.size() < 2:
-		return null
-	var col := int(value[0])
-	var row := int(value[1])
-	return Vector2i(col - (row >> 1), row)
-
 func _secondary_objective_marker_coord(objective: Dictionary) -> Variant:
-	if _secondary_objective_type(objective) == "destroy_unit":
-		var target: Unit = _secondary_objective_target_unit(objective)
-		if target != null:
-			return target.coord
-	return _coord_from_offset_array(objective.get("target", []))
+	return SecondaryObjectiveRules.target_coord(objective, units)
 
 func _check_secondary_objective_capture(unit: Unit) -> String:
 	if unit == null or not unit.is_alive():
@@ -1438,15 +1427,14 @@ func _check_secondary_objective_capture(unit: Unit) -> String:
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if _secondary_objective_type(objective) != "capture":
+		if SecondaryObjectiveRules.objective_type(objective) != "capture":
 			continue
-		var faction_id := String(objective.get("faction", unit.faction_id))
-		if faction_id != "" and faction_id != unit.faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, unit.faction_id, unit.faction_id):
 			continue
-		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		var target_value: Variant = SecondaryObjectiveRules.target_coord(objective)
 		if target_value == null or unit.coord != target_value:
 			continue
 		return _complete_secondary_objective(unit, objective, key, "佔領")
@@ -1459,19 +1447,18 @@ func _check_secondary_objective_hold_turns(faction_id: String) -> Array[String]:
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if _secondary_objective_type(objective) != "hold_turns":
+		if SecondaryObjectiveRules.objective_type(objective) != "hold_turns":
 			continue
-		var objective_faction := String(objective.get("faction", faction_id))
-		if objective_faction != "" and objective_faction != faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
-		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		var target_value: Variant = SecondaryObjectiveRules.target_coord(objective)
 		if target_value == null:
 			continue
 		var holder: Unit = _unit_holding_coord(faction_id, target_value)
-		var required_turns: int = max(1, int(objective.get("required_turns", 1)))
+		var required_turns := SecondaryObjectiveRules.required_turns(objective)
 		var label := String(objective.get("label", key))
 		if holder == null:
 			if int(secondary_objective_progress.get(key, 0)) > 0:
@@ -1495,15 +1482,14 @@ func _check_secondary_objective_destroy_unit(killer: Unit, destroyed: Unit) -> S
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if _secondary_objective_type(objective) != "destroy_unit":
+		if SecondaryObjectiveRules.objective_type(objective) != "destroy_unit":
 			continue
-		var objective_faction := String(objective.get("faction", killer.faction_id))
-		if objective_faction != "" and objective_faction != killer.faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, killer.faction_id, killer.faction_id):
 			continue
-		if not _secondary_target_matches_unit(objective, destroyed):
+		if not SecondaryObjectiveRules.target_matches_unit(objective, destroyed):
 			continue
 		return _complete_secondary_objective(killer, objective, key, "摧毀")
 	return ""
@@ -1520,15 +1506,14 @@ func _check_secondary_objective_recon_hex(faction_id: String) -> Array[String]:
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if _secondary_objective_type(objective) != "recon_hex":
+		if SecondaryObjectiveRules.objective_type(objective) != "recon_hex":
 			continue
-		var objective_faction := String(objective.get("faction", faction_id))
-		if objective_faction != "" and objective_faction != faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
-		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		var target_value: Variant = SecondaryObjectiveRules.target_coord(objective)
 		if target_value == null or not visible.has(target_value):
 			continue
 		var spotter: Unit = _nearest_unit_with_visibility(faction_id, target_value)
@@ -1539,13 +1524,13 @@ func _check_secondary_objective_recon_hex(faction_id: String) -> Array[String]:
 func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: String, verb: String) -> String:
 	captured_secondary_objectives[key] = true
 	secondary_objective_progress.erase(key)
-	var rewards := _secondary_objective_rewards(objective)
-	var xp_reward := _secondary_objective_xp_reward(rewards)
+	var rewards := SecondaryObjectiveRules.rewards(objective)
+	var xp_reward := SecondaryObjectiveRules.xp_reward(rewards)
 	if xp_reward > 0:
 		unit.gain_xp(xp_reward)
 	action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
 	var label := String(objective.get("label", key))
-	var reward_text := _secondary_objective_reward_text(rewards)
+	var reward_text := SecondaryObjectiveRules.reward_text(rewards)
 	_apply_player_objective_pulse()
 	return "%s %s %s (%s)" % [unit.display_name, verb, label, reward_text]
 
@@ -1574,30 +1559,8 @@ func _nearest_unit_with_visibility(faction_id: String, coord: Vector2i) -> Unit:
 			best_distance = dist
 	return best
 
-func _secondary_target_matches_unit(objective: Dictionary, unit: Unit) -> bool:
-	var target_unit := String(objective.get("target_unit", ""))
-	if target_unit == "":
-		return false
-	if target_unit == unit.scenario_unit_id:
-		return true
-	if target_unit == unit.display_name:
-		return true
-	if target_unit == "%s:%s" % [unit.faction_id, unit.display_name]:
-		return true
-	return false
-
-func _secondary_objective_target_unit(objective: Dictionary) -> Unit:
-	for u in units:
-		var unit: Unit = u
-		if unit.is_alive() and _secondary_target_matches_unit(objective, unit):
-			return unit
-	return null
-
-func _secondary_objective_type(objective: Dictionary) -> String:
-	return String(objective.get("type", "capture"))
-
 func _secondary_objective_required_turns(objective: Dictionary) -> int:
-	return max(1, int(objective.get("required_turns", 1)))
+	return SecondaryObjectiveRules.required_turns(objective)
 
 func _secondary_objective_progress_text(objective: Dictionary, key: String) -> String:
 	var progress: int = int(secondary_objective_progress.get(key, 0))
@@ -1606,7 +1569,7 @@ func _secondary_objective_progress_text(objective: Dictionary, key: String) -> S
 
 func _secondary_objective_marker_label(objective: Dictionary, key: String) -> String:
 	var label := String(objective.get("label", key))
-	match _secondary_objective_type(objective):
+	match SecondaryObjectiveRules.objective_type(objective):
 		"hold_turns":
 			return "守備:%s %s" % [label, _secondary_objective_progress_text(objective, key)]
 		"destroy_unit":
@@ -1626,11 +1589,10 @@ func _secondary_objective_status_summary(faction_id: String) -> String:
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
 		var objective: Dictionary = objectives[i]
-		var key := String(objective.get("id", "secondary_%d" % i))
+		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		var objective_faction := String(objective.get("faction", faction_id))
-		if objective_faction != "" and objective_faction != faction_id:
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
 		if parts.size() >= 2:
 			skipped += 1
@@ -1642,8 +1604,8 @@ func _secondary_objective_status_summary(faction_id: String) -> String:
 
 func _secondary_objective_status_text(objective: Dictionary, key: String) -> String:
 	var label := String(objective.get("label", key))
-	var reward_text := _secondary_objective_reward_text(_secondary_objective_rewards(objective))
-	match _secondary_objective_type(objective):
+	var reward_text := SecondaryObjectiveRules.reward_text(SecondaryObjectiveRules.rewards(objective))
+	match SecondaryObjectiveRules.objective_type(objective):
 		"hold_turns":
 			return "守備:%s %s %s" % [label, _secondary_objective_progress_text(objective, key), reward_text]
 		"destroy_unit":
@@ -1652,42 +1614,6 @@ func _secondary_objective_status_text(objective: Dictionary, key: String) -> Str
 			return "偵察:%s %s" % [label, reward_text]
 		_:
 			return "佔領:%s %s" % [label, reward_text]
-
-func _secondary_objective_rewards(objective: Dictionary) -> Array[Dictionary]:
-	var rewards: Array[Dictionary] = []
-	var raw_rewards: Array = objective.get("rewards", [])
-	for raw in raw_rewards:
-		if typeof(raw) != TYPE_DICTIONARY:
-			continue
-		var reward: Dictionary = raw
-		var reward_type := String(reward.get("type", ""))
-		var amount := int(reward.get("amount", 0))
-		if reward_type == "" or amount <= 0:
-			continue
-		rewards.append({"type": reward_type, "amount": amount})
-	var legacy_xp := int(objective.get("xp_reward", 0))
-	if legacy_xp > 0 and _secondary_objective_xp_reward(rewards) <= 0:
-		rewards.append({"type": "xp", "amount": legacy_xp})
-	return rewards
-
-func _secondary_objective_xp_reward(rewards: Array[Dictionary]) -> int:
-	var total := 0
-	for reward in rewards:
-		if String(reward.get("type", "")) == "xp":
-			total += int(reward.get("amount", 0))
-	return total
-
-func _secondary_objective_reward_text(rewards: Array[Dictionary]) -> String:
-	var parts: Array[String] = []
-	for reward in rewards:
-		var reward_type := String(reward.get("type", ""))
-		var amount := int(reward.get("amount", 0))
-		match reward_type:
-			"xp":
-				parts.append("XP +%d" % amount)
-	if parts.is_empty():
-		return "已控制"
-	return ", ".join(parts)
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 	# As `mover` passes through each hex along `path`, every watcher that
