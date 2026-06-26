@@ -76,6 +76,7 @@ Key settings in `project.godot`:
 |---|---|
 | Main scene | `res://scenes/main_menu.tscn` |
 | Window | `1280x720`, `canvas_items` stretch, `expand` aspect |
+| UI layout contract | Desktop-first at `1280x720` and `1366x768`; smaller windows are not currently guaranteed |
 | Renderer | `gl_compatibility` for desktop and mobile |
 | Autoloads | `DataLoader`, `GameState`, `AudioBank`, `ScreenshotHelper` |
 | Camera input | WASD actions mapped as `ui_camera_pan_*` |
@@ -205,7 +206,7 @@ tools/validate.sh
 - `git diff --check`.
 - 159 headless GDScript checks through `bash tests/run_all.sh`.
 
-The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest.
+The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract.
 
 Install the local pre-commit validation hook:
 

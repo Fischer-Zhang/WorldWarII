@@ -237,6 +237,11 @@ Headless GDScript coverage currently includes combat, AI, pathfinding, visibilit
 
 It checks required nodes and collapsed visible controls. This is intended to catch broken node paths, missing preloads and obvious UI regressions early.
 
+`tests/test_ui_layout.gd` checks the same major screens at the supported desktop
+viewport contract (`1280x720` and `1366x768`) and fails when visible containers,
+buttons, labels, panels or scroll views leave the viewport. Scroll contents are
+allowed to extend inside their scroll container.
+
 ## Adding A Feature
 
 Typical touch list:
