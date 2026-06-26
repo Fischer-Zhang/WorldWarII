@@ -29,7 +29,14 @@ ROLE_BY_TYPE = {
     "light_tank": "scout_armor",
     "medium_tank": "armor",
     "artillery": "artillery",
+    "engineer": "engineer",
+    "paratrooper": "infantry",
+    "tank_destroyer": "anti_armor",
+    "heavy_tank": "armor",
+    "rocket_artillery": "artillery",
 }
+
+BREACH_TYPES = ("engineer", "artillery", "rocket_artillery")
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -99,8 +106,10 @@ def faction_rows(scenario: dict[str, Any], units: dict[str, Any]) -> tuple[list[
         armor_count = 0
         anti_armor_count = 0
         artillery_count = 0
+        unit_counts: collections.Counter[str] = collections.Counter()
         for unit in roster:
             unit_type = str(unit.get("type", ""))
+            unit_counts[unit_type] += 1
             role = ROLE_BY_TYPE.get(unit_type, unit_type)
             role_counts[role] += 1
             power += unit_power(unit_type, units)
@@ -117,6 +126,7 @@ def faction_rows(scenario: dict[str, Any], units: dict[str, Any]) -> tuple[list[
             "armor": armor_count,
             "anti_armor": anti_armor_count,
             "artillery": artillery_count,
+            "unit_counts": unit_counts,
         }
         rows.append([
             fid,
@@ -157,6 +167,32 @@ def terrain_summary(scenario: dict[str, Any], terrains: dict[str, Any]) -> str:
     return f"{top}; def>=2 {defensive / total:.0%}; move>=3 {slow / total:.0%}"
 
 
+def needs_urban_breach(scenario: dict[str, Any], faction_id: str) -> bool:
+    victory = scenario.get("victory", {})
+    objective = victory.get(faction_id, {})
+    objective_type = str(objective.get("type", ""))
+    return objective_type in {"capture", "eliminate"}
+
+
+def breach_tool_count(summary: dict[str, Any]) -> int:
+    unit_counts: collections.Counter[str] = summary.get("unit_counts", collections.Counter())
+    return sum(unit_counts.get(unit_type, 0) for unit_type in BREACH_TYPES)
+
+
+def urban_breach_summary(faction_summary: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for fid, summary in faction_summary.items():
+        unit_counts: collections.Counter[str] = summary.get("unit_counts", collections.Counter())
+        values = [
+            f"eng {unit_counts.get('engineer', 0)}",
+            f"art {unit_counts.get('artillery', 0)}",
+            f"rocket {unit_counts.get('rocket_artillery', 0)}",
+            f"mg {unit_counts.get('mg_team', 0)}",
+        ]
+        parts.append(f"{fid}: " + ", ".join(values))
+    return "; ".join(parts) if parts else "n/a"
+
+
 def risk_notes(scenario: dict[str, Any], faction_summary: dict[str, Any], terrains: dict[str, Any]) -> str:
     notes: list[str] = []
     counts = terrain_counts(scenario)
@@ -166,6 +202,14 @@ def risk_notes(scenario: dict[str, Any], faction_summary: dict[str, Any], terrai
     forest_pct = counts.get("forest", 0) / total_tiles
     if town_pct >= 0.25:
         notes.append("high town density: dig-in pacing risk")
+        for fid, summary in faction_summary.items():
+            if not needs_urban_breach(scenario, fid):
+                continue
+            unit_counts: collections.Counter[str] = summary.get("unit_counts", collections.Counter())
+            if breach_tool_count(summary) == 0:
+                notes.append(f"{fid} lacks breach tools for urban objective")
+            elif town_pct >= 0.40 and unit_counts.get("engineer", 0) == 0:
+                notes.append(f"{fid} has no engineers for dense urban breach")
     if forest_pct >= 0.20:
         notes.append("high forest density: LOS and breakthrough tempo risk")
     if river_pct >= 0.07:
@@ -203,12 +247,14 @@ def generate_report() -> str:
     for scenario in scenarios:
         faction_table_rows, summary = faction_rows(scenario, units)
         terrain = terrain_summary(scenario, terrains)
+        breach = urban_breach_summary(summary)
         objective = objective_distance(scenario)
         risks = risk_notes(scenario, summary, terrains)
         overview_rows.append([
             scenario.get("id", ""),
             scenario.get("title", ""),
             terrain,
+            breach,
             objective,
             risks,
         ])
@@ -217,7 +263,9 @@ def generate_report() -> str:
             + table(["faction", "name", "controller", "units", "power", "roles"], faction_table_rows)
         )
 
-    sections.append("## Overview\n\n" + table(["scenario", "title", "terrain pressure", "objective distance", "risk notes"], overview_rows))
+    sections.append("## Overview\n\n" + table([
+        "scenario", "title", "terrain pressure", "urban breach tools", "objective distance", "risk notes",
+    ], overview_rows))
     sections.extend(detail_sections)
     return "\n\n".join(sections) + "\n"
 
