@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-272%2F272-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-274%2F274-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -19,7 +19,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 36 scenario JSON files: 30 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 4 campaigns, including tutorial campaign 0, and a 19-region conquest map |
-| Tests | 272 headless GDScript checks plus static data/report validators |
+| Tests | 274 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -206,7 +206,7 @@ tools/validate.sh
 - Generated diagnostics: unit balance report, scenario pressure report, scenario probe and tutorial probe.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 272 headless GDScript checks through `bash tests/run_all.sh`.
+- 274 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts and conquest source/target selection.
 
