@@ -16,8 +16,13 @@ def main() -> None:
     require("urban breach tools" in report, "scenario report missing urban breach tools column")
     require("03_stalingrad_1942" in report, "scenario report missing Stalingrad row")
     require(
-        "axis has no engineers for dense urban breach" in report,
-        "Stalingrad should flag Axis engineer gap in dense urban combat",
+        "axis: eng 1, art 1, rocket 0, mg 1" in report,
+        "Stalingrad should show Axis has an engineer and artillery after siege tuning",
+    )
+    require(
+        "03_stalingrad_1942 | 史達林格勒巷戰 1942" in report
+        and "high town density: dig-in pacing risk" in report,
+        "Stalingrad should still flag dense urban dig-in pacing risk",
     )
     require("east_10_berlin_1945" in report, "scenario report missing Berlin row")
     require(

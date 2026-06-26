@@ -332,7 +332,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | 00_sandbox | 3 | 1 | 1 | 1 | 2 | 1 | 0 | 0 | 2 | 2 | 2 |
 | 01_sedan_1940 | 5 | 2 | 1 | 1 | 3 | 1 | 0 | 0 | 0 | 0 | 0 |
 | 02_kiev_1941 | 5 | 1 | 2 | 1 | 4 | 2 | 0 | 0 | 1 | 0 | 0 |
-| 03_stalingrad_1942 | 6 | 3 | 2 | 1 | 1 | 1 | 0 | 0 | 1 | 0 | 1 |
+| 03_stalingrad_1942 | 5 | 3 | 2 | 1 | 1 | 1 | 0 | 1 | 1 | 0 | 1 |
 | 04_kursk_1943 | 3 | 0 | 4 | 1 | 7 | 2 | 0 | 0 | 2 | 1 | 0 |
 | 05_bastogne_1944 | 4 | 1 | 1 | 0 | 5 | 2 | 2 | 1 | 1 | 1 | 0 |
 | 06_market_garden_1944 | 3 | 2 | 2 | 0 | 4 | 2 | 3 | 1 | 1 | 0 | 0 |
@@ -365,7 +365,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 144 | 40 | 60 | 19 | 87 | 57 | 6 | 5 | 26 | 9 | 7 |
+| TOTAL | 143 | 40 | 60 | 19 | 87 | 57 | 6 | 6 | 26 | 9 | 7 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
