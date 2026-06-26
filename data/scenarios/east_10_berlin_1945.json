@@ -43,7 +43,7 @@
     {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [20, 0]},
     {"faction": "soviet", "type": "infantry", "name": "突擊步 1", "at": [1, 13], "general": "chuikov"},
     {"faction": "soviet", "type": "infantry", "name": "突擊步 2", "at": [2, 14]},
-    {"faction": "soviet", "type": "engineer", "name": "工兵營", "at": [3, 13]},
+    {"faction": "soviet", "type": "engineer", "name": "工兵營", "at": [8, 13]},
     {"faction": "soviet", "type": "medium_tank", "name": "T-34/85", "at": [1, 15], "general": "konev"},
     {"faction": "soviet", "type": "heavy_tank", "name": "IS-2", "at": [4, 14]},
     {"faction": "soviet", "type": "artillery", "name": "203 mm", "at": [0, 14], "general": "zhukov"},

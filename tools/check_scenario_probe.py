@@ -29,14 +29,14 @@ def main() -> None:
     )
     require(
         "east_10_berlin_1945" in report
-        and "soviet: eng min 17, art 0/3, targets 3" in report,
-        "Berlin breach probe should expose long Soviet engineer approach",
+        and "soviet: eng min 12, art 0/3, targets 3" in report,
+        "Berlin breach probe should show tuned Soviet engineer approach and artillery gap",
     )
     require(
         "east_10_berlin_1945" in report
-        and "soviet: eng turns 5" in report
+        and "soviet: eng turns 4" in report
         and "soviet: art move 0/3" in report,
-        "Berlin tempo probe should expose slow engineer and poor artillery access",
+        "Berlin tempo probe should show improved engineer timing and poor artillery access",
     )
     require(
         "tut_03_suppression_digin_engineer" in report
