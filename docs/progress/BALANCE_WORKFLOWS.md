@@ -49,7 +49,7 @@ Current rules established before large number changes:
 - ZoC cost is part of both movement range and path reconstruction.
 - Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
 - Damaging indirect fire gets +1 suppression when a same-faction light tank has LOS and vision to the target.
-- Pinned units cannot overwatch or build dig-in, heavier suppression reduces movement/attack, and artillery strips one dig-in level on damaging indirect hits.
+- Pinned units cannot overwatch or build dig-in, heavier suppression reduces movement/attack, indirect fire strips one dig-in level on damaging hits, and engineers strip up to two dig-in levels on damaging attacks.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
 
 These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.

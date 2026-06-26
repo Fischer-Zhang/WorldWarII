@@ -21,6 +21,9 @@ func _init() -> void:
 	var mg := {
 		"id": "mg_team", "hp": 8, "attack": 5, "defense": 2, "range": 1, "vs_armor": 1, "armor": 0
 	}
+	var engineer := {
+		"id": "engineer", "hp": 8, "attack": 3, "defense": 2, "range": 1, "vs_armor": 1, "armor": 0
+	}
 	var artillery := {
 		"id": "artillery", "hp": 8, "attack": 8, "defense": 1, "range": 3, "vs_armor": 2, "armor": 0,
 		"indirect": true
@@ -176,28 +179,38 @@ func _init() -> void:
 			r15.suppression_to_defender, r15.defender_dig_in_loss,
 		])
 
-	# 16) Lethal hits do not leave suppression on a removed defender.
-	var r16 := CombatResolver.resolve(mg, infantry, 8, 1, plain, plain, 1)
-	if r16.defender_dies and r16.suppression_to_defender == 0:
+	# 16) Engineers breach two dig-in levels on damaging attacks but keep normal suppression.
+	var r16 := CombatResolver.resolve(engineer, infantry, 8, 10, plain, town, 1, 3)
+	if r16.damage_to_defender > 0 and r16.suppression_to_defender == 1 and r16.defender_dig_in_loss == 2:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: engineer breach expected suppression=1 digloss=2 got dmg=%d suppression=%d digloss=%d" % [
+			r16.damage_to_defender, r16.suppression_to_defender, r16.defender_dig_in_loss,
+		])
+
+	# 17) Lethal hits do not leave suppression on a removed defender.
+	var r17 := CombatResolver.resolve(mg, infantry, 8, 1, plain, plain, 1)
+	if r17.defender_dies and r17.suppression_to_defender == 0:
 		pass_count += 1
 	else:
 		fail_count += 1
 		printerr("FAIL: lethal suppression expected 0 got died=%s suppression=%d" % [
-			r16.defender_dies, r16.suppression_to_defender,
+			r17.defender_dies, r17.suppression_to_defender,
 		])
 
-	# 17) suppress_counter=true skips the counter even when defender survives.
+	# 18) suppress_counter=true skips the counter even when defender survives.
 	#     Used by general active skills like Rommel's 閃電進攻.
-	var r17 := CombatResolver.resolve(
+	var r18 := CombatResolver.resolve(
 		infantry, infantry, 10, 10, plain, plain, 1,
 		0, {}, {}, true
 	)
-	if r17.damage_to_defender == 2 and r17.counter_damage == 0:
+	if r18.damage_to_defender == 2 and r18.counter_damage == 0:
 		pass_count += 1
 	else:
 		fail_count += 1
 		printerr("FAIL: suppress_counter expected dmg=2 counter=0 got dmg=%d counter=%d" % [
-			r17.damage_to_defender, r17.counter_damage
+			r18.damage_to_defender, r18.counter_damage
 		])
 
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])

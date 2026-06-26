@@ -100,9 +100,16 @@ def suppression_for_attack(attacker_id: str, attacker: dict[str, Any], damage: i
     return base
 
 
-def dig_in_loss_for_attack(attacker: dict[str, Any], damage: int, defender_dig_in: int) -> int:
+def dig_in_loss_for_attack(
+    attacker_id: str,
+    attacker: dict[str, Any],
+    damage: int,
+    defender_dig_in: int,
+) -> int:
     if damage <= 0 or defender_dig_in <= 0:
         return 0
+    if attacker_id == "engineer":
+        return min(2, defender_dig_in)
     return 1 if bool(attacker.get("indirect", False)) else 0
 
 
@@ -139,7 +146,7 @@ def resolve(
     defender_after = defender_hp - damage
     defender_dies = defender_after <= 0
     suppression = suppression_for_attack(attacker_id, attacker, damage, defender_dies)
-    dig_in_loss = dig_in_loss_for_attack(attacker, damage, defender_dig_in)
+    dig_in_loss = dig_in_loss_for_attack(attacker_id, attacker, damage, defender_dig_in)
     counter = 0
     attacker_dies = False
 
@@ -587,7 +594,7 @@ def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
     sections.append(
         "## Suppression / Dig-In Break Matrix\n\n"
         "Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. "
-        "MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level when it damages an entrenched target.\n\n"
+        "MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level, while engineers strip up to two levels when they damage an entrenched target.\n\n"
         + effect_matrix(units, terrains, "town", 2)
     )
     sections.append(

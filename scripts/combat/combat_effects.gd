@@ -40,6 +40,8 @@ static func spotter_suppression_bonus(
 static func dig_in_loss_for_attack(atk_def: Dictionary, damage: int, defender_dig_in: int) -> int:
 	if damage <= 0 or defender_dig_in <= 0:
 		return 0
+	if String(atk_def.get("id", "")) == "engineer":
+		return min(2, defender_dig_in)
 	return 1 if atk_def.get("indirect", false) else 0
 
 static func apply_suppression(current: int, added: int) -> int:

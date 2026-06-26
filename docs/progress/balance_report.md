@@ -103,7 +103,7 @@ Cell format is `damage/counter`.
 
 ## Suppression / Dig-In Break Matrix
 
-Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level when it damages an entrenched target.
+Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level, while engineers strip up to two levels when they damage an entrenched target.
 
 | atk \ def | 步兵 | 機槍組 | 反戰車砲 | 輕戰車 | 中戰車 | 砲兵 | 傘兵 | 工兵 | 驅逐戰車 | 重戰車 | 火箭砲 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -114,7 +114,7 @@ Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in l
 | 中戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
 | 砲兵 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 |
 | 傘兵 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
-| 工兵 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
+| 工兵 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 | S1/D2 |
 | 驅逐戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
 | 重戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
 | 火箭砲 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 |
@@ -132,7 +132,7 @@ Town breach cells simulate repeated attacks into town+dig3 without defender reco
 | 中戰車 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
 | 砲兵 | 1 dmg S3/D1; clear 3; kill 7 | 1 dmg S3/D1; clear 3; kill 5 | 1 dmg S3/D1; clear 3; kill 4 | 1 dmg S3/D1; clear 3; kill >12 |
 | 傘兵 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
-| 工兵 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 工兵 | 1 dmg S1/D2; clear 2; kill 10 | 1 dmg S1/D2; clear 2; kill 8 | 1 dmg S1/D2; clear 2; kill 6 | 1 dmg S1/D2; clear 2; kill >12 |
 | 驅逐戰車 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
 | 重戰車 | 1 dmg S1/D0; clear --; kill 10 | 2 dmg S1/D0; clear --; kill 4 | 2 dmg S1/D0; clear --; kill 3 | 5 dmg S1/D0; clear --; kill 4 |
 | 火箭砲 | 1 dmg S3/D1; clear 3; kill 10 | 1 dmg S3/D1; clear 3; kill 6 | 1 dmg S3/D1; clear 3; kill 5 | 1 dmg S3/D1; clear 3; kill >12 |
