@@ -16,7 +16,7 @@ MAX_SUPPRESSION = 5
 MAX_DIG_IN = 3
 MAX_RANK = 3
 ALLOWED_SECONDARY_REWARD_TYPES = {"xp"}
-ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns"}
+ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
     "attack",
@@ -60,6 +60,24 @@ def offset_to_axial(at: list[Any]) -> tuple[int, int]:
 
 def fail(errors: list[str], path: Path, message: str) -> None:
     errors.append(f"{path.relative_to(ROOT)}: {message}")
+
+
+def secondary_target_unit_exists(scenario: dict[str, Any], target_unit: str) -> bool:
+    if not target_unit:
+        return False
+    for collection in ("units", "reinforcements"):
+        entries = scenario.get(collection, [])
+        if not isinstance(entries, list):
+            continue
+        for unit in entries:
+            if not isinstance(unit, dict):
+                continue
+            unit_id = str(unit.get("id", ""))
+            unit_name = str(unit.get("name", ""))
+            unit_faction = str(unit.get("faction", ""))
+            if target_unit in {unit_id, unit_name, f"{unit_faction}:{unit_name}"}:
+                return True
+    return False
 
 
 def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
@@ -241,15 +259,22 @@ def validate_scenario(
             faction_id = str(objective.get("faction", ""))
             if faction_id and faction_id not in faction_ids:
                 fail(errors, path, f"secondary_objectives[{index}] references unknown faction {faction_id!r}")
-            target = objective.get("target", [])
-            if not in_bounds(target, width, height):
-                fail(errors, path, f"secondary_objectives[{index}] target out of bounds: {target!r}")
+            if objective_type in {"capture", "hold_turns", "recon_hex"}:
+                target = objective.get("target", [])
+                if not in_bounds(target, width, height):
+                    fail(errors, path, f"secondary_objectives[{index}] target out of bounds: {target!r}")
             if objective_type == "hold_turns":
                 try:
                     if int(objective.get("required_turns", 0)) <= 0:
                         fail(errors, path, f"secondary_objectives[{index}] required_turns must be positive")
                 except (TypeError, ValueError):
                     fail(errors, path, f"secondary_objectives[{index}] required_turns must be an integer")
+            if objective_type == "destroy_unit":
+                target_unit = str(objective.get("target_unit", ""))
+                if not target_unit:
+                    fail(errors, path, f"secondary_objectives[{index}] target_unit is required")
+                elif not secondary_target_unit_exists(scenario, target_unit):
+                    fail(errors, path, f"secondary_objectives[{index}] target_unit {target_unit!r} not found")
             try:
                 if int(objective.get("xp_reward", 0)) < 0:
                     fail(errors, path, f"secondary_objectives[{index}] xp_reward must be non-negative")

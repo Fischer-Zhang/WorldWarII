@@ -47,6 +47,7 @@ static func create_unit(data: Dictionary, factions: Dictionary) -> Unit:
 	var unit: Unit = Unit.new()
 	var color: Color = factions.get(faction_id, {}).get("color", Color.WHITE)
 	unit.configure(type_id, faction_id, color, coord, unit_name)
+	unit.scenario_unit_id = String(data.get("id", ""))
 	unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
 	# Optional: attach a named general (data lookup in CombatModifiers).
 	var general_id := String(data.get("general", ""))

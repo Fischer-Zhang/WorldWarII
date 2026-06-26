@@ -32,6 +32,7 @@ const GENERAL_QUALITY_COLOR := {
 }
 
 var type_id: String = ""
+var scenario_unit_id: String = ""
 var display_name: String = ""
 var faction_id: String = ""
 var faction_color: Color = Color.WHITE

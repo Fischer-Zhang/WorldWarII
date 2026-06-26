@@ -1043,18 +1043,25 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		else:
 			defender.gain_xp(1)
 
+	var destroy_messages: Array[String] = []
 	if not defender.is_alive():
 		hex_map.unregister_unit(defender)
 		hex_map.place_wreckage(defender.coord, defender.faction_color)
 		defender.play_death_animation()
 		AudioBank.play("death")
 		msg += " — %s 陣亡" % defender.display_name
+		var defender_destroy_text := _check_secondary_objective_destroy_unit(attacker, defender)
+		if defender_destroy_text != "":
+			destroy_messages.append(defender_destroy_text)
 	if not attacker.is_alive():
 		hex_map.unregister_unit(attacker)
 		hex_map.place_wreckage(attacker.coord, attacker.faction_color)
 		attacker.play_death_animation()
 		AudioBank.play("death")
 		msg += " — %s 陣亡" % attacker.display_name
+		var attacker_destroy_text := _check_secondary_objective_destroy_unit(defender, attacker)
+		if attacker_destroy_text != "":
+			destroy_messages.append(attacker_destroy_text)
 	else:
 		attacker.has_attacked = true
 		attacker.queue_redraw()
@@ -1062,6 +1069,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var splashed := _apply_splash(attacker, atk_def, defender.coord, defender)
 	if splashed > 0:
 		msg += " — 範圍波及 %d 單位" % splashed
+	if not destroy_messages.is_empty():
+		msg += "；%s" % "；".join(destroy_messages)
 
 	# Garbage-collect dead units from our roster
 	units = units.filter(func(u): return u.is_alive())
@@ -1465,6 +1474,55 @@ func _check_secondary_objective_hold_turns(faction_id: String) -> Array[String]:
 	_apply_player_objective_pulse()
 	return messages
 
+func _check_secondary_objective_destroy_unit(killer: Unit, destroyed: Unit) -> String:
+	if killer == null or destroyed == null:
+		return ""
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		if _secondary_objective_type(objective) != "destroy_unit":
+			continue
+		var objective_faction := String(objective.get("faction", killer.faction_id))
+		if objective_faction != "" and objective_faction != killer.faction_id:
+			continue
+		if not _secondary_target_matches_unit(objective, destroyed):
+			continue
+		return _complete_secondary_objective(killer, objective, key, "摧毀")
+	return ""
+
+func _check_secondary_objective_recon_hex(faction_id: String) -> Array[String]:
+	var messages: Array[String] = []
+	if faction_id == "":
+		return messages
+	var visible: Dictionary = visibility_by_faction.get(faction_id, {})
+	if visible.is_empty():
+		return messages
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		if _secondary_objective_type(objective) != "recon_hex":
+			continue
+		var objective_faction := String(objective.get("faction", faction_id))
+		if objective_faction != "" and objective_faction != faction_id:
+			continue
+		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		if target_value == null or not visible.has(target_value):
+			continue
+		var spotter: Unit = _nearest_unit_with_visibility(faction_id, target_value)
+		if spotter != null:
+			messages.append(_complete_secondary_objective(spotter, objective, key, "偵察"))
+	return messages
+
 func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: String, verb: String) -> String:
 	captured_secondary_objectives[key] = true
 	secondary_objective_progress.erase(key)
@@ -1484,6 +1542,36 @@ func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
 		if unit.is_alive() and unit.faction_id == faction_id and unit.coord == coord:
 			return unit
 	return null
+
+func _nearest_unit_with_visibility(faction_id: String, coord: Vector2i) -> Unit:
+	var best: Unit = null
+	var best_distance := 9999
+	for u in units:
+		var unit: Unit = u
+		if not unit.is_alive() or unit.faction_id != faction_id:
+			continue
+		var dist := HexCoord.distance(unit.coord, coord)
+		var unit_def: Dictionary = DataLoader.get_unit_def(unit.type_id)
+		if dist > int(unit_def.get("vision", 3)):
+			continue
+		if not Visibility.has_los(unit.coord, coord, hex_map, faction_id):
+			continue
+		if dist < best_distance:
+			best = unit
+			best_distance = dist
+	return best
+
+func _secondary_target_matches_unit(objective: Dictionary, unit: Unit) -> bool:
+	var target_unit := String(objective.get("target_unit", ""))
+	if target_unit == "":
+		return false
+	if target_unit == unit.scenario_unit_id:
+		return true
+	if target_unit == unit.display_name:
+		return true
+	if target_unit == "%s:%s" % [unit.faction_id, unit.display_name]:
+		return true
+	return false
 
 func _secondary_objective_type(objective: Dictionary) -> String:
 	return String(objective.get("type", "capture"))
@@ -1687,6 +1775,10 @@ func _recompute_visibility() -> void:
 	# Render only the player's fog overlay.
 	if player_faction_id != "":
 		hex_map.apply_visibility(visibility_by_faction[player_faction_id], player_faction_id)
+	for fid in factions.keys():
+		var messages := _check_secondary_objective_recon_hex(String(fid))
+		if not messages.is_empty() and String(fid) == player_faction_id and phase != Phase.GAME_OVER:
+			_set_prompt("次要目標", "；".join(messages))
 
 func get_known_enemies(faction_id: String) -> Array:
 	# Returns Array of {unit: Unit, coord: Vector2i, visible: bool}.

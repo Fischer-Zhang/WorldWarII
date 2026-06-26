@@ -277,6 +277,75 @@ func _run() -> void:
 			battle.captured_secondary_objectives.clear()
 			battle.secondary_objective_progress.clear()
 
+		# Destroy-unit and recon secondary objectives complete from combat and visibility events.
+		var unit_script: Script = player_unit.get_script()
+		var destroy_target = unit_script.new()
+		var destroy_enemy_faction := ""
+		var destroy_enemy_color := Color(0.2, 0.4, 0.8)
+		for fid in battle.factions.keys():
+			if String(fid) != player_unit.faction_id:
+				destroy_enemy_faction = String(fid)
+				destroy_enemy_color = battle.factions[fid].get("color", destroy_enemy_color)
+				break
+		destroy_target.configure("infantry", destroy_enemy_faction, destroy_enemy_color, Vector2i(99, 99), "Target Truck")
+		destroy_target.scenario_unit_id = "target_truck"
+		var original_scenario_destroy: Dictionary = battle.scenario.duplicate(true)
+		battle.scenario["secondary_objectives"] = [{
+			"id": "destroy_truck",
+			"type": "destroy_unit",
+			"label": "摧毀補給車",
+			"faction": battle.player_faction_id,
+			"target_unit": "target_truck",
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+		battle.captured_secondary_objectives.clear()
+		var destroy_before_xp := int(player_unit.xp)
+		var destroy_text: String = battle._check_secondary_objective_destroy_unit(player_unit, destroy_target)
+		var destroy_repeat: String = battle._check_secondary_objective_destroy_unit(player_unit, destroy_target)
+		var destroy_events := 0
+		for event in battle.action_log.events:
+			if String(event.get("type", "")) == "secondary_objective" and String(event.get("objective_id", "")) == "destroy_truck":
+				destroy_events += 1
+		if destroy_text.find("摧毀補給車") != -1 and destroy_repeat == "" \
+				and int(player_unit.xp) == destroy_before_xp + 1 and destroy_events == 1:
+			pass_count += 1
+		else:
+			fail_count += 1
+			printerr("FAIL: destroy-unit secondary objective should complete once; text=%s repeat=%s xp %d->%d events=%d" % [
+				destroy_text, destroy_repeat, destroy_before_xp, int(player_unit.xp), destroy_events,
+			])
+		destroy_target.queue_free()
+
+		battle._recompute_visibility()
+		var recon_coord: Vector2i = player_unit.coord
+		if battle.hex_map.terrain_at(recon_coord) == "":
+			fail_count += 1
+			printerr("FAIL: could not stage a visible recon objective hex")
+		else:
+			var recon_offset := _axial_to_offset(recon_coord)
+			battle.scenario["secondary_objectives"] = [{
+				"id": "recon_crossroad",
+				"type": "recon_hex",
+				"label": "偵察路口",
+				"faction": battle.player_faction_id,
+				"target": [recon_offset.x, recon_offset.y],
+				"rewards": [{"type": "xp", "amount": 1}],
+			}]
+			battle.captured_secondary_objectives.clear()
+			var recon_before_xp := int(player_unit.xp)
+			var recon_messages: Array[String] = battle._check_secondary_objective_recon_hex(battle.player_faction_id)
+			var recon_repeat: Array[String] = battle._check_secondary_objective_recon_hex(battle.player_faction_id)
+			if recon_messages.size() == 1 and recon_messages[0].find("偵察路口") != -1 \
+					and recon_repeat.is_empty() and int(player_unit.xp) == recon_before_xp + 1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: recon secondary objective should complete once; messages=%s repeat=%s xp %d->%d" % [
+					str(recon_messages), str(recon_repeat), recon_before_xp, int(player_unit.xp),
+				])
+		battle.scenario = original_scenario_destroy
+		battle.captured_secondary_objectives.clear()
+
 		# MG overwatch uses its unit-data reaction-fire profile: full damage instead of the default half hit.
 		var mg_coord := Vector2i(-999, -999)
 		var target_coord := Vector2i(-999, -999)
@@ -296,7 +365,6 @@ func _run() -> void:
 		else:
 			battle.hex_map.tiles[mg_coord] = "plain"
 			battle.hex_map.tiles[target_coord] = "plain"
-			var unit_script: Script = player_unit.get_script()
 			var mg = unit_script.new()
 			mg.configure("mg_team", player_unit.faction_id, player_unit.faction_color, mg_coord, "Test MG")
 			var target = unit_script.new()
