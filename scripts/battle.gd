@@ -1401,7 +1401,7 @@ func _apply_player_objective_pulse() -> void:
 		var objective_faction := String(objective.get("faction", player_faction_id))
 		if objective_faction != "" and objective_faction != player_faction_id:
 			continue
-		var coord_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		var coord_value: Variant = _secondary_objective_marker_coord(objective)
 		if coord_value != null:
 			markers.append({
 				"coord": coord_value,
@@ -1416,6 +1416,13 @@ func _coord_from_offset_array(value) -> Variant:
 	var col := int(value[0])
 	var row := int(value[1])
 	return Vector2i(col - (row >> 1), row)
+
+func _secondary_objective_marker_coord(objective: Dictionary) -> Variant:
+	if _secondary_objective_type(objective) == "destroy_unit":
+		var target: Unit = _secondary_objective_target_unit(objective)
+		if target != null:
+			return target.coord
+	return _coord_from_offset_array(objective.get("target", []))
 
 func _check_secondary_objective_capture(unit: Unit) -> String:
 	if unit == null or not unit.is_alive():
@@ -1573,6 +1580,13 @@ func _secondary_target_matches_unit(objective: Dictionary, unit: Unit) -> bool:
 		return true
 	return false
 
+func _secondary_objective_target_unit(objective: Dictionary) -> Unit:
+	for u in units:
+		var unit: Unit = u
+		if unit.is_alive() and _secondary_target_matches_unit(objective, unit):
+			return unit
+	return null
+
 func _secondary_objective_type(objective: Dictionary) -> String:
 	return String(objective.get("type", "capture"))
 
@@ -1586,9 +1600,15 @@ func _secondary_objective_progress_text(objective: Dictionary, key: String) -> S
 
 func _secondary_objective_marker_label(objective: Dictionary, key: String) -> String:
 	var label := String(objective.get("label", key))
-	if _secondary_objective_type(objective) == "hold_turns":
-		return "%s %s" % [label, _secondary_objective_progress_text(objective, key)]
-	return label
+	match _secondary_objective_type(objective):
+		"hold_turns":
+			return "守備:%s %s" % [label, _secondary_objective_progress_text(objective, key)]
+		"destroy_unit":
+			return "殲滅:%s" % label
+		"recon_hex":
+			return "偵察:%s" % label
+		_:
+			return "佔領:%s" % label
 
 func _secondary_objective_status_summary(faction_id: String) -> String:
 	if faction_id == "":
@@ -1617,9 +1637,15 @@ func _secondary_objective_status_summary(faction_id: String) -> String:
 func _secondary_objective_status_text(objective: Dictionary, key: String) -> String:
 	var label := String(objective.get("label", key))
 	var reward_text := _secondary_objective_reward_text(_secondary_objective_rewards(objective))
-	if _secondary_objective_type(objective) == "hold_turns":
-		return "%s %s %s" % [label, _secondary_objective_progress_text(objective, key), reward_text]
-	return "%s %s" % [label, reward_text]
+	match _secondary_objective_type(objective):
+		"hold_turns":
+			return "守備:%s %s %s" % [label, _secondary_objective_progress_text(objective, key), reward_text]
+		"destroy_unit":
+			return "殲滅:%s %s" % [label, reward_text]
+		"recon_hex":
+			return "偵察:%s %s" % [label, reward_text]
+		_:
+			return "佔領:%s %s" % [label, reward_text]
 
 func _secondary_objective_rewards(objective: Dictionary) -> Array[Dictionary]:
 	var rewards: Array[Dictionary] = []

@@ -231,8 +231,8 @@ func _run() -> void:
 					if child.name == "ObjectiveLabel":
 						hold_labels.append(String(child.text))
 			battle._update_status()
-			if _labels_contain(hold_labels, "守備點 1/2") \
-					and battle.status_label.text.find("守備點 1/2") != -1:
+			if _labels_contain(hold_labels, "守備:守備點 1/2") \
+					and battle.status_label.text.find("守備:守備點 1/2") != -1:
 				pass_count += 1
 			else:
 				fail_count += 1
@@ -287,7 +287,12 @@ func _run() -> void:
 				destroy_enemy_faction = String(fid)
 				destroy_enemy_color = battle.factions[fid].get("color", destroy_enemy_color)
 				break
-		destroy_target.configure("infantry", destroy_enemy_faction, destroy_enemy_color, Vector2i(99, 99), "Target Truck")
+		var destroy_coord := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) == null:
+				destroy_coord = c
+				break
+		destroy_target.configure("infantry", destroy_enemy_faction, destroy_enemy_color, destroy_coord, "Target Truck")
 		destroy_target.scenario_unit_id = "target_truck"
 		var original_scenario_destroy: Dictionary = battle.scenario.duplicate(true)
 		battle.scenario["secondary_objectives"] = [{
@@ -299,6 +304,26 @@ func _run() -> void:
 			"rewards": [{"type": "xp", "amount": 1}],
 		}]
 		battle.captured_secondary_objectives.clear()
+		battle.units.append(destroy_target)
+		if destroy_coord == Vector2i(-999, -999) or not battle.hex_map.register_unit(destroy_target):
+			fail_count += 1
+			printerr("FAIL: could not stage a destroy-unit objective target")
+		else:
+			battle._apply_player_objective_pulse()
+			battle._update_status()
+			var destroy_labels: Array[String] = []
+			for overlay in battle.hex_map.objective_overlays:
+				for child in overlay.get_children():
+					if child.name == "ObjectiveLabel":
+						destroy_labels.append(String(child.text))
+			if _labels_contain(destroy_labels, "殲滅:摧毀補給車") \
+					and battle.status_label.text.find("殲滅:摧毀補給車") != -1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: destroy objective marker/status should be explicit; labels=%s status=%s" % [
+					str(destroy_labels), battle.status_label.text,
+				])
 		var destroy_before_xp := int(player_unit.xp)
 		var destroy_text: String = battle._check_secondary_objective_destroy_unit(player_unit, destroy_target)
 		var destroy_repeat: String = battle._check_secondary_objective_destroy_unit(player_unit, destroy_target)
@@ -314,6 +339,8 @@ func _run() -> void:
 			printerr("FAIL: destroy-unit secondary objective should complete once; text=%s repeat=%s xp %d->%d events=%d" % [
 				destroy_text, destroy_repeat, destroy_before_xp, int(player_unit.xp), destroy_events,
 			])
+		battle.hex_map.unregister_unit(destroy_target)
+		battle.units.erase(destroy_target)
 		destroy_target.queue_free()
 
 		battle._recompute_visibility()
