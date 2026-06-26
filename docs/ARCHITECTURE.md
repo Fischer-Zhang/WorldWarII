@@ -79,14 +79,15 @@ Battle setup order:
 
 1. Read `GameState.current_scenario_id`.
 2. Duplicate scenario data so conquest/campaign overrides do not mutate `DataLoader`.
-3. Load map and units.
-4. Apply campaign roster if campaign mode.
-5. Apply lounge upgrades.
-6. Apply deployment overrides when a mode provides them.
-7. Identify player faction.
-8. Apply conquest battle context if conquest mode.
-9. Seed fog-of-war memory.
-10. Start turn manager.
+3. Load the themed map and connect map input.
+4. Apply conquest battle context if conquest mode, before unit construction.
+5. Build factions and units, then register them on the map.
+6. Apply campaign roster if campaign mode.
+7. Apply lounge upgrades.
+8. Apply deployment overrides when a mode provides them.
+9. Identify player faction and restore conquest garrison XP/rank.
+10. Seed fog-of-war memory.
+11. Start turn manager.
 
 ## Combat
 
@@ -182,18 +183,18 @@ Files:
 - `ConquestManager`: ownership, transfer, end-turn and battle-result resolution.
 - `ConquestBattleSetup`: reuses a themed scenario's terrain while replacing factions, rosters and victory rules.
 
-Player attack flow:
+Player-fought tactical flow:
 
-1. Choose friendly source and adjacent enemy target.
-2. `conquest.gd` selects the tactical scenario mapped to the target region.
+1. Player attacks choose a friendly source and adjacent enemy target; enemy-phase attacks on player regions pause for a defensive battle.
+2. `conquest.gd` selects the tactical scenario mapped to the target or defended region.
 3. `GameState.pending_conquest_battle` records the attacking garrison, generated defenders, country ids, display names, colors and role (`attack` or `defend`).
 4. Briefing shows generated conquest matchup text plus the themed scenario's terrain notes.
 5. Deployment applies `ConquestBattleSetup`; enemies start on-map, player units start unplaced, and every player unit must be deployed inside the conquest zone before battle can start.
-6. Battle applies the same `ConquestBattleSetup`, then deployment overrides move the placed player units to their chosen hexes.
+6. Battle applies the same `ConquestBattleSetup` before building units, then deployment overrides move the placed player units to their chosen hexes.
 7. Result panel returns to conquest.
 8. `ConquestManager.resolve_battle_result` or `resolve_defense_result` updates region owner, strength and surviving garrisons.
 
-AI-country conquest moves still use deterministic strategic resolution during `end_turn`.
+AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
 
 ## Validation
 

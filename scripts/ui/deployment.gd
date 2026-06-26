@@ -401,7 +401,7 @@ func _deployment_radius() -> int:
 
 func _conquest_deployment_anchors() -> Array[Vector2i]:
 	var anchors: Array[Vector2i] = []
-	var raw: Array = scenario.get("conquest_deployment_anchors", [])
+	var raw: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	for at in raw:
 		var anchor_arr: Array = at
 		if anchor_arr.size() < 2:

@@ -13,6 +13,7 @@ extends RefCounted
 #   role ("attack" | "defend").
 
 const DEFENDER_SURVIVE_TURNS := 12
+const DEPLOYMENT_ANCHORS_KEY := "conquest_deployment_anchors"
 
 static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	var player_faction := String(pending.get("player_faction", ""))
@@ -27,7 +28,7 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	var map_bounds := _map_bounds(scenario)
 	var player_pool: Array = pools["attacker"] if role == "attack" else pools["defender"]
 	var enemy_pool: Array = pools["defender"] if role == "attack" else pools["attacker"]
-	scenario["conquest_deployment_anchors"] = player_pool.duplicate(true)
+	scenario[DEPLOYMENT_ANCHORS_KEY] = player_pool.duplicate(true)
 
 	var occupied := {}
 	for arr in pools.values():

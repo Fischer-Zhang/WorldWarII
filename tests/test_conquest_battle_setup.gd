@@ -101,7 +101,7 @@ func _test_attack_setup() -> bool:
 	if String((victory.get("soviet", {}) as Dictionary).get("type", "")) != "survive":
 		printerr("FAIL: defender victory should be survive")
 		return false
-	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	var anchors: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	if anchors.size() != 2 or not _has_coord(anchors, [0, 0]) or not _has_coord(anchors, [1, 0]):
 		printerr("FAIL: attack deployment anchors should mirror authored attacker slots: %s" % str(anchors))
 		return false
@@ -207,7 +207,7 @@ func _test_deployment_anchors_ignore_overflow() -> bool:
 		"role": "attack",
 	}
 	ConquestBattleSetup.apply(scenario, pending)
-	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	var anchors: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	if anchors.size() != 2 or not _has_coord(anchors, [0, 0]) or not _has_coord(anchors, [1, 0]):
 		printerr("FAIL: overflow should not expand deployment anchors: %s" % str(anchors))
 		return false
@@ -251,7 +251,7 @@ func _test_duplicate_roster_names_become_unique() -> bool:
 	if seen.size() != 2:
 		printerr("FAIL: expected two player roster entries, got %d" % seen.size())
 		return false
-	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	var anchors: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	if anchors.size() != 2 or not _has_coord(anchors, [4, 0]) or not _has_coord(anchors, [5, 0]):
 		printerr("FAIL: defense deployment anchors should mirror authored defender slots: %s" % str(anchors))
 		return false
