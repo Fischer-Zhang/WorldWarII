@@ -123,7 +123,20 @@ func _init() -> void:
 		printerr("FAIL: friendly adjacency must not apply ZoC; got ",
 			range_friend.get(Vector2i(1, 0), "missing"))
 
-	# 10) Reconstructed path must honor ZoC-adjusted cumulative costs (SUBHEX scale).
+	# 10) Pinned enemies do NOT project ZoC, so suppression can open movement lanes.
+	var pinned_enemy := EnemyStub.new("axis", 2)
+	var occ_pinned := {Vector2i(1, 1): pinned_enemy}
+	var range_pinned_zoc := Pathfinding.movement_range(
+		Vector2i(0, 0), 1, stub, occ_pinned, "allies"
+	)
+	if range_pinned_zoc.has(Vector2i(1, 0)) and range_pinned_zoc[Vector2i(1, 0)] == 2:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: pinned enemy must not project ZoC; got ",
+			range_pinned_zoc.get(Vector2i(1, 0), "missing"))
+
+	# 11) Reconstructed path must honor ZoC-adjusted cumulative costs (SUBHEX scale).
 	var range_zoc_path := Pathfinding.movement_range(
 		Vector2i(0, 0), 6, stub, occ_zoc, "allies"
 	)
@@ -145,7 +158,7 @@ func _init() -> void:
 			path_zoc, path_cost, range_zoc_path.get(Vector2i(2, 0), "missing"),
 		])
 
-	# 11) Road is half-cost: 1 move pt reaches 2 road hexes (a plain run reaches 1).
+	# 12) Road is half-cost: 1 move pt reaches 2 road hexes (a plain run reaches 1).
 	stub.tiles[Vector2i(1, 0)] = "road"
 	stub.tiles[Vector2i(2, 0)] = "road"
 	var range_road := Pathfinding.movement_range(Vector2i(0, 0), 1, stub, {})
@@ -157,7 +170,7 @@ func _init() -> void:
 	stub.tiles[Vector2i(1, 0)] = "plain"
 	stub.tiles[Vector2i(2, 0)] = "plain"
 
-	# 12) Mountain / river are impassable (not enterable even with ample move)
+	# 13) Mountain / river are impassable (not enterable even with ample move)
 	stub.tiles[Vector2i(1, 0)] = "mountain"
 	stub.tiles[Vector2i(0, 1)] = "river"
 	var range_imp := Pathfinding.movement_range(Vector2i(0, 0), 5, stub, {})
@@ -167,7 +180,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: mountain/river should be impassable; got ", range_imp)
 
-	# 13) A bridge opens an impassable hex at road-like cost
+	# 14) A bridge opens an impassable hex at road-like cost
 	stub.bridged[Vector2i(0, 1)] = true
 	var range_bridge := Pathfinding.movement_range(Vector2i(0, 0), 1, stub, {})
 	if range_bridge.has(Vector2i(0, 1)) and range_bridge[Vector2i(0, 1)] == 1:
@@ -180,7 +193,7 @@ func _init() -> void:
 	stub.tiles[Vector2i(1, 0)] = "plain"
 	stub.tiles[Vector2i(0, 1)] = "plain"
 
-	# 14) Infantry ignores the difficult-terrain (forest) penalty; other types don't
+	# 15) Infantry ignores the difficult-terrain (forest) penalty; other types don't
 	stub.tiles[Vector2i(1, 0)] = "forest"
 	var inf := Pathfinding.movement_range(Vector2i(0, 0), 1, stub, {}, "", "infantry")
 	var tank := Pathfinding.movement_range(Vector2i(0, 0), 1, stub, {}, "", "medium_tank")
@@ -198,5 +211,7 @@ func _init() -> void:
 
 class EnemyStub:
 	var faction_id: String
-	func _init(fid: String) -> void:
+	var suppression: int = 0
+	func _init(fid: String, initial_suppression: int = 0) -> void:
 		faction_id = fid
+		suppression = initial_suppression

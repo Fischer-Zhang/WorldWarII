@@ -564,7 +564,7 @@ def rule_risk_section() -> str:
         ],
         [
             "ZoC path reconstruction",
-            "Resolved: movement range and path reconstruction share the same terrain + ZoC step cost.",
+            "Resolved: movement range and path reconstruction share the same terrain + active-ZoC step cost; pinned units do not project ZoC.",
             "Keep new pathfinding callsites passing occupied + mover_faction.",
         ],
         [

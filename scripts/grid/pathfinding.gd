@@ -2,6 +2,7 @@ class_name Pathfinding
 extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 
 const ZOC_PENALTY := 2  # extra cost (in hex units) to enter a hex adjacent to an enemy
 const SUBHEX := 2       # internal cost scale: a normal hex costs SUBHEX, a road/bridge costs 1 (half) so roads are fast
@@ -47,10 +48,22 @@ static func movement_range(
 	cost_to.erase(start)  # caller does not need to know it can "stay"
 	return cost_to
 
+static func _enemy_projects_zoc(unit, mover_faction: String) -> bool:
+	if unit == null:
+		return false
+	if not unit is Object:
+		return false
+	var faction_id := String(unit.get("faction_id"))
+	if faction_id == "" or faction_id == mover_faction:
+		return false
+	var suppression_value = unit.get("suppression")
+	var suppression := 0 if suppression_value == null else int(suppression_value)
+	return not CombatEffects.is_pinned(suppression)
+
 static func _enters_enemy_zoc(hex: Vector2i, occupied: Dictionary, mover_faction: String) -> bool:
 	for nb in HexCoord.neighbors(hex):
 		var u = occupied.get(nb)
-		if u != null and u.faction_id != mover_faction:
+		if _enemy_projects_zoc(u, mover_faction):
 			return true
 	return false
 

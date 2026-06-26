@@ -24,6 +24,7 @@ NEIGHBORS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 SUBHEX = 2
 ZOC_PENALTY = 2
 IMPASSABLE = 1 << 20
+SUPPRESSION_PIN_THRESHOLD = 2
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -194,7 +195,11 @@ def occupied_by_initial_units(scenario: dict[str, Any]) -> dict[tuple[int, int],
 def enters_enemy_zoc(coord: tuple[int, int], occupied: dict[tuple[int, int], dict[str, Any]], mover_faction: str) -> bool:
     for nb in neighbors(coord):
         unit = occupied.get(nb)
-        if unit is not None and str(unit.get("faction", "")) != mover_faction:
+        if (
+            unit is not None
+            and str(unit.get("faction", "")) != mover_faction
+            and int(unit.get("suppression", 0)) < SUPPRESSION_PIN_THRESHOLD
+        ):
             return True
     return False
 

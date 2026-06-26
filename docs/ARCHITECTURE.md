@@ -128,13 +128,13 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 ## Tactical Mechanics
 
-**Zone of Control** lives in `Pathfinding`. Entering enemy-adjacent hexes costs extra movement.
+**Zone of Control** lives in `Pathfinding`. Entering enemy-adjacent hexes costs extra movement, but pinned enemies do not project ZoC.
 
 **Overwatch** is resolved along the movement path, not only at the destination. A watcher must see and be in range of the crossed hex.
 
 **Dig In** rewards no-action turns with defense, capped by `Unit.MAX_DIG_IN`.
 
-**Suppression** comes from damaging attacks, especially MG/artillery. Pinned units lose overwatch/dig-in access; heavier suppression reduces move/attack.
+**Suppression** comes from damaging attacks, especially MG/artillery. Pinned units lose overwatch/dig-in access and stop projecting ZoC; heavier suppression reduces move/attack.
 
 **Rally** spends the action to reduce suppression, with better recovery in defensive terrain.
 

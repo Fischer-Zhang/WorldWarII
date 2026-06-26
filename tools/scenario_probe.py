@@ -27,6 +27,7 @@ NEIGHBORS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 SUBHEX = 2
 ZOC_PENALTY = 2
 IMPASSABLE = 1 << 20
+SUPPRESSION_PIN_THRESHOLD = 2
 
 SUPPRESSION_BY_TYPE = {
     "infantry": 1,
@@ -135,7 +136,11 @@ def enters_enemy_zoc(
 ) -> bool:
     for neighbor in neighbors(coord):
         unit = occupied.get(neighbor)
-        if unit is not None and str(unit.get("faction", "")) != mover_faction:
+        if (
+            unit is not None
+            and str(unit.get("faction", "")) != mover_faction
+            and int(unit.get("suppression", 0)) < SUPPRESSION_PIN_THRESHOLD
+        ):
             return True
     return False
 
