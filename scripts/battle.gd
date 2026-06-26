@@ -636,9 +636,15 @@ func _select_unit(unit: Unit) -> void:
 	hex_map.show_movement_range(movement_range.keys())
 	hex_map.show_threat_range(_enemy_threat_hexes(unit.faction_id))
 	hex_map.highlight_coord(unit.coord)
-	info_label.text = "選取:%s (HP %d/%d) — 點藍色 hex 移動,或再點自己原地待機" % [
-		unit.display_name, unit.hp, unit.max_hp,
-	]
+	# Show special-ability buttons on selection too (not only after a move), so
+	# abilities usable ONLY before moving — the paratrooper's airdrop — are
+	# discoverable instead of hidden behind a skip-move gesture.
+	_refresh_skill_button(unit)
+	bridge_button.visible = not _engineer_bridge_targets(unit).is_empty()
+	var hint := "點藍色 hex 移動,或再點自己原地待機"
+	if skill_button.visible or bridge_button.visible:
+		hint = "點藍色 hex 移動,或按右側按鈕發動技能(也可再點自己待機)"
+	info_label.text = "選取:%s (HP %d/%d) — %s" % [unit.display_name, unit.hp, unit.max_hp, hint]
 
 func _enter_attack_phase() -> void:
 	phase = Phase.ATTACK_PHASE
@@ -696,9 +702,6 @@ func _resolve_active_skill(unit: Unit) -> Dictionary:
 	var skill: Dictionary = unit_def.get("skill", {})
 	if skill.is_empty() and unit.general_id != "":
 		skill = DataLoader.get_general_def(unit.general_id).get("skill", {})
-	# Airdrop is disabled in Conquest mode (only single-battle / campaign use it).
-	if GameState.conquest_mode and String(skill.get("id", "")) == "airdrop":
-		return {}
 	return skill
 
 func _refresh_skill_button(unit: Unit) -> void:
@@ -724,7 +727,7 @@ func _refresh_skill_button(unit: Unit) -> void:
 		skill_button.visible = true
 
 func _on_skill_pressed() -> void:
-	if phase != Phase.ATTACK_PHASE or selected_unit == null:
+	if selected_unit == null or (phase != Phase.ATTACK_PHASE and phase != Phase.UNIT_SELECTED):
 		return
 	var skill: Dictionary = _resolve_active_skill(selected_unit)
 	if skill.is_empty():
@@ -835,7 +838,8 @@ func _engineer_bridge_targets(unit: Unit) -> Array:
 	return out
 
 func _on_bridge_pressed() -> void:
-	if phase != Phase.ATTACK_PHASE or selected_unit == null or selected_unit.has_attacked:
+	if selected_unit == null or selected_unit.has_attacked \
+			or (phase != Phase.ATTACK_PHASE and phase != Phase.UNIT_SELECTED):
 		return
 	var targets := _engineer_bridge_targets(selected_unit)
 	if targets.is_empty():
