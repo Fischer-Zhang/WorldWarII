@@ -570,7 +570,7 @@ def rule_risk_section() -> str:
         [
             "Town + dig-in",
             "Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits.",
-            "Monitor whether Stalingrad/Berlin create breach decisions instead of static 1-damage stalls.",
+            "Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls.",
         ],
     ]
     return table(["risk", "why it matters", "next action"], rows)
@@ -612,8 +612,8 @@ def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
     sections.append(
         "## Recommended Next Pass\n\n"
         "1. Run this report before and after every candidate stat patch, then compare role diagnostics plus hits-to-kill.\n"
-        "2. Use the Urban Breach Baseline plus scenario breach coverage before changing Stalingrad or Berlin rosters.\n"
-        "3. Validate whether engineers open town+dig3 positions without replacing artillery/MG suppression as the setup step.\n"
+        "2. Use the Urban Breach Baseline, scenario breach tools, and scenario_probe.md breach paths before changing Stalingrad or Berlin rosters or turn clocks.\n"
+        "3. Validate whether engineers can reach and open town+dig3 positions; Stalingrad/Berlin currently rely on long engineer approaches, so playtest before further defender nerfs.\n"
         "4. Validate Rally and suppression tempo in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.\n"
     )
     return "\n\n".join(sections) + "\n"

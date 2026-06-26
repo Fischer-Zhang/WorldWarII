@@ -413,12 +413,12 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | Attack visibility | Resolved: direct attacks require visibility + LOS; indirect attacks require visibility and ignore LOS blockers. | Keep future attack helpers routed through CombatRules. |
 | indirect semantics | Resolved: indirect units cannot counter while defending, but close indirect attacks can still be countered. | Preserve this distinction in UI text and combat tests. |
 | ZoC path reconstruction | Resolved: movement range and path reconstruction share the same terrain + ZoC step cost. | Keep new pathfinding callsites passing occupied + mover_faction. |
-| Town + dig-in | Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits. | Monitor whether Stalingrad/Berlin create breach decisions instead of static 1-damage stalls. |
+| Town + dig-in | Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits. | Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls. |
 
 ## Recommended Next Pass
 
 1. Run this report before and after every candidate stat patch, then compare role diagnostics plus hits-to-kill.
-2. Use the Urban Breach Baseline plus scenario breach coverage before changing Stalingrad or Berlin rosters.
-3. Validate whether engineers open town+dig3 positions without replacing artillery/MG suppression as the setup step.
+2. Use the Urban Breach Baseline, scenario breach tools, and scenario_probe.md breach paths before changing Stalingrad or Berlin rosters or turn clocks.
+3. Validate whether engineers can reach and open town+dig3 positions; Stalingrad/Berlin currently rely on long engineer approaches, so playtest before further defender nerfs.
 4. Validate Rally and suppression tempo in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.
 
