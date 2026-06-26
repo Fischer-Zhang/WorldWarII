@@ -144,7 +144,7 @@ func _ready() -> void:
 			if unit.faction_id != fid:
 				last_known_positions[fid][unit] = unit.coord
 
-	camera.position = hex_map.get_map_center()
+	camera.fit_world_rect(hex_map.get_map_rect(), _battle_map_screen_rect())
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	end_turn_button.tooltip_text = "結束目前陣營回合。請先完成想移動或攻擊的單位。"
 	menu_button.pressed.connect(_on_menu_button_pressed)
@@ -179,6 +179,12 @@ func _close_legend() -> void:
 
 func _set_prompt(step: String, detail: String) -> void:
 	info_label.text = "%s: %s" % [step, detail]
+
+func _battle_map_screen_rect() -> Rect2:
+	var viewport_size := get_viewport_rect().size
+	var origin := Vector2(20.0, 54.0)
+	var size := Vector2(max(320.0, viewport_size.x - 280.0), max(240.0, viewport_size.y - 112.0))
+	return Rect2(origin, size)
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	# Keyboard shortcuts mirror the on-screen buttons. O/R only fire when their

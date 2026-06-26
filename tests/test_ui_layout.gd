@@ -71,6 +71,30 @@ const SCENE_CASES := [
 	},
 ]
 
+const CAMERA_OVERVIEW_CASES := [
+	{
+		"name": "battle large map overview",
+		"path": "res://scenes/battle.tscn",
+		"scenario_id": "01_sedan_1940",
+		"min_zoom": 0.5,
+		"max_zoom": 0.75,
+	},
+	{
+		"name": "deployment large map overview",
+		"path": "res://scenes/deployment.tscn",
+		"scenario_id": "01_sedan_1940",
+		"min_zoom": 0.4,
+		"max_zoom": 0.45,
+	},
+	{
+		"name": "tutorial keeps readable zoom",
+		"path": "res://scenes/battle.tscn",
+		"scenario_id": "tut_00_basic_turn",
+		"min_zoom": 0.99,
+		"max_zoom": 1.01,
+	},
+]
+
 func _init() -> void:
 	call_deferred("_run")
 
@@ -88,6 +112,16 @@ func _run() -> void:
 				pass_count += 1
 			else:
 				fail_count += 1
+	var overview_viewport := Vector2i(1280, 720)
+	root.size = overview_viewport
+	DisplayServer.window_set_size(overview_viewport)
+	await process_frame
+	for camera_case in CAMERA_OVERVIEW_CASES:
+		var result := await _run_camera_overview_case(camera_case, overview_viewport)
+		if result:
+			pass_count += 1
+		else:
+			fail_count += 1
 	print("UI layout tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -121,6 +155,49 @@ func _run_scene_case(scene_case: Dictionary, viewport: Vector2i) -> bool:
 			viewport.x,
 			viewport.y,
 			", ".join(issues),
+		])
+		return false
+	return true
+
+func _run_camera_overview_case(camera_case: Dictionary, viewport: Vector2i) -> bool:
+	var game_state := _game_state()
+	if game_state == null:
+		printerr("FAIL: camera overview missing GameState autoload")
+		return false
+	game_state.current_scenario_id = String(camera_case.get("scenario_id", ""))
+	game_state.current_campaign_id = ""
+	game_state.campaign_mode = false
+	game_state.clear_conquest_battle()
+	game_state.conquest_mode = false
+
+	var packed := load(String(camera_case.get("path", "")))
+	if packed == null:
+		printerr("FAIL: camera overview missing scene %s" % camera_case.get("path", ""))
+		return false
+	var scene: Node = packed.instantiate()
+	root.add_child(scene)
+	await process_frame
+	await process_frame
+	await process_frame
+
+	var camera: Camera2D = scene.get_node_or_null("Camera")
+	var ok := camera != null
+	var zoom_x := 0.0
+	if ok:
+		zoom_x = camera.zoom.x
+		var min_zoom := float(camera_case.get("min_zoom", 0.0))
+		var max_zoom := float(camera_case.get("max_zoom", 999.0))
+		ok = zoom_x >= min_zoom - 0.001 and zoom_x <= max_zoom + 0.001
+	scene.queue_free()
+	await process_frame
+	if not ok:
+		printerr("FAIL: %s at %dx%d zoom %.3f outside %.3f..%.3f" % [
+			String(camera_case.get("name", "camera")),
+			viewport.x,
+			viewport.y,
+			zoom_x,
+			float(camera_case.get("min_zoom", 0.0)),
+			float(camera_case.get("max_zoom", 999.0)),
 		])
 		return false
 	return true

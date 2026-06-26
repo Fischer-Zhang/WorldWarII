@@ -269,23 +269,30 @@ func _hex_vertices(size: float) -> PackedVector2Array:
 
 func _recompute_bounds() -> void:
 	if polys.is_empty():
+		bounds_min = Vector2.ZERO
+		bounds_max = Vector2.ZERO
 		return
 	var first := true
-	for coord in polys.keys():
-		var p: Polygon2D = polys[coord]
-		var pos := p.position
-		if first:
-			bounds_min = pos
-			bounds_max = pos
-			first = false
-		else:
-			bounds_min.x = min(bounds_min.x, pos.x)
-			bounds_min.y = min(bounds_min.y, pos.y)
-			bounds_max.x = max(bounds_max.x, pos.x)
-			bounds_max.y = max(bounds_max.y, pos.y)
+	for value in polys.values():
+		var p: Polygon2D = value
+		for vertex in p.polygon:
+			var point := p.position + vertex
+			if first:
+				bounds_min = point
+				bounds_max = point
+				first = false
+			else:
+				bounds_min.x = min(bounds_min.x, point.x)
+				bounds_min.y = min(bounds_min.y, point.y)
+				bounds_max.x = max(bounds_max.x, point.x)
+				bounds_max.y = max(bounds_max.y, point.y)
+
+func get_map_rect() -> Rect2:
+	return Rect2(position + bounds_min, bounds_max - bounds_min)
 
 func get_map_center() -> Vector2:
-	return (bounds_min + bounds_max) * 0.5
+	var rect := get_map_rect()
+	return rect.position + rect.size * 0.5
 
 func coord_at_world(world_pos: Vector2) -> Vector2i:
 	var local := world_pos - global_position
@@ -346,6 +353,8 @@ func _clear() -> void:
 	highlight = null
 	range_overlays = null
 	threat_overlays = null
+	bounds_min = Vector2.ZERO
+	bounds_max = Vector2.ZERO
 	set_process(false)
 
 var _hover_coord: Vector2i = Vector2i(-9999, -9999)

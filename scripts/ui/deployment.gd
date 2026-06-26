@@ -4,6 +4,7 @@ const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const HexMap := preload("res://scripts/grid/hex_map.gd")
 const Unit := preload("res://scripts/units/unit.gd")
 const UnitFactory := preload("res://scripts/units/unit_factory.gd")
+const CameraController := preload("res://scripts/ui/camera_controller.gd")
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const DeploymentOverrides := preload("res://scripts/scenario/deployment_overrides.gd")
 const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
@@ -13,7 +14,7 @@ const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd"
 const DEPLOY_RADIUS := 2
 
 @onready var hex_map: HexMap = $HexMap
-@onready var camera: Camera2D = $Camera
+@onready var camera: CameraController = $Camera
 @onready var title_label: Label = $UI/Root/TopBar/Title
 @onready var status_label: Label = $UI/Root/TopBar/Status
 @onready var unit_list: VBoxContainer = $UI/Root/Body/LeftPanel/UnitScroll/UnitList
@@ -59,7 +60,7 @@ func _ready() -> void:
 	hex_map.load_from_scenario(scenario)
 	hex_map.hex_clicked.connect(_on_hex_clicked)
 	hex_map.hex_hovered.connect(_on_hex_hovered)
-	camera.position = hex_map.get_map_center()
+	camera.fit_world_rect(hex_map.get_map_rect(), _deployment_map_screen_rect())
 
 	var built := UnitFactory.build(scenario, hex_map)
 	factions = built["factions"]
@@ -141,6 +142,12 @@ func _build_general_pool() -> void:
 		if not DataLoader.get_general_def(String(gid)).is_empty():
 			general_pool.append(String(gid))
 	general_pool.sort()
+
+func _deployment_map_screen_rect() -> Rect2:
+	var viewport_size := get_viewport_rect().size
+	var origin := Vector2(282.0, 82.0)
+	var size := Vector2(max(320.0, viewport_size.x - 564.0), max(240.0, viewport_size.y - 164.0))
+	return Rect2(origin, size)
 
 func _build_deployment_zone() -> void:
 	deployment_zone.clear()

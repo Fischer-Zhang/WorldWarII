@@ -4,9 +4,10 @@ extends Camera2D
 # WASD / arrow-key pan, mouse-drag pan, wheel zoom.
 
 @export var pan_speed: float = 600.0
-@export var zoom_min: float = 0.5
+@export var zoom_min: float = 0.4
 @export var zoom_max: float = 2.5
 @export var zoom_step: float = 0.1
+@export var overview_padding: float = 0.92
 
 var _dragging := false
 var _drag_start_mouse := Vector2.ZERO
@@ -43,3 +44,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func _apply_zoom(delta_zoom: float) -> void:
 	var new_zoom_v: float = clamp(zoom.x + delta_zoom, zoom_min, zoom_max)
 	zoom = Vector2(new_zoom_v, new_zoom_v)
+
+func fit_world_rect(world_rect: Rect2, screen_rect: Rect2 = Rect2(), max_initial_zoom: float = 1.0) -> void:
+	if world_rect.size.x <= 0.0 or world_rect.size.y <= 0.0:
+		return
+	var viewport_rect := get_viewport_rect()
+	if screen_rect.size.x <= 0.0 or screen_rect.size.y <= 0.0:
+		screen_rect = viewport_rect
+	var fit_size: Vector2 = screen_rect.size * clamp(overview_padding, 0.1, 1.0)
+	var fit_zoom: float = min(fit_size.x / world_rect.size.x, fit_size.y / world_rect.size.y)
+	var zoom_v: float = clamp(min(max_initial_zoom, fit_zoom), zoom_min, zoom_max)
+	zoom = Vector2(zoom_v, zoom_v)
+	var world_center := world_rect.position + world_rect.size * 0.5
+	var viewport_center := viewport_rect.size * 0.5
+	var screen_center := screen_rect.position + screen_rect.size * 0.5
+	position = world_center - (screen_center - viewport_center) / zoom_v

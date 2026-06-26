@@ -244,7 +244,9 @@ It checks required nodes and collapsed visible controls. This is intended to cat
 `tests/test_ui_layout.gd` checks the same major screens at the supported desktop
 viewport contract (`1280x720` and `1366x768`) and fails when visible containers,
 buttons, labels, panels or scroll views leave the viewport. Scroll contents are
-allowed to extend inside their scroll container.
+allowed to extend inside their scroll container. It also verifies the tactical
+camera starts zoomed out enough for large battle/deployment maps while preserving
+readable zoom on small tutorial maps.
 
 `tests/test_ui_workflows.gd` drives representative UI paths headlessly: scenario
 filtering, briefing, deployment selection, battle action prompting, campaign
