@@ -18,6 +18,7 @@ func _run() -> void:
 	await _check_conquest_deployment()
 	await _check_conquest_defense_deployment()
 	await _check_conquest_deployment_handoff()
+	await _check_conquest_defense_deployment_handoff()
 	await _check_battle()
 	await _check_campaign()
 	await _check_lounge()
@@ -361,6 +362,89 @@ func _check_conquest_deployment_handoff() -> void:
 		var overrides_cleared: bool = _game_state().get_deployment_overrides("01_sedan_1940").is_empty()
 		_expect(
 			"conquest deployment handoff preserves roster",
+			matched == expected.size() and failures.is_empty() and overrides_cleared,
+			"matched=%d/%d cleared=%s failures=%s" % [
+				matched, expected.size(), str(overrides_cleared), "; ".join(failures)
+			]
+		)
+		await _free_scene(battle)
+	if is_instance_valid(scene) and scene.get_parent() != null:
+		await _free_scene(scene)
+	_game_state().clear_conquest_battle()
+
+func _check_conquest_defense_deployment_handoff() -> void:
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"player_name": "德軍",
+		"enemy_name": "蘇軍",
+		"player_color": "#a86632",
+		"enemy_color": "#2f6fb0",
+		"battle_location": "防守交接測試戰場",
+		"role": "defend",
+		"attacker_garrison": [
+			{"id": 201, "type": "infantry", "name": "防守步兵", "xp": 8, "rank": 2},
+			{"id": 202, "type": "at_gun", "name": "防守反坦克炮", "xp": 4, "rank": 1},
+		],
+		"defender_types": ["infantry", "medium_tank"],
+	}
+	var expected := {}
+	for rec in pending["attacker_garrison"]:
+		var record: Dictionary = rec
+		expected[String(record.get("name", ""))] = {
+			"roster_id": int(record.get("id", -1)),
+			"xp": int(record.get("xp", 0)),
+			"rank": int(record.get("rank", 0)),
+			"coord": Vector2i.MIN,
+		}
+	var scene := await _instantiate_scene(
+		"res://scenes/deployment.tscn",
+		{"scenario_id": "01_sedan_1940", "conquest_mode": true, "pending": pending}
+	)
+	var used := {}
+	for u in scene.player_units:
+		var unit = u
+		scene._select_unit(unit)
+		var coord := _first_free_deploy_hex_except(scene, unit, used)
+		if coord == Vector2i.MIN:
+			_fail("conquest defense handoff free hex", unit.display_name)
+			continue
+		scene._on_hex_clicked(coord, String(scene.hex_map.tiles[coord]))
+		used[coord] = true
+		if expected.has(unit.display_name):
+			expected[unit.display_name]["coord"] = coord
+	scene._on_begin_pressed()
+	for _i in range(5):
+		await process_frame
+	var battle: Node = current_scene
+	var opened := battle != null and String(battle.scene_file_path) == "res://scenes/battle.tscn"
+	_expect(
+		"conquest defense handoff opens battle",
+		opened,
+		String(battle.scene_file_path) if battle != null else "no current scene"
+	)
+	if opened:
+		var failures: Array[String] = []
+		var matched := 0
+		for u in battle.units:
+			var unit = u
+			if unit.faction_id != battle.player_faction_id or not expected.has(unit.display_name):
+				continue
+			matched += 1
+			var data: Dictionary = expected[unit.display_name]
+			if unit.coord != data.get("coord", Vector2i.MIN):
+				failures.append("%s coord %s" % [unit.display_name, str(unit.coord)])
+			if unit.roster_id != int(data.get("roster_id", -1)):
+				failures.append("%s roster %d" % [unit.display_name, unit.roster_id])
+			if unit.xp != int(data.get("xp", -1)) or unit.rank != int(data.get("rank", -1)):
+				failures.append("%s xp/rank %d/%d" % [unit.display_name, unit.xp, unit.rank])
+		var victory: Dictionary = battle.scenario.get("victory", {})
+		var player_objective := String((victory.get(battle.player_faction_id, {}) as Dictionary).get("type", ""))
+		if player_objective != "survive":
+			failures.append("objective %s" % player_objective)
+		var overrides_cleared: bool = _game_state().get_deployment_overrides("01_sedan_1940").is_empty()
+		_expect(
+			"conquest defense handoff preserves roster",
 			matched == expected.size() and failures.is_empty() and overrides_cleared,
 			"matched=%d/%d cleared=%s failures=%s" % [
 				matched, expected.size(), str(overrides_cleared), "; ".join(failures)
