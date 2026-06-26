@@ -49,3 +49,37 @@ Focused gate for city assaults that already have breach tools but still need man
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach support |
 | east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach support |
+
+## Secondary Objective Reward Audit
+
+Focused audit of optional objective pressure, reward type, and static reward effectiveness.
+
+| scenario | objective | target | faction | distance | rewards | audit |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01_sedan_1940 | 橋頭補給 | capture 15,5 | axis | own 7 / enemy 9 | XP 1 | ok |
+| 01_sedan_1940 | 中路渡口 | recon 13,5 | axis | own 9 / enemy 11 | XP 1 | ok |
+| 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 | axis | own 19 / enemy 0 | XP 1 | enemy closer |
+| 02_kiev_1941 | 南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1 | enemy closer |
+| 03_stalingrad_1942 | 突擊工兵 | destroy 8,9 | soviet | own 12 / enemy 0 | XP 1 | enemy closer |
+| 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 | axis | own 18 / enemy 0 | XP 1 | enemy closer |
+| 04_kursk_1943 | 北側高地偵察 | recon 18,2 | axis | own 4 / enemy 0 | XP 1 | enemy closer |
+| 05_bastogne_1944 | 鎮心補給 | hold 2t 6,4 | allies | own 0 / enemy 3 | XP 1 | starts held |
+| 06_market_garden_1944 | 南岸橋頭 | hold 2t 5,12 | allies | own 8 / enemy 10 | XP 1 | ok |
+| 06_market_garden_1944 | 德軍遠程砲 | destroy 18,2 | allies | own 12 / enemy 0 | XP 1 | enemy closer |
+| 07_bagration_1944 | 奪取路口 | capture 3,4 | soviet | own 19 / enemy 0 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
+| 07_bagration_1944 | 壓制德軍砲位 | destroy 1,2 | soviet | own 21 / enemy 0 | XP 1 | enemy closer |
+| blitz_00_poland_1939 | 摧毀 37mm 反戰車砲 | destroy 3,3 | axis | own 20 / enemy 0 | XP 1 | enemy closer |
+| blitz_00_poland_1939 | 偵察砲兵陣地 | recon 0,2 | axis | own 24 / enemy 0 | XP 1 | enemy closer |
+| blitz_02_dunkirk_1940 | 堅守撤退出口 | hold 2t 5,0 | allies | own 0 / enemy 18 | XP 1, supp -2 | starts held; sustain reward |
+| blitz_02_dunkirk_1940 | 偵察裝甲縱隊 | recon 22,2 | allies | own 18 / enemy 0 | XP 1 | enemy closer |
+| blitz_03_moscow_1941 | 壓制 MG 34 | destroy 17,2 | soviet | own 5 / enemy 0 | XP 1 | enemy closer |
+| blitz_03_moscow_1941 | 前進觀測點 | recon 18,2 | soviet | own 4 / enemy 1 | XP 1 | enemy closer |
+| east_05_kharkov_1943 | 突破機槍據點 | destroy 5,3 | axis | own 18 / enemy 0 | XP 1 | enemy closer |
+| east_05_kharkov_1943 | 南側警戒線 | recon 5,4 | axis | own 19 / enemy 0 | XP 1 | enemy closer |
+| east_09_seelow_1945 | 清除 MG 42 | destroy 19,2 | soviet | own 22 / enemy 0 | XP 1 | enemy closer |
+| east_09_seelow_1945 | 偵察砲兵觀測點 | recon 21,1 | soviet | own 25 / enemy 0 | XP 1 | enemy closer |
+| east_10_berlin_1945 | 清除西側 MG 42 | destroy 18,3 | soviet | own 15 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
+| east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 | soviet | own 19 / enemy 0 | XP 1 | enemy closer |
+| tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
+| west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1 | enemy closer |
+| west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 | allies | own 21 / enemy 0 | XP 1 | enemy closer |

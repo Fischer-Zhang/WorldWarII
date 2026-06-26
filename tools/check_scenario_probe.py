@@ -18,6 +18,11 @@ def main() -> None:
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
     require("## Urban Breach Focus" in report, "scenario probe missing urban breach focus section")
     require(
+        "## Secondary Objective Reward Audit" in report
+        and "| scenario | objective | target | faction | distance | rewards | audit |" in report,
+        "scenario probe missing secondary objective reward audit section",
+    )
+    require(
         "03_stalingrad_1942" in report
         and "axis: eng min 12, art 0/6, targets 6" in report,
         "Stalingrad breach probe should show tuned Axis engineer approach and artillery gap",
@@ -71,6 +76,24 @@ def main() -> None:
         and "allies: eng turns 0" in report
         and "allies: art move 2/2" in report,
         "Tutorial tempo probe should show immediate engineer and artillery access",
+    )
+    require(
+        "07_bagration_1944" in report
+        and "奪取路口 | capture 3,4 | soviet | own 19 / enemy 0 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4"
+        in report,
+        "Reward audit should show Bagration reinforcement timing reward and pressure",
+    )
+    require(
+        "blitz_02_dunkirk_1940" in report
+        and "堅守撤退出口 | hold 2t 5,0 | allies | own 0 / enemy 18 | XP 1, supp -2 | starts held; sustain reward"
+        in report,
+        "Reward audit should show Dunkirk suppression recovery hold reward",
+    )
+    require(
+        "east_10_berlin_1945" in report
+        and "清除西側 MG 42 | destroy 18,3 | soviet | own 15 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery"
+        in report,
+        "Reward audit should show Berlin repair reward and pressure",
     )
     print("Scenario probe checks passed")
 

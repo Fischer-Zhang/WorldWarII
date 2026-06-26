@@ -80,7 +80,7 @@ Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
 spotter coverage, breach-path distance, terrain-aware breach tempo, artillery
 reposition coverage, objective pressure, secondary pressure, reinforcement
-deltas, and the Stalingrad/Berlin urban breach focus gate.
+deltas, secondary reward audits, and the Stalingrad/Berlin urban breach focus gate.
 
 Evaluate scenarios in this order:
 

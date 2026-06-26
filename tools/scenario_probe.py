@@ -269,6 +269,10 @@ def objective_pressure(scenario: dict[str, Any]) -> str:
     return "; ".join(parts) if parts else "n/a"
 
 
+def scenario_faction_ids(scenario: dict[str, Any]) -> list[str]:
+    return [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+
+
 def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
     objectives = scenario.get("secondary_objectives", [])
     if not isinstance(objectives, list) or not objectives:
@@ -367,6 +371,146 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
     if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
         parts.append(f"XP {legacy_xp}")
     return ", ".join(parts) if parts else "no reward"
+
+
+def secondary_objective_focus_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        objectives = scenario.get("secondary_objectives", [])
+        if not isinstance(objectives, list):
+            continue
+        scenario_id = str(scenario.get("id", ""))
+        for objective in objectives:
+            if not isinstance(objective, dict):
+                continue
+            rows.append([
+                scenario_id,
+                str(objective.get("label", objective.get("id", "secondary"))),
+                secondary_objective_focus_target_text(scenario, objective),
+                secondary_objective_faction_text(scenario, objective),
+                secondary_objective_distance_text(scenario, objective),
+                secondary_reward_text(objective),
+                secondary_objective_audit_text(scenario, objective),
+            ])
+    return rows
+
+
+def secondary_objective_focus_target_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    target = secondary_objective_target_offset(scenario, objective)
+    if target is None:
+        return f"{secondary_objective_type_text(objective)} n/a"
+    return f"{secondary_objective_type_text(objective)} {target[0]},{target[1]}"
+
+
+def secondary_objective_factions(scenario: dict[str, Any], objective: dict[str, Any]) -> list[str]:
+    faction_id = str(objective.get("faction", ""))
+    if faction_id:
+        return [faction_id]
+    return scenario_faction_ids(scenario)
+
+
+def secondary_objective_faction_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    faction_id = str(objective.get("faction", ""))
+    if faction_id:
+        return faction_id
+    factions = scenario_faction_ids(scenario)
+    return "any" if len(factions) > 1 else (factions[0] if factions else "any")
+
+
+def secondary_objective_distance_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    target = secondary_objective_target_offset(scenario, objective)
+    if target is None:
+        return "n/a"
+    target_coord = axial_from_offset(target)
+    factions = set(secondary_objective_factions(scenario, objective))
+    own_dist: list[int] = []
+    enemy_dist: list[int] = []
+    for unit in initial_units(scenario):
+        unit_coord = axial_from_offset(unit.get("at", [0, 0]))
+        distance = hex_distance(unit_coord, target_coord)
+        if str(unit.get("faction", "")) in factions:
+            own_dist.append(distance)
+        else:
+            enemy_dist.append(distance)
+    own = "n/a" if not own_dist else str(min(own_dist))
+    enemy = "n/a" if not enemy_dist else str(min(enemy_dist))
+    return f"own {own} / enemy {enemy}"
+
+
+def secondary_objective_audit_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    notes: list[str] = []
+    target = secondary_objective_target_offset(scenario, objective)
+    if target is None:
+        notes.append("missing target")
+    else:
+        target_coord = axial_from_offset(target)
+        factions = set(secondary_objective_factions(scenario, objective))
+        own_dist: list[int] = []
+        enemy_dist: list[int] = []
+        for unit in initial_units(scenario):
+            distance = hex_distance(axial_from_offset(unit.get("at", [0, 0])), target_coord)
+            if str(unit.get("faction", "")) in factions:
+                own_dist.append(distance)
+            else:
+                enemy_dist.append(distance)
+        if own_dist and enemy_dist and min(enemy_dist) < min(own_dist):
+            notes.append("enemy closer")
+        if own_dist and min(own_dist) == 0:
+            notes.append("starts held")
+
+    if str(objective.get("type", "capture")) == "destroy_unit":
+        target_unit = find_secondary_target_unit(scenario, str(objective.get("target_unit", "")))
+        if target_unit is not None and target_unit in scenario.get("reinforcements", []):
+            notes.append(f"target T{int(target_unit.get('at_turn', 0))}")
+
+    reward_notes = secondary_reward_audit_notes(scenario, objective)
+    notes.extend(reward_notes)
+    return "; ".join(notes) if notes else "ok"
+
+
+def secondary_reward_audit_notes(scenario: dict[str, Any], objective: dict[str, Any]) -> list[str]:
+    rewards = objective.get("rewards", [])
+    notes: list[str] = []
+    if not isinstance(rewards, list) or not rewards:
+        if int(objective.get("xp_reward", 0)) <= 0:
+            return ["no reward"]
+        return notes
+    for reward in rewards:
+        if not isinstance(reward, dict):
+            continue
+        reward_type = str(reward.get("type", ""))
+        amount = int(reward.get("amount", 0))
+        if amount <= 0:
+            continue
+        if reward_type == "advance_reinforcements":
+            notes.append(secondary_reinforcement_reward_audit(scenario, objective, amount))
+        elif reward_type == "recover_suppression":
+            notes.append("sustain reward")
+        elif reward_type == "repair_hp":
+            notes.append("damage recovery")
+    return notes
+
+
+def secondary_reinforcement_reward_audit(
+    scenario: dict[str, Any],
+    objective: dict[str, Any],
+    amount: int,
+) -> str:
+    factions = set(secondary_objective_factions(scenario, objective))
+    bits: list[str] = []
+    for reinforcement in scenario.get("reinforcements", []):
+        if not isinstance(reinforcement, dict):
+            continue
+        if str(reinforcement.get("faction", "")) not in factions:
+            continue
+        current_turn = int(reinforcement.get("at_turn", 0))
+        if current_turn <= 1:
+            continue
+        new_turn = max(1, current_turn - amount)
+        bits.append(f"T{current_turn}->T{new_turn}")
+    if not bits:
+        return "reinforce reward has no matching future reinforcement"
+    return "reinforce best " + ", ".join(sorted(set(bits)))
 
 
 def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:
@@ -669,6 +813,20 @@ def generate_report() -> str:
                 "check",
             ],
             urban_breach_focus_rows(scenarios, units, terrains),
+        ),
+        "## Secondary Objective Reward Audit",
+        "Focused audit of optional objective pressure, reward type, and static reward effectiveness.",
+        table(
+            [
+                "scenario",
+                "objective",
+                "target",
+                "faction",
+                "distance",
+                "rewards",
+                "audit",
+            ],
+            secondary_objective_focus_rows(scenarios),
         ),
     ]
     return "\n\n".join(sections) + "\n"
