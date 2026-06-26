@@ -45,6 +45,7 @@ func start_conquest_battle(
 	scenario_id: String,
 	context: Dictionary = {},
 ) -> void:
+	clear_deployment_overrides()
 	conquest_mode = true
 	campaign_mode = false
 	current_campaign_id = ""

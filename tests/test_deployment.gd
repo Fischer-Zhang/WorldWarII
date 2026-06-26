@@ -73,6 +73,7 @@ func _init() -> void:
 		printerr("FAIL: occupied deployment target should fall back to original coord")
 
 	var conquest_state := GameStateScript.new()
+	conquest_state.set_deployment_overrides("01_sedan", {"allies|Stale": {"q": 8, "r": 8, "general_id": ""}})
 	conquest_state.start_conquest_battle("alpha", "bravo", "01_sedan", {
 		"attacker_strength": 9,
 		"attacker_production": 4,
@@ -90,6 +91,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: conquest battle context should persist in GameState")
+	if conquest_state.get_deployment_overrides("01_sedan").is_empty():
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: starting conquest battle should clear stale deployment overrides")
 	conquest_state.clear_conquest_battle()
 	if not conquest_state.conquest_mode and conquest_state.pending_conquest_battle.is_empty():
 		pass_count += 1
