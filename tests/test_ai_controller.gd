@@ -9,12 +9,18 @@ const AT_DEF := {
 	"vision": 2, "vs_armor": 6, "armor": 0,
 }
 const ARTILLERY_DEF := {
-	"id": "artillery", "hp": 8, "attack": 7, "defense": 1, "range": 3, "move": 2,
+	"id": "artillery", "hp": 8, "attack": 7, "defense": 1, "range": 4, "move": 2,
 	"vision": 5, "vs_armor": 1, "armor": 0, "indirect": true,
 }
 const LIGHT_TANK_DEF := {
 	"hp": 12, "attack": 5, "defense": 4, "range": 1, "move": 5,
 	"vision": 5, "vs_armor": 2, "armor": 2,
+	"skill": {
+		"id": "fire_support_mark",
+		"cooldown": 2,
+		"duration": 0,
+		"fire_support_range": 5,
+	},
 }
 const ENGINEER_DEF := {
 	"id": "engineer", "hp": 8, "attack": 3, "defense": 2, "range": 1, "move": 3,
@@ -32,6 +38,8 @@ class StubHexMap:
 		return terrain_overrides.get(coord, "plain")
 	func blocks_los_at(coord: Vector2i) -> bool:
 		return terrain_at(coord) in ["forest", "mountain"]
+	func terrain_impassable(terrain: String) -> bool:
+		return terrain in ["river", "sea", "mountain"]
 	func move_cost_at(_coord: Vector2i) -> int:
 		return 1
 
@@ -85,6 +93,8 @@ class StubUnit:
 	var general_id: String = ""
 	var dig_in_level: int = 0
 	var suppression: int = 0
+	var has_attacked: bool = false
+	var skill_cooldowns: Dictionary = {}
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
 		type_id = _type_id
 		display_name = _type_id
@@ -94,6 +104,10 @@ class StubUnit:
 		max_hp = _hp
 	func is_alive() -> bool:
 		return hp > 0
+	func is_done_for_turn() -> bool:
+		return has_attacked
+	func skill_ready(skill_id: String, current_turn: int) -> bool:
+		return int(skill_cooldowns.get(skill_id, 0)) <= current_turn
 
 func make_unit(type_id: String, faction: String, coord: Vector2i, hp: int) -> StubUnit:
 	return StubUnit.new(type_id, faction, coord, hp)
@@ -352,7 +366,55 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: artillery should prefer light-tank-spotted target")
 
-	# 12) Target selection must use the attacker's live HP, not base HP.
+	# 12) Light tanks should mark a target when a follow-up attacker can use the bonus.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var marker := make_unit("light_tank", "axis", Vector2i(0, 0), 12)
+	var followup_artillery := make_unit("artillery", "axis", Vector2i(0, -1), 8)
+	var mark_target := make_unit("infantry", "allies", Vector2i(3, 0), 10)
+	mark_target.suppression = 1
+	battle.units = [marker, followup_artillery, mark_target]
+	battle.hex_map.occupants[marker.coord] = marker
+	battle.hex_map.occupants[followup_artillery.coord] = followup_artillery
+	battle.hex_map.occupants[mark_target.coord] = mark_target
+	for river_hex in [
+		Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, 1),
+		Vector2i(-1, 1), Vector2i(-1, 0), Vector2i(2, 0),
+		Vector2i(2, -1), Vector2i(1, 1), Vector2i(0, 2),
+		Vector2i(-1, 2), Vector2i(-2, 1), Vector2i(-2, 0),
+		Vector2i(-1, -1),
+	]:
+		battle.hex_map.terrain_overrides[river_hex] = "river"
+	battle.visibility_by_faction = {"axis": {mark_target.coord: true}}
+	var mark_plan: Dictionary = ai.plan_for_unit(marker)
+	if String(mark_plan.get("action", "")) == "fire_support_mark" \
+			and mark_plan.get("fire_support_target") == mark_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: light tank should mark for artillery follow-up, got %s" % str(mark_plan))
+
+	marker.skill_cooldowns["fire_support_mark"] = 99
+	var cooldown_plan: Dictionary = ai.plan_for_unit(marker)
+	if String(cooldown_plan.get("action", "")) != "fire_support_mark":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: light tank should not mark while fire-support skill is on cooldown")
+
+	marker.skill_cooldowns.clear()
+	followup_artillery.has_attacked = true
+	var no_followup_plan: Dictionary = ai.plan_for_unit(marker)
+	if String(no_followup_plan.get("action", "")) != "fire_support_mark":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: light tank should not mark when no ready follow-up attacker can use it")
+
+	# 13) Target selection must use the attacker's live HP, not base HP.
 	# At 1/10 HP infantry deals 1 damage, so only the one-HP target is killable.
 	battle.units = []
 	battle.visibility_by_faction = {}
@@ -376,7 +438,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: wounded attacker should only apply kill bonus to the target killed by live-HP damage")
 
-	# 13) Engineers should prefer breaching entrenched urban defenders over easier soft damage.
+	# 14) Engineers should prefer breaching entrenched urban defenders over easier soft damage.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -399,7 +461,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should prefer breaching entrenched urban target")
 
-	# 14) MG teams should value overwatch more than equal-position infantry because they use full reaction damage.
+	# 15) MG teams should value overwatch more than equal-position infantry because they use full reaction damage.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -424,7 +486,7 @@ func _init() -> void:
 			% [mg_ow_score, infantry_ow_score]
 		)
 
-	# 15) Engineers should approach entrenched urban defenders before they are in attack range.
+	# 16) Engineers should approach entrenched urban defenders before they are in attack range.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -456,7 +518,7 @@ func _init() -> void:
 			% [toward_urban, toward_plain]
 		)
 
-	# 16) Plan trace should explain the same selected plan without changing the decision.
+	# 17) Plan trace should explain the same selected plan without changing the decision.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -490,6 +552,7 @@ func _init() -> void:
 	if traced_plan.get("move_to") == direct_plan.get("move_to") \
 			and traced_plan.get("action") == direct_plan.get("action") \
 			and traced_plan.get("attack") == direct_plan.get("attack") \
+			and traced_plan.get("fire_support_target") == direct_plan.get("fire_support_target") \
 			and not candidates.is_empty() \
 			and top.has("coord") \
 			and components.has("distance") \
@@ -497,13 +560,14 @@ func _init() -> void:
 			and components.has("primary_objective") \
 			and components.has("secondary_objective") \
 			and components.has("total") \
+			and top.has("fire_support_score") \
 			and abs(float(components.get("objective", 0.0)) - (
 				float(components.get("primary_objective", 0.0))
 				+ float(components.get("secondary_objective", 0.0))
 			)) < 0.001 \
 			and primary_info.has("target") \
 			and secondary_info.get("key", "") == "trace_cache" \
-			and abs(float(traced_plan.get("score", 0.0)) - float(top.get("base_score", 0.0))) < 0.001:
+			and abs(float(traced_plan.get("score", 0.0)) - ai._trace_sort_score(top)) < 0.001:
 		pass_count += 1
 	else:
 		fail_count += 1

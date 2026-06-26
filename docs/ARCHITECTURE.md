@@ -157,11 +157,13 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - movement pressure toward primary objectives, secondary objectives and visible breach targets; destroy-unit secondary objectives also bias attack selection toward the marked unit
 - rally value when suppressed
 - overwatch value when no attack is better
+- fire-support marking when a light tank has a visible LOS target and a same-faction follow-up attacker can use the suppression bonus
 
 Hard difficulty adds one-ply lookahead against visible player retaliation.
 `tools/ai_trace_report.gd` generates `docs/progress/ai_trace_report.md` through
 `AIController.plan_trace_for_unit()` so AI diagnostics stay tied to the runtime
-scoring path, including primary and secondary objective score splits.
+scoring path, including primary/secondary objective score splits and fire-support
+mark scores.
 
 ## Campaign
 

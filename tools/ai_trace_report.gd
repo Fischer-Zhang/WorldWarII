@@ -15,6 +15,9 @@ class StubHexMap:
 	func blocks_los_at(coord: Vector2i) -> bool:
 		return terrain_at(coord) in ["forest", "mountain"]
 
+	func terrain_impassable(terrain: String) -> bool:
+		return terrain in ["river", "sea", "mountain"]
+
 	func move_cost_at(_coord: Vector2i) -> int:
 		return 1
 
@@ -47,6 +50,8 @@ class StubUnit:
 	var general_id: String = ""
 	var dig_in_level: int = 0
 	var suppression: int = 0
+	var has_attacked: bool = false
+	var skill_cooldowns: Dictionary = {}
 
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
 		type_id = _type_id
@@ -58,6 +63,12 @@ class StubUnit:
 
 	func is_alive() -> bool:
 		return hp > 0
+
+	func is_done_for_turn() -> bool:
+		return has_attacked
+
+	func skill_ready(skill_id: String, current_turn: int) -> bool:
+		return int(skill_cooldowns.get(skill_id, 0)) <= current_turn
 
 func _init() -> void:
 	call_deferred("_run")
@@ -112,6 +123,35 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 				{"unit": _dug_in_unit("infantry", "allies", Vector2i(4, 0), 3, data_loader), "visible": true, "terrain": "town"},
 			],
 			"notes": "Visible high-cover dig-in target should create breach movement pressure before contact.",
+		},
+		{
+			"id": "light_tank_fire_support",
+			"title": "Light tank fire-support mark",
+			"difficulty": "normal",
+			"attacker": _unit("light_tank", "axis", Vector2i(0, 0), data_loader),
+			"allies": [
+				_unit("artillery", "axis", Vector2i(0, -1), data_loader),
+			],
+			"enemies": [
+				{"unit": _suppressed_unit("infantry", "allies", Vector2i(3, 0), 1, data_loader), "visible": true},
+			],
+			"terrain": {
+				Vector2i(1, 0): "river",
+				Vector2i(1, -1): "river",
+				Vector2i(0, 1): "river",
+				Vector2i(-1, 1): "river",
+				Vector2i(-1, 0): "river",
+				Vector2i(0, -1): "plain",
+				Vector2i(2, 0): "river",
+				Vector2i(2, -1): "river",
+				Vector2i(1, 1): "river",
+				Vector2i(0, 2): "river",
+				Vector2i(-1, 2): "river",
+				Vector2i(-2, 1): "river",
+				Vector2i(-2, 0): "river",
+				Vector2i(-1, -1): "river",
+			},
+			"notes": "A light tank with no clean assault lane should spend its action marking a visible target when friendly artillery can follow up.",
 		},
 		{
 			"id": "hard_lookahead",
@@ -177,6 +217,9 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 	battle.hex_map.occupants[attacker.coord] = attacker
 	for coord in case_def.get("terrain", {}).keys():
 		battle.hex_map.terrain_overrides[coord] = case_def["terrain"][coord]
+	for ally in case_def.get("allies", []):
+		battle.units.append(ally)
+		battle.hex_map.occupants[ally.coord] = ally
 	var visible: Dictionary = {}
 	for enemy_def in case_def["enemies"]:
 		var enemy = enemy_def["unit"]
@@ -201,23 +244,25 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 		"Plan: `%s` to `%s`, target `%s`, score `%s`." % [
 			String(plan.get("action", "wait")),
 			_coord_text(plan.get("move_to", attacker.coord)),
-			_unit_text(plan.get("attack", null)),
+			_unit_text(_plan_target(plan)),
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | base | overwatch | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | base | overwatch | mark | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
+			_unit_text(row.get("fire_support_target", null)),
 			_score(row.get("base_score", 0.0)),
 			_score(row.get("overwatch_score", 0.0)),
+			_score(row.get("fire_support_score", 0.0)),
 			_score(row.get("rally_score", 0.0)),
 			_score(c.get("distance", 0.0)),
 			_score(c.get("attack", 0.0)),
@@ -260,6 +305,11 @@ func _unit_text(value: Variant) -> String:
 	if value == null:
 		return "none"
 	return "%s@%s" % [String(value.type_id), _coord_text(value.coord)]
+
+func _plan_target(plan: Dictionary):
+	if String(plan.get("action", "")) == "fire_support_mark":
+		return plan.get("fire_support_target", null)
+	return plan.get("attack", null)
 
 func _score(value: Variant) -> String:
 	var score := float(value)

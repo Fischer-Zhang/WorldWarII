@@ -30,6 +30,7 @@ const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
+const W_FIRE_SUPPORT := 2.0
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
 const AT_ARMOR_TARGET_BONUS := 2.0
@@ -70,7 +71,7 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 	_use_lookahead = bool(p["lookahead"])
 
 func plan_for_unit(unit) -> Dictionary:
-	# Returns: { "move_to": Vector2i, "attack": Unit | null, "score": float, "reachable": Dictionary }
+	# Returns: { "move_to": Vector2i, "attack": Unit | null, "action": String, "score": float, "reachable": Dictionary }
 	# Invalidate the player-reach cache: a previous AI unit on this turn
 	# may have killed or displaced players, so cached reach is stale.
 	# (Within a single plan_for_unit, the cache still amortises across the
@@ -96,7 +97,14 @@ func plan_for_unit(unit) -> Dictionary:
 	# Symmetric fog: AI only knows enemies it can currently see + remembers.
 	var known: Array = battle.get_known_enemies(unit.faction_id)
 	if known.is_empty():
-		return {"move_to": unit.coord, "attack": null, "score": 0.0, "reachable": reachable}
+		return {
+			"move_to": unit.coord,
+			"attack": null,
+			"fire_support_target": null,
+			"action": "wait",
+			"score": 0.0,
+			"reachable": reachable,
+		}
 
 	# Only currently-visible enemies are valid attack targets.
 	var visible_enemies: Array = []
@@ -107,8 +115,10 @@ func plan_for_unit(unit) -> Dictionary:
 	var best: Vector2i = unit.coord
 	var best_score: float = -INF
 	var best_target = null
-	var best_action := "wait"  # "attack", "overwatch", "rally", or "wait"
+	var best_fire_support_target = null
+	var best_action := "wait"  # "attack", "overwatch", "rally", "fire_support_mark", or "wait"
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
+	var fire_support_skill := _fire_support_skill(unit, atk_def)
 
 	for cand in candidates:
 		var coord: Vector2i = cand
@@ -124,27 +134,43 @@ func plan_for_unit(unit) -> Dictionary:
 		# To get the "overwatch" total, swap them:
 		var overwatch_score: float = base_score - attack_value + overwatch_value
 		var rally_score: float = _rally_score(unit, coord, hex_map, atk_def)
+		var fire_support := _best_fire_support_mark_from(
+			unit, coord, visible_enemies, fire_support_skill, visible_hexes
+		)
+		var fire_support_score := -INF
+		if fire_support.get("target", null) != null:
+			fire_support_score = base_score - attack_value + float(fire_support.get("score", 0.0))
 
 		if base_score > best_score:
 			best_score = base_score
 			best = coord
 			best_target = target
+			best_fire_support_target = null
 			best_action = "attack" if target != null else "wait"
 		if overwatch_score > best_score and not atk_def.get("indirect", false) \
 				and not CombatEffects.is_pinned(unit.suppression):
 			best_score = overwatch_score
 			best = coord
 			best_target = null
+			best_fire_support_target = null
 			best_action = "overwatch"
+		if fire_support_score > best_score:
+			best_score = fire_support_score
+			best = coord
+			best_target = null
+			best_fire_support_target = fire_support.get("target", null)
+			best_action = "fire_support_mark"
 		if rally_score > best_score:
 			best_score = rally_score
 			best = coord
 			best_target = null
+			best_fire_support_target = null
 			best_action = "rally"
 
 	return {
 		"move_to": best,
 		"attack": best_target,
+		"fire_support_target": best_fire_support_target,
 		"action": best_action,
 		"score": best_score,
 		"reachable": reachable,
@@ -161,6 +187,7 @@ func plan_trace_for_unit(unit) -> Dictionary:
 		if k.get("visible", false):
 			visible_enemies.append(k["unit"])
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
+	var fire_support_skill := _fire_support_skill(unit, atk_def)
 	var candidates: Array = [unit.coord]
 	var reachable: Dictionary = plan.get("reachable", {})
 	for c in reachable.keys():
@@ -177,11 +204,19 @@ func plan_trace_for_unit(unit) -> Dictionary:
 		var attack_value: float = _best_attack_value(unit, coord, visible_enemies, battle.hex_map, atk_def, visible_hexes)
 		var overwatch_value: float = _overwatch_score(unit, coord, visible_enemies, battle.hex_map, atk_def, int(atk_def.get("range", 1)))
 		var rally_value: float = _rally_score(unit, coord, battle.hex_map, atk_def)
+		var fire_support := _best_fire_support_mark_from(
+			unit, coord, visible_enemies, fire_support_skill, visible_hexes
+		)
+		var fire_support_score := -INF
+		if fire_support.get("target", null) != null:
+			fire_support_score = float(breakdown.total) - attack_value + float(fire_support.get("score", 0.0))
 		traces.append({
 			"coord": coord,
 			"target": target,
+			"fire_support_target": fire_support.get("target", null),
 			"base_score": float(breakdown.total),
 			"overwatch_score": float(breakdown.total) - attack_value + overwatch_value,
+			"fire_support_score": fire_support_score,
 			"rally_score": rally_value,
 			"components": breakdown,
 		})
@@ -286,7 +321,10 @@ func _score_position_breakdown(
 func _trace_sort_score(trace: Dictionary) -> float:
 	return max(
 		float(trace.get("base_score", -INF)),
-		max(float(trace.get("overwatch_score", -INF)), float(trace.get("rally_score", -INF)))
+		max(
+			float(trace.get("overwatch_score", -INF)),
+			max(float(trace.get("fire_support_score", -INF)), float(trace.get("rally_score", -INF)))
+		)
 	)
 
 func _rally_score(unit, pos: Vector2i, hex_map, atk_def: Dictionary) -> float:
@@ -404,6 +442,101 @@ func _best_attack_from(
 			best = enemy
 	return best
 
+func _best_fire_support_mark_from(
+	unit,
+	pos: Vector2i,
+	visible_enemies: Array,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> Dictionary:
+	if skill.is_empty() or unit == null or unit.has_attacked:
+		return {"target": null, "score": -INF}
+	var skill_id := String(skill.get("id", ""))
+	if skill_id == "" or not _skill_ready(unit, skill_id):
+		return {"target": null, "score": -INF}
+	var best = null
+	var best_score := -INF
+	for e in visible_enemies:
+		var enemy = e
+		var score := _fire_support_mark_score(unit, pos, enemy, skill, visible_hexes)
+		if score > best_score:
+			best_score = score
+			best = enemy
+	if best == null:
+		return {"target": null, "score": -INF}
+	return {"target": best, "score": best_score}
+
+func _fire_support_mark_score(
+	unit,
+	pos: Vector2i,
+	enemy,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> float:
+	if enemy == null or not enemy.is_alive() or enemy.faction_id == unit.faction_id:
+		return -INF
+	if not visible_hexes.has(enemy.coord):
+		return -INF
+	if HexCoord.distance(pos, enemy.coord) > int(skill.get("fire_support_range", 0)):
+		return -INF
+	if not Visibility.has_los(pos, enemy.coord, battle.hex_map):
+		return -INF
+	if _target_has_fire_support_mark(unit.faction_id, enemy):
+		return -INF
+	var followup_score := _best_fire_support_followup_score(unit, enemy, visible_hexes)
+	if followup_score <= 0.0:
+		return -INF
+	var def_def: Dictionary = _get_unit_def(enemy.type_id)
+	return followup_score + _target_focus_score(enemy, def_def) * 0.25 \
+		+ _secondary_destroy_target_score(unit.faction_id, enemy) * 0.5
+
+func _best_fire_support_followup_score(marker, enemy, visible_hexes: Dictionary) -> float:
+	var best := 0.0
+	for u in battle.units:
+		var ally = u
+		if ally == marker or not ally.is_alive() or ally.faction_id != marker.faction_id:
+			continue
+		if ally.has_method("is_done_for_turn") and ally.is_done_for_turn():
+			continue
+		var ally_def: Dictionary = _get_unit_def(ally.type_id)
+		if not CombatRules.can_attack_from_coord(
+			ally.coord, ally.faction_id, enemy, ally_def, battle.hex_map, visible_hexes
+		):
+			continue
+		var score := _fire_support_followup_attack_score(ally, enemy, ally_def)
+		best = max(best, score)
+	return best
+
+func _fire_support_followup_attack_score(ally, enemy, ally_def: Dictionary) -> float:
+	var distance := HexCoord.distance(ally.coord, enemy.coord)
+	var atk_terr: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(ally.coord))
+	var def_terr: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(enemy.coord))
+	var ally_general: Dictionary = _get_general_def(ally.general_id)
+	var enemy_general: Dictionary = _get_general_def(enemy.general_id)
+	var ally_mods: Dictionary = CombatModifiers.for_unit(ally, ally_general)
+	var enemy_mods: Dictionary = CombatModifiers.for_unit(enemy, enemy_general)
+	ally_mods.attack = int(ally_mods.get("attack", 0)) - CombatEffects.attack_penalty(ally.suppression)
+	var result: CombatResolver.Result = CombatResolver.resolve(
+		ally_def, _get_unit_def(enemy.type_id), ally.hp, enemy.hp,
+		atk_terr, def_terr, distance, enemy.dig_in_level, ally_mods, enemy_mods,
+	)
+	var bonus := CombatEffects.fire_support_suppression_bonus(
+		true, result.damage_to_defender, result.defender_dies
+	)
+	if bonus <= 0:
+		return 0.0
+	var base_suppression := result.suppression_to_defender + _spotter_suppression_bonus(
+		ally.faction_id, enemy.coord, ally_def, result.damage_to_defender, result.defender_dies
+	)
+	var before := CombatEffects.apply_suppression(enemy.suppression, base_suppression)
+	var after := CombatEffects.apply_suppression(enemy.suppression, base_suppression + bonus)
+	var score := float(bonus) * W_SUPPRESSION * W_FIRE_SUPPORT
+	if not CombatEffects.is_pinned(before) and CombatEffects.is_pinned(after):
+		score += 3.0
+	score += float(after - before) * 0.4
+	score += float(result.damage_to_defender) * 0.15
+	return score
+
 func _attack_candidate_score(
 	attacker,
 	pos: Vector2i,
@@ -446,6 +579,44 @@ func _attack_candidate_score(
 	score += _secondary_destroy_target_score(attacker_faction, enemy)
 	score -= 0.6 * float(r.counter_damage)
 	return score
+
+func _fire_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
+	var def := unit_def
+	if def.is_empty() and unit != null:
+		def = _get_unit_def(unit.type_id)
+	var primary: Dictionary = def.get("skill", {})
+	if primary.has("fire_support_range"):
+		return primary
+	for value in def.get("skills", []):
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var skill: Dictionary = value
+		if skill.has("fire_support_range"):
+			return skill
+	return {}
+
+func _skill_ready(unit, skill_id: String) -> bool:
+	if unit == null:
+		return false
+	if unit.has_method("skill_ready"):
+		return unit.skill_ready(skill_id, _current_turn_number())
+	var cooldowns = unit.get("skill_cooldowns")
+	if typeof(cooldowns) == TYPE_DICTIONARY:
+		return int(cooldowns.get(skill_id, 0)) <= _current_turn_number()
+	return true
+
+func _current_turn_number() -> int:
+	var turn_manager = battle.get("turn_manager")
+	if turn_manager != null:
+		return int(turn_manager.get("turn_number"))
+	return 0
+
+func _target_has_fire_support_mark(faction_id: String, enemy) -> bool:
+	var marks = battle.get("fire_support_marks")
+	if typeof(marks) != TYPE_DICTIONARY:
+		return false
+	var mark: Dictionary = marks.get(enemy.get_instance_id(), {})
+	return String(mark.get("faction", "")) == faction_id
 
 func _unit_at(pos: Vector2i, faction_id: String, type_id: String):
 	var occupant = battle.hex_map.occupants.get(pos)

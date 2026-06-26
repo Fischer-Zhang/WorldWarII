@@ -332,6 +332,19 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				u.queue_redraw()
 				_set_prompt("AI 行動", "%s 進入警戒" % u.display_name)
 				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+			"fire_support_mark":
+				var fire_support_target: Unit = plan.get("fire_support_target")
+				var skill := _resolve_skill_by_id(u, FIRE_SUPPORT_SKILL_ID)
+				if fire_support_target != null and not skill.is_empty() \
+						and fire_support_target.is_alive() \
+						and u.skill_ready(String(skill.get("id", FIRE_SUPPORT_SKILL_ID)), turn_manager.turn_number) \
+						and fire_support_target in _fire_support_targets(u, skill):
+					fire_support_skill = skill
+					_do_fire_support_mark(u, fire_support_target)
+					await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+				else:
+					u.has_attacked = true
+					u.queue_redraw()
 			"rally":
 				var recovered := _rally_unit(u)
 				_set_prompt("AI 行動", "%s 整隊,壓制 -%d" % [u.display_name, recovered])

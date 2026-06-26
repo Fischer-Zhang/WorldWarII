@@ -110,7 +110,7 @@ instead of mirroring the scoring formula in Python.
 Current role-shaping pass:
 
 - Light tanks get a scouting-position bonus when no enemy is currently visible.
-- Player light tanks can mark fire-support targets; AI scoring still models their passive artillery spotter value.
+- Light tanks can mark fire-support targets; AI scoring evaluates the active mark only when a same-faction follow-up attacker can use the suppression bonus.
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
 - Engineers prefer entrenched urban/high-cover targets when their attack would remove dig-in.
