@@ -119,6 +119,24 @@ Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in l
 | 重戰車 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 | S1/D0 |
 | 火箭砲 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 | S3/D1 |
 
+## Urban Breach Baseline
+
+Town breach cells simulate repeated attacks into town+dig3 without defender recovery. Cell format is first-hit `damage Sx/Dy`, then hits to clear all dig-in and hits to kill the defender within the simulation cap.
+
+| attacker | 步兵 | 機槍組 | 反戰車砲 | 中戰車 |
+| --- | --- | --- | --- | --- |
+| 步兵 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 機槍組 | 1 dmg S3/D0; clear --; kill 10 | 1 dmg S3/D0; clear --; kill 8 | 1 dmg S3/D0; clear --; kill 6 | 1 dmg S3/D0; clear --; kill >12 |
+| 反戰車砲 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 輕戰車 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 中戰車 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 砲兵 | 1 dmg S3/D1; clear 3; kill 7 | 1 dmg S3/D1; clear 3; kill 5 | 1 dmg S3/D1; clear 3; kill 4 | 1 dmg S3/D1; clear 3; kill >12 |
+| 傘兵 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 工兵 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 驅逐戰車 | 1 dmg S1/D0; clear --; kill 10 | 1 dmg S1/D0; clear --; kill 8 | 1 dmg S1/D0; clear --; kill 6 | 1 dmg S1/D0; clear --; kill >12 |
+| 重戰車 | 1 dmg S1/D0; clear --; kill 10 | 2 dmg S1/D0; clear --; kill 4 | 2 dmg S1/D0; clear --; kill 3 | 5 dmg S1/D0; clear --; kill 4 |
+| 火箭砲 | 1 dmg S3/D1; clear 3; kill 10 | 1 dmg S3/D1; clear 3; kill 6 | 1 dmg S3/D1; clear 3; kill 5 | 1 dmg S3/D1; clear 3; kill >12 |
+
 ## Hits To Kill
 
 | attacker | defender | plain dmg | plain hits | town+dig3 dmg | town+dig3 hits |

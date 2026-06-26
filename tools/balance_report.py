@@ -31,6 +31,10 @@ TERRAIN_CASES = [
     ("town_dig3", "town", 3),
 ]
 
+URBAN_BREACH_DEFENDERS = ["infantry", "mg_team", "at_gun", "medium_tank"]
+URBAN_BREACH_DIG_IN = 3
+URBAN_BREACH_MAX_HITS = 12
+
 SUPPRESSION_BY_TYPE = {
     "infantry": 1,
     "mg_team": 3,
@@ -253,6 +257,56 @@ def effect_matrix(units: dict[str, Any], terrains: dict[str, Any], terrain_id: s
                 defender_dig_in=dig_in,
             )
             row.append(f"S{result.suppression}/D{result.dig_in_loss}")
+        rows.append(row)
+    return table(headers, rows)
+
+
+def urban_breach_cell(
+    attacker_id: str,
+    defender_id: str,
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    hp = int(units[defender_id].get("hp", 1))
+    dig_in = URBAN_BREACH_DIG_IN
+    first_hit: CombatResult | None = None
+    hits_to_clear: int | None = None
+    hits_to_kill: int | None = None
+
+    for hit in range(1, URBAN_BREACH_MAX_HITS + 1):
+        result = resolve(
+            attacker_id,
+            defender_id,
+            units,
+            terrains,
+            defender_hp=hp,
+            defender_terrain_id="town",
+            defender_dig_in=dig_in,
+        )
+        if first_hit is None:
+            first_hit = result
+        hp -= result.damage
+        dig_in = max(0, dig_in - result.dig_in_loss)
+        if hits_to_clear is None and dig_in == 0:
+            hits_to_clear = hit
+        if hp <= 0:
+            hits_to_kill = hit
+            break
+
+    assert first_hit is not None
+    clear_text = str(hits_to_clear) if hits_to_clear is not None else "--"
+    kill_text = str(hits_to_kill) if hits_to_kill is not None else f">{URBAN_BREACH_MAX_HITS}"
+    return f"{first_hit.damage} dmg S{first_hit.suppression}/D{first_hit.dig_in_loss}; clear {clear_text}; kill {kill_text}"
+
+
+def urban_breach_matrix(units: dict[str, Any], terrains: dict[str, Any]) -> str:
+    defender_ids = [unit_id for unit_id in URBAN_BREACH_DEFENDERS if unit_id in units]
+    headers = ["attacker"] + [unit_name(unit_id, units) for unit_id in defender_ids]
+    rows: list[list[Any]] = []
+    for attacker_id in units.keys():
+        row: list[Any] = [unit_name(attacker_id, units)]
+        for defender_id in defender_ids:
+            row.append(urban_breach_cell(attacker_id, defender_id, units, terrains))
         rows.append(row)
     return table(headers, rows)
 
@@ -535,6 +589,12 @@ def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
         "Cell format is `Sx/Dy`: suppression applied to a surviving defender and dig-in levels stripped on town+dig2. "
         "MG teams and indirect fire are the primary pinning tools; indirect fire strips one dig-in level when it damages an entrenched target.\n\n"
         + effect_matrix(units, terrains, "town", 2)
+    )
+    sections.append(
+        "## Urban Breach Baseline\n\n"
+        "Town breach cells simulate repeated attacks into town+dig3 without defender recovery. "
+        "Cell format is first-hit `damage Sx/Dy`, then hits to clear all dig-in and hits to kill the defender within the simulation cap.\n\n"
+        + urban_breach_matrix(units, terrains)
     )
     sections.append("## Hits To Kill\n\n" + ttk_table(units, terrains))
     if baseline_units is not None:
