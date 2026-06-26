@@ -118,6 +118,24 @@ func _check_briefing() -> void:
 	_expect("briefing begin tooltip", String(scene.get_node("Margin/VBox/Buttons/BeginButton").tooltip_text) != "")
 	await _free_scene(scene)
 
+	scene = await _instantiate_scene(
+		"res://scenes/briefing.tscn",
+		{"scenario_id": "tut_00_basic_turn", "campaign_mode": true, "campaign_id": "00_tutorial"}
+	)
+	scene.get_node("Margin/VBox/Buttons/BeginButton").pressed.emit()
+	await process_frame
+	await process_frame
+	var current: Node = current_scene
+	_expect(
+		"campaign briefing skips deployment",
+		current != null and String(current.scene_file_path) == "res://scenes/battle.tscn",
+		String(current.scene_file_path) if current != null else "no current scene"
+	)
+	if current != null:
+		await _free_scene(current)
+	if is_instance_valid(scene) and scene.get_parent() != null:
+		await _free_scene(scene)
+
 func _check_deployment() -> void:
 	var scene := await _instantiate_scene("res://scenes/deployment.tscn", {"scenario_id": "01_sedan_1940"})
 	_expect(
@@ -164,7 +182,11 @@ func _check_campaign() -> void:
 		"campaign tutorial starts at scenario zero",
 		scene.selected_campaign_id == "00_tutorial" and scene.selected_scenario_id == "tut_00_basic_turn"
 	)
-	_expect("campaign continue tooltip", String(scene.get_node("Margin/VBox/Buttons/ContinueButton").tooltip_text) != "")
+	_expect(
+		"campaign continue tooltip",
+		String(scene.get_node("Margin/VBox/Buttons/ContinueButton").tooltip_text).contains("簡報")
+				and not String(scene.get_node("Margin/VBox/Buttons/ContinueButton").tooltip_text).contains("部署")
+	)
 	await _free_scene(scene)
 
 func _check_lounge() -> void:

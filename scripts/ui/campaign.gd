@@ -119,7 +119,7 @@ func _rebuild_scenario_list() -> void:
 		]
 		continue_button.text = "開始選定作戰"
 		continue_button.disabled = selected_scenario_id == ""
-		continue_button.tooltip_text = "進入簡報與戰前部署。" if not continue_button.disabled else "先選擇目前已解鎖的作戰。"
+		continue_button.tooltip_text = "進入作戰簡報。" if not continue_button.disabled else "先選擇目前已解鎖的作戰。"
 	reset_button.text = "重置此戰線"
 	reset_button.disabled = false
 	back_button.text = "返回戰線列表"

@@ -82,7 +82,7 @@ Battle setup order:
 3. Load map and units.
 4. Apply campaign roster if campaign mode.
 5. Apply lounge upgrades.
-6. Apply deployment overrides.
+6. Apply deployment overrides when a mode provides them.
 7. Identify player faction.
 8. Apply conquest battle context if conquest mode.
 9. Seed fog-of-war memory.
@@ -169,7 +169,7 @@ Hard difficulty adds one-ply lookahead against visible player retaliation.
 - general upgrades
 - tech upgrades
 
-These upgrades are applied to player units before deployment/battle.
+These upgrades are applied to player units before battle.
 
 ## Conquest
 

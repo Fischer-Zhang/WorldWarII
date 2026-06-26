@@ -24,7 +24,7 @@ func _ready() -> void:
 		title_label.text = String(scenario.get("title", scenario.get("id", "")))
 		briefing_label.text = String(scenario.get("briefing", "(無簡報)"))
 	begin_button.pressed.connect(_on_begin_pressed)
-	begin_button.tooltip_text = "進入戰前部署。"
+	begin_button.tooltip_text = "開始戰鬥。" if GameState.campaign_mode else "進入戰前部署。"
 	back_button.pressed.connect(_on_back_pressed)
 	back_button.tooltip_text = back_button.text
 
@@ -52,8 +52,12 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 		]
 
 func _on_begin_pressed() -> void:
-	# Every mode now routes through deployment; for conquest the editor builds the
-	# recruited army onto the themed map (see deployment.gd / ConquestBattleSetup).
+	if GameState.campaign_mode:
+		GameState.clear_deployment_overrides()
+		get_tree().change_scene_to_file("res://scenes/battle.tscn")
+		return
+	# Conquest still routes through deployment; the editor builds the recruited
+	# army onto the themed map (see deployment.gd / ConquestBattleSetup).
 	get_tree().change_scene_to_file("res://scenes/deployment.tscn")
 
 func _on_back_pressed() -> void:
