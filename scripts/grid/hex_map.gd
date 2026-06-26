@@ -21,6 +21,7 @@ const FOG_COLOR := Color(0.04, 0.04, 0.07, 0.72)
 var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
 var polys: Dictionary = {}     # Vector2i (axial) -> Polygon2D node
 var occupants: Dictionary = {} # Vector2i (axial) -> Unit
+var bridges: Dictionary = {}   # Vector2i -> true: engineer bridges over impassable water
 var highlight: Polygon2D
 var range_overlays: Node2D
 var threat_overlays: Node2D
@@ -82,7 +83,9 @@ func _spawn_highlight() -> void:
 func _spawn_range_overlay_layer() -> void:
 	range_overlays = Node2D.new()
 	range_overlays.name = "RangeOverlays"
-	range_overlays.z_index = 5
+	# Above the fog layer (z=8) so the movement range stays clearly visible even on
+	# fogged hexes you can move into; below the highlight (z=10) and units (z=20).
+	range_overlays.z_index = 9
 	add_child(range_overlays)
 
 func _spawn_threat_overlay_layer() -> void:
@@ -94,7 +97,7 @@ func _spawn_threat_overlay_layer() -> void:
 func _spawn_fog_layer() -> void:
 	var layer := Node2D.new()
 	layer.name = "FogLayer"
-	layer.z_index = 8  # above range overlays and wreckage, below units (z=20)
+	layer.z_index = 8  # over wreckage + threat overlay; movement range (z=9) shows through, units (z=20) on top
 	add_child(layer)
 	for c in tiles.keys():
 		var coord: Vector2i = c
@@ -304,6 +307,18 @@ func move_cost_at(coord: Vector2i) -> int:
 		return 999
 	var def := DataLoader.get_terrain_def(terrain_id)
 	return int(def.get("move_cost", 1))
+
+func terrain_impassable(terrain_id: String) -> bool:
+	if terrain_id == "":
+		return true
+	return bool(DataLoader.get_terrain_def(terrain_id).get("impassable", false))
+
+func is_bridged(coord: Vector2i) -> bool:
+	return bridges.has(coord)
+
+func add_bridge(coord: Vector2i) -> void:
+	bridges[coord] = true
+	queue_redraw()
 
 func blocks_los_at(coord: Vector2i) -> bool:
 	var terrain_id: String = tiles.get(coord, "")

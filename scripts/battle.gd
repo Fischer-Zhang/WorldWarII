@@ -274,7 +274,7 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 		if dest != u.coord:
 			var reachable: Dictionary = plan.get("reachable", {})
 			var path := Pathfinding.reconstruct_path(
-				u.coord, dest, reachable, hex_map, hex_map.occupants, u.faction_id
+				u.coord, dest, reachable, hex_map, hex_map.occupants, u.faction_id, u.type_id
 			)
 			var survived := _move_with_overwatch(u, path)
 			hex_map.highlight_coord(dest)
@@ -577,7 +577,7 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 			if movement_range.has(coord) and clicked_unit == null:
 				var path := Pathfinding.reconstruct_path(
 					selected_unit.coord, coord, movement_range, hex_map,
-					hex_map.occupants, selected_unit.faction_id
+					hex_map.occupants, selected_unit.faction_id, selected_unit.type_id
 				)
 				var survived := _move_with_overwatch(selected_unit, path)
 				if not survived:
@@ -623,7 +623,7 @@ func _select_unit(unit: Unit) -> void:
 	var general_def: Dictionary = DataLoader.get_general_def(unit.general_id)
 	var move_pts: int = unit.effective_move(unit_def, general_def)
 	movement_range = Pathfinding.movement_range(
-		unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id
+		unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id, unit.type_id
 	)
 	hex_map.show_movement_range(movement_range.keys())
 	hex_map.show_threat_range(_enemy_threat_hexes(unit.faction_id))

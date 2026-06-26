@@ -3,7 +3,9 @@ extends RefCounted
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 
-const ZOC_PENALTY := 2  # extra cost to enter a hex adjacent to an enemy unit
+const ZOC_PENALTY := 2  # extra cost (in hex units) to enter a hex adjacent to an enemy
+const SUBHEX := 2       # internal cost scale: a normal hex costs SUBHEX, a road/bridge costs 1 (half) so roads are fast
+const IMPASSABLE := 1 << 20  # river / sea / mountain (unless bridged): never enterable
 
 # Dijkstra-style BFS for hex movement.
 # Returns `coord -> cumulative_cost` for every hex reachable within `move_points`,
@@ -14,10 +16,13 @@ const ZOC_PENALTY := 2  # extra cost to enter a hex adjacent to an enemy unit
 static func movement_range(
 	start: Vector2i,
 	move_points: int,
-	hex_map,  # duck-typed: needs terrain_at(coord) and move_cost_at(coord)
+	hex_map,  # duck-typed: needs terrain_at + move_cost_at (+ optional terrain_impassable / is_bridged)
 	occupied: Dictionary,
 	mover_faction: String = "",  # required for ZoC; "" disables ZoC
+	unit_type: String = "",      # infantry ignores difficult-terrain penalty
 ) -> Dictionary:
+	# Costs are in the SUBHEX scale (a normal hex = SUBHEX), so the budget scales too.
+	var budget := move_points * SUBHEX
 	var cost_to: Dictionary = {start: 0}
 	var frontier: Array = [start]  # poor-man's priority via re-relaxation; map sizes are small
 
@@ -29,9 +34,11 @@ static func movement_range(
 				continue  # off-map
 			if occupied.has(n) and occupied[n] != null:
 				continue  # blocked by another unit
-			var step_cost: int = _movement_step_cost(n, hex_map, occupied, mover_faction)
+			var step_cost: int = _movement_step_cost(n, hex_map, occupied, mover_faction, unit_type)
+			if step_cost >= IMPASSABLE:
+				continue  # river / sea / mountain (no bridge)
 			var new_cost := current_cost + step_cost
-			if new_cost > move_points:
+			if new_cost > budget:
 				continue
 			if not cost_to.has(n) or new_cost < cost_to[n]:
 				cost_to[n] = new_cost
@@ -52,10 +59,21 @@ static func _movement_step_cost(
 	hex_map,
 	occupied: Dictionary,
 	mover_faction: String,
+	unit_type: String = "",
 ) -> int:
-	var step_cost: int = hex_map.move_cost_at(hex)
+	var terrain: String = hex_map.terrain_at(hex)
+	var bridged: bool = hex_map.has_method("is_bridged") and hex_map.is_bridged(hex)
+	if not bridged and hex_map.has_method("terrain_impassable") and hex_map.terrain_impassable(terrain):
+		return IMPASSABLE  # river / sea / mountain — only an engineer bridge (water) opens it
+	var step_cost: int
+	if terrain == "road" or bridged:
+		step_cost = 1  # road / bridge: half a normal step
+	elif unit_type == "infantry" and hex_map.move_cost_at(hex) >= 2:
+		step_cost = SUBHEX  # infantry ignores the difficult-terrain (forest/jungle) penalty
+	else:
+		step_cost = hex_map.move_cost_at(hex) * SUBHEX
 	if mover_faction != "" and _enters_enemy_zoc(hex, occupied, mover_faction):
-		step_cost += ZOC_PENALTY
+		step_cost += ZOC_PENALTY * SUBHEX
 	return step_cost
 
 static func reconstruct_path(
@@ -65,6 +83,7 @@ static func reconstruct_path(
 	hex_map,
 	occupied: Dictionary = {},
 	mover_faction: String = "",
+	unit_type: String = "",
 ) -> Array[Vector2i]:
 	# Walk backwards from goal to start by picking the neighbor with the cheapest cost.
 	if not cost_to.has(goal):
@@ -78,13 +97,13 @@ static func reconstruct_path(
 		var best_cost: int = cost_to[cursor]
 		for n in HexCoord.neighbors(cursor):
 			if n == start:
-				var start_step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction)
+				var start_step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction, unit_type)
 				if start_step == cost_to[cursor]:
 					best = n
 					best_cost = -1
 					break
 			if cost_to.has(n) and cost_to[n] < best_cost:
-				var step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction)
+				var step: int = _movement_step_cost(cursor, hex_map, occupied, mover_faction, unit_type)
 				if cost_to[n] + step == cost_to[cursor]:
 					best = n
 					best_cost = cost_to[n]

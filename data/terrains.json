@@ -18,6 +18,7 @@
     "move_cost": 3,
     "defense": 3,
     "blocks_los": true,
+    "impassable": true,
     "color": "#7a6a55"
   },
   "town": {
@@ -33,6 +34,7 @@
     "move_cost": 4,
     "defense": -1,
     "blocks_los": false,
+    "impassable": true,
     "color": "#4a7ab0"
   },
   "road": {
@@ -62,6 +64,7 @@
     "move_cost": 9,
     "defense": 0,
     "blocks_los": false,
+    "impassable": true,
     "color": "#2a5a8a"
   }
 }
