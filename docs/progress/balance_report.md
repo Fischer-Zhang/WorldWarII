@@ -9,12 +9,12 @@ Generated from `data/units.json`, `data/terrains.json`, and `data/scenarios/*.js
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | infantry | 步兵 | 10 | 4 | 2 | 1 | 3 | 3 | 1 | 0 |  |
 | mg_team | 機槍組 | 8 | 6 | 1 | 1 | 2 | 3 | 0 | 0 |  |
-| at_gun | 反戰車砲 | 6 | 5 | 1 | 2 | 1 | 2 | 6 | 0 |  |
+| at_gun | 反戰車砲 | 6 | 5 | 1 | 2 | 2 | 2 | 6 | 0 |  |
 | light_tank | 輕戰車 | 12 | 5 | 4 | 1 | 5 | 5 | 2 | 2 |  |
 | medium_tank | 中戰車 | 16 | 7 | 5 | 1 | 4 | 4 | 4 | 4 |  |
 | artillery | 砲兵 | 8 | 7 | 1 | 4 | 2 | 2 | 1 | 0 | yes |
 | paratrooper | 傘兵 | 8 | 5 | 2 | 1 | 3 | 4 | 2 | 0 |  |
-| engineer | 工兵 | 8 | 3 | 2 | 1 | 2 | 3 | 1 | 0 |  |
+| engineer | 工兵 | 8 | 3 | 2 | 1 | 3 | 3 | 1 | 0 |  |
 | tank_destroyer | 驅逐戰車 | 12 | 5 | 4 | 1 | 3 | 3 | 7 | 3 |  |
 | heavy_tank | 重戰車 | 22 | 9 | 5 | 1 | 3 | 4 | 7 | 6 |  |
 | rocket_artillery | 火箭砲 | 8 | 6 | 1 | 3 | 2 | 2 | 0 | 0 | yes |
@@ -253,7 +253,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | id | name | changes |
 | --- | --- | --- |
-| at_gun | 反戰車砲 | attack 7->5 (-2)<br>range 1->2 (+1)<br>vs_armor 5->6 (+1) |
+| at_gun | 反戰車砲 | attack 7->5 (-2)<br>range 1->2 (+1)<br>move 1->2 (+1)<br>vs_armor 5->6 (+1) |
 | light_tank | 輕戰車 | vision 4->5 (+1) |
 | artillery | 砲兵 | attack 8->7 (-1)<br>range 3->4 (+1)<br>vision 5->2 (-3)<br>vs_armor 2->1 (-1) |
 | paratrooper | 傘兵 | new unit |
@@ -297,7 +297,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | --- | --- | --- | --- | --- |
 | 步兵 | 2.57 | 1.00 | -1.57 |  |
 | 機槍組 | 4.57 | 1.50 | -3.07 |  |
-| 反戰車砲 | 3.57 | 6.50 | +2.93 | Role depends heavily on setup and map placement |
+| 反戰車砲 | 3.57 | 6.50 | +2.93 |  |
 | 輕戰車 | 3.57 | 2.50 | -1.07 | Mobility/vision must justify lower damage |
 | 中戰車 | 5.57 | 6.50 | +0.93 | Baseline main battle unit; many named tanks share this stat |
 | 砲兵 | 5.57 | 3.50 | -2.07 |  |

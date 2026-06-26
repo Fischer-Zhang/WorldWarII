@@ -682,12 +682,13 @@ func _resolve_active_skill(unit: Unit) -> Dictionary:
 	if unit == null:
 		return {}
 	var unit_def := DataLoader.get_unit_def(unit.type_id)
-	var unit_skill: Dictionary = unit_def.get("skill", {})
-	if not unit_skill.is_empty():
-		return unit_skill
-	if unit.general_id != "":
-		return DataLoader.get_general_def(unit.general_id).get("skill", {})
-	return {}
+	var skill: Dictionary = unit_def.get("skill", {})
+	if skill.is_empty() and unit.general_id != "":
+		skill = DataLoader.get_general_def(unit.general_id).get("skill", {})
+	# Airdrop is disabled in Conquest mode (only single-battle / campaign use it).
+	if GameState.conquest_mode and String(skill.get("id", "")) == "airdrop":
+		return {}
+	return skill
 
 func _refresh_skill_button(unit: Unit) -> void:
 	var skill: Dictionary = _resolve_active_skill(unit)
