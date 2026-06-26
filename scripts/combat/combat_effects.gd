@@ -8,6 +8,7 @@ const MAX_SUPPRESSION := 5
 const RALLY_RECOVERY := 2
 const RALLY_COVER_BONUS := 1
 const SPOTTER_SUPPRESSION_BONUS := 1
+const FIRE_SUPPORT_SUPPRESSION_BONUS := 1
 const SPLASH_DAMAGE_PCT := 50  # default falloff for splash targets when a unit omits splash_damage_pct
 const OVERWATCH_DAMAGE_PCT := 50  # default reaction-fire damage when a unit omits overwatch_damage_pct
 
@@ -37,6 +38,11 @@ static func spotter_suppression_bonus(
 	if not atk_def.get("indirect", false):
 		return 0
 	return SPOTTER_SUPPRESSION_BONUS if has_light_tank_spotter else 0
+
+static func fire_support_suppression_bonus(marked: bool, damage: int, defender_dies: bool) -> int:
+	if defender_dies or damage <= 0 or not marked:
+		return 0
+	return FIRE_SUPPORT_SUPPRESSION_BONUS
 
 static func dig_in_loss_for_attack(atk_def: Dictionary, damage: int, defender_dig_in: int) -> int:
 	if damage <= 0 or defender_dig_in <= 0:

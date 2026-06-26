@@ -32,8 +32,9 @@ const HelpContent := preload("res://scripts/ui/help_content.gd")
 # Battle scene controller — owns the per-turn state machine.
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"
+const FIRE_SUPPORT_SKILL_ID := "fire_support_mark"
 
-enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET }
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET, FIRE_SUPPORT_TARGET }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
@@ -77,6 +78,10 @@ var attack_targets: Array = []
 var airdrop_targets: Array = []  # valid drop hexes while phase == AIRDROP_TARGET
 var airdrop_skill: Dictionary = {}  # the skill being resolved during an AIRDROP_TARGET sub-phase
 var bridge_targets: Array = []   # adjacent water hexes an engineer can bridge (BRIDGE_TARGET)
+var fire_support_targets: Array = []  # visible enemy units while phase == FIRE_SUPPORT_TARGET
+var fire_support_skill: Dictionary = {}
+var fire_support_marks: Dictionary = {}  # target instance id -> {faction, spotter, target, turn}
+var fire_support_return_phase: Phase = Phase.ATTACK_PHASE
 var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one per active skill)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
@@ -573,6 +578,11 @@ func _show_damage_preview(attacker: Unit, defender: Unit) -> void:
 		mod_bits.append("反裝甲 %+d" % int(atk_mods.vs_armor))
 	if defender.dig_in_level > 0:
 		mod_bits.append("構工 +%d" % defender.dig_in_level)
+	var fire_support_bonus := _fire_support_preview_bonus(
+		attacker, defender, int(preview.dmg), bool(preview.defender_dies)
+	)
+	if fire_support_bonus > 0:
+		lines.append("[color=#79d6ff]標定火力:壓制 +%d[/color]" % fire_support_bonus)
 	if not mod_bits.is_empty():
 		lines.append("[color=#88aaff]修正: %s[/color]" % " · ".join(mod_bits))
 	damage_preview_content.text = "\n".join(lines)
@@ -642,6 +652,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				_do_bridge(selected_unit, coord)
 			else:
 				_enter_attack_phase()  # cancel: back to the action menu
+		Phase.FIRE_SUPPORT_TARGET:
+			if clicked_unit != null and clicked_unit in fire_support_targets:
+				_do_fire_support_mark(selected_unit, clicked_unit)
+			else:
+				_cancel_fire_support_mark()
 
 func _select_unit(unit: Unit) -> void:
 	if selected_unit != null and selected_unit != unit:
@@ -787,6 +802,8 @@ func _refresh_skill_buttons(unit: Unit) -> void:
 		# Airdrop is a relocation that replaces the move — only offer it before moving.
 		if skill.has("airdrop_range") and unit.has_moved:
 			continue
+		if skill.has("fire_support_range") and unit.has_attacked:
+			continue
 		var skill_id := String(skill.get("id", ""))
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(0, 40)
@@ -812,6 +829,9 @@ func _on_skill_pressed(skill: Dictionary) -> void:
 	# Airdrop needs a target hex — hand off to the targeting sub-phase.
 	if skill.has("airdrop_range"):
 		_begin_airdrop(selected_unit, skill)
+		return
+	if skill.has("fire_support_range"):
+		_begin_fire_support_mark(selected_unit, skill)
 		return
 	# Special instant effects (e.g. engineer's Fortify) are applied
 	# immediately, in addition to recording the active_effect entry so the
@@ -918,6 +938,90 @@ func _cancel_airdrop() -> void:
 	airdrop_skill = {}
 	_enter_attack_phase()
 
+func _begin_fire_support_mark(unit: Unit, skill: Dictionary) -> void:
+	if unit == null or unit.has_attacked:
+		return
+	fire_support_targets = _fire_support_targets(unit, skill)
+	if fire_support_targets.is_empty():
+		_set_prompt("無可標定", "%s 視野與視線內沒有可標定敵軍" % unit.display_name)
+		return
+	fire_support_skill = skill
+	fire_support_return_phase = phase
+	phase = Phase.FIRE_SUPPORT_TARGET
+	overwatch_button.visible = false
+	rally_button.visible = false
+	_hide_skill_buttons()
+	bridge_button.visible = false
+	damage_preview_panel.visible = false
+	hex_map.show_attack_targets(fire_support_targets.map(func(u): return u.coord))
+	hex_map.highlight_coord(unit.coord)
+	_set_prompt("選擇標定", "點紅色敵軍標定目標;同陣營下一次主動攻擊未致死傷害壓制 +1,或點別處取消")
+
+func _fire_support_targets(unit: Unit, skill: Dictionary) -> Array:
+	if unit == null:
+		return []
+	var radius := int(skill.get("fire_support_range", 5))
+	var visible: Dictionary = visibility_by_faction.get(unit.faction_id, {})
+	var out: Array = []
+	for u in units:
+		var target: Unit = u
+		if not target.is_alive() or target.faction_id == unit.faction_id:
+			continue
+		if not visible.has(target.coord):
+			continue
+		if HexCoord.distance(unit.coord, target.coord) > radius:
+			continue
+		if not Visibility.has_los(unit.coord, target.coord, hex_map):
+			continue
+		out.append(target)
+	return out
+
+func _do_fire_support_mark(unit: Unit, target: Unit) -> void:
+	if unit == null or target == null or not target.is_alive():
+		_cancel_fire_support_mark()
+		return
+	var skill := fire_support_skill if not fire_support_skill.is_empty() else _resolve_skill_by_id(unit, FIRE_SUPPORT_SKILL_ID)
+	var skill_id := String(skill.get("id", FIRE_SUPPORT_SKILL_ID))
+	var cooldown: int = int(skill.get("cooldown", 0))
+	fire_support_marks[_fire_support_mark_key(target)] = {
+		"faction": unit.faction_id,
+		"spotter": unit.display_name,
+		"target": target.display_name,
+		"turn": turn_manager.turn_number,
+	}
+	unit.skill_cooldowns[skill_id] = turn_manager.turn_number + cooldown
+	unit.skill_used.emit(skill_id)
+	unit.has_attacked = true
+	unit.queue_redraw()
+	action_log.record_skill(unit, skill_id, turn_manager.turn_number)
+	AudioBank.play("select")
+	fire_support_targets.clear()
+	fire_support_skill = {}
+	hex_map.clear_movement_range()
+	_set_prompt("標定完成", "%s 標定 %s — 下一次同陣營主動攻擊未致死傷害額外壓制 +1" % [
+		unit.display_name, target.display_name,
+	])
+	_update_info_panel_for_unit(target)
+	_deselect()
+	_update_status()
+
+func _cancel_fire_support_mark() -> void:
+	var return_phase := fire_support_return_phase
+	fire_support_targets.clear()
+	fire_support_skill = {}
+	fire_support_return_phase = Phase.ATTACK_PHASE
+	if return_phase == Phase.UNIT_SELECTED and selected_unit != null \
+			and not selected_unit.has_moved and not selected_unit.has_attacked:
+		_present_unit_actions(selected_unit)
+	else:
+		_enter_attack_phase()
+
+func _resolve_skill_by_id(unit: Unit, skill_id: String) -> Dictionary:
+	for skill in _resolve_active_skills(unit):
+		if String(skill.get("id", "")) == skill_id:
+			return skill
+	return {}
+
 func _engineer_bridge_targets(unit: Unit) -> Array:
 	# Adjacent impassable water (river/sea) an engineer can bridge — not mountains.
 	if unit == null or unit.type_id != "engineer":
@@ -1012,7 +1116,10 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var spotter_bonus := _spotter_suppression_bonus(
 		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
 	)
-	result.suppression_to_defender += spotter_bonus
+	var fire_support_bonus := _fire_support_suppression_bonus(
+		attacker, defender, result.damage_to_defender, result.defender_dies
+	)
+	result.suppression_to_defender += spotter_bonus + fire_support_bonus
 
 	attacker.play_attack_animation(defender.position)
 	AudioBank.play("attack")
@@ -1025,6 +1132,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		msg += ",壓制 +%d" % result.suppression_to_defender
 	if spotter_bonus > 0:
 		msg += ",偵察校射 +%d" % spotter_bonus
+	if fire_support_bonus > 0:
+		msg += ",標定火力 +%d" % fire_support_bonus
 	if result.defender_dig_in_loss > 0:
 		msg += ",構工 -%d" % result.defender_dig_in_loss
 	if result.counter_damage > 0:
@@ -1047,6 +1156,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 
 	var destroy_messages: Array[String] = []
 	if not defender.is_alive():
+		_clear_fire_support_mark(defender)
 		hex_map.unregister_unit(defender)
 		hex_map.place_wreckage(defender.coord, defender.faction_color)
 		defender.play_death_animation()
@@ -1056,6 +1166,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		if defender_destroy_text != "":
 			destroy_messages.append(defender_destroy_text)
 	if not attacker.is_alive():
+		_clear_fire_support_mark(attacker)
 		hex_map.unregister_unit(attacker)
 		hex_map.place_wreckage(attacker.coord, attacker.faction_color)
 		attacker.play_death_animation()
@@ -1139,6 +1250,7 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 		if attacker.is_alive():
 			attacker.gain_xp(3 if not unit.is_alive() else 1)
 		if not unit.is_alive():
+			_clear_fire_support_mark(unit)
 			hex_map.unregister_unit(unit)
 			hex_map.place_wreckage(unit.coord, unit.faction_color)
 			unit.play_death_animation()
@@ -1179,7 +1291,10 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 	var spotter_bonus := _spotter_suppression_bonus(
 		attacker, defender, atk_def, result.damage_to_defender, result.defender_dies
 	)
-	var total_suppression := result.suppression_to_defender + spotter_bonus
+	var fire_support_bonus := _fire_support_preview_bonus(
+		attacker, defender, result.damage_to_defender, result.defender_dies
+	)
+	var total_suppression := result.suppression_to_defender + spotter_bonus + fire_support_bonus
 	var parts: Array[String] = ["傷害 %d" % result.damage_to_defender]
 	if result.counter_damage > 0:
 		parts.append("反擊 %d" % result.counter_damage)
@@ -1187,6 +1302,8 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 		parts.append("壓制 +%d" % total_suppression)
 	if spotter_bonus > 0:
 		parts.append("偵察校射 +%d壓制" % spotter_bonus)
+	if fire_support_bonus > 0:
+		parts.append("標定火力 +%d壓制" % fire_support_bonus)
 	if result.defender_dig_in_loss > 0:
 		parts.append("構工 -%d" % result.defender_dig_in_loss)
 	if int(atk_def.get("splash_radius", 0)) > 0:
@@ -1207,6 +1324,32 @@ func _spotter_suppression_bonus(
 		damage,
 		defender_dies,
 	)
+
+func _fire_support_mark_key(unit: Unit) -> int:
+	return unit.get_instance_id() if unit != null else 0
+
+func _has_fire_support_mark(attacker: Unit, defender: Unit) -> bool:
+	if attacker == null or defender == null:
+		return false
+	var mark: Dictionary = fire_support_marks.get(_fire_support_mark_key(defender), {})
+	if mark.is_empty():
+		return false
+	return String(mark.get("faction", "")) == attacker.faction_id
+
+func _fire_support_preview_bonus(attacker: Unit, defender: Unit, damage: int, defender_dies: bool) -> int:
+	return CombatEffects.fire_support_suppression_bonus(
+		_has_fire_support_mark(attacker, defender), damage, defender_dies
+	)
+
+func _fire_support_suppression_bonus(attacker: Unit, defender: Unit, damage: int, defender_dies: bool) -> int:
+	var marked := _has_fire_support_mark(attacker, defender)
+	if marked and damage > 0:
+		_clear_fire_support_mark(defender)
+	return CombatEffects.fire_support_suppression_bonus(marked, damage, defender_dies)
+
+func _clear_fire_support_mark(unit: Unit) -> void:
+	if unit != null:
+		fire_support_marks.erase(_fire_support_mark_key(unit))
 
 func _has_light_tank_spotter(faction_id: String, target_coord: Vector2i) -> bool:
 	var visible: Dictionary = visibility_by_faction.get(faction_id, {})
@@ -1235,6 +1378,9 @@ func _deselect() -> void:
 	airdrop_targets.clear()
 	airdrop_skill = {}
 	bridge_targets.clear()
+	fire_support_targets.clear()
+	fire_support_skill = {}
+	fire_support_return_phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
@@ -1333,6 +1479,14 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		var after_rally := CombatEffects.rally_suppression(unit.suppression, terrain_def)
 		lines.append("[color=#79aaff]壓制 %d: %s; 整隊後 %d[/color]" % [
 			unit.suppression, effect_text, after_rally,
+		])
+	var fire_support_mark: Dictionary = fire_support_marks.get(_fire_support_mark_key(unit), {})
+	if not fire_support_mark.is_empty():
+		var mark_faction_id := String(fire_support_mark.get("faction", ""))
+		var mark_faction: Dictionary = factions.get(mark_faction_id, {})
+		var faction_name := String(mark_faction.get("name", mark_faction_id))
+		lines.append("[color=#79d6ff]標定: %s 下次主動攻擊未致死壓制 +%d[/color]" % [
+			faction_name, CombatEffects.FIRE_SUPPORT_SUPPRESSION_BONUS,
 		])
 	if unit.has_moved:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
@@ -1682,6 +1836,7 @@ func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 		# past the last hex if the watcher loop drifts. Clamp to the truncated path.
 		var safe_idx: int = clampi(death_idx, 0, effective_path.size() - 1)
 		var death_coord: Vector2i = effective_path[safe_idx]
+		_clear_fire_support_mark(mover)
 		hex_map.unregister_unit(mover)
 		hex_map.place_wreckage(death_coord, mover.faction_color)
 		mover.play_death_animation()

@@ -46,7 +46,15 @@
     "move": 5,
     "vision": 5,
     "vs_armor": 2,
-    "armor": 2
+    "armor": 2,
+    "skill": {
+      "id": "fire_support_mark",
+      "name_zh": "標定目標",
+      "description_zh": "消耗行動標定 5 格內可見且有視線的敵軍;同陣營下一次主動攻擊對該目標造成未致死傷害時額外壓制 +1。",
+      "cooldown": 2,
+      "duration": 0,
+      "fire_support_range": 5
+    }
   },
   "medium_tank": {
     "name_zh": "中戰車",

@@ -118,7 +118,24 @@ func _init() -> void:
 			% [direct, lethal_spotted, no_damage_spotted]
 		)
 
-	# 12) Splash damage is a floored percentage of a direct hit; no base = no splash.
+	# 12) Fire-support marks add suppression only to damaging non-lethal hits.
+	var marked_fire_support := CombatEffects.fire_support_suppression_bonus(true, 2, false)
+	var unmarked_fire_support := CombatEffects.fire_support_suppression_bonus(false, 2, false)
+	var lethal_fire_support := CombatEffects.fire_support_suppression_bonus(true, 2, true)
+	var no_damage_fire_support := CombatEffects.fire_support_suppression_bonus(true, 0, false)
+	if marked_fire_support == CombatEffects.FIRE_SUPPORT_SUPPRESSION_BONUS \
+			and unmarked_fire_support == 0 \
+			and lethal_fire_support == 0 \
+			and no_damage_fire_support == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: fire-support guardrails expected 1/0/0/0 got %d/%d/%d/%d"
+			% [marked_fire_support, unmarked_fire_support, lethal_fire_support, no_damage_fire_support]
+		)
+
+	# 13) Splash damage is a floored percentage of a direct hit; no base = no splash.
 	if CombatEffects.splash_damage(8, 50) == 4 \
 			and CombatEffects.splash_damage(1, 50) == 1 \
 			and CombatEffects.splash_damage(5, 100) == 5 \
@@ -128,7 +145,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: splash_damage did not match expected falloff")
 
-	# 13) Overwatch defaults to half damage, while unit data can define stronger reaction fire.
+	# 14) Overwatch defaults to half damage, while unit data can define stronger reaction fire.
 	var default_overwatch := CombatEffects.overwatch_damage(5, infantry)
 	var mg_overwatch := CombatEffects.overwatch_damage(5, {"id": "mg_team", "overwatch_damage_pct": 100})
 	var zero_overwatch := CombatEffects.overwatch_damage(0, mg)

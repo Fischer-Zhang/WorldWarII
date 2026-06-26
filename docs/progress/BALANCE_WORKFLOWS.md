@@ -54,6 +54,7 @@ Current rules established before large number changes:
 - ZoC cost is part of both movement range and path reconstruction.
 - Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
 - Damaging indirect fire gets +1 suppression when a same-faction light tank has LOS and vision to the target.
+- Light tanks can also spend their action to mark a visible LOS target; the next same-faction active attack against that target consumes the mark and adds +1 suppression through `CombatEffects` only on non-lethal damage.
 - Pinned units cannot overwatch or build dig-in and do not project ZoC; heavier suppression reduces movement/attack, indirect fire strips one dig-in level on damaging hits, and engineers strip up to two dig-in levels on damaging attacks.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
 - Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that grant one-time data-authored rewards such as XP, suppression recovery, repair or reinforcement timing but do not alter victory resolution.
@@ -109,6 +110,7 @@ instead of mirroring the scoring formula in Python.
 Current role-shaping pass:
 
 - Light tanks get a scouting-position bonus when no enemy is currently visible.
+- Player light tanks can mark fire-support targets; AI scoring still models their passive artillery spotter value.
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
 - Engineers prefer entrenched urban/high-cover targets when their attack would remove dig-in.

@@ -7,6 +7,7 @@ extends SceneTree
 # acted, _enter_attack_phase offers no targets and hides the action buttons.
 
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 
 func _init() -> void:
 	call_deferred("_run")
@@ -330,6 +331,109 @@ func _run() -> void:
 		player_unit.suppression = original_suppression
 		battle.captured_secondary_objectives.clear()
 		battle.secondary_objective_progress.clear()
+
+		# Light tanks can spend their action to mark a visible LOS target; the next
+		# same-faction active non-lethal hit consumes the mark and adds suppression.
+		var mark_spotter = player_unit
+		var mark_attacker = null
+		for u in battle.units:
+			if u != mark_spotter and u.faction_id == battle.player_faction_id:
+				mark_attacker = u
+				break
+		var mark_target = null
+		for u in battle.units:
+			if u.faction_id != battle.player_faction_id:
+				mark_target = u
+				break
+		if mark_attacker == null or mark_target == null:
+			fail_count += 1
+			printerr("FAIL: could not stage units for fire-support mark test")
+		else:
+			mark_spotter.type_id = "light_tank"
+			mark_spotter.has_moved = false
+			mark_spotter.has_attacked = false
+			mark_spotter.skill_cooldowns.clear()
+			mark_attacker.type_id = "infantry"
+			mark_attacker.has_attacked = false
+			mark_attacker.suppression = 0
+			mark_target.type_id = "infantry"
+			mark_target.hp = mark_target.max_hp
+			mark_target.suppression = 0
+			mark_target.dig_in_level = 0
+			var target_coord := Vector2i(-999, -999)
+			var spotter_coord := Vector2i(-999, -999)
+			var attacker_coord := Vector2i(-999, -999)
+			var staged := false
+			for c in battle.hex_map.tiles.keys():
+				var center_terrain: String = battle.hex_map.terrain_at(c)
+				if center_terrain == "" or battle.hex_map.terrain_impassable(center_terrain):
+					continue
+				if battle.hex_map.unit_at(c) != null and battle.hex_map.unit_at(c) != mark_target:
+					continue
+				var open_neighbors: Array = []
+				for nb in HexCoord.neighbors(c):
+					var terrain: String = battle.hex_map.terrain_at(nb)
+					if terrain != "" and not battle.hex_map.terrain_impassable(terrain) \
+							and battle.hex_map.unit_at(nb) == null:
+						open_neighbors.append(nb)
+				if open_neighbors.size() >= 2:
+					target_coord = c
+					spotter_coord = open_neighbors[0]
+					attacker_coord = open_neighbors[1]
+					staged = true
+					break
+			if not staged:
+				fail_count += 1
+				printerr("FAIL: could not stage adjacent open hexes for fire-support mark test")
+			else:
+				battle.hex_map.move_unit(mark_target, target_coord, 0.0)
+				battle.hex_map.move_unit(mark_spotter, spotter_coord, 0.0)
+				battle.hex_map.move_unit(mark_attacker, attacker_coord, 0.0)
+				mark_target.has_moved = false
+				mark_spotter.has_moved = false
+				mark_attacker.has_moved = false
+				battle._recompute_visibility()
+				var mark_skill: Dictionary = battle._resolve_skill_by_id(mark_spotter, "fire_support_mark")
+				var mark_targets: Array = battle._fire_support_targets(mark_spotter, mark_skill)
+				battle.selected_unit = mark_spotter
+				battle.phase = battle.Phase.UNIT_SELECTED
+				battle.fire_support_return_phase = battle.Phase.UNIT_SELECTED
+				battle.fire_support_targets = mark_targets
+				battle._cancel_fire_support_mark()
+				if battle.phase == battle.Phase.UNIT_SELECTED \
+						and battle.selected_unit == mark_spotter \
+						and not battle.movement_range.is_empty():
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: cancelling fire-support from selection should restore movement phase")
+				mark_targets = battle._fire_support_targets(mark_spotter, mark_skill)
+				battle.fire_support_skill = mark_skill
+				battle._do_fire_support_mark(mark_spotter, mark_target)
+				var mark_key: int = battle._fire_support_mark_key(mark_target)
+				if mark_target in mark_targets \
+						and mark_spotter.has_attacked \
+						and mark_spotter.skill_cooldowns.has("fire_support_mark") \
+						and battle.fire_support_marks.has(mark_key):
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: fire-support mark should target, spend action and start cooldown")
+				var base_suppression := CombatEffects.suppression_for_attack(
+					data_loader.get_unit_def(mark_attacker.type_id), 1, false
+				)
+				var preview_bonus: int = battle._fire_support_preview_bonus(mark_attacker, mark_target, 1, false)
+				var support_bonus: int = battle._fire_support_suppression_bonus(mark_attacker, mark_target, 1, false)
+				if preview_bonus == CombatEffects.FIRE_SUPPORT_SUPPRESSION_BONUS \
+						and support_bonus == CombatEffects.FIRE_SUPPORT_SUPPRESSION_BONUS \
+						and not battle.fire_support_marks.has(mark_key) \
+						and base_suppression + support_bonus == 2:
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: fire-support bonus should preview, apply once and consume; preview=%d bonus=%d marked=%s" % [
+						preview_bonus, support_bonus, battle.fire_support_marks.has(mark_key),
+					])
 
 		# Destroy-unit and recon secondary objectives complete from combat and visibility events.
 		var unit_script: Script = player_unit.get_script()

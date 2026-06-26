@@ -238,7 +238,7 @@ base = max(1, attack + vs_armor_if_target_armored - defense - terrain_defense)
 damage = max(1, round(base * attacker_hp / attacker_max_hp))
 ```
 
-Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary.
+Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary. Light tanks can also spend their action to mark a visible LOS target for fire support, adding +1 suppression to the next same-faction active attack that deals non-lethal damage to that target.
 
 AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. Hard difficulty enables a one-ply lookahead against visible player retaliation. `tools/ai_trace_report.gd` regenerates `docs/progress/ai_trace_report.md` from the live `AIController.plan_trace_for_unit()` diagnostics, including primary and secondary objective score splits.
 

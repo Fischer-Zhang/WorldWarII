@@ -138,6 +138,8 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Rally** spends the action to reduce suppression, with better recovery in defensive terrain.
 
+**Fire-Support Marking** lets a light tank spend its action to mark a visible enemy in LOS. The mark is stored by the battle scene and consumed by the next same-faction active attack against that target, adding +1 suppression through `CombatEffects` only when the hit deals non-lethal damage.
+
 **Secondary Objectives** are optional scenario-authored capture, hold-turn, destroy-unit or recon-hex tasks. They do not change victory resolution; the battle scene grants one-time `rewards` such as XP, suppression recovery, repair or reinforcement timing, records the event in `ActionLog`, and tracks hold progress per objective. Primary and secondary objectives render as labeled map markers so the player can distinguish victory hexes from optional reward hexes, marked targets and hold progress.
 
 ## AI
