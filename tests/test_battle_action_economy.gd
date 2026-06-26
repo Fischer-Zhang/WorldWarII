@@ -183,6 +183,85 @@ func _run() -> void:
 				])
 			battle.scenario = original_scenario
 
+		# Hold-turn secondary objectives progress at faction end-turn, reset when
+		# the point is empty, and pay out only once when the required hold is met.
+		var hold_coord := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) == null:
+				hold_coord = c
+				break
+		if hold_coord == Vector2i(-999, -999):
+			fail_count += 1
+			printerr("FAIL: could not stage an empty hold objective hex")
+		else:
+			var original_scenario_hold: Dictionary = battle.scenario.duplicate(true)
+			var hold_offset := _axial_to_offset(hold_coord)
+			battle.scenario["secondary_objectives"] = [{
+				"id": "test_hold",
+				"type": "hold_turns",
+				"label": "Hold Point",
+				"faction": battle.player_faction_id,
+				"target": [hold_offset.x, hold_offset.y],
+				"required_turns": 2,
+				"rewards": [{"type": "xp", "amount": 1}],
+			}]
+			battle.captured_secondary_objectives.clear()
+			battle.secondary_objective_progress.clear()
+			var hold_before_xp := int(player_unit.xp)
+			battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+			if int(battle.secondary_objective_progress.get("test_hold", -1)) == -1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: empty hold objective should not start progress")
+			battle.hex_map.move_unit(player_unit, hold_coord, 0.0)
+			player_unit.has_moved = false
+			var first_hold: Array[String] = battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+			if int(battle.secondary_objective_progress.get("test_hold", 0)) == 1 \
+					and not battle.captured_secondary_objectives.has("test_hold") \
+					and first_hold.size() == 1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: first held turn should track progress 1/2")
+			var clear_coord := Vector2i(-999, -999)
+			for c in battle.hex_map.tiles.keys():
+				if battle.hex_map.unit_at(c) == null and c != hold_coord:
+					clear_coord = c
+					break
+			if clear_coord == Vector2i(-999, -999):
+				fail_count += 1
+				printerr("FAIL: could not stage a clear hex for hold reset")
+			else:
+				battle.hex_map.move_unit(player_unit, clear_coord, 0.0)
+				player_unit.has_moved = false
+				battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+				if int(battle.secondary_objective_progress.get("test_hold", -1)) == 0:
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: leaving hold objective should reset progress to 0")
+			battle.hex_map.move_unit(player_unit, hold_coord, 0.0)
+			player_unit.has_moved = false
+			battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+			battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+			battle._check_secondary_objective_hold_turns(battle.player_faction_id)
+			var hold_events := 0
+			for event in battle.action_log.events:
+				if String(event.get("type", "")) == "secondary_objective" and String(event.get("objective_id", "")) == "test_hold":
+					hold_events += 1
+			if int(player_unit.xp) == hold_before_xp + 1 and hold_events == 1 \
+					and battle.captured_secondary_objectives.has("test_hold"):
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: hold objective should grant XP once; xp %d->%d events=%d captured=%s" % [
+					hold_before_xp, int(player_unit.xp), hold_events, battle.captured_secondary_objectives.has("test_hold"),
+				])
+			battle.scenario = original_scenario_hold
+			battle.captured_secondary_objectives.clear()
+			battle.secondary_objective_progress.clear()
+
 		# MG overwatch uses its unit-data reaction-fire profile: full damage instead of the default half hit.
 		var mg_coord := Vector2i(-999, -999)
 		var target_coord := Vector2i(-999, -999)

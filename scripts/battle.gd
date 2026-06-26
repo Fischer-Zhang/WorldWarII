@@ -79,6 +79,7 @@ var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one pe
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var captured_secondary_objectives: Dictionary = {}  # objective id/index -> true
+var secondary_objective_progress: Dictionary = {}  # objective id/index -> consecutive held turns
 var player_faction_id: String = ""
 # Per-faction visibility + memory (symmetric fog model)
 var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
@@ -338,6 +339,7 @@ func _on_end_turn_pressed() -> void:
 	_deselect()
 	AudioBank.play("end_turn")
 	_update_dig_in_for_current_faction()
+	_check_secondary_objective_hold_turns(turn_manager.current_faction())
 	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
 	if winner != "":
 		_handle_game_over(winner)
@@ -1411,23 +1413,74 @@ func _check_secondary_objective_capture(unit: Unit) -> String:
 		var key := String(objective.get("id", "secondary_%d" % i))
 		if captured_secondary_objectives.has(key):
 			continue
+		if _secondary_objective_type(objective) != "capture":
+			continue
 		var faction_id := String(objective.get("faction", unit.faction_id))
 		if faction_id != "" and faction_id != unit.faction_id:
 			continue
 		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
 		if target_value == null or unit.coord != target_value:
 			continue
-		captured_secondary_objectives[key] = true
-		var rewards := _secondary_objective_rewards(objective)
-		var xp_reward := _secondary_objective_xp_reward(rewards)
-		if xp_reward > 0:
-			unit.gain_xp(xp_reward)
-		action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
-		var label := String(objective.get("label", key))
-		var reward_text := _secondary_objective_reward_text(rewards)
-		_apply_player_objective_pulse()
-		return "%s 佔領 %s (%s)" % [unit.display_name, label, reward_text]
+		return _complete_secondary_objective(unit, objective, key, "佔領")
 	return ""
+
+func _check_secondary_objective_hold_turns(faction_id: String) -> Array[String]:
+	var messages: Array[String] = []
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		if _secondary_objective_type(objective) != "hold_turns":
+			continue
+		var objective_faction := String(objective.get("faction", faction_id))
+		if objective_faction != "" and objective_faction != faction_id:
+			continue
+		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		if target_value == null:
+			continue
+		var holder: Unit = _unit_holding_coord(faction_id, target_value)
+		var required_turns: int = max(1, int(objective.get("required_turns", 1)))
+		var label := String(objective.get("label", key))
+		if holder == null:
+			if int(secondary_objective_progress.get(key, 0)) > 0:
+				secondary_objective_progress[key] = 0
+				messages.append("%s 守備中斷 (0/%d)" % [label, required_turns])
+			continue
+		var progress: int = int(secondary_objective_progress.get(key, 0)) + 1
+		secondary_objective_progress[key] = progress
+		if progress >= required_turns:
+			messages.append(_complete_secondary_objective(holder, objective, key, "守住"))
+		else:
+			messages.append("%s 守住 %s (%d/%d)" % [holder.display_name, label, progress, required_turns])
+	_apply_player_objective_pulse()
+	return messages
+
+func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: String, verb: String) -> String:
+	captured_secondary_objectives[key] = true
+	secondary_objective_progress.erase(key)
+	var rewards := _secondary_objective_rewards(objective)
+	var xp_reward := _secondary_objective_xp_reward(rewards)
+	if xp_reward > 0:
+		unit.gain_xp(xp_reward)
+	action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
+	var label := String(objective.get("label", key))
+	var reward_text := _secondary_objective_reward_text(rewards)
+	_apply_player_objective_pulse()
+	return "%s %s %s (%s)" % [unit.display_name, verb, label, reward_text]
+
+func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
+	for u in units:
+		var unit: Unit = u
+		if unit.is_alive() and unit.faction_id == faction_id and unit.coord == coord:
+			return unit
+	return null
+
+func _secondary_objective_type(objective: Dictionary) -> String:
+	return String(objective.get("type", "capture"))
 
 func _secondary_objective_rewards(objective: Dictionary) -> Array[Dictionary]:
 	var rewards: Array[Dictionary] = []

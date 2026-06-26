@@ -16,6 +16,7 @@ MAX_SUPPRESSION = 5
 MAX_DIG_IN = 3
 MAX_RANK = 3
 ALLOWED_SECONDARY_REWARD_TYPES = {"xp"}
+ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
     "attack",
@@ -234,12 +235,21 @@ def validate_scenario(
             if objective_id in seen_secondary_ids:
                 fail(errors, path, f"secondary_objectives[{index}] duplicate id {objective_id!r}")
             seen_secondary_ids.add(objective_id)
+            objective_type = str(objective.get("type", "capture"))
+            if objective_type not in ALLOWED_SECONDARY_OBJECTIVE_TYPES:
+                fail(errors, path, f"secondary_objectives[{index}] unknown type {objective_type!r}")
             faction_id = str(objective.get("faction", ""))
             if faction_id and faction_id not in faction_ids:
                 fail(errors, path, f"secondary_objectives[{index}] references unknown faction {faction_id!r}")
             target = objective.get("target", [])
             if not in_bounds(target, width, height):
                 fail(errors, path, f"secondary_objectives[{index}] target out of bounds: {target!r}")
+            if objective_type == "hold_turns":
+                try:
+                    if int(objective.get("required_turns", 0)) <= 0:
+                        fail(errors, path, f"secondary_objectives[{index}] required_turns must be positive")
+                except (TypeError, ValueError):
+                    fail(errors, path, f"secondary_objectives[{index}] required_turns must be an integer")
             try:
                 if int(objective.get("xp_reward", 0)) < 0:
                     fail(errors, path, f"secondary_objectives[{index}] xp_reward must be non-negative")
