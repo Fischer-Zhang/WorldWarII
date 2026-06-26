@@ -2,6 +2,7 @@
   "id": "tut_00_basic_turn",
   "title": "教學 00: 移動、攻擊與佔領",
   "briefing": "基礎教學:先熟悉單位選取、藍色移動範圍、紅色攻擊目標與佔領目標格。\n\n任務:用步兵與中戰車推進,在 6 回合內佔領東側城鎮。敵方只有少量守軍,重點是觀察移動後仍能攻擊,以及近距離交火會觸發反擊。\n\n測試機制:移動、攻擊、反擊、佔點。",
+  "deployment_locked": true,
   "tutorial_mechanics": [
     "movement",
     "attack",

@@ -92,7 +92,8 @@ func _ready() -> void:
 
 	_build_general_pool()
 	_build_deployment_zone()
-	hex_map.show_movement_range(deployment_zone.keys())
+	if not _deployment_locked():
+		hex_map.show_movement_range(deployment_zone.keys())
 	_rebuild_unit_list()
 	if not player_units.is_empty():
 		_select_unit(player_units[0])
@@ -132,12 +133,13 @@ func _build_general_pool() -> void:
 func _build_deployment_zone() -> void:
 	deployment_zone.clear()
 	unit_deployment_zones.clear()
+	var deploy_radius := _deployment_radius()
 	for u in player_units:
 		var unit: Unit = u
 		var unit_zone := {}
 		for coord in hex_map.tiles.keys():
 			var c: Vector2i = coord
-			if HexCoord.distance(unit.coord, c) > DEPLOY_RADIUS:
+			if HexCoord.distance(unit.coord, c) > deploy_radius:
 				continue
 			var occupant := hex_map.unit_at(c)
 			if occupant != null and occupant.faction_id != player_faction_id:
@@ -199,7 +201,7 @@ func _refresh_general_option() -> void:
 		if selected_unit != null and selected_unit.general_id == gid:
 			selected_index = idx
 	general_option.selected = selected_index
-	general_option.disabled = selected_unit == null or general_pool.is_empty()
+	general_option.disabled = _deployment_locked() or selected_unit == null or general_pool.is_empty()
 	_refreshing_general_option = false
 
 func _update_detail() -> void:
@@ -232,12 +234,16 @@ func _update_detail() -> void:
 		general_def = DataLoader.get_general_def(selected_unit.general_id)
 	lines.append_array(UnitDetailFormatter.deployment_upgrade_lines(selected_unit, unit_def, general_def))
 	lines.append("")
-	lines.append("下一步:點藍色格調整部署,點我方單位切換,點已佔用格可交換。")
-	status_label.text = "下一步:配置部署與將軍 · 部署區半徑 %d · 可重派 %d 名將軍" % [DEPLOY_RADIUS, general_pool.size()]
+	if _deployment_locked():
+		lines.append("下一步:固定部署與將軍配置,可直接開始戰鬥。")
+		status_label.text = "下一步:教學固定部署 · 將軍配置鎖定"
+	else:
+		lines.append("下一步:點藍色格調整部署,點我方單位切換,點已佔用格可交換。")
+		status_label.text = "下一步:配置部署與將軍 · 部署區半徑 %d · 可重派 %d 名將軍" % [_deployment_radius(), general_pool.size()]
 	detail_label.text = "\n".join(lines)
 
 func _on_general_selected(_index: int) -> void:
-	if _refreshing_general_option or selected_unit == null:
+	if _refreshing_general_option or selected_unit == null or _deployment_locked():
 		return
 	var gid := String(general_option.get_selected_metadata())
 	if gid != "":
@@ -262,7 +268,7 @@ func _on_hex_clicked(coord: Vector2i, _terrain_id: String) -> void:
 	if selected_unit == null:
 		return
 	if not _can_place_selected_at(coord):
-		status_label.text = "無法部署:只能放在該單位原始位置附近的藍色格。"
+		status_label.text = "無法部署:教學固定部署只能使用初始位置。" if _deployment_locked() else "無法部署:只能放在該單位原始位置附近的藍色格。"
 		return
 	if occupant != null:
 		status_label.text = "無法部署:該位置已被敵軍佔用。"
@@ -272,7 +278,7 @@ func _on_hex_clicked(coord: Vector2i, _terrain_id: String) -> void:
 func _on_hex_hovered(coord: Vector2i, terrain_id: String) -> void:
 	if terrain_id == "":
 		return
-	var label := "可部署" if deployment_zone.has(coord) else "部署區外"
+	var label := "固定部署" if _deployment_locked() else ("可部署" if deployment_zone.has(coord) else "部署區外")
 	var off := _axial_to_offset(coord)
 	status_label.text = "%s (%d,%d) · %s" % [
 		String(DataLoader.get_terrain_def(terrain_id).get("name_zh", terrain_id)),
@@ -312,6 +318,14 @@ func _can_place_unit_at(unit: Unit, coord: Vector2i) -> bool:
 	var zone: Dictionary = unit_deployment_zones.get(_unit_key(unit), {})
 	return zone.has(coord)
 
+func _deployment_locked() -> bool:
+	return bool(scenario.get("deployment_locked", false))
+
+func _deployment_radius() -> int:
+	if _deployment_locked():
+		return 0
+	return int(scenario.get("deployment_radius", DEPLOY_RADIUS))
+
 func _reposition_unit(unit: Unit, coord: Vector2i) -> void:
 	unit.coord = coord
 	unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
@@ -320,6 +334,10 @@ func _reposition_unit(unit: Unit, coord: Vector2i) -> void:
 	unit.queue_redraw()
 
 func _on_begin_pressed() -> void:
+	if _deployment_locked():
+		GameState.clear_deployment_overrides()
+		get_tree().change_scene_to_file("res://scenes/battle.tscn")
+		return
 	var overrides := {}
 	for u in player_units:
 		var unit: Unit = u

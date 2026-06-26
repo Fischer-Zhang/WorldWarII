@@ -33,7 +33,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | tut_00_basic_turn | 教學 00: 移動、攻擊與佔領 | plain 88%, road 10%, town 2%; def>=2 2%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,2 min 5 avg 5.0 | force power ratio above 1.35: check victory-clock compensation |
 | tut_01_terrain_zoc_overwatch | 教學 01: 地形、管制區與警戒 | plain 81%, road 9%, forest 7%; def>=2 9%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 1; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,0 min 4 avg 4.7 | no major static risks |
 | tut_02_los_spotting_artillery | 教學 02: 視線、觀測與間接火力 | plain 77%, forest 14%, road 9%; def>=2 14%; move>=3 0% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | n/a | force power ratio above 1.35: check victory-clock compensation |
-| tut_03_suppression_digin_engineer | 教學 03: 壓制、整隊、構工與工兵破障 | plain 81%, river 14%, town 3%; def>=2 4%; move>=3 14% | allies: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | allies->7,3 min 5 avg 6.2 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
+| tut_03_suppression_digin_engineer | 教學 03: 壓制、整隊、構工與工兵破障 | plain 81%, river 14%, town 3%; def>=2 4%; move>=3 14% | allies: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | allies->7,3 min 3 avg 4.2 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
 | tut_04_armor_at_veteran_general | 教學 04: 裝甲、反戰車、老兵與將領技能 | plain 85%, road 11%, forest 4%; def>=2 4%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | n/a | no major static risks |
 | tut_05_airdrop_reinforcement_rocket | 教學 05: 空降、援軍與火箭濺射 | plain 90%, road 4%, forest 3%; def>=2 6%; move>=3 0% | allies: eng 0, art 0, rocket 1, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | n/a | force power ratio above 1.35: check victory-clock compensation |
 | west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, forest 12%, road 10%; def>=2 17%; move>=3 2% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->21,4 min 19 avg 22.4 | no major static risks |
@@ -229,7 +229,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 觀測分隊 | player | 3 | 127.9 | armor:1, artillery:1, scout_armor:1 |
+| allies | 觀測分隊 | player | 3 | 102.9 | anti_armor:1, artillery:1, scout_armor:1 |
 | axis | 隱蔽火點 | ai | 2 | 52.6 | anti_armor:1, infantry:1 |
 
 ## tut_03_suppression_digin_engineer

@@ -131,7 +131,12 @@ func _category_label(category_id: String) -> String:
 
 func _category_count(category_id: String) -> int:
 	if category_id == CATEGORY_ALL:
-		return DataLoader.scenarios.size()
+		var count := 0
+		for s in DataLoader.scenarios:
+			var scenario: Dictionary = s
+			if not _is_single_battle_hidden(String(scenario.get("id", ""))):
+				count += 1
+		return count
 	var ids: Dictionary = category_scenarios.get(category_id, {})
 	return ids.size()
 

@@ -45,8 +45,14 @@ func _test_region_scenario_mapping(data_loader: Node) -> bool:
 		if not scenario_ids.has(scenario_id):
 			printerr("FAIL: conquest region %s maps to unknown scenario %s" % [region_id, scenario_id])
 			ok = false
+		if scenario_id.begins_with("tut_"):
+			printerr("FAIL: conquest region %s maps to tutorial scenario %s" % [region_id, scenario_id])
+			ok = false
 	if not scenario_ids.has(ConquestCatalog.FALLBACK_SCENARIO):
 		printerr("FAIL: conquest fallback scenario is unknown: %s" % ConquestCatalog.FALLBACK_SCENARIO)
+		ok = false
+	if ConquestCatalog.FALLBACK_SCENARIO.begins_with("tut_"):
+		printerr("FAIL: conquest fallback scenario must not be tutorial: %s" % ConquestCatalog.FALLBACK_SCENARIO)
 		ok = false
 	return ok
 

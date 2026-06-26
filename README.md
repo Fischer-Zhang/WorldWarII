@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-255%2F255-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-262%2F262-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -19,7 +19,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 36 scenario JSON files: 29 campaign/conquest battlefields, 6 campaign-only tutorial scenarios and `00_sandbox` |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 4 campaigns, including tutorial campaign 0, and a 19-region conquest map |
-| Tests | 255 headless GDScript checks plus static data/report validators |
+| Tests | 262 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -263,7 +263,9 @@ Demo capture plan: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 2. Change `id`, `title`, `briefing`, `map`, `factions`, `units` and `victory`.
 3. Use odd-r offset coordinates in JSON; runtime converts to axial hex coordinates.
 4. Run `tools/validate_fast.sh`.
-5. Launch the game. The scenario appears automatically in the single-battle list.
+5. Launch the game. Normal scenarios appear automatically in the single-battle list.
+
+Tutorial scenarios use `tut_` ids, set `deployment_locked: true`, list `tutorial_mechanics`, and are campaign-only through `00_tutorial` in `data/campaigns.json`; they are intentionally hidden from Single Battle. `tools/tutorial_probe.py` verifies that their declared mechanics are actionable from authored starting positions.
 
 ## Roadmap
 

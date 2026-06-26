@@ -25,12 +25,14 @@ python3 -m py_compile \
   tools/check_scenario_balance_report.py \
   tools/scenario_balance_report.py \
   tools/scenario_probe.py \
+  tools/tutorial_probe.py \
   tools/validate_data.py
 python3 tools/validate_data.py
 python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_balance_patch.json
 python3 tools/scenario_balance_report.py
 python3 tools/check_scenario_balance_report.py
 python3 tools/scenario_probe.py
+python3 tools/tutorial_probe.py
 git diff --check
 
 rm -rf tools/__pycache__

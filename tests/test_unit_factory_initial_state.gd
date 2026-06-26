@@ -22,6 +22,18 @@ func _run() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: tutorial initial suppression/dig-in not applied")
+	if deployment.deployment_zone.size() == deployment.player_units.size():
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tutorial deployment should be locked to original unit hexes")
+	var tutorial_detail := String(deployment.get_node("UI/Root/Body/RightPanel/Detail").text)
+	var tutorial_status := String(deployment.get_node("UI/Root/TopBar/Status").text)
+	if tutorial_detail.contains("固定部署") and not tutorial_detail.contains("藍色格") and tutorial_status.contains("教學固定部署") and deployment.general_option.disabled:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tutorial deployment UI should explain locked deployment and lock generals")
 	await _free_scene(deployment)
 
 	var veteran_deploy := await _instantiate_deployment("tut_04_armor_at_veteran_general")
@@ -31,7 +43,29 @@ func _run() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: tutorial initial veteran/general state not applied")
+	veteran_deploy.selected_unit = veteran
+	veteran_deploy._on_general_selected(0)
+	if veteran != null and String(veteran.general_id) == "patton":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: locked tutorial deployment should not allow changing assigned generals")
+	veteran_deploy._on_begin_pressed()
+	await process_frame
+	if game_state.get_deployment_overrides("tut_04_armor_at_veteran_general").is_empty():
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: locked tutorial deployment should not write deployment overrides")
 	await _free_scene(veteran_deploy)
+
+	var normal_deploy := await _instantiate_deployment("01_sedan_1940")
+	if normal_deploy.deployment_zone.size() > normal_deploy.player_units.size():
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: normal scenarios should keep flexible deployment zones")
+	await _free_scene(normal_deploy)
 
 	print("UnitFactory initial state tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

@@ -2,6 +2,7 @@
   "id": "tut_04_armor_at_veteran_general",
   "title": "教學 04: 裝甲、反戰車、老兵與將領技能",
   "briefing": "裝甲教學:戰車正面硬碰硬風險高,反戰車砲和驅逐戰車能有效處理裝甲。老兵與將領會改變單位數值,主動技能能在關鍵回合創造突破。\n\n任務:用反戰車砲攔住敵方中戰車,再讓帶將領的老兵中戰車發動技能完成反擊。\n\n測試機制:裝甲、反裝甲、老兵、將領技能。",
+  "deployment_locked": true,
   "tutorial_mechanics": [
     "movement",
     "attack",

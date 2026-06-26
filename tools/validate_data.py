@@ -130,6 +130,14 @@ def validate_scenario(
     elif scenario_id in scenario_ids:
         fail(errors, path, f"duplicate scenario id {scenario_id!r}")
     scenario_ids.add(scenario_id)
+    if "deployment_locked" in scenario and not isinstance(scenario["deployment_locked"], bool):
+        fail(errors, path, "deployment_locked must be a boolean")
+    if "deployment_radius" in scenario:
+        try:
+            if int(scenario["deployment_radius"]) < 0:
+                fail(errors, path, "deployment_radius must be non-negative")
+        except (TypeError, ValueError):
+            fail(errors, path, "deployment_radius must be an integer")
 
     map_data = scenario.get("map", {})
     if not isinstance(map_data, dict):
@@ -292,6 +300,8 @@ def validate_tutorial_metadata(
     if not isinstance(mechanics_raw, list) or not mechanics_raw:
         fail(errors, path, "tutorial scenario must list tutorial_mechanics")
         return
+    if not bool(scenario.get("deployment_locked", False)):
+        fail(errors, path, "tutorial scenario must set deployment_locked=true")
 
     mechanics = {str(m) for m in mechanics_raw}
     unknown = sorted(mechanics - REQUIRED_TUTORIAL_MECHANICS)

@@ -355,7 +355,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | east_10_berlin_1945 | 5 | 2 | 1 | 0 | 2 | 2 | 0 | 1 | 1 | 1 | 0 |
 | tut_00_basic_turn | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | tut_01_terrain_zoc_overwatch | 3 | 1 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-| tut_02_los_spotting_artillery | 1 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| tut_02_los_spotting_artillery | 1 | 0 | 2 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tut_03_suppression_digin_engineer | 2 | 1 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 0 | 0 |
 | tut_04_armor_at_veteran_general | 1 | 0 | 1 | 0 | 2 | 0 | 0 | 0 | 1 | 1 | 0 |
 | tut_05_airdrop_reinforcement_rocket | 4 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 1 |
@@ -365,7 +365,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 144 | 40 | 59 | 19 | 88 | 57 | 6 | 5 | 26 | 9 | 7 |
+| TOTAL | 144 | 40 | 60 | 19 | 87 | 57 | 6 | 5 | 26 | 9 | 7 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |

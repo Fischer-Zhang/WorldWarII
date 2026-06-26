@@ -94,6 +94,12 @@ func _check_scenario_select() -> void:
 	var list: VBoxContainer = scene.get_node("Margin/VBox/ListScroll/List")
 	_expect("scenario select list populated", list.get_child_count() >= 20, "count=%d" % list.get_child_count())
 	_expect("scenario select hides tutorials", not _list_has_prefix(list, "tut_"))
+	_expect("scenario select hides tutorial campaign category", not scene.category_buttons.has("00_tutorial"))
+	_expect(
+		"scenario select all count matches visible list",
+		String(scene.category_buttons["all"].text).ends_with(" %d" % list.get_child_count()),
+		"label=%s list=%d" % [String(scene.category_buttons["all"].text), list.get_child_count()]
+	)
 	scene._set_difficulty("hard")
 	_expect(
 		"scenario select hard difficulty",
