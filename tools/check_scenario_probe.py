@@ -18,14 +18,14 @@ def main() -> None:
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
     require(
         "03_stalingrad_1942" in report
-        and "axis: eng min 18, art 0/6, targets 6" in report,
-        "Stalingrad breach probe should expose long Axis engineer approach",
+        and "axis: eng min 12, art 0/6, targets 6" in report,
+        "Stalingrad breach probe should show tuned Axis engineer approach and artillery gap",
     )
     require(
         "03_stalingrad_1942" in report
-        and "axis: eng turns 7" in report
+        and "axis: eng turns 4" in report
         and "axis: art move 0/6" in report,
-        "Stalingrad tempo probe should expose slow engineer and poor artillery access",
+        "Stalingrad tempo probe should show improved engineer timing and poor artillery access",
     )
     require(
         "east_10_berlin_1945" in report
