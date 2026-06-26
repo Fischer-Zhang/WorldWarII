@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-262%2F262-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-267%2F267-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -16,10 +16,10 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|
 | Engine | Godot 4 project, validated locally and in CI with Godot 4.2.2 stable |
 | Language | GDScript for runtime/tests, Python 3 for validators/reports, Bash for validation entrypoints |
-| Content | 36 scenario JSON files: 29 campaign/conquest battlefields, 6 campaign-only tutorial scenarios and `00_sandbox` |
+| Content | 36 scenario JSON files: 30 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 4 campaigns, including tutorial campaign 0, and a 19-region conquest map |
-| Tests | 262 headless GDScript checks plus static data/report validators |
+| Tests | 267 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -199,12 +199,14 @@ tools/validate.sh
 
 `tools/validate.sh` runs:
 
+- The Godot 4.2 project-feature gate in `project.godot`.
 - JSON syntax checks for unit data and balance baselines.
-- Python compile checks for report/validator scripts.
+- Python compile checks for report, probe and validator scripts.
 - `tools/validate_data.py` for unknown refs, bounds, duplicate coordinates, campaign references and conquest graph integrity.
-- Balance reports: unit matrix, scenario pressure report and tactical probe.
+- Generated diagnostics: unit balance report, scenario pressure report, scenario probe and tutorial probe.
+- Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 159 headless GDScript checks through `bash tests/run_all.sh`.
+- 267 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts and conquest source/target selection.
 

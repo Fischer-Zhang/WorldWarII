@@ -14,7 +14,7 @@ The viewer should understand:
 | Time | Shot | Content | Caption |
 |---|---|---|---|
 | 0:00-0:04 | Main menu | Show main menu with Single Battle / Campaign / Conquest / Lounge. | `Godot 4 tactical hex wargame` |
-| 0:04-0:10 | Scenario select | Click Single Battle, show category tabs and difficulty buttons. | `20 scenarios · category tabs · AI difficulty` |
+| 0:04-0:10 | Scenario select | Click Single Battle, show category tabs and difficulty buttons. | `30 single-battle scenarios · category tabs · AI difficulty` |
 | 0:10-0:16 | Briefing -> deployment | Open Sedan briefing, then deployment screen. Select a unit and show final stats/source breakdown. | `Deployment: generals, upgrades, final stats` |
 | 0:16-0:31 | Sedan 1940 | Move a Panzer toward objective. Show movement overlay, threat overlay, attack, popup, wreckage. | `Deterministic combat · terrain · capture objectives` |
 | 0:31-0:43 | Kiev / artillery | Show indirect artillery firing at a spotted target over blockers. | `Indirect fire uses spotted targets, not hidden information` |
@@ -22,7 +22,7 @@ The viewer should understand:
 | 0:55-1:07 | Kursk / armor | Tank duel with AT gun or Panther/T-34 exchange. Show compact info panel. | `Armor vs anti-armor · live HP affects damage` |
 | 1:07-1:17 | Campaign/lounge | Open campaign map, then lounge. Show resource points and upgrade buttons. | `Campaign progress unlocks general and tech upgrades` |
 | 1:17-1:27 | Conquest -> battle | Open conquest, select source/target. Show battle context lines: attack/defense power, reserves, then cut to briefing/deployment. | `Conquest attacks launch real hex battles` |
-| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `118 headless checks · data validator · UI smoke` |
+| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `267 headless checks · report probes · UI smoke` |
 
 ## Capturing
 
