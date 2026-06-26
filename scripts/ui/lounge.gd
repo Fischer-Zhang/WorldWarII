@@ -16,6 +16,7 @@ func _ready() -> void:
 	state = CampaignManager.load_state()
 	LoungeManager.lounge_state(state)
 	back_button.pressed.connect(_on_back_pressed)
+	back_button.tooltip_text = "儲存升級並返回上一層。"
 	_rebuild()
 
 func _rebuild() -> void:
@@ -25,6 +26,8 @@ func _rebuild() -> void:
 		LoungeManager.available_points(state),
 		LoungeManager.total_points(state),
 	]
+	if status_label.text == "":
+		status_label.text = "下一步:選擇可升級的將領或科技。"
 	_update_context()
 	_rebuild_generals()
 	_rebuild_techs()
@@ -76,6 +79,12 @@ func _rebuild_generals() -> void:
 			"下一級: %s" % LoungeManager.describe_mods(mods) if level < LoungeManager.MAX_GENERAL_LEVEL else "加成已達上限",
 		]
 		btn.disabled = level >= LoungeManager.MAX_GENERAL_LEVEL or LoungeManager.available_points(state) < cost
+		if level >= LoungeManager.MAX_GENERAL_LEVEL:
+			btn.tooltip_text = "已達滿級。"
+		elif LoungeManager.available_points(state) < cost:
+			btn.tooltip_text = "資源不足,需要 %d 點。" % cost
+		else:
+			btn.tooltip_text = "消耗 %d 資源點升級此將領。" % cost
 		btn.pressed.connect(func(): _upgrade_general(gid))
 		generals_list.add_child(btn)
 
@@ -100,6 +109,12 @@ func _rebuild_techs() -> void:
 			"滿級" if level >= levels.size() else "升級消耗 %d · 下一級: %s" % [cost, LoungeManager.describe_mods(next_mods)],
 		]
 		btn.disabled = level >= levels.size() or LoungeManager.available_points(state) < cost
+		if level >= levels.size():
+			btn.tooltip_text = "已達滿級。"
+		elif LoungeManager.available_points(state) < cost:
+			btn.tooltip_text = "資源不足,需要 %d 點。" % cost
+		else:
+			btn.tooltip_text = "消耗 %d 資源點升級此科技。" % cost
 		btn.pressed.connect(func(): _upgrade_tech(tid))
 		tech_list.add_child(btn)
 

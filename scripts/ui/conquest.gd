@@ -33,8 +33,11 @@ func _ready() -> void:
 	attack_button.pressed.connect(_on_attack_pressed)
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	end_turn_button.tooltip_text = "結束玩家戰略回合,處理敵方行動。"
 	reset_button.pressed.connect(_on_reset_pressed)
+	reset_button.tooltip_text = "重置征服模式狀態。"
 	back_button.pressed.connect(_on_back_pressed)
+	back_button.tooltip_text = "儲存征服狀態並返回主選單。"
 	country_option.item_selected.connect(_on_country_selected)
 	_rebuild()
 	# If we returned from a defensive battle mid-enemy-phase, resume the AI queue.
@@ -193,6 +196,9 @@ func _update_detail(message: String = "") -> void:
 			and ConquestManager.can_transfer(state, DataLoader.conquest_map, selected_region_id, target_region_id)
 	attack_button.disabled = not can_attack or status != ""
 	transfer_button.disabled = not can_transfer or status != ""
+	var unavailable := _unavailable_reason() if selected_region_id != "" and target_region_id != "" else ""
+	attack_button.tooltip_text = "進入戰術簡報與部署。" if can_attack and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰敵方目標。")
+	transfer_button.tooltip_text = "調動勾選部隊;未勾選時調動全部守備軍。" if can_transfer and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰己方目標。")
 	_refresh_transfer_button_label()
 	end_turn_button.disabled = status != ""
 	# Tell the player what to do next / why the action is greyed out, so a
@@ -203,7 +209,7 @@ func _update_detail(message: String = "") -> void:
 			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 調動。[/color]")
 		elif selected_region_id != "" and target_region_id != "" and not can_attack and not can_transfer:
 			lines.append("")
-			lines.append("[color=#d88]%s[/color]" % _unavailable_reason())
+			lines.append("[color=#d88]%s[/color]" % unavailable)
 	detail_label.text = "\n".join(lines)
 	_rebuild_recruit_panel()
 

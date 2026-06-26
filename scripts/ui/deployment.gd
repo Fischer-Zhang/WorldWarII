@@ -99,8 +99,11 @@ func _ready() -> void:
 
 	general_option.item_selected.connect(_on_general_selected)
 	begin_button.pressed.connect(_on_begin_pressed)
+	begin_button.tooltip_text = "儲存目前部署與將軍配置,進入戰鬥。"
 	reset_button.pressed.connect(_on_reset_pressed)
+	reset_button.tooltip_text = "恢復本作戰的初始部署與將軍配置。"
 	back_button.pressed.connect(_on_back_pressed)
+	back_button.tooltip_text = "返回簡報;目前未開始的部署調整會清除。"
 
 func _build_general_pool() -> void:
 	var found := {}
@@ -229,8 +232,8 @@ func _update_detail() -> void:
 		general_def = DataLoader.get_general_def(selected_unit.general_id)
 	lines.append_array(UnitDetailFormatter.deployment_upgrade_lines(selected_unit, unit_def, general_def))
 	lines.append("")
-	lines.append("藍色格為可部署區。選取單位只能在原部署點附近移動; 點我方單位切換; 點已佔用格可交換。")
-	status_label.text = "部署區半徑 %d · 可重派 %d 名將軍" % [DEPLOY_RADIUS, general_pool.size()]
+	lines.append("下一步:點藍色格調整部署,點我方單位切換,點已佔用格可交換。")
+	status_label.text = "下一步:配置部署與將軍 · 部署區半徑 %d · 可重派 %d 名將軍" % [DEPLOY_RADIUS, general_pool.size()]
 	detail_label.text = "\n".join(lines)
 
 func _on_general_selected(_index: int) -> void:
@@ -259,10 +262,10 @@ func _on_hex_clicked(coord: Vector2i, _terrain_id: String) -> void:
 	if selected_unit == null:
 		return
 	if not _can_place_selected_at(coord):
-		status_label.text = "只能部署在該單位原始位置附近。"
+		status_label.text = "無法部署:只能放在該單位原始位置附近的藍色格。"
 		return
 	if occupant != null:
-		status_label.text = "該位置已被敵軍佔用。"
+		status_label.text = "無法部署:該位置已被敵軍佔用。"
 		return
 	_move_unit_to(selected_unit, coord)
 

@@ -30,6 +30,10 @@ var category_buttons: Dictionary = {}
 
 func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
+	easy_btn.tooltip_text = String(DIFFICULTY_HINTS["easy"])
+	normal_btn.tooltip_text = String(DIFFICULTY_HINTS["normal"])
+	hard_btn.tooltip_text = String(DIFFICULTY_HINTS["hard"])
+	back_button.tooltip_text = "返回主選單。"
 	_build_categories()
 	_build_category_buttons()
 	_rebuild_scenario_list()
@@ -66,6 +70,7 @@ func _build_category_buttons() -> void:
 		btn.toggle_mode = true
 		btn.custom_minimum_size = Vector2(104, 34)
 		btn.text = _category_label(category_id)
+		btn.tooltip_text = "篩選作戰列表:%s" % _category_label(category_id)
 		btn.pressed.connect(func(): _set_category(category_id))
 		category_row.add_child(btn)
 		category_buttons[category_id] = btn
@@ -83,6 +88,7 @@ func _rebuild_scenario_list() -> void:
 		btn.text = "%s — %s" % [scenario.get("id", ""), scenario.get("title", "(無標題)")]
 		btn.custom_minimum_size = Vector2(0, 44)
 		btn.add_theme_font_size_override("font_size", 18)
+		btn.tooltip_text = "查看此作戰簡報。"
 		btn.pressed.connect(func(): _on_scenario_picked(scenario_id))
 		list.add_child(btn)
 

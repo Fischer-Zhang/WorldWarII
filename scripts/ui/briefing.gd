@@ -24,7 +24,9 @@ func _ready() -> void:
 		title_label.text = String(scenario.get("title", scenario.get("id", "")))
 		briefing_label.text = String(scenario.get("briefing", "(無簡報)"))
 	begin_button.pressed.connect(_on_begin_pressed)
+	begin_button.tooltip_text = "進入戰前部署。"
 	back_button.pressed.connect(_on_back_pressed)
+	back_button.tooltip_text = back_button.text
 
 func _show_conquest_briefing(scenario: Dictionary) -> void:
 	var p := GameState.pending_conquest_battle

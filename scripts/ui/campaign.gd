@@ -18,6 +18,9 @@ func _ready() -> void:
 	continue_button.pressed.connect(_on_continue_pressed)
 	reset_button.pressed.connect(_on_reset_pressed)
 	back_button.pressed.connect(_on_back_pressed)
+	continue_button.tooltip_text = "先選擇戰線或作戰。"
+	reset_button.tooltip_text = "重置目前範圍的戰役進度。"
+	back_button.tooltip_text = "返回上一層。"
 
 func _clear_list() -> void:
 	for child in list.get_children():
@@ -30,7 +33,7 @@ func _rebuild_campaign_list() -> void:
 	_clear_list()
 	$Margin/VBox/Title.text = "戰役"
 	$Margin/VBox/Hint.text = "選擇一條戰役線。每條戰線有獨立進度、老兵與將軍配置。"
-	status_label.text = "共 %d 條戰線" % DataLoader.campaigns.size()
+	status_label.text = "下一步:選擇一條戰線。共 %d 條戰線" % DataLoader.campaigns.size()
 	continue_button.text = "選擇戰線"
 	continue_button.disabled = true
 	reset_button.text = "重置全部"
@@ -51,6 +54,7 @@ func _rebuild_campaign_list() -> void:
 			order.size(),
 			String(campaign.get("description", "")),
 		]
+		btn.tooltip_text = "查看此戰線的作戰進度。"
 		btn.pressed.connect(func(): _select_campaign(cid))
 		list.add_child(btn)
 
@@ -93,6 +97,7 @@ func _rebuild_scenario_list() -> void:
 		btn.add_theme_color_override("font_color", color)
 		btn.text = "%s  %s — %s" % [prefix, sid, title]
 		btn.disabled = i > progress
+		btn.tooltip_text = "尚未解鎖,先完成前一場作戰。" if btn.disabled else "選擇此作戰。"
 		btn.pressed.connect(func(): _select_scenario(sid))
 		list.add_child(btn)
 	var roster: Dictionary = cstate.get("roster", {})
@@ -105,6 +110,7 @@ func _rebuild_scenario_list() -> void:
 		status_label.text = selected_text if selected_text != "" else "戰線已完成!可重置重新開始。"
 		continue_button.text = "重玩選定作戰"
 		continue_button.disabled = selected_scenario_id == ""
+		continue_button.tooltip_text = "重新進入選定作戰;不會倒退戰線進度。" if not continue_button.disabled else "先選擇可重玩的作戰。"
 	else:
 		var selected_text := _selected_scenario_status(ordered, progress)
 		status_label.text = "進度 %d / %d  ·  %s" % [
@@ -113,6 +119,7 @@ func _rebuild_scenario_list() -> void:
 		]
 		continue_button.text = "開始選定作戰"
 		continue_button.disabled = selected_scenario_id == ""
+		continue_button.tooltip_text = "進入簡報與戰前部署。" if not continue_button.disabled else "先選擇目前已解鎖的作戰。"
 	reset_button.text = "重置此戰線"
 	reset_button.disabled = false
 	back_button.text = "返回戰線列表"

@@ -14,6 +14,7 @@ func _ready() -> void:
 	title_label.text = String(data.get("title", "如何遊玩"))
 	help_text.text = HelpContent.full_bbcode(DataLoader.terrains, DataLoader.units)
 	back_button.pressed.connect(_on_back_pressed)
+	back_button.tooltip_text = "返回主選單。"
 	back_button.grab_focus()
 
 func _on_back_pressed() -> void:

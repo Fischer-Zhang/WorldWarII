@@ -146,12 +146,16 @@ func _ready() -> void:
 
 	camera.position = hex_map.get_map_center()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	end_turn_button.tooltip_text = "結束目前陣營回合。請先完成想移動或攻擊的單位。"
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	lounge_button.pressed.connect(_on_lounge_button_pressed)
 	next_button.pressed.connect(_on_next_button_pressed)
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
+	overwatch_button.tooltip_text = "消耗行動進入警戒;敵方進入射程時自動射擊。"
 	rally_button.pressed.connect(_on_rally_pressed)
+	rally_button.tooltip_text = "消耗行動降低壓制,適合被壓制或火力下降時使用。"
 	bridge_button.pressed.connect(_on_bridge_pressed)
+	bridge_button.tooltip_text = "工兵消耗行動在相鄰河流或海面架橋。"
 	legend_button.pressed.connect(_toggle_legend)
 	legend_close_button.pressed.connect(_close_legend)
 	legend_text.text = HelpContent.legend_bbcode()
@@ -164,7 +168,7 @@ func _ready() -> void:
 	turn_manager.turn_started.connect(_on_turn_started)
 	turn_manager.emit_initial()
 
-	info_label.text = "%s — 點我方單位選取" % scenario.get("title", scenario_id)
+	_set_prompt("選取單位", "%s — 點我方單位查看移動範圍與可用行動" % scenario.get("title", scenario_id))
 	_update_status()
 
 func _toggle_legend() -> void:
@@ -172,6 +176,9 @@ func _toggle_legend() -> void:
 
 func _close_legend() -> void:
 	legend_panel.visible = false
+
+func _set_prompt(step: String, detail: String) -> void:
+	info_label.text = "%s: %s" % [step, detail]
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	# Keyboard shortcuts mirror the on-screen buttons. O/R only fire when their
@@ -236,7 +243,7 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	phase = Phase.IDLE
 	_deselect()
 	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
-	info_label.text = "▶ %s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number]
+	_set_prompt("回合開始", "%s 的回合 (第 %d 回合)" % [factions[faction_id]["name"], turn_number])
 	_show_turn_banner("%s — 第 %d 回合" % [factions[faction_id]["name"], turn_number])
 	# Spawn after the standard turn UI so the reinforcement message overrides
 	# the "X's turn" text and the player notices it immediately.
@@ -282,7 +289,7 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			)
 			var survived := _move_with_overwatch(u, path)
 			hex_map.highlight_coord(dest)
-			info_label.text = "AI:%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
+			_set_prompt("AI 行動", "%s → (%d, %d)" % [u.display_name, dest.x, dest.y])
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
 			if not survived:
 				continue
@@ -303,11 +310,11 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				u.on_overwatch = true
 				u.has_attacked = true
 				u.queue_redraw()
-				info_label.text = "AI:%s 進入警戒" % u.display_name
+				_set_prompt("AI 行動", "%s 進入警戒" % u.display_name)
 				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
 			"rally":
 				var recovered := _rally_unit(u)
-				info_label.text = "AI:%s 整隊,壓制 -%d" % [u.display_name, recovered]
+				_set_prompt("AI 行動", "%s 整隊,壓制 -%d" % [u.display_name, recovered])
 				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
 			_:  # "wait" or anything else
 				u.has_attacked = true
@@ -652,7 +659,7 @@ func _present_unit_actions(unit: Unit) -> void:
 	var hint := "點藍色 hex 移動,或再點自己原地待機"
 	if not skill_buttons.is_empty() or bridge_button.visible:
 		hint = "點藍色 hex 移動,或按右側按鈕發動技能(也可再點自己待機)"
-	info_label.text = "選取:%s (HP %d/%d) — %s" % [unit.display_name, unit.hp, unit.max_hp, hint]
+	_set_prompt("選取單位", "%s (HP %d/%d) — %s" % [unit.display_name, unit.hp, unit.max_hp, hint])
 
 func _enter_attack_phase() -> void:
 	phase = Phase.ATTACK_PHASE
@@ -669,7 +676,7 @@ func _enter_attack_phase() -> void:
 		_hide_skill_buttons()
 		bridge_button.visible = false
 		damage_preview_panel.visible = false
-		info_label.text = "%s 本回合已行動 — 點空地結束" % selected_unit.display_name
+		_set_prompt("行動已用", "%s 本回合已行動 — 點空地或選其他單位" % selected_unit.display_name)
 		return
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
 	attack_targets = _visible_attack_targets(selected_unit, atk_def)
@@ -684,12 +691,12 @@ func _enter_attack_phase() -> void:
 	bridge_button.visible = not _engineer_bridge_targets(selected_unit).is_empty()
 	if attack_targets.is_empty():
 		if CombatEffects.is_pinned(selected_unit.suppression):
-			info_label.text = "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name
+			_set_prompt("選擇行動", "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name)
 		else:
 			var idle_text := "點「警戒」進入警戒,或結束回合待機"
 			if selected_unit.suppression > 0:
 				idle_text = "點「整隊」恢復壓制,點「警戒」,或待機"
-			info_label.text = "%s 已就位 — %s" % [selected_unit.display_name, idle_text]
+			_set_prompt("選擇行動", "%s 已就位 — %s" % [selected_unit.display_name, idle_text])
 	else:
 		var preview := _attack_preview(selected_unit, attack_targets[0])
 		var action_text := "點目標 / 點「警戒」/ 點空地待機"
@@ -697,9 +704,9 @@ func _enter_attack_phase() -> void:
 			action_text = "點目標 / 點「整隊」/ 點空地待機"
 		elif selected_unit.suppression > 0:
 			action_text = "點目標 / 點「警戒」/ 點「整隊」/ 點空地待機"
-		info_label.text = "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
+		_set_prompt("選擇攻擊", "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
-		]
+		])
 
 func _resolve_active_skills(unit: Unit) -> Array:
 	# Every active skill the unit can use this battle: its own kit (paratrooper
@@ -812,10 +819,10 @@ func _on_skill_pressed(skill: Dictionary) -> void:
 	if is_free_action:
 		var unit := selected_unit
 		_present_unit_actions(unit)  # re-show range/targets with the new, buffed stats
-		info_label.text = "★ %s 發動「%s」 — 仍可移動/攻擊" % [unit.display_name, skill_name]
+		_set_prompt("技能發動", "%s 發動「%s」 — 仍可移動/攻擊" % [unit.display_name, skill_name])
 		_update_status()
 		return
-	info_label.text = "★ %s 發動「%s」" % [selected_unit.display_name, skill_name]
+	_set_prompt("技能發動", "%s 發動「%s」" % [selected_unit.display_name, skill_name])
 	selected_unit.has_attacked = true
 	selected_unit.queue_redraw()
 	_deselect()
@@ -832,7 +839,7 @@ func _begin_airdrop(unit: Unit, skill: Dictionary) -> void:
 		if h != unit.coord and _is_open_drop_hex(h):
 			airdrop_targets.append(h)
 	if airdrop_targets.is_empty():
-		info_label.text = "%s 周圍無可用空降落點" % unit.display_name
+		_set_prompt("無法空降", "%s 周圍無可用空降落點" % unit.display_name)
 		return
 	airdrop_skill = skill
 	phase = Phase.AIRDROP_TARGET
@@ -842,7 +849,7 @@ func _begin_airdrop(unit: Unit, skill: Dictionary) -> void:
 	damage_preview_panel.visible = false
 	hex_map.show_movement_range(airdrop_targets)
 	hex_map.highlight_coord(unit.coord)
-	info_label.text = "空降:點藍色落點(只能落在可通行陸地),或點別處取消"
+	_set_prompt("選擇空降", "點藍色落點(只能落在可通行陸地),或點別處取消")
 
 func _is_open_drop_hex(coord: Vector2i) -> bool:
 	# Drops land troops, so the target must be passable land — not sea/river/
@@ -863,7 +870,7 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 	airdrop_targets.clear()
 	airdrop_skill = {}
 	hex_map.clear_movement_range()
-	info_label.text = "★ %s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y]
+	_set_prompt("空降完成", "%s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y])
 	_recompute_visibility()
 	_deselect()
 	_update_status()
@@ -903,7 +910,7 @@ func _on_bridge_pressed() -> void:
 	damage_preview_panel.visible = false
 	hex_map.show_movement_range(bridge_targets)
 	hex_map.highlight_coord(selected_unit.coord)
-	info_label.text = "架橋:點藍色水域格搭橋(之後可通行),或點別處取消"
+	_set_prompt("選擇架橋", "點藍色水域格搭橋(之後可通行),或點別處取消")
 
 func _do_bridge(unit: Unit, coord: Vector2i) -> void:
 	hex_map.add_bridge(coord)
@@ -913,7 +920,7 @@ func _do_bridge(unit: Unit, coord: Vector2i) -> void:
 	AudioBank.play("select")
 	bridge_targets.clear()
 	hex_map.clear_movement_range()
-	info_label.text = "★ %s 在 (%d, %d) 架起橋樑" % [unit.display_name, coord.x, coord.y]
+	_set_prompt("架橋完成", "%s 在 (%d, %d) 架起橋樑" % [unit.display_name, coord.x, coord.y])
 	_recompute_visibility()
 	_deselect()
 	_update_status()
@@ -922,13 +929,13 @@ func _on_overwatch_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
 		return
 	if CombatEffects.is_pinned(selected_unit.suppression):
-		info_label.text = "%s 被壓制,無法進入警戒" % selected_unit.display_name
+		_set_prompt("無法警戒", "%s 被壓制,請整隊或待機" % selected_unit.display_name)
 		overwatch_button.visible = false
 		return
 	selected_unit.on_overwatch = true
 	selected_unit.has_attacked = true
 	selected_unit.queue_redraw()
-	info_label.text = "%s 進入警戒 — 進入射程的敵人會被自動射擊" % selected_unit.display_name
+	_set_prompt("警戒中", "%s 進入警戒 — 進入射程的敵人會被自動射擊" % selected_unit.display_name)
 	overwatch_button.visible = false
 	_deselect()
 
@@ -940,7 +947,7 @@ func _on_rally_pressed() -> void:
 		return
 	var unit := selected_unit
 	var recovered := _rally_unit(unit)
-	info_label.text = "%s 整隊 — 壓制 -%d" % [unit.display_name, recovered]
+	_set_prompt("整隊完成", "%s 壓制 -%d" % [unit.display_name, recovered])
 	_deselect()
 
 func _rally_unit(unit: Unit) -> int:
@@ -1033,7 +1040,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		turn_manager.turn_number,
 	)
 	_recompute_visibility()
-	info_label.text = msg
+	_set_prompt("攻擊結果", msg)
 	_deselect()
 	_update_status()
 
@@ -1220,10 +1227,10 @@ func _show_terrain_info(coord: Vector2i, terrain_id: String, unit_here: Unit) ->
 		_update_info_panel_for_unit(unit_here)
 	else:
 		_update_info_panel_terrain_only(coord, terrain_id)
-	info_label.text = "(%d, %d) %s — 移動消耗 %d, 防禦 %+d%s" % [
+	_set_prompt("地形資訊", "(%d, %d) %s — 移動消耗 %d, 防禦 %+d%s" % [
 		coord.x, coord.y, String(def.get("name_zh", terrain_id)),
 		int(def.get("move_cost", 0)), int(def.get("defense", 0)), suffix,
-	]
+	])
 
 func _update_info_panel_for_unit(unit: Unit) -> void:
 	var u_def := DataLoader.get_unit_def(unit.type_id)
@@ -1375,9 +1382,9 @@ func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 			action_log.record_overwatch(watcher, mover, dmg, turn_manager.turn_number)
 			watcher.on_overwatch = false
 			watcher.queue_redraw()
-			info_label.text = "⌖ %s 警戒射擊 %s @(%d,%d) → -%d" % [
+			_set_prompt("警戒射擊", "%s 射擊 %s @(%d,%d) → -%d" % [
 				watcher.display_name, mover.display_name, step.x, step.y, dmg,
-			]
+			])
 			if not mover.is_alive():
 				return i
 	return -1
@@ -1488,6 +1495,6 @@ func _spawn_reinforcements_for_turn(faction_id: String, turn_number: int) -> voi
 	var names := []
 	for u in fresh:
 		names.append(u.display_name)
-	info_label.text = "★ 援軍抵達:%s" % ", ".join(names)
+	_set_prompt("援軍抵達", ", ".join(names))
 	AudioBank.play("victory")  # fanfare borrow — replace with a dedicated SFX later if added
 	_recompute_visibility()
