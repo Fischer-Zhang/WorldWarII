@@ -15,6 +15,7 @@ SCENARIOS = DATA / "scenarios"
 MAX_SUPPRESSION = 5
 MAX_DIG_IN = 3
 MAX_RANK = 3
+ALLOWED_SECONDARY_REWARD_TYPES = {"xp"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
     "attack",
@@ -244,6 +245,22 @@ def validate_scenario(
                     fail(errors, path, f"secondary_objectives[{index}] xp_reward must be non-negative")
             except (TypeError, ValueError):
                 fail(errors, path, f"secondary_objectives[{index}] xp_reward must be an integer")
+            rewards = objective.get("rewards", [])
+            if "rewards" in objective and not isinstance(rewards, list):
+                fail(errors, path, f"secondary_objectives[{index}] rewards must be a list when present")
+            elif isinstance(rewards, list):
+                for reward_index, reward in enumerate(rewards):
+                    if not isinstance(reward, dict):
+                        fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] must be an object")
+                        continue
+                    reward_type = str(reward.get("type", ""))
+                    if reward_type not in ALLOWED_SECONDARY_REWARD_TYPES:
+                        fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] unknown type {reward_type!r}")
+                    try:
+                        if int(reward.get("amount", 0)) <= 0:
+                            fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] amount must be positive")
+                    except (TypeError, ValueError):
+                        fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] amount must be an integer")
 
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
 

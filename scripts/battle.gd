@@ -1414,15 +1414,52 @@ func _check_secondary_objective_capture(unit: Unit) -> String:
 		if target_value == null or unit.coord != target_value:
 			continue
 		captured_secondary_objectives[key] = true
-		var xp_reward := int(objective.get("xp_reward", 0))
+		var rewards := _secondary_objective_rewards(objective)
+		var xp_reward := _secondary_objective_xp_reward(rewards)
 		if xp_reward > 0:
 			unit.gain_xp(xp_reward)
-		action_log.record_secondary_objective(unit, key, xp_reward, turn_manager.turn_number)
+		action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
 		var label := String(objective.get("label", key))
-		var reward_text := "XP +%d" % xp_reward if xp_reward > 0 else "已控制"
+		var reward_text := _secondary_objective_reward_text(rewards)
 		_apply_player_objective_pulse()
 		return "%s 佔領 %s (%s)" % [unit.display_name, label, reward_text]
 	return ""
+
+func _secondary_objective_rewards(objective: Dictionary) -> Array[Dictionary]:
+	var rewards: Array[Dictionary] = []
+	var raw_rewards: Array = objective.get("rewards", [])
+	for raw in raw_rewards:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var reward: Dictionary = raw
+		var reward_type := String(reward.get("type", ""))
+		var amount := int(reward.get("amount", 0))
+		if reward_type == "" or amount <= 0:
+			continue
+		rewards.append({"type": reward_type, "amount": amount})
+	var legacy_xp := int(objective.get("xp_reward", 0))
+	if legacy_xp > 0 and _secondary_objective_xp_reward(rewards) <= 0:
+		rewards.append({"type": "xp", "amount": legacy_xp})
+	return rewards
+
+func _secondary_objective_xp_reward(rewards: Array[Dictionary]) -> int:
+	var total := 0
+	for reward in rewards:
+		if String(reward.get("type", "")) == "xp":
+			total += int(reward.get("amount", 0))
+	return total
+
+func _secondary_objective_reward_text(rewards: Array[Dictionary]) -> String:
+	var parts: Array[String] = []
+	for reward in rewards:
+		var reward_type := String(reward.get("type", ""))
+		var amount := int(reward.get("amount", 0))
+		match reward_type:
+			"xp":
+				parts.append("XP +%d" % amount)
+	if parts.is_empty():
+		return "已控制"
+	return ", ".join(parts)
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 	# As `mover` passes through each hex along `path`, every watcher that

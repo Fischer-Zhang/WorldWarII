@@ -156,7 +156,7 @@ func _run() -> void:
 				"label": "Test Cache",
 				"faction": battle.player_faction_id,
 				"target": [secondary_offset.x, secondary_offset.y],
-				"xp_reward": 1,
+				"rewards": [{"type": "xp", "amount": 1}],
 			}]
 			battle._apply_player_objective_pulse()
 			if battle.hex_map.objective_overlays.size() == 2:

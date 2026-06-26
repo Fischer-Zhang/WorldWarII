@@ -167,10 +167,27 @@ def secondary_objective_summary(scenario: dict[str, Any]) -> str:
         if not isinstance(objective, dict):
             continue
         label = str(objective.get("label", objective.get("id", "secondary")))
-        reward = int(objective.get("xp_reward", 0))
-        reward_text = f"XP {reward}" if reward > 0 else "no reward"
-        parts.append(f"{label} ({reward_text})")
+        parts.append(f"{label} ({secondary_reward_text(objective)})")
     return "; ".join(parts) if parts else "none"
+
+
+def secondary_reward_text(objective: dict[str, Any]) -> str:
+    rewards = objective.get("rewards", [])
+    parts: list[str] = []
+    if isinstance(rewards, list):
+        for reward in rewards:
+            if not isinstance(reward, dict):
+                continue
+            reward_type = str(reward.get("type", ""))
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            if reward_type == "xp":
+                parts.append(f"XP {amount}")
+    legacy_xp = int(objective.get("xp_reward", 0))
+    if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
+        parts.append(f"XP {legacy_xp}")
+    return ", ".join(parts) if parts else "no reward"
 
 
 def terrain_summary(scenario: dict[str, Any], terrains: dict[str, Any]) -> str:

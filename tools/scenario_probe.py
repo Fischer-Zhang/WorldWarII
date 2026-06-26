@@ -288,10 +288,28 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
         ]
         own_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own]
         label = str(objective.get("label", objective.get("id", "secondary")))
-        reward = int(objective.get("xp_reward", 0))
         if own_dist:
-            parts.append(f"{label} {target[0]},{target[1]} min {min(own_dist)} XP {reward}")
+            parts.append(f"{label} {target[0]},{target[1]} min {min(own_dist)} {secondary_reward_text(objective)}")
     return "; ".join(parts) if parts else "none"
+
+
+def secondary_reward_text(objective: dict[str, Any]) -> str:
+    rewards = objective.get("rewards", [])
+    parts: list[str] = []
+    if isinstance(rewards, list):
+        for reward in rewards:
+            if not isinstance(reward, dict):
+                continue
+            reward_type = str(reward.get("type", ""))
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            if reward_type == "xp":
+                parts.append(f"XP {amount}")
+    legacy_xp = int(objective.get("xp_reward", 0))
+    if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
+        parts.append(f"XP {legacy_xp}")
+    return ", ".join(parts) if parts else "no reward"
 
 
 def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:

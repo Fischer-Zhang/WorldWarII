@@ -53,7 +53,9 @@
       "label": "道路檢查點",
       "faction": "allies",
       "target": [4, 0],
-      "xp_reward": 1
+      "rewards": [
+        {"type": "xp", "amount": 1}
+      ]
     }
   ],
   "victory": {
