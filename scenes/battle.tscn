@@ -125,20 +125,22 @@ mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 14
 text = ""
 
-[node name="SkillButton" type="Button" parent="UI"]
-visible = false
+[node name="AbilityBox" type="VBoxContainer" parent="UI"]
 offset_left = 1050.0
-offset_top = 520.0
+offset_top = 300.0
 offset_right = 1260.0
-offset_bottom = 560.0
-text = "技能"
+offset_bottom = 562.0
+mouse_filter = 2
+alignment = 2
+theme_override_constants/separation = 6
 
-[node name="BridgeButton" type="Button" parent="UI"]
+[node name="SkillBox" type="VBoxContainer" parent="UI/AbilityBox"]
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="BridgeButton" type="Button" parent="UI/AbilityBox"]
 visible = false
-offset_left = 1050.0
-offset_top = 470.0
-offset_right = 1260.0
-offset_bottom = 510.0
+custom_minimum_size = Vector2(0, 40)
 text = "架橋"
 
 [node name="OverwatchButton" type="Button" parent="UI"]

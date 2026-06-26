@@ -40,8 +40,8 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDG
 @onready var end_turn_button: Button = $UI/EndTurnButton
 @onready var overwatch_button: Button = $UI/OverwatchButton
 @onready var rally_button: Button = $UI/RallyButton
-@onready var skill_button: Button = $UI/SkillButton
-@onready var bridge_button: Button = $UI/BridgeButton
+@onready var skill_box: VBoxContainer = $UI/AbilityBox/SkillBox
+@onready var bridge_button: Button = $UI/AbilityBox/BridgeButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var result_summary: RichTextLabel = $UI/ResultPanel/ResultSummary
@@ -73,7 +73,9 @@ var selected_unit: Unit = null
 var movement_range: Dictionary = {}
 var attack_targets: Array = []
 var airdrop_targets: Array = []  # valid drop hexes while phase == AIRDROP_TARGET
+var airdrop_skill: Dictionary = {}  # the skill being resolved during an AIRDROP_TARGET sub-phase
 var bridge_targets: Array = []   # adjacent water hexes an engineer can bridge (BRIDGE_TARGET)
+var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one per active skill)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var player_faction_id: String = ""
@@ -149,7 +151,6 @@ func _ready() -> void:
 	next_button.pressed.connect(_on_next_button_pressed)
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	rally_button.pressed.connect(_on_rally_pressed)
-	skill_button.pressed.connect(_on_skill_pressed)
 	bridge_button.pressed.connect(_on_bridge_pressed)
 	legend_button.pressed.connect(_toggle_legend)
 	legend_close_button.pressed.connect(_close_legend)
@@ -621,12 +622,19 @@ func _select_unit(unit: Unit) -> void:
 		selected_unit.set_selected(false)
 	selected_unit = unit
 	unit.set_selected(true)
-	phase = Phase.UNIT_SELECTED
 	AudioBank.play("select")
+	_present_unit_actions(unit)
+
+# Renders the action affordances for the already-selected unit: movement range +
+# ability buttons before it has moved, or the attack menu after. Split out from
+# _select_unit so a free (non-turn-ending) skill can re-present the unit with its
+# freshly-buffed stats without re-running selection bookkeeping or the SFX.
+func _present_unit_actions(unit: Unit) -> void:
 	_update_info_panel_for_unit(unit)
 	if unit.has_moved:
 		_enter_attack_phase()
 		return
+	phase = Phase.UNIT_SELECTED
 	var unit_def: Dictionary = DataLoader.get_unit_def(unit.type_id)
 	var general_def: Dictionary = DataLoader.get_general_def(unit.general_id)
 	var move_pts: int = unit.effective_move(unit_def, general_def)
@@ -639,10 +647,10 @@ func _select_unit(unit: Unit) -> void:
 	# Show special-ability buttons on selection too (not only after a move), so
 	# abilities usable ONLY before moving — the paratrooper's airdrop — are
 	# discoverable instead of hidden behind a skip-move gesture.
-	_refresh_skill_button(unit)
+	_refresh_skill_buttons(unit)
 	bridge_button.visible = not _engineer_bridge_targets(unit).is_empty()
 	var hint := "點藍色 hex 移動,或再點自己原地待機"
-	if skill_button.visible or bridge_button.visible:
+	if not skill_buttons.is_empty() or bridge_button.visible:
 		hint = "點藍色 hex 移動,或按右側按鈕發動技能(也可再點自己待機)"
 	info_label.text = "選取:%s (HP %d/%d) — %s" % [unit.display_name, unit.hp, unit.max_hp, hint]
 
@@ -658,7 +666,7 @@ func _enter_attack_phase() -> void:
 		hex_map.show_attack_targets([])
 		overwatch_button.visible = false
 		rally_button.visible = false
-		skill_button.visible = false
+		_hide_skill_buttons()
 		bridge_button.visible = false
 		damage_preview_panel.visible = false
 		info_label.text = "%s 本回合已行動 — 點空地結束" % selected_unit.display_name
@@ -670,8 +678,8 @@ func _enter_attack_phase() -> void:
 	# is making the attack-or-skip decision.
 	overwatch_button.visible = not CombatEffects.is_pinned(selected_unit.suppression)
 	rally_button.visible = selected_unit.suppression > 0
-	# Skill button: only if attached general has a skill and cooldown is ready.
-	_refresh_skill_button(selected_unit)
+	# Skill buttons: one per active skill the unit has (its own kit + general's).
+	_refresh_skill_buttons(selected_unit)
 	# Engineer bridge: when adjacent to impassable water it can build a crossing.
 	bridge_button.visible = not _engineer_bridge_targets(selected_unit).is_empty()
 	if attack_targets.is_empty():
@@ -693,43 +701,71 @@ func _enter_attack_phase() -> void:
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
 		]
 
-func _resolve_active_skill(unit: Unit) -> Dictionary:
-	# Returns the active skill available to this unit, preferring the unit's
-	# own kit (engineer's Fortify) over the attached general's skill.
+func _resolve_active_skills(unit: Unit) -> Array:
+	# Every active skill the unit can use this battle: its own kit (paratrooper
+	# airdrop, engineer fortify) PLUS its attached general's skill. A unit may
+	# carry several at once; each tracks its own cooldown independently.
+	var out: Array = []
 	if unit == null:
-		return {}
-	var unit_def := DataLoader.get_unit_def(unit.type_id)
-	var skill: Dictionary = unit_def.get("skill", {})
-	if skill.is_empty() and unit.general_id != "":
-		skill = DataLoader.get_general_def(unit.general_id).get("skill", {})
-	return skill
+		return out
+	var seen := {}
+	_collect_skills(out, seen, DataLoader.get_unit_def(unit.type_id))
+	if unit.general_id != "":
+		_collect_skills(out, seen, DataLoader.get_general_def(unit.general_id))
+	return out
 
-func _refresh_skill_button(unit: Unit) -> void:
-	var skill: Dictionary = _resolve_active_skill(unit)
-	if skill.is_empty():
-		skill_button.visible = false
-		return
-	# Airdrop is a relocation, so it replaces the move — only offer it before moving.
-	if skill.has("airdrop_range") and unit.has_moved:
-		skill_button.visible = false
-		return
-	var skill_id := String(skill.get("id", ""))
-	var ready: bool = unit.skill_ready(skill_id, turn_manager.turn_number)
-	if ready:
-		skill_button.text = "技能: %s" % String(skill.get("name_zh", skill_id))
-		skill_button.disabled = false
-		skill_button.tooltip_text = String(skill.get("description_zh", ""))
-		skill_button.visible = true
-	else:
-		var cd_left: int = int(unit.skill_cooldowns.get(skill_id, 0)) - turn_manager.turn_number
-		skill_button.text = "技能 (CD %d)" % max(0, cd_left)
-		skill_button.disabled = true
-		skill_button.visible = true
+func _collect_skills(out: Array, seen: Dictionary, def: Dictionary) -> void:
+	# Supports both a single "skill" block and an optional "skills" array.
+	var single: Dictionary = def.get("skill", {})
+	if not single.is_empty() and not seen.has(String(single.get("id", ""))):
+		seen[String(single.get("id", ""))] = true
+		out.append(single)
+	for s in def.get("skills", []):
+		if s is Dictionary and not s.is_empty() and not seen.has(String(s.get("id", ""))):
+			seen[String(s.get("id", ""))] = true
+			out.append(s)
 
-func _on_skill_pressed() -> void:
+func _resolve_active_skill(unit: Unit) -> Dictionary:
+	# Back-compat shim: the unit's PRIMARY skill (own kit before general's).
+	var all := _resolve_active_skills(unit)
+	return all[0] if not all.is_empty() else {}
+
+func _hide_skill_buttons() -> void:
+	# Detach synchronously (so layout/child-count update now and a freshly pressed
+	# skill button stops rendering immediately) but defer the actual delete — this
+	# may run from within a button's own `pressed` callback, where free() is unsafe.
+	for b in skill_buttons:
+		if is_instance_valid(b):
+			if b.get_parent() != null:
+				b.get_parent().remove_child(b)
+			b.queue_free()
+	skill_buttons.clear()
+
+func _refresh_skill_buttons(unit: Unit) -> void:
+	_hide_skill_buttons()
+	if unit == null:
+		return
+	for skill in _resolve_active_skills(unit):
+		# Airdrop is a relocation that replaces the move — only offer it before moving.
+		if skill.has("airdrop_range") and unit.has_moved:
+			continue
+		var skill_id := String(skill.get("id", ""))
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(0, 40)
+		btn.tooltip_text = String(skill.get("description_zh", ""))
+		if unit.skill_ready(skill_id, turn_manager.turn_number):
+			btn.text = "技能: %s" % String(skill.get("name_zh", skill_id))
+		else:
+			var cd_left: int = int(unit.skill_cooldowns.get(skill_id, 0)) - turn_manager.turn_number
+			btn.text = "%s (CD %d)" % [String(skill.get("name_zh", skill_id)), max(0, cd_left)]
+			btn.disabled = true
+		btn.pressed.connect(_on_skill_pressed.bind(skill))
+		skill_box.add_child(btn)
+		skill_buttons.append(btn)
+
+func _on_skill_pressed(skill: Dictionary) -> void:
 	if selected_unit == null or (phase != Phase.ATTACK_PHASE and phase != Phase.UNIT_SELECTED):
 		return
-	var skill: Dictionary = _resolve_active_skill(selected_unit)
 	if skill.is_empty():
 		return
 	var skill_id := String(skill.get("id", ""))
@@ -765,12 +801,21 @@ func _on_skill_pressed() -> void:
 			var u := hex_map.unit_at(nb)
 			if u != null and u.is_alive() and u.faction_id == selected_unit.faction_id:
 				u.receive_aura(aura_effect)
-	info_label.text = "★ %s 發動「%s」" % [
-		selected_unit.display_name,
-		String(skill.get("name_zh", skill_id)),
-	]
 	AudioBank.play("select")
-	skill_button.visible = false
+	var skill_name := String(skill.get("name_zh", skill_id))
+	# A pure self-buff strengthens the unit's OWN coming move/attack ("本回合 +X"),
+	# so consuming the action would waste it — keep the unit free to act. Auras
+	# (spent supporting allies) and Fortify (entrenching in place) still cost the
+	# turn's action, as does an airdrop (handled above).
+	var has_self_mods: bool = not (skill.get("self_mods", {}) as Dictionary).is_empty()
+	var is_free_action: bool = has_self_mods and aura.is_empty() and instant_dig == 0
+	if is_free_action:
+		var unit := selected_unit
+		_present_unit_actions(unit)  # re-show range/targets with the new, buffed stats
+		info_label.text = "★ %s 發動「%s」 — 仍可移動/攻擊" % [unit.display_name, skill_name]
+		_update_status()
+		return
+	info_label.text = "★ %s 發動「%s」" % [selected_unit.display_name, skill_name]
 	selected_unit.has_attacked = true
 	selected_unit.queue_redraw()
 	_deselect()
@@ -789,23 +834,26 @@ func _begin_airdrop(unit: Unit, skill: Dictionary) -> void:
 	if airdrop_targets.is_empty():
 		info_label.text = "%s 周圍無可用空降落點" % unit.display_name
 		return
+	airdrop_skill = skill
 	phase = Phase.AIRDROP_TARGET
 	overwatch_button.visible = false
 	rally_button.visible = false
-	skill_button.visible = false
+	_hide_skill_buttons()
 	damage_preview_panel.visible = false
 	hex_map.show_movement_range(airdrop_targets)
 	hex_map.highlight_coord(unit.coord)
-	info_label.text = "空降:點藍色落點(無視地形/管制),或點別處取消"
+	info_label.text = "空降:點藍色落點(只能落在可通行陸地),或點別處取消"
 
 func _is_open_drop_hex(coord: Vector2i) -> bool:
+	# Drops land troops, so the target must be passable land — not sea/river/
+	# mountain (impassable) and not already occupied.
 	var terrain := hex_map.terrain_at(coord)
-	if terrain == "" or terrain == "sea":
+	if terrain == "" or hex_map.terrain_impassable(terrain):
 		return false
 	return hex_map.unit_at(coord) == null
 
 func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
-	var skill := _resolve_active_skill(unit)
+	var skill := airdrop_skill if not airdrop_skill.is_empty() else _resolve_active_skill(unit)
 	hex_map.move_unit(unit, dest, 0.25)  # move_to sets coord + has_moved + animates
 	unit.use_skill(skill, turn_manager.turn_number)  # starts the (battle-long) cooldown
 	unit.has_attacked = true  # lands and is spent for the turn
@@ -813,6 +861,7 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 	action_log.record_skill(unit, String(skill.get("id", "airdrop")), turn_manager.turn_number)
 	AudioBank.play("select")
 	airdrop_targets.clear()
+	airdrop_skill = {}
 	hex_map.clear_movement_range()
 	info_label.text = "★ %s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y]
 	_recompute_visibility()
@@ -824,6 +873,7 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 
 func _cancel_airdrop() -> void:
 	airdrop_targets.clear()
+	airdrop_skill = {}
 	_enter_attack_phase()
 
 func _engineer_bridge_targets(unit: Unit) -> Array:
@@ -848,7 +898,7 @@ func _on_bridge_pressed() -> void:
 	phase = Phase.BRIDGE_TARGET
 	overwatch_button.visible = false
 	rally_button.visible = false
-	skill_button.visible = false
+	_hide_skill_buttons()
 	bridge_button.visible = false
 	damage_preview_panel.visible = false
 	hex_map.show_movement_range(bridge_targets)
@@ -1126,13 +1176,13 @@ func _deselect() -> void:
 	movement_range.clear()
 	attack_targets.clear()
 	airdrop_targets.clear()
+	airdrop_skill = {}
 	bridge_targets.clear()
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
 	rally_button.visible = false
-	if skill_button != null:
-		skill_button.visible = false
+	_hide_skill_buttons()
 	if bridge_button != null:
 		bridge_button.visible = false
 	if damage_preview_panel != null:

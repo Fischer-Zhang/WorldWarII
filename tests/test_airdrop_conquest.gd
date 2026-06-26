@@ -67,18 +67,38 @@ func _run() -> void:
 		para.has_moved = false
 		para.has_attacked = false
 		battle._select_unit(para)
-		if battle.skill_button.visible:
+		if not battle.skill_buttons.is_empty():
 			pass_count += 1
 		else:
 			printerr("FAIL: airdrop button not shown when a fresh paratrooper is selected")
 			fail_count += 1
 
 		# And it must fire straight from the selection state (not only ATTACK_PHASE).
-		battle._on_skill_pressed()
+		battle._on_skill_pressed(skill)
 		if battle.phase == battle.Phase.AIRDROP_TARGET:
 			pass_count += 1
 		else:
 			printerr("FAIL: pressing airdrop on selection did not begin airdrop targeting (phase=%d)" % battle.phase)
+			fail_count += 1
+
+		# Drops land troops: impassable terrain (sea/river/mountain) is NOT a valid
+		# landing hex, only passable land is.
+		var land_ok := false
+		var blocked_ok := true
+		for c in battle.hex_map.tiles.keys():
+			var terr: String = battle.hex_map.terrain_at(c)
+			if battle.hex_map.unit_at(c) != null:
+				continue
+			if battle.hex_map.terrain_impassable(terr):
+				if battle._is_open_drop_hex(c):
+					blocked_ok = false  # impassable hex wrongly allowed
+			elif terr != "":
+				if battle._is_open_drop_hex(c):
+					land_ok = true  # at least one passable land hex allowed
+		if land_ok and blocked_ok:
+			pass_count += 1
+		else:
+			printerr("FAIL: drop-hex validity wrong (land_ok=%s blocked_ok=%s)" % [land_ok, blocked_ok])
 			fail_count += 1
 
 	battle.queue_free()

@@ -77,7 +77,7 @@ func _run() -> void:
 		else:
 			printerr("FAIL: an already-attacked unit was still offered attack targets")
 			fail_count += 1
-		if not battle.overwatch_button.visible and not battle.rally_button.visible and not battle.skill_button.visible:
+		if not battle.overwatch_button.visible and not battle.rally_button.visible and battle.skill_buttons.is_empty():
 			pass_count += 1
 		else:
 			printerr("FAIL: action buttons still visible after the unit has acted")
