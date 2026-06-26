@@ -159,7 +159,7 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 Hard difficulty adds one-ply lookahead against visible player retaliation.
 `tools/ai_trace_report.gd` generates `docs/progress/ai_trace_report.md` through
 `AIController.plan_trace_for_unit()` so AI diagnostics stay tied to the runtime
-scoring path.
+scoring path, including primary and secondary objective score splits.
 
 ## Campaign
 

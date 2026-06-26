@@ -468,12 +468,25 @@ func _init() -> void:
 	battle.hex_map.occupants[trace_attacker.coord] = trace_attacker
 	battle.hex_map.occupants[trace_target.coord] = trace_target
 	battle.visibility_by_faction = {"axis": {trace_target.coord: true}}
+	battle.scenario = {
+		"victory": {"axis": {"type": "capture", "target": [4, 0]}},
+		"secondary_objectives": [{
+			"id": "trace_cache",
+			"type": "recon_hex",
+			"faction": "axis",
+			"target": [2, 0],
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+	}
 	var trace: Dictionary = ai.plan_trace_for_unit(trace_attacker)
 	var traced_plan: Dictionary = trace.get("plan", {})
 	var direct_plan: Dictionary = ai.plan_for_unit(trace_attacker)
 	var candidates: Array = trace.get("candidates", [])
 	var top: Dictionary = candidates[0] if not candidates.is_empty() else {}
 	var components: Dictionary = top.get("components", {})
+	var objective_detail: Dictionary = components.get("objective_detail", {})
+	var primary_info: Dictionary = objective_detail.get("primary_info", {})
+	var secondary_info: Dictionary = objective_detail.get("secondary_info", {})
 	if traced_plan.get("move_to") == direct_plan.get("move_to") \
 			and traced_plan.get("action") == direct_plan.get("action") \
 			and traced_plan.get("attack") == direct_plan.get("attack") \
@@ -481,7 +494,15 @@ func _init() -> void:
 			and top.has("coord") \
 			and components.has("distance") \
 			and components.has("attack") \
+			and components.has("primary_objective") \
+			and components.has("secondary_objective") \
 			and components.has("total") \
+			and abs(float(components.get("objective", 0.0)) - (
+				float(components.get("primary_objective", 0.0))
+				+ float(components.get("secondary_objective", 0.0))
+			)) < 0.001 \
+			and primary_info.has("target") \
+			and secondary_info.get("key", "") == "trace_cache" \
 			and abs(float(traced_plan.get("score", 0.0)) - float(top.get("base_score", 0.0))) < 0.001:
 		pass_count += 1
 	else:

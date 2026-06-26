@@ -254,8 +254,10 @@ func _score_position_breakdown(
 	var terr_def: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 	var terrain_term: float = float(terr_def.get("defense", 0)) * W_TERRAIN
 	var role_term: float = _role_position_score(unit, pos, known, visible_enemies, atk_def)
-	var objective_term: float = _objective_position_score(unit.faction_id, pos) \
-		+ _secondary_objective_position_score(unit.faction_id, pos)
+	var objective_breakdown := _objective_position_breakdown(unit.faction_id, pos)
+	var primary_objective_term: float = float(objective_breakdown.get("primary", 0.0))
+	var secondary_objective_term: float = float(objective_breakdown.get("secondary", 0.0))
+	var objective_term: float = primary_objective_term + secondary_objective_term
 
 	# 1-ply lookahead: discount by worst counter the player could deliver
 	# *after* we land on this hex. Only enabled on Hard difficulty.
@@ -272,7 +274,10 @@ func _score_position_breakdown(
 		"exposure": exposure_term,
 		"terrain": terrain_term,
 		"role": role_term,
+		"primary_objective": primary_objective_term,
+		"secondary_objective": secondary_objective_term,
 		"objective": objective_term,
+		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
 		"raw_total": raw_total,
 		"total": total,
@@ -585,27 +590,50 @@ func _artillery_standoff_score(pos: Vector2i, known: Array) -> float:
 	return penalty
 
 func _objective_position_score(faction_id: String, pos: Vector2i) -> float:
+	return float(_primary_objective_position_breakdown(faction_id, pos).get("score", 0.0))
+
+func _objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
+	var primary := _primary_objective_position_breakdown(faction_id, pos)
+	var secondary := _secondary_objective_position_breakdown(faction_id, pos)
+	return {
+		"primary": float(primary.get("score", 0.0)),
+		"secondary": float(secondary.get("score", 0.0)),
+		"primary_info": primary,
+		"secondary_info": secondary,
+	}
+
+func _primary_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
 	var victory_cfg: Dictionary = battle.scenario.get("victory", {})
 	var objective: Dictionary = victory_cfg.get(faction_id, {})
 	if String(objective.get("type", "")) != "capture":
-		return 0.0
+		return {"score": 0.0}
 	var target: Variant = objective.get("target", [])
 	if typeof(target) != TYPE_ARRAY or target.size() < 2:
-		return 0.0
+		return {"score": 0.0}
 	var col := int(target[0])
 	var row := int(target[1])
 	var target_coord := Vector2i(col - (row >> 1), row)
-	return -float(HexCoord.distance(pos, target_coord)) * W_CAPTURE_OBJECTIVE
+	var distance := HexCoord.distance(pos, target_coord)
+	return {
+		"score": -float(distance) * W_CAPTURE_OBJECTIVE,
+		"target": target_coord,
+		"distance": distance,
+		"type": "capture",
+	}
 
 func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> float:
+	return float(_secondary_objective_position_breakdown(faction_id, pos).get("score", 0.0))
+
+func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
 	var objectives: Array = battle.scenario.get("secondary_objectives", [])
 	if objectives.is_empty():
-		return 0.0
+		return {"score": 0.0}
 	var captured: Dictionary = {}
 	var captured_value: Variant = battle.get("captured_secondary_objectives")
 	if typeof(captured_value) == TYPE_DICTIONARY:
 		captured = captured_value
 	var best := -INF
+	var best_info: Dictionary = {"score": 0.0}
 	for i in range(objectives.size()):
 		if typeof(objectives[i]) != TYPE_DICTIONARY:
 			continue
@@ -619,12 +647,23 @@ func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> f
 		if target_coord_value == null:
 			continue
 		var target_coord: Vector2i = target_coord_value
-		var score := -float(HexCoord.distance(pos, target_coord)) \
-			* _secondary_objective_position_weight(objective)
-		best = max(best, score)
+		var distance := HexCoord.distance(pos, target_coord)
+		var score := -float(distance) * _secondary_objective_position_weight(objective)
+		var objective_type := SecondaryObjectiveRules.objective_type(objective)
+		if score > best:
+			best = score
+			best_info = {
+				"score": score,
+				"key": key,
+				"label": String(objective.get("label", key)),
+				"type": objective_type,
+				"target": target_coord,
+				"distance": distance,
+				"weight": _secondary_objective_position_weight(objective),
+			}
 	if best == -INF:
-		return 0.0
-	return best
+		return {"score": 0.0}
+	return best_info
 
 func _secondary_objective_position_weight(objective: Dictionary) -> float:
 	match SecondaryObjectiveRules.objective_type(objective):

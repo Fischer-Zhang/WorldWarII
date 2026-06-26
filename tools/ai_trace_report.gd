@@ -146,11 +146,33 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			],
 			"notes": "MG reaction-fire profile should appear in overwatch candidate scores.",
 		},
+		{
+			"id": "secondary_objective_pull",
+			"title": "Secondary objective pull",
+			"difficulty": "normal",
+			"attacker": _unit("light_tank", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(5, 0), data_loader), "visible": false},
+			],
+			"scenario": {
+				"victory": {"axis": {"type": "capture", "target": [6, 0]}},
+				"secondary_objectives": [{
+					"id": "forward_cache",
+					"label": "Forward Cache",
+					"type": "recon_hex",
+					"faction": "axis",
+					"target": [3, 0],
+					"rewards": [{"type": "xp", "amount": 1}],
+				}],
+			},
+			"notes": "Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.",
+		},
 	]
 
 func _case_report(case_def: Dictionary, data_loader) -> String:
 	var battle := StubBattle.new()
 	var attacker = case_def["attacker"]
+	battle.scenario = case_def.get("scenario", {})
 	battle.units.append(attacker)
 	battle.hex_map.occupants[attacker.coord] = attacker
 	for coord in case_def.get("terrain", {}).keys():
@@ -183,14 +205,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | base | overwatch | rally | distance | attack | exposure | terrain | role | objective | lookahead |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | base | overwatch | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % [
+		lines.append("| %d | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -202,7 +224,10 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("exposure", 0.0)),
 			_score(c.get("terrain", 0.0)),
 			_score(c.get("role", 0.0)),
+			_score(c.get("primary_objective", 0.0)),
+			_score(c.get("secondary_objective", 0.0)),
 			_score(c.get("objective", 0.0)),
+			_objective_detail_text(c.get("objective_detail", {})),
 			_score(c.get("lookahead", 0.0)),
 		])
 	return "\n".join(lines)
@@ -241,3 +266,25 @@ func _score(value: Variant) -> String:
 	if score <= -INF / 2.0:
 		return "-inf"
 	return "%.2f" % score
+
+func _objective_detail_text(value: Variant) -> String:
+	if typeof(value) != TYPE_DICTIONARY:
+		return "none"
+	var detail: Dictionary = value
+	var parts: Array[String] = []
+	var primary: Dictionary = detail.get("primary_info", {})
+	if primary.has("target"):
+		parts.append("primary:%s d%d" % [
+			_coord_text(primary.get("target", Vector2i.ZERO)),
+			int(primary.get("distance", 0)),
+		])
+	var secondary: Dictionary = detail.get("secondary_info", {})
+	if secondary.has("key"):
+		parts.append("secondary:%s %s d%d" % [
+			String(secondary.get("key", "secondary")),
+			_coord_text(secondary.get("target", Vector2i.ZERO)),
+			int(secondary.get("distance", 0)),
+		])
+	if parts.is_empty():
+		return "none"
+	return "; ".join(parts)
