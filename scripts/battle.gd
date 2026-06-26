@@ -78,6 +78,7 @@ var bridge_targets: Array = []   # adjacent water hexes an engineer can bridge (
 var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one per active skill)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
+var captured_secondary_objectives: Dictionary = {}  # objective id/index -> true
 var player_faction_id: String = ""
 # Per-faction visibility + memory (symmetric fog model)
 var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
@@ -254,6 +255,7 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 	# Spawn after the standard turn UI so the reinforcement message overrides
 	# the "X's turn" text and the player notices it immediately.
 	_spawn_reinforcements_for_turn(faction_id, turn_number)
+	_apply_player_objective_pulse()
 	_update_status()
 
 	var controller := String(factions[faction_id].get("controller", "player"))
@@ -294,8 +296,12 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				u.coord, dest, reachable, hex_map, hex_map.occupants, u.faction_id, u.type_id
 			)
 			var survived := _move_with_overwatch(u, path)
+			var secondary_text := _check_secondary_objective_capture(u)
 			hex_map.highlight_coord(dest)
-			_set_prompt("AI 行動", "%s → (%d, %d)" % [u.display_name, dest.x, dest.y])
+			var move_text := "%s → (%d, %d)" % [u.display_name, dest.x, dest.y]
+			if secondary_text != "":
+				move_text += "；%s" % secondary_text
+			_set_prompt("AI 行動", move_text)
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
 			if not survived:
 				continue
@@ -601,7 +607,8 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 					_deselect()
 					_update_status()
 					return
-				_enter_attack_phase()
+				var secondary_text := _check_secondary_objective_capture(selected_unit)
+				_enter_attack_phase(secondary_text)
 				return
 			_deselect()
 			_show_terrain_info(coord, terrain_id, clicked_unit)
@@ -667,7 +674,7 @@ func _present_unit_actions(unit: Unit) -> void:
 		hint = "點藍色 hex 移動,或按右側按鈕發動技能(也可再點自己待機)"
 	_set_prompt("選取單位", "%s (HP %d/%d) — %s" % [unit.display_name, unit.hp, unit.max_hp, hint])
 
-func _enter_attack_phase() -> void:
+func _enter_attack_phase(status_prefix: String = "") -> void:
 	phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
 	# One action per turn (attack/overwatch/rally/skill all set has_attacked). A
@@ -682,7 +689,10 @@ func _enter_attack_phase() -> void:
 		_hide_skill_buttons()
 		bridge_button.visible = false
 		damage_preview_panel.visible = false
-		_set_prompt("行動已用", "%s 本回合已行動 — 點空地或選其他單位" % selected_unit.display_name)
+		var done_text := "%s 本回合已行動 — 點空地或選其他單位" % selected_unit.display_name
+		if status_prefix != "":
+			done_text = "%s；%s" % [status_prefix, done_text]
+		_set_prompt("行動已用", done_text)
 		return
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
 	attack_targets = _visible_attack_targets(selected_unit, atk_def)
@@ -697,12 +707,18 @@ func _enter_attack_phase() -> void:
 	bridge_button.visible = not _engineer_bridge_targets(selected_unit).is_empty()
 	if attack_targets.is_empty():
 		if CombatEffects.is_pinned(selected_unit.suppression):
-			_set_prompt("選擇行動", "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name)
+			var pinned_text := "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name
+			if status_prefix != "":
+				pinned_text = "%s；%s" % [status_prefix, pinned_text]
+			_set_prompt("選擇行動", pinned_text)
 		else:
 			var idle_text := "點「警戒」進入警戒,或結束回合待機"
 			if selected_unit.suppression > 0:
 				idle_text = "點「整隊」恢復壓制,點「警戒」,或待機"
-			_set_prompt("選擇行動", "%s 已就位 — %s" % [selected_unit.display_name, idle_text])
+			var ready_text := "%s 已就位 — %s" % [selected_unit.display_name, idle_text]
+			if status_prefix != "":
+				ready_text = "%s；%s" % [status_prefix, ready_text]
+			_set_prompt("選擇行動", ready_text)
 	else:
 		var preview := _attack_preview(selected_unit, attack_targets[0])
 		var action_text := "點目標 / 點「警戒」/ 點空地待機"
@@ -710,9 +726,12 @@ func _enter_attack_phase() -> void:
 			action_text = "點目標 / 點「整隊」/ 點空地待機"
 		elif selected_unit.suppression > 0:
 			action_text = "點目標 / 點「警戒」/ 點「整隊」/ 點空地待機"
-		_set_prompt("選擇攻擊", "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
+		var attack_text := "%s 可攻擊 %d 個目標 — %s。首目標預覽:%s" % [
 			selected_unit.display_name, attack_targets.size(), action_text, preview,
-		])
+		]
+		if status_prefix != "":
+			attack_text = "%s；%s" % [status_prefix, attack_text]
+		_set_prompt("選擇攻擊", attack_text)
 
 func _resolve_active_skills(unit: Unit) -> Array:
 	# Every active skill the unit can use this battle: its own kit (paratrooper
@@ -868,6 +887,7 @@ func _is_open_drop_hex(coord: Vector2i) -> bool:
 func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 	var skill := airdrop_skill if not airdrop_skill.is_empty() else _resolve_active_skill(unit)
 	hex_map.move_unit(unit, dest, 0.25)  # move_to sets coord + has_moved + animates
+	var secondary_text := _check_secondary_objective_capture(unit)
 	unit.use_skill(skill, turn_manager.turn_number)  # starts the (battle-long) cooldown
 	unit.has_attacked = true  # lands and is spent for the turn
 	unit.queue_redraw()
@@ -876,7 +896,10 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 	airdrop_targets.clear()
 	airdrop_skill = {}
 	hex_map.clear_movement_range()
-	_set_prompt("空降完成", "%s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y])
+	var drop_text := "%s 空降至 (%d, %d)" % [unit.display_name, dest.x, dest.y]
+	if secondary_text != "":
+		drop_text += "；%s" % secondary_text
+	_set_prompt("空降完成", drop_text)
 	_recompute_visibility()
 	_deselect()
 	_update_status()
@@ -1337,22 +1360,69 @@ func _update_status() -> void:
 	status_label.text = "  |  ".join(parts) + "    回合 %d" % turn_manager.turn_number
 
 func _apply_player_objective_pulse() -> void:
-	# Highlights the hex the *player* needs to capture, if their victory is type=capture.
+	# Highlights the hexes the player should care about: primary capture target plus
+	# optional secondary objectives that can grant side rewards.
 	var victory_cfg: Dictionary = scenario.get("victory", {})
+	var coords: Array[Vector2i] = []
 	for fid in factions.keys():
 		if String(factions[fid].get("controller", "")) != "player":
 			continue
 		var v: Dictionary = victory_cfg.get(fid, {})
-		if String(v.get("type", "")) != "capture":
-			return
-		var target = v.get("target", [0, 0])
-		if typeof(target) != TYPE_ARRAY or target.size() < 2:
-			return
-		var col := int(target[0])
-		var row := int(target[1])
-		var coord := Vector2i(col - (row >> 1), row)
-		hex_map.set_objective_coords([coord])
-		return
+		if String(v.get("type", "")) == "capture":
+			var coord_value: Variant = _coord_from_offset_array(v.get("target", []))
+			if coord_value != null:
+				coords.append(coord_value)
+		break
+	var secondary_objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(secondary_objectives.size()):
+		if typeof(secondary_objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = secondary_objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		var objective_faction := String(objective.get("faction", player_faction_id))
+		if objective_faction != "" and objective_faction != player_faction_id:
+			continue
+		var coord_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		if coord_value != null:
+			coords.append(coord_value)
+	hex_map.set_objective_coords(coords)
+
+func _coord_from_offset_array(value) -> Variant:
+	if typeof(value) != TYPE_ARRAY or value.size() < 2:
+		return null
+	var col := int(value[0])
+	var row := int(value[1])
+	return Vector2i(col - (row >> 1), row)
+
+func _check_secondary_objective_capture(unit: Unit) -> String:
+	if unit == null or not unit.is_alive():
+		return ""
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		var faction_id := String(objective.get("faction", unit.faction_id))
+		if faction_id != "" and faction_id != unit.faction_id:
+			continue
+		var target_value: Variant = _coord_from_offset_array(objective.get("target", []))
+		if target_value == null or unit.coord != target_value:
+			continue
+		captured_secondary_objectives[key] = true
+		var xp_reward := int(objective.get("xp_reward", 0))
+		if xp_reward > 0:
+			unit.gain_xp(xp_reward)
+		action_log.record_secondary_objective(unit, key, xp_reward, turn_manager.turn_number)
+		var label := String(objective.get("label", key))
+		var reward_text := "XP +%d" % xp_reward if xp_reward > 0 else "已控制"
+		_apply_player_objective_pulse()
+		return "%s 佔領 %s (%s)" % [unit.display_name, label, reward_text]
+	return ""
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 	# As `mover` passes through each hex along `path`, every watcher that

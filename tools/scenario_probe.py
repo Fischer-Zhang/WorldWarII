@@ -269,6 +269,31 @@ def objective_pressure(scenario: dict[str, Any]) -> str:
     return "; ".join(parts) if parts else "n/a"
 
 
+def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
+    objectives = scenario.get("secondary_objectives", [])
+    if not isinstance(objectives, list) or not objectives:
+        return "none"
+    parts: list[str] = []
+    for objective in objectives:
+        if not isinstance(objective, dict):
+            continue
+        target = objective.get("target", [])
+        if not isinstance(target, list) or len(target) < 2:
+            continue
+        faction_id = str(objective.get("faction", ""))
+        target_coord = axial_from_offset(target)
+        own = [
+            u for u in initial_units(scenario)
+            if faction_id == "" or str(u.get("faction", "")) == faction_id
+        ]
+        own_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own]
+        label = str(objective.get("label", objective.get("id", "secondary")))
+        reward = int(objective.get("xp_reward", 0))
+        if own_dist:
+            parts.append(f"{label} {target[0]},{target[1]} min {min(own_dist)} XP {reward}")
+    return "; ".join(parts) if parts else "none"
+
+
 def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:
     objective = scenario.get("victory", {}).get(faction_id, {})
     return str(objective.get("type", "")) in {"capture", "eliminate"}
@@ -466,6 +491,7 @@ def generate_report() -> str:
                 engineer_breach_tempo(scenario, units, terrains),
                 artillery_reposition_pressure(scenario, units, terrains),
                 objective_pressure(scenario),
+                secondary_objective_pressure(scenario),
                 reinforcement_delta(scenario, units),
             ]
         )
@@ -483,6 +509,7 @@ def generate_report() -> str:
                 "breach tempo",
                 "artillery reposition",
                 "objective pressure",
+                "secondary pressure",
                 "reinforcement delta",
             ],
             rows,

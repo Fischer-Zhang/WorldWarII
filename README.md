@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-284%2F284-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-290%2F290-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -19,7 +19,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 36 scenario JSON files: 30 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 4 campaigns, including tutorial campaign 0, and a 19-region conquest map |
-| Tests | 284 headless GDScript checks plus static data/report validators |
+| Tests | 290 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -35,7 +35,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 - Deterministic combat: same position, HP, terrain and modifiers always resolve the same way.
 - Shared attack legality for player and AI through `CombatRules`.
 - Fog of war, line of sight and AI last-known-position memory.
-- Zone of control, overwatch, dig-in, suppression and rally layered into movement and action economy; pinned units stop projecting ZoC and MG overwatch uses full reaction-fire damage.
+- Zone of control, overwatch, dig-in, suppression, rally and optional secondary objectives layered into movement and action economy; pinned units stop projecting ZoC and MG overwatch uses full reaction-fire damage.
 - Historical generals, veteran XP, lounge upgrades and tech upgrades routed through a shared modifier pipeline.
 - Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles; conquest uses a free deployment zone for every recruited attacker before battle starts.
 - Conquest battles are real tactical battles, not a separate mini-simulator.
@@ -206,7 +206,7 @@ tools/validate.sh
 - Generated diagnostics: unit balance report, scenario pressure report, scenario probe and tutorial probe.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 284 headless GDScript checks through `bash tests/run_all.sh`.
+- 290 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts and conquest source/target selection.
 
@@ -279,7 +279,7 @@ Done:
 - Deployment setup and upgrade visibility.
 - Per-region conquest battlefields with terrain notes surfaced in briefing.
 - In-game how-to-play screen and battlefield legend (rules, combat formula, terrain/unit tables, status glossary).
-- Campaign-only tutorial campaign 0 covering movement, attacks, capture, terrain, ZoC, overwatch, suppression, rally, dig-in, LOS, indirect fire, spotting, armor/AT, engineer bridge/breach, airdrop, generals, veterans, reinforcements and splash damage.
+- Campaign-only tutorial campaign 0 covering movement, attacks, capture, secondary objectives, terrain, ZoC, overwatch, suppression, rally, dig-in, LOS, indirect fire, spotting, armor/AT, engineer bridge/breach, airdrop, generals, veterans, reinforcements and splash damage.
 - Headless validators, balance reports and UI smoke coverage.
 
 Open:

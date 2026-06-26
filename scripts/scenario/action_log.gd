@@ -57,6 +57,15 @@ func record_skill(unit, skill_id: String, turn_number: int) -> void:
 		"turn": turn_number,
 	})
 
+func record_secondary_objective(unit, objective_id: String, xp_reward: int, turn_number: int) -> void:
+	record("secondary_objective", {
+		"unit": String(unit.display_name),
+		"faction": String(unit.faction_id),
+		"objective_id": objective_id,
+		"xp_reward": xp_reward,
+		"turn": turn_number,
+	})
+
 func record_turn_change(faction_id: String, turn_number: int) -> void:
 	record("turn_start", {"faction": faction_id, "turn": turn_number})
 

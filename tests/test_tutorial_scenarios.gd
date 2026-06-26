@@ -6,6 +6,7 @@ const REQUIRED_MECHANICS := {
 	"attack": true,
 	"counterattack": true,
 	"capture": true,
+	"secondary_objective": true,
 	"terrain_defense": true,
 	"zoc": true,
 	"overwatch": true,

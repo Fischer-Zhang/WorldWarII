@@ -138,6 +138,8 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Rally** spends the action to reduce suppression, with better recovery in defensive terrain.
 
+**Secondary Objectives** are optional scenario-authored capture points. They do not change victory resolution; the battle scene grants one-time rewards such as XP and records the event in `ActionLog`.
+
 ## AI
 
 `AIController` scores candidate positions and actions with deterministic heuristics:

@@ -131,6 +131,58 @@ func _run() -> void:
 			printerr("FAIL: could not stage an adjacent hex for the bridge test")
 			fail_count += 1
 
+		# Secondary objectives highlight alongside the primary target and grant their one-time XP reward.
+		var secondary_coord := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) == null:
+				secondary_coord = c
+				break
+		if secondary_coord == Vector2i(-999, -999):
+			fail_count += 1
+			printerr("FAIL: could not stage an empty secondary objective hex")
+		else:
+			var original_scenario: Dictionary = battle.scenario.duplicate(true)
+			var primary_offset := _axial_to_offset(Vector2i(0, 0))
+			var secondary_offset := _axial_to_offset(secondary_coord)
+			battle.scenario["victory"] = {
+				battle.player_faction_id: {
+					"type": "capture",
+					"target": [primary_offset.x, primary_offset.y],
+					"by_turn": 9,
+				}
+			}
+			battle.scenario["secondary_objectives"] = [{
+				"id": "test_cache",
+				"label": "Test Cache",
+				"faction": battle.player_faction_id,
+				"target": [secondary_offset.x, secondary_offset.y],
+				"xp_reward": 1,
+			}]
+			battle._apply_player_objective_pulse()
+			if battle.hex_map.objective_overlays.size() == 2:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: primary + secondary objective overlays expected 2 got %d" % battle.hex_map.objective_overlays.size())
+			var before_xp := int(player_unit.xp)
+			battle.hex_map.move_unit(player_unit, secondary_coord, 0.0)
+			player_unit.has_moved = false
+			battle._check_secondary_objective_capture(player_unit)
+			battle._check_secondary_objective_capture(player_unit)
+			var secondary_events := 0
+			for event in battle.action_log.events:
+				if String(event.get("type", "")) == "secondary_objective" and String(event.get("objective_id", "")) == "test_cache":
+					secondary_events += 1
+			if int(player_unit.xp) == before_xp + 1 and secondary_events == 1 \
+					and battle.hex_map.objective_overlays.size() == 1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: secondary objective should grant XP once and clear overlay; xp %d->%d events=%d overlays=%d" % [
+					before_xp, int(player_unit.xp), secondary_events, battle.hex_map.objective_overlays.size(),
+				])
+			battle.scenario = original_scenario
+
 		# MG overwatch uses its unit-data reaction-fire profile: full damage instead of the default half hit.
 		var mg_coord := Vector2i(-999, -999)
 		var target_coord := Vector2i(-999, -999)
@@ -183,3 +235,6 @@ func _run() -> void:
 	await process_frame
 	print("Battle action economy tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+func _axial_to_offset(coord: Vector2i) -> Vector2i:
+	return Vector2i(coord.x + (coord.y >> 1), coord.y)

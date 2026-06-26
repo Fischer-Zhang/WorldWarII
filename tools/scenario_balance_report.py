@@ -158,6 +158,21 @@ def objective_distance(scenario: dict[str, Any]) -> str:
     return "; ".join(parts) if parts else "n/a"
 
 
+def secondary_objective_summary(scenario: dict[str, Any]) -> str:
+    objectives = scenario.get("secondary_objectives", [])
+    if not isinstance(objectives, list) or not objectives:
+        return "none"
+    parts: list[str] = []
+    for objective in objectives:
+        if not isinstance(objective, dict):
+            continue
+        label = str(objective.get("label", objective.get("id", "secondary")))
+        reward = int(objective.get("xp_reward", 0))
+        reward_text = f"XP {reward}" if reward > 0 else "no reward"
+        parts.append(f"{label} ({reward_text})")
+    return "; ".join(parts) if parts else "none"
+
+
 def terrain_summary(scenario: dict[str, Any], terrains: dict[str, Any]) -> str:
     counts = terrain_counts(scenario)
     total = sum(counts.values()) or 1
@@ -249,6 +264,7 @@ def generate_report() -> str:
         terrain = terrain_summary(scenario, terrains)
         breach = urban_breach_summary(summary)
         objective = objective_distance(scenario)
+        secondary = secondary_objective_summary(scenario)
         risks = risk_notes(scenario, summary, terrains)
         overview_rows.append([
             scenario.get("id", ""),
@@ -256,6 +272,7 @@ def generate_report() -> str:
             terrain,
             breach,
             objective,
+            secondary,
             risks,
         ])
         detail_sections.append(
@@ -264,7 +281,7 @@ def generate_report() -> str:
         )
 
     sections.append("## Overview\n\n" + table([
-        "scenario", "title", "terrain pressure", "urban breach tools", "objective distance", "risk notes",
+        "scenario", "title", "terrain pressure", "urban breach tools", "objective distance", "secondary objectives", "risk notes",
     ], overview_rows))
     sections.extend(detail_sections)
     return "\n\n".join(sections) + "\n"

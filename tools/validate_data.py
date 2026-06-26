@@ -20,6 +20,7 @@ REQUIRED_TUTORIAL_MECHANICS = {
     "attack",
     "counterattack",
     "capture",
+    "secondary_objective",
     "terrain_defense",
     "zoc",
     "overwatch",
@@ -219,6 +220,31 @@ def validate_scenario(
                 if not in_bounds(target, width, height):
                     fail(errors, path, f"victory {faction_id!r} capture target out of bounds: {target!r}")
 
+    secondary_objectives = scenario.get("secondary_objectives", [])
+    if "secondary_objectives" in scenario and not isinstance(secondary_objectives, list):
+        fail(errors, path, "secondary_objectives must be a list when present")
+    elif isinstance(secondary_objectives, list):
+        seen_secondary_ids: set[str] = set()
+        for index, objective in enumerate(secondary_objectives):
+            if not isinstance(objective, dict):
+                fail(errors, path, f"secondary_objectives[{index}] must be an object")
+                continue
+            objective_id = str(objective.get("id", f"secondary_{index}"))
+            if objective_id in seen_secondary_ids:
+                fail(errors, path, f"secondary_objectives[{index}] duplicate id {objective_id!r}")
+            seen_secondary_ids.add(objective_id)
+            faction_id = str(objective.get("faction", ""))
+            if faction_id and faction_id not in faction_ids:
+                fail(errors, path, f"secondary_objectives[{index}] references unknown faction {faction_id!r}")
+            target = objective.get("target", [])
+            if not in_bounds(target, width, height):
+                fail(errors, path, f"secondary_objectives[{index}] target out of bounds: {target!r}")
+            try:
+                if int(objective.get("xp_reward", 0)) < 0:
+                    fail(errors, path, f"secondary_objectives[{index}] xp_reward must be non-negative")
+            except (TypeError, ValueError):
+                fail(errors, path, f"secondary_objectives[{index}] xp_reward must be an integer")
+
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
 
 
@@ -332,6 +358,7 @@ def validate_tutorial_metadata(
         "attack": lambda: has_enemy_units(scenario),
         "counterattack": lambda: has_close_enemy_pair(initial_units, 1),
         "capture": lambda: bool(capture_targets),
+        "secondary_objective": lambda: bool(scenario.get("secondary_objectives", [])),
         "terrain_defense": lambda: any(int(terrains.get(t, {}).get("defense", 0)) >= 2 for t in terrain_counts),
         "zoc": lambda: has_close_enemy_pair(initial_units, 2),
         "overwatch": lambda: "mg_team" in unit_types or any(bool(u.get("on_overwatch", False)) for u in initial_units),

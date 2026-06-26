@@ -443,6 +443,9 @@ def probe_scenario(scenario: dict[str, Any], units_catalog: dict[str, Any], terr
         if str(fid) == faction_id and isinstance(cfg, dict) and cfg.get("type") == "capture"
     ]
     record("capture", bool(capture_targets), f"targets={capture_targets}")
+    secondary_objectives = scenario.get("secondary_objectives", [])
+    secondary_count = len(secondary_objectives) if isinstance(secondary_objectives, list) else 0
+    record("secondary_objective", secondary_count > 0, f"count={secondary_count}")
     record(
         "terrain_defense",
         any(int(terrains.get(t, {}).get("defense", 0)) >= 2 for t in pmap.tiles.values()),
