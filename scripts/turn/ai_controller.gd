@@ -29,6 +29,8 @@ const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
 const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
+const ENGINEER_BREACH_TARGET_BONUS := 2.5
+const ENGINEER_HIGH_COVER_BONUS := 0.8
 
 const DIFFICULTY_PROFILE := {
 	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false},
@@ -352,6 +354,7 @@ func _attack_candidate_score(
 	score += _target_focus_score(enemy, def_def)
 	score += float(suppression) * W_SUPPRESSION
 	score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
+	score += _engineer_breach_role_score(attacker_type, enemy, def_terr, r)
 	score -= 0.6 * float(r.counter_damage)
 	return score
 
@@ -410,6 +413,20 @@ func _target_focus_score(enemy, defender_def: Dictionary) -> float:
 	var missing_hp: int = max(0, max_hp - enemy.hp)
 	var suppression := int(enemy.suppression)
 	return float(missing_hp) * W_FOCUS_DAMAGE + float(suppression) * W_FOCUS_SUPPRESSION
+
+func _engineer_breach_role_score(
+	attacker_type: String,
+	enemy,
+	defender_terrain_def: Dictionary,
+	result: CombatResolver.Result,
+) -> float:
+	if attacker_type != "engineer" or result.defender_dig_in_loss <= 0:
+		return 0.0
+	var score := ENGINEER_BREACH_TARGET_BONUS
+	score += float(max(0, int(enemy.dig_in_level) - 1)) * 0.5
+	if int(defender_terrain_def.get("defense", 0)) >= 2:
+		score += ENGINEER_HIGH_COVER_BONUS
+	return score
 
 func _role_position_score(
 	unit,

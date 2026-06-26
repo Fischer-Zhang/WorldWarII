@@ -16,6 +16,10 @@ const LIGHT_TANK_DEF := {
 	"hp": 12, "attack": 5, "defense": 4, "range": 1, "move": 5,
 	"vision": 5, "vs_armor": 2, "armor": 2,
 }
+const ENGINEER_DEF := {
+	"id": "engineer", "hp": 8, "attack": 3, "defense": 2, "range": 1, "move": 3,
+	"vision": 3, "vs_armor": 1, "armor": 0,
+}
 
 class StubHexMap:
 	var terrain_overrides: Dictionary = {}
@@ -48,6 +52,7 @@ class StubDataLoader:
 		"at_gun": AT_DEF,
 		"artillery": ARTILLERY_DEF,
 		"light_tank": LIGHT_TANK_DEF,
+		"engineer": ENGINEER_DEF,
 	}
 	var terrains: Dictionary = {
 		"plain": {"defense": 0},
@@ -274,6 +279,29 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: wounded attacker should only apply kill bonus to the target killed by live-HP damage")
+
+	# 11) Engineers should prefer breaching entrenched urban defenders over easier soft damage.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	var engineer := make_unit("engineer", "axis", Vector2i(0, 0), 8)
+	var exposed_soft := make_unit("infantry", "allies", Vector2i(1, 0), 4)
+	var entrenched_urban := make_unit("infantry", "allies", Vector2i(0, 1), 10)
+	entrenched_urban.dig_in_level = 3
+	battle.hex_map.terrain_overrides[entrenched_urban.coord] = "town"
+	var engineer_choice = ai._best_attack_from(
+		engineer.coord, engineer.faction_id, engineer.type_id,
+		[exposed_soft, entrenched_urban],
+		ENGINEER_DEF,
+		{exposed_soft.coord: true, entrenched_urban.coord: true},
+		engineer
+	)
+	if engineer_choice == entrenched_urban:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: engineer should prefer breaching entrenched urban target")
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
