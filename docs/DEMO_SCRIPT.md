@@ -21,8 +21,8 @@ The viewer should understand:
 | 0:43-0:55 | Stalingrad / defense | Soviet infantry in town survives, counter-attacks, suppression/dig-in visible. | `Urban defense · suppression · rally decisions` |
 | 0:55-1:07 | Kursk / armor | Tank duel with AT gun or Panther/T-34 exchange. Show compact info panel. | `Armor vs anti-armor · live HP affects damage` |
 | 1:07-1:17 | Campaign/lounge | Open campaign map, then lounge. Show resource points and upgrade buttons. | `Campaign progress unlocks general and tech upgrades` |
-| 1:17-1:27 | Conquest -> battle | Open conquest, select source/target. Show battle context lines: attack/defense power, reserves, then cut to briefing/deployment. | `Conquest attacks launch real hex battles` |
-| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `267 headless checks · report probes · UI smoke` |
+| 1:17-1:27 | Conquest -> battle | Open conquest, select source/target. Show the conquest briefing, then deployment with enemies already on-map and player units waiting to be placed. | `Conquest attacks launch real hex battles` |
+| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `272 headless checks · report probes · UI smoke` |
 
 ## Capturing
 
@@ -66,7 +66,7 @@ Use these as lower-third captions:
 - `Fog of war + line of sight`
 - `ZoC, overwatch, dig-in, suppression, rally`
 - `Generals, veteran XP, tech upgrades`
-- `Conquest strength and production shape the tactical battle`
+- `Conquest armies deploy into real tactical maps`
 - `tools/validate.sh: data, reports, tests, UI smoke`
 
 ## Minimal 45s Cut

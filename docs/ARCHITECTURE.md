@@ -180,20 +180,18 @@ Files:
 - `data/conquest_map.json`: countries, regions, owners, production, graph.
 - `ConquestCatalog`: region -> scenario mapping and country -> side mapping.
 - `ConquestManager`: ownership, transfer, end-turn and battle-result resolution.
-- `ConquestBattleContext`: converts attacking/defending region strength and production into tactical context.
+- `ConquestBattleSetup`: reuses a themed scenario's terrain while replacing factions, rosters and victory rules.
 
 Player attack flow:
 
 1. Choose friendly source and adjacent enemy target.
-2. `conquest.gd` selects a tactical scenario matching the player's side when possible.
-3. `ConquestBattleContext.from_regions` records attacker/defender power, attacker rank edge, defender dig-in and production reserves.
-4. Normal briefing -> deployment -> battle starts; in conquest deployment, enemies are on-map first and every player unit must be placed inside the deployment zone before battle can start.
-5. `battle.gd` applies conquest context:
-   - attacker power can grant veteran rank to vanguard units
-   - defender power can grant enemy dig-in
-   - attacker production can schedule turn-2 reserves
-6. Result panel returns to conquest.
-7. `ConquestManager.resolve_battle_result` updates region owner/strength.
+2. `conquest.gd` selects the tactical scenario mapped to the target region.
+3. `GameState.pending_conquest_battle` records the attacking garrison, generated defenders, country ids, display names, colors and role (`attack` or `defend`).
+4. Briefing shows generated conquest matchup text plus the themed scenario's terrain notes.
+5. Deployment applies `ConquestBattleSetup`; enemies start on-map, player units start unplaced, and every player unit must be deployed inside the conquest zone before battle can start.
+6. Battle applies the same `ConquestBattleSetup`, then deployment overrides move the placed player units to their chosen hexes.
+7. Result panel returns to conquest.
+8. `ConquestManager.resolve_battle_result` or `resolve_defense_result` updates region owner, strength and surviving garrisons.
 
 AI-country conquest moves still use deterministic strategic resolution during `end_turn`.
 
