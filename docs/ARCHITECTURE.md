@@ -242,6 +242,11 @@ viewport contract (`1280x720` and `1366x768`) and fails when visible containers,
 buttons, labels, panels or scroll views leave the viewport. Scroll contents are
 allowed to extend inside their scroll container.
 
+`tests/test_ui_workflows.gd` drives representative UI paths headlessly: scenario
+filtering, briefing, deployment selection, battle action prompting, campaign
+selection, lounge upgrade list rendering and order-independent conquest region
+selection.
+
 ## Adding A Feature
 
 Typical touch list:

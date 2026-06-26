@@ -206,7 +206,7 @@ tools/validate.sh
 - `git diff --check`.
 - 159 headless GDScript checks through `bash tests/run_all.sh`.
 
-The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract.
+The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts and conquest source/target selection.
 
 Install the local pre-commit validation hook:
 
