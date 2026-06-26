@@ -73,6 +73,8 @@ class StubDataLoader:
 
 class StubUnit:
 	var type_id: String
+	var scenario_unit_id: String = ""
+	var display_name: String = ""
 	var faction_id: String
 	var coord: Vector2i
 	var hp: int
@@ -85,6 +87,7 @@ class StubUnit:
 	var suppression: int = 0
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
 		type_id = _type_id
+		display_name = _type_id
 		faction_id = _faction
 		coord = _coord
 		hp = _hp
@@ -233,7 +236,68 @@ func _init() -> void:
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
-	# 7) A pinned unit with no profitable contact should choose Rally in place.
+	# 7) Destroy secondary objectives should bias attack choice toward the marked unit.
+	var destroy_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	destroy_target.scenario_unit_id = "ammo_truck"
+	destroy_target.display_name = "Ammo Truck"
+	var ordinary_target := make_unit("infantry", "allies", Vector2i(0, 1), 10)
+	battle.units = [light_tank, destroy_target, ordinary_target]
+	battle.scenario = {
+		"secondary_objectives": [{
+			"id": "destroy_ammo",
+			"type": "destroy_unit",
+			"faction": "axis",
+			"target_unit": "ammo_truck",
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+	}
+	battle.captured_secondary_objectives.clear()
+	var destroy_choice = ai._best_attack_from(
+		light_tank.coord, light_tank.faction_id, light_tank.type_id,
+		[ordinary_target, destroy_target],
+		LIGHT_TANK_DEF,
+		{ordinary_target.coord: true, destroy_target.coord: true},
+		light_tank
+	)
+	if destroy_choice == destroy_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: destroy secondary objective should bias attack toward marked target")
+	battle.captured_secondary_objectives["destroy_ammo"] = true
+	var completed_destroy_score: float = ai._secondary_destroy_target_score("axis", destroy_target)
+	if completed_destroy_score == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: completed destroy secondary objective should stop attack bonus, got %.2f" % completed_destroy_score)
+
+	# 8) Recon secondary objectives should bias movement toward the recon hex.
+	battle.scenario = {
+		"secondary_objectives": [{
+			"id": "recon_crossroad",
+			"type": "recon_hex",
+			"faction": "axis",
+			"target": [4, 0],
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+	}
+	battle.captured_secondary_objectives.clear()
+	var recon_far: float = ai._secondary_objective_position_score("axis", Vector2i(0, 0))
+	var recon_near: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	battle.captured_secondary_objectives["recon_crossroad"] = true
+	var recon_completed: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	if recon_near > recon_far and recon_completed == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: recon secondary objective should score near, completed should stop; near %.2f far %.2f completed %.2f" % [
+			recon_near, recon_far, recon_completed,
+		])
+	battle.scenario = {}
+	battle.captured_secondary_objectives.clear()
+
+	# 9) A pinned unit with no profitable contact should choose Rally in place.
 	var pinned_mg := make_unit("infantry", "axis", Vector2i(0, 0), 10)
 	pinned_mg.suppression = 4
 	var distant_enemy := make_unit("infantry", "allies", Vector2i(5, 0), 10)
@@ -246,7 +310,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: pinned unit expected rally plan got %s" % str(rally_plan))
 
-	# 8) AI should focus an already damaged/suppressed target when raw matchups tie.
+	# 10) AI should focus an already damaged/suppressed target when raw matchups tie.
 	battle.hex_map.terrain_overrides.clear()
 	var focus_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 10)
 	var fresh_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
@@ -264,7 +328,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: AI should focus damaged/suppressed target")
 
-	# 9) Artillery should prefer a light-tank-spotted target when raw damage ties.
+	# 11) Artillery should prefer a light-tank-spotted target when raw damage ties.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -288,7 +352,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: artillery should prefer light-tank-spotted target")
 
-	# 10) Target selection must use the attacker's live HP, not base HP.
+	# 12) Target selection must use the attacker's live HP, not base HP.
 	# At 1/10 HP infantry deals 1 damage, so only the one-HP target is killable.
 	battle.units = []
 	battle.visibility_by_faction = {}
@@ -312,7 +376,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: wounded attacker should only apply kill bonus to the target killed by live-HP damage")
 
-	# 11) Engineers should prefer breaching entrenched urban defenders over easier soft damage.
+	# 13) Engineers should prefer breaching entrenched urban defenders over easier soft damage.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -335,7 +399,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should prefer breaching entrenched urban target")
 
-	# 12) MG teams should value overwatch more than equal-position infantry because they use full reaction damage.
+	# 14) MG teams should value overwatch more than equal-position infantry because they use full reaction damage.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -360,7 +424,7 @@ func _init() -> void:
 			% [mg_ow_score, infantry_ow_score]
 		)
 
-	# 13) Engineers should approach entrenched urban defenders before they are in attack range.
+	# 15) Engineers should approach entrenched urban defenders before they are in attack range.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()

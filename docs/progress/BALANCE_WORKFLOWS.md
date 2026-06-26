@@ -110,6 +110,7 @@ Current role-shaping pass:
 - Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.
 - Unfinished secondary objectives add a smaller movement bias toward their target hex.
+- Recon and destroy-unit secondary objectives bias movement toward their target hex or marked unit, and destroy targets get a direct attack-score bonus.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 
 Likely follow-up:

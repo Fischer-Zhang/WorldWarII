@@ -25,6 +25,9 @@ const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
 const W_SECONDARY_OBJECTIVE := 1.1
+const W_SECONDARY_RECON_OBJECTIVE := 1.35
+const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
+const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
@@ -359,6 +362,7 @@ func _attack_candidate_score(
 	score += float(suppression) * W_SUPPRESSION
 	score += float(r.defender_dig_in_loss) * W_DIG_IN_BREAK
 	score += _engineer_breach_role_score(attacker_type, enemy, def_terr, r)
+	score += _secondary_destroy_target_score(attacker_faction, enemy)
 	score -= 0.6 * float(r.counter_damage)
 	return score
 
@@ -536,17 +540,87 @@ func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> f
 		var objective_faction := String(objective.get("faction", faction_id))
 		if objective_faction != "" and objective_faction != faction_id:
 			continue
-		var target: Variant = objective.get("target", [])
-		if typeof(target) != TYPE_ARRAY or target.size() < 2:
+		var target_coord_value: Variant = _secondary_objective_target_coord(objective)
+		if target_coord_value == null:
 			continue
-		var col := int(target[0])
-		var row := int(target[1])
-		var target_coord := Vector2i(col - (row >> 1), row)
-		var score := -float(HexCoord.distance(pos, target_coord)) * W_SECONDARY_OBJECTIVE
+		var target_coord: Vector2i = target_coord_value
+		var score := -float(HexCoord.distance(pos, target_coord)) \
+			* _secondary_objective_position_weight(objective)
 		best = max(best, score)
 	if best == -INF:
 		return 0.0
 	return best
+
+func _secondary_objective_position_weight(objective: Dictionary) -> float:
+	match String(objective.get("type", "capture")):
+		"recon_hex":
+			return W_SECONDARY_RECON_OBJECTIVE
+		"destroy_unit":
+			return W_SECONDARY_DESTROY_OBJECTIVE
+		_:
+			return W_SECONDARY_OBJECTIVE
+
+func _secondary_objective_target_coord(objective: Dictionary) -> Variant:
+	if String(objective.get("type", "capture")) == "destroy_unit":
+		var target_unit = _secondary_objective_target_unit(objective)
+		if target_unit != null:
+			return target_unit.coord
+		return null
+	var target: Variant = objective.get("target", [])
+	if typeof(target) != TYPE_ARRAY or target.size() < 2:
+		return null
+	var col := int(target[0])
+	var row := int(target[1])
+	return Vector2i(col - (row >> 1), row)
+
+func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
+	if enemy == null:
+		return 0.0
+	var objectives: Array = battle.scenario.get("secondary_objectives", [])
+	if objectives.is_empty():
+		return 0.0
+	var captured: Dictionary = {}
+	var captured_value: Variant = battle.get("captured_secondary_objectives")
+	if typeof(captured_value) == TYPE_DICTIONARY:
+		captured = captured_value
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured.has(key):
+			continue
+		if String(objective.get("type", "capture")) != "destroy_unit":
+			continue
+		var objective_faction := String(objective.get("faction", faction_id))
+		if objective_faction != "" and objective_faction != faction_id:
+			continue
+		if _secondary_target_matches_unit(objective, enemy):
+			return SECONDARY_DESTROY_TARGET_BONUS
+	return 0.0
+
+func _secondary_objective_target_unit(objective: Dictionary):
+	for u in battle.units:
+		var unit = u
+		if unit.is_alive() and _secondary_target_matches_unit(objective, unit):
+			return unit
+	return null
+
+func _secondary_target_matches_unit(objective: Dictionary, unit) -> bool:
+	var target_unit := String(objective.get("target_unit", ""))
+	if target_unit == "":
+		return false
+	var scenario_unit_id := ""
+	var scenario_id_value: Variant = unit.get("scenario_unit_id")
+	if typeof(scenario_id_value) == TYPE_STRING:
+		scenario_unit_id = String(scenario_id_value)
+	if target_unit == scenario_unit_id:
+		return true
+	if target_unit == String(unit.get("display_name")):
+		return true
+	if target_unit == "%s:%s" % [String(unit.get("faction_id")), String(unit.get("display_name"))]:
+		return true
+	return false
 
 # ---------- 1-ply lookahead ----------
 
