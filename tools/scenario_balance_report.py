@@ -236,6 +236,12 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
                 continue
             if reward_type == "xp":
                 parts.append(f"XP {amount}")
+            elif reward_type == "recover_suppression":
+                parts.append(f"supp -{amount}")
+            elif reward_type == "repair_hp":
+                parts.append(f"repair {amount}")
+            elif reward_type == "advance_reinforcements":
+                parts.append(f"reinforce -{amount}t")
     legacy_xp = int(objective.get("xp_reward", 0))
     if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
         parts.append(f"XP {legacy_xp}")

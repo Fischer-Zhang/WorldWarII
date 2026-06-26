@@ -47,6 +47,22 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: legacy xp_reward should be normalized into reward list, got %s" % str(rewards))
 
+	var combo_rewards := SecondaryObjectiveRules.rewards({
+		"rewards": [
+			{"type": "xp", "amount": 1},
+			{"type": "recover_suppression", "amount": 2},
+			{"type": "repair_hp", "amount": 3},
+			{"type": "advance_reinforcements", "amount": 2},
+		],
+	})
+	var combo_text := SecondaryObjectiveRules.reward_text(combo_rewards)
+	if SecondaryObjectiveRules.xp_reward(combo_rewards) == 1 \
+			and combo_text == "XP +1, 壓制 -2, 修復 +3, 援軍提前 2T":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: reward text should describe all secondary reward types, got %s" % combo_text)
+
 	var target := StubUnit.new("ammo_truck", "Ammo Truck", "axis", Vector2i(2, 1))
 	if SecondaryObjectiveRules.target_matches_unit({"target_unit": "ammo_truck"}, target) \
 			and SecondaryObjectiveRules.target_matches_unit({"target_unit": "Ammo Truck"}, target) \

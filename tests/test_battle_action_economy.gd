@@ -282,6 +282,55 @@ func _run() -> void:
 			battle.captured_secondary_objectives.clear()
 			battle.secondary_objective_progress.clear()
 
+		var original_scenario_rewards: Dictionary = battle.scenario.duplicate(true)
+		var original_spawned_reinforcements: Dictionary = battle.spawned_reinforcements.duplicate(true)
+		var original_turn_number: int = battle.turn_manager.turn_number
+		var original_hp: int = player_unit.hp
+		var original_suppression: int = player_unit.suppression
+		battle.scenario["reinforcements"] = [
+			{"at_turn": 6, "faction": player_unit.faction_id, "type": "infantry", "name": "Friendly Future", "at": [0, 0]},
+			{"at_turn": 2, "faction": player_unit.faction_id, "type": "infantry", "name": "Friendly Soon", "at": [0, 0]},
+			{"at_turn": 6, "faction": "enemy_test", "type": "infantry", "name": "Enemy Future", "at": [0, 0]},
+		]
+		battle.spawned_reinforcements.clear()
+		battle.turn_manager.turn_number = 2
+		player_unit.suppression = 4
+		player_unit.hp = max(1, player_unit.max_hp - 3)
+		var reward_before_xp := int(player_unit.xp)
+		var reward_text: String = battle._complete_secondary_objective(player_unit, {
+			"id": "reward_combo",
+			"label": "戰地補給",
+			"rewards": [
+				{"type": "xp", "amount": 1},
+				{"type": "recover_suppression", "amount": 2},
+				{"type": "repair_hp", "amount": 3},
+				{"type": "advance_reinforcements", "amount": 2},
+			],
+		}, "reward_combo", "完成")
+		var reward_reinforcements: Array = battle.scenario.get("reinforcements", [])
+		if int(player_unit.xp) == reward_before_xp + 1 \
+				and int(player_unit.suppression) == 2 \
+				and int(player_unit.hp) == player_unit.max_hp \
+				and int(reward_reinforcements[0].get("at_turn", 0)) == 4 \
+				and int(reward_reinforcements[1].get("at_turn", 0)) == 2 \
+				and int(reward_reinforcements[2].get("at_turn", 0)) == 6 \
+				and reward_text.find("戰地補給") != -1 \
+				and reward_text.find("援軍提前 2T") != -1:
+			pass_count += 1
+		else:
+			fail_count += 1
+			printerr("FAIL: secondary reward effects should apply deterministically; text=%s xp %d->%d hp=%d suppression=%d reinforcements=%s" % [
+				reward_text, reward_before_xp, int(player_unit.xp), int(player_unit.hp),
+				int(player_unit.suppression), str(reward_reinforcements),
+			])
+		battle.scenario = original_scenario_rewards
+		battle.spawned_reinforcements = original_spawned_reinforcements
+		battle.turn_manager.turn_number = original_turn_number
+		player_unit.hp = original_hp
+		player_unit.suppression = original_suppression
+		battle.captured_secondary_objectives.clear()
+		battle.secondary_objective_progress.clear()
+
 		# Destroy-unit and recon secondary objectives complete from combat and visibility events.
 		var unit_script: Script = player_unit.get_script()
 		var destroy_target = unit_script.new()

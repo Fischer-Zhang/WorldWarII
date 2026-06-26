@@ -88,6 +88,12 @@ static func reward_text(rewards: Array[Dictionary]) -> String:
 		match reward_type:
 			"xp":
 				parts.append("XP +%d" % amount)
+			"recover_suppression":
+				parts.append("壓制 -%d" % amount)
+			"repair_hp":
+				parts.append("修復 +%d" % amount)
+			"advance_reinforcements":
+				parts.append("援軍提前 %dT" % amount)
 	if parts.is_empty():
 		return "已控制"
 	return ", ".join(parts)

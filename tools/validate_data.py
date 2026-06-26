@@ -15,7 +15,12 @@ SCENARIOS = DATA / "scenarios"
 MAX_SUPPRESSION = 5
 MAX_DIG_IN = 3
 MAX_RANK = 3
-ALLOWED_SECONDARY_REWARD_TYPES = {"xp"}
+ALLOWED_SECONDARY_REWARD_TYPES = {
+    "xp",
+    "recover_suppression",
+    "repair_hp",
+    "advance_reinforcements",
+}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",

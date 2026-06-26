@@ -67,7 +67,7 @@
       "type": "capture",
       "faction": "soviet",
       "target": [3, 4],
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "advance_reinforcements", "amount": 2}]
     },
     {
       "id": "counterbattery_105",

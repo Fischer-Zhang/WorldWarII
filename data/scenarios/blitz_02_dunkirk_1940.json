@@ -61,7 +61,7 @@
       "faction": "allies",
       "target": [5, 0],
       "required_turns": 2,
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "recover_suppression", "amount": 2}]
     },
     {
       "id": "spot_panzer_column",

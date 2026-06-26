@@ -1526,14 +1526,49 @@ func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: Strin
 	captured_secondary_objectives[key] = true
 	secondary_objective_progress.erase(key)
 	var rewards := SecondaryObjectiveRules.rewards(objective)
-	var xp_reward := SecondaryObjectiveRules.xp_reward(rewards)
-	if xp_reward > 0:
-		unit.gain_xp(xp_reward)
+	_apply_secondary_objective_rewards(unit, rewards)
 	action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
 	var label := String(objective.get("label", key))
 	var reward_text := SecondaryObjectiveRules.reward_text(rewards)
 	_apply_player_objective_pulse()
 	return "%s %s %s (%s)" % [unit.display_name, verb, label, reward_text]
+
+func _apply_secondary_objective_rewards(unit: Unit, rewards: Array[Dictionary]) -> void:
+	for reward in rewards:
+		var reward_type := String(reward.get("type", ""))
+		var amount := int(reward.get("amount", 0))
+		if amount <= 0:
+			continue
+		match reward_type:
+			"xp":
+				unit.gain_xp(amount)
+			"recover_suppression":
+				unit.suppression = max(0, unit.suppression - amount)
+				unit.queue_redraw()
+			"repair_hp":
+				unit.hp = min(unit.max_hp, unit.hp + amount)
+				unit.queue_redraw()
+			"advance_reinforcements":
+				_advance_reinforcements(unit.faction_id, amount)
+
+func _advance_reinforcements(faction_id: String, turns: int) -> void:
+	var reinforcements: Array = scenario.get("reinforcements", [])
+	if reinforcements.is_empty():
+		return
+	for i in range(reinforcements.size()):
+		if spawned_reinforcements.has(i):
+			continue
+		if typeof(reinforcements[i]) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = reinforcements[i]
+		if String(entry.get("faction", "")) != faction_id:
+			continue
+		var current_turn := int(entry.get("at_turn", 0))
+		if current_turn <= turn_manager.turn_number:
+			continue
+		entry["at_turn"] = max(turn_manager.turn_number + 1, current_turn - turns)
+		reinforcements[i] = entry
+	scenario["reinforcements"] = reinforcements
 
 func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
 	for u in units:
