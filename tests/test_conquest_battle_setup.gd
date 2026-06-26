@@ -13,6 +13,8 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_overflow_slots_unique(): pass_count += 1
 	else: fail_count += 1
+	if _test_overflow_slots_stay_in_bounds(): pass_count += 1
+	else: fail_count += 1
 	if _test_duplicate_roster_names_become_unique(): pass_count += 1
 	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
@@ -21,7 +23,11 @@ func _init() -> void:
 func _themed() -> Dictionary:
 	return {
 		"id": "themed",
-		"map": {"width": 6, "height": 1, "tiles": [["plain", "plain", "plain", "plain", "plain", "plain"]]},
+		"map": {
+			"width": 10,
+			"height": 1,
+			"tiles": [["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain"]],
+		},
 		"factions": [
 			{"id": "soviet", "controller": "player", "color": "#00ff00"},
 			{"id": "axis", "controller": "ai", "color": "#ff0000"},
@@ -117,11 +123,69 @@ func _test_overflow_slots_unique() -> bool:
 	var seen := {}
 	for u in units:
 		var at: Array = (u as Dictionary).get("at", [])
+		if not _in_bounds(at, scenario):
+			printerr("FAIL: overflow spawn coord out of bounds %s" % str(at))
+			return false
 		var key := "%d,%d" % [int(at[0]), int(at[1])]
 		if seen.has(key):
 			printerr("FAIL: duplicate spawn coord %s" % key)
 			return false
 		seen[key] = true
+	return true
+
+func _test_overflow_slots_stay_in_bounds() -> bool:
+	var scenario := {
+		"id": "edge",
+		"map": {
+			"width": 3,
+			"height": 2,
+			"tiles": [
+				["plain", "plain", "plain"],
+				["plain", "plain", "plain"],
+			],
+		},
+		"factions": [
+			{"id": "soviet", "controller": "player", "color": "#00ff00"},
+			{"id": "axis", "controller": "ai", "color": "#ff0000"},
+		],
+		"units": [
+			{"faction": "soviet", "type": "infantry", "at": [2, 0]},
+			{"faction": "axis", "type": "infantry", "at": [0, 0]},
+		],
+		"victory": {},
+	}
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": [
+			{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "edge1"},
+			{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "edge2"},
+			{"id": 3, "type": "infantry", "xp": 0, "rank": 0, "name": "edge3"},
+			{"id": 4, "type": "infantry", "xp": 0, "rank": 0, "name": "edge4"},
+		],
+		"defender_types": [],
+		"role": "attack",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+	var seen := {}
+	var player_count := 0
+	for u in scenario["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) != "germany":
+			continue
+		player_count += 1
+		var at: Array = unit.get("at", [])
+		if not _in_bounds(at, scenario):
+			printerr("FAIL: edge overflow spawn coord out of bounds %s" % str(at))
+			return false
+		var key := "%d,%d" % [int(at[0]), int(at[1])]
+		if seen.has(key):
+			printerr("FAIL: duplicate edge spawn coord %s" % key)
+			return false
+		seen[key] = true
+	if player_count != 4:
+		printerr("FAIL: expected 4 edge player units, got %d" % player_count)
+		return false
 	return true
 
 func _test_duplicate_roster_names_become_unique() -> bool:
@@ -151,3 +215,11 @@ func _test_duplicate_roster_names_become_unique() -> bool:
 		printerr("FAIL: expected two player roster entries, got %d" % seen.size())
 		return false
 	return true
+
+func _in_bounds(at: Array, scenario: Dictionary) -> bool:
+	if at.size() < 2:
+		return false
+	var map: Dictionary = scenario.get("map", {})
+	var col := int(at[0])
+	var row := int(at[1])
+	return col >= 0 and row >= 0 and col < int(map.get("width", 0)) and row < int(map.get("height", 0))

@@ -24,6 +24,7 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	# garrison the player actually owns always spawns on the protagonist slots.
 	var role := String(pending.get("role", "attack"))
 	var pools := _spawn_pools(scenario)
+	var map_bounds := _map_bounds(scenario)
 	var player_pool: Array = pools["attacker"] if role == "attack" else pools["defender"]
 	var enemy_pool: Array = pools["defender"] if role == "attack" else pools["attacker"]
 
@@ -33,10 +34,10 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 			occupied[_key(at)] = true
 
 	var player_entries := _roster_entries(
-		pending.get("attacker_garrison", []), player_faction, player_pool, occupied
+		pending.get("attacker_garrison", []), player_faction, player_pool, occupied, map_bounds
 	)
 	var enemy_entries := _type_entries(
-		pending.get("defender_types", []), enemy_faction, enemy_pool, occupied
+		pending.get("defender_types", []), enemy_faction, enemy_pool, occupied, map_bounds
 	)
 
 	scenario["factions"] = [
@@ -98,7 +99,25 @@ static func _spawn_pools(scenario: Dictionary) -> Dictionary:
 		defender = defender.slice(half)
 	return {"attacker": attacker, "defender": defender}
 
-static func _roster_entries(garrison: Array, faction_id: String, slots: Array, occupied: Dictionary) -> Array:
+static func _map_bounds(scenario: Dictionary) -> Dictionary:
+	var map: Dictionary = scenario.get("map", {})
+	var width := int(map.get("width", 0))
+	var height := int(map.get("height", 0))
+	var rows: Array = map.get("tiles", [])
+	if height <= 0:
+		height = rows.size()
+	if width <= 0 and not rows.is_empty() and rows[0] is Array:
+		var first_row: Array = rows[0]
+		width = first_row.size()
+	return {"width": width, "height": height}
+
+static func _roster_entries(
+	garrison: Array,
+	faction_id: String,
+	slots: Array,
+	occupied: Dictionary,
+	map_bounds: Dictionary
+) -> Array:
 	var entries: Array = []
 	var used_names := {}
 	for i in range(garrison.size()):
@@ -113,7 +132,7 @@ static func _roster_entries(garrison: Array, faction_id: String, slots: Array, o
 			"type": String(record.get("type", "infantry")),
 			"faction": faction_id,
 			"name": name,
-			"at": _slot_or_free(slots, i, occupied),
+			"at": _slot_or_free(slots, i, occupied, map_bounds),
 			"roster_id": int(record.get("id", -1)),
 		}
 		entries.append(entry)
@@ -129,30 +148,68 @@ static func _unique_roster_name(raw_name: String, type_id: String, idx: int, use
 	used_names[name] = true
 	return name
 
-static func _type_entries(types: Array, faction_id: String, slots: Array, occupied: Dictionary) -> Array:
+static func _type_entries(
+	types: Array,
+	faction_id: String,
+	slots: Array,
+	occupied: Dictionary,
+	map_bounds: Dictionary
+) -> Array:
 	var entries: Array = []
 	for i in range(types.size()):
 		entries.append({
 			"type": String(types[i]),
 			"faction": faction_id,
-			"at": _slot_or_free(slots, i, occupied),
+			"at": _slot_or_free(slots, i, occupied, map_bounds),
 		})
 	return entries
 
-static func _slot_or_free(slots: Array, idx: int, occupied: Dictionary) -> Array:
+static func _slot_or_free(slots: Array, idx: int, occupied: Dictionary, map_bounds: Dictionary) -> Array:
 	if idx < slots.size():
 		return slots[idx]
 	# Overflow beyond the authored slots: search outward from the last slot.
 	var seed: Array = slots[slots.size() - 1] if not slots.is_empty() else [0, 0]
 	for off in _offsets():
 		var cand: Array = [int(seed[0]) + int(off[0]), int(seed[1]) + int(off[1])]
-		if cand[0] < 0 or cand[1] < 0:
+		if not _in_bounds(cand, map_bounds):
 			continue
 		if occupied.has(_key(cand)):
 			continue
 		occupied[_key(cand)] = true
 		return cand
-	return seed
+	var fallback := _first_free_on_map(map_bounds, occupied)
+	if not fallback.is_empty():
+		return fallback
+	if _in_bounds(seed, map_bounds):
+		return seed
+	return [0, 0]
+
+static func _in_bounds(at: Array, map_bounds: Dictionary) -> bool:
+	if at.size() < 2:
+		return false
+	var col := int(at[0])
+	var row := int(at[1])
+	if col < 0 or row < 0:
+		return false
+	var width := int(map_bounds.get("width", 0))
+	var height := int(map_bounds.get("height", 0))
+	if width <= 0 or height <= 0:
+		return true
+	return col < width and row < height
+
+static func _first_free_on_map(map_bounds: Dictionary, occupied: Dictionary) -> Array:
+	var width := int(map_bounds.get("width", 0))
+	var height := int(map_bounds.get("height", 0))
+	if width <= 0 or height <= 0:
+		return []
+	for row in range(height):
+		for col in range(width):
+			var cand := [col, row]
+			if occupied.has(_key(cand)):
+				continue
+			occupied[_key(cand)] = true
+			return cand
+	return []
 
 static func _offsets() -> Array:
 	return [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [2, 0], [-2, 0], [0, 2], [0, -2]]
