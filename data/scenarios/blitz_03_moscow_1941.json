@@ -55,6 +55,24 @@
     {"faction": "axis", "type": "at_gun", "name": "PaK 38", "at": [18, 11]},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [4, 1]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "silence_mg34",
+      "label": "壓制 MG 34",
+      "type": "destroy_unit",
+      "faction": "soviet",
+      "target_unit": "MG 34",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "forward_observation",
+      "label": "前進觀測點",
+      "type": "recon_hex",
+      "faction": "soviet",
+      "target": [18, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "soviet": {
       "type": "capture",

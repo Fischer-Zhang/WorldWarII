@@ -57,6 +57,24 @@
     {"faction": "soviet", "type": "at_gun", "name": "45 mm AT", "at": [4, 11]},
     {"faction": "soviet", "type": "at_gun", "name": "76 mm AT", "at": [2, 12]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "silence_maxim",
+      "label": "壓制馬克沁火點",
+      "type": "destroy_unit",
+      "faction": "axis",
+      "target_unit": "Maxim",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "southern_sweep",
+      "label": "南翼掃蕩",
+      "type": "recon_hex",
+      "faction": "axis",
+      "target": [3, 13],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "axis": {
       "type": "eliminate",

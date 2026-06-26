@@ -60,6 +60,24 @@
     {"faction": "axis", "type": "at_gun", "name": "PaK 40 b", "at": [0, 2]},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [1, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "seize_crossroads",
+      "label": "奪取路口",
+      "type": "capture",
+      "faction": "soviet",
+      "target": [3, 4],
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "counterbattery_105",
+      "label": "壓制德軍砲位",
+      "type": "destroy_unit",
+      "faction": "soviet",
+      "target_unit": "105 mm",
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "reinforcements": [
     {"at_turn": 6, "faction": "soviet", "type": "medium_tank", "name": "T-34/85 d", "at": [23, 15]},
     {"at_turn": 6, "faction": "soviet", "type": "infantry", "name": "近衛步 3", "at": [22, 15]}

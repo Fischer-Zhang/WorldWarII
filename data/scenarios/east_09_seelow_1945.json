@@ -55,6 +55,24 @@
     {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [20, 11], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [21, 1]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "clear_mg42",
+      "label": "清除 MG 42",
+      "type": "destroy_unit",
+      "faction": "soviet",
+      "target_unit": "MG 42",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "spot_artillery_observer",
+      "label": "偵察砲兵觀測點",
+      "type": "recon_hex",
+      "faction": "soviet",
+      "target": [21, 1],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "soviet": {
       "type": "capture",

@@ -53,6 +53,24 @@
     {"faction": "allies", "type": "mg_team", "name": "Ckm wz.30", "at": [1, 4]},
     {"faction": "allies", "type": "artillery", "name": "75 mm", "at": [0, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "neutralize_37mm",
+      "label": "摧毀 37mm 反戰車砲",
+      "type": "destroy_unit",
+      "faction": "axis",
+      "target_unit": "37 mm AT",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "battery_recon",
+      "label": "偵察砲兵陣地",
+      "type": "recon_hex",
+      "faction": "axis",
+      "target": [0, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "axis": {
       "type": "capture",

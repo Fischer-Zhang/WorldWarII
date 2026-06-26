@@ -56,6 +56,24 @@
     {"faction": "axis", "type": "medium_tank", "name": "Panther", "at": [21, 12]},
     {"faction": "axis", "type": "artillery", "name": "150 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "clear_western_mg",
+      "label": "清除西側 MG 42",
+      "type": "destroy_unit",
+      "faction": "soviet",
+      "target_unit": "MG 42 a",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "locate_heavy_battery",
+      "label": "標定重砲陣地",
+      "type": "recon_hex",
+      "faction": "soviet",
+      "target": [22, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "soviet": {
       "type": "capture",

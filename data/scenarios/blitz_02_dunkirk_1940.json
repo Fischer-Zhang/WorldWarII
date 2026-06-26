@@ -53,6 +53,25 @@
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [21, 13]},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [23, 1]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "hold_dunkirk_exit",
+      "label": "堅守撤退出口",
+      "type": "hold_turns",
+      "faction": "allies",
+      "target": [5, 0],
+      "required_turns": 2,
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "spot_panzer_column",
+      "label": "偵察裝甲縱隊",
+      "type": "recon_hex",
+      "faction": "allies",
+      "target": [22, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "axis": {
       "type": "capture",

@@ -57,6 +57,24 @@
     {"faction": "soviet", "type": "at_gun", "name": "76 mm AT", "at": [2, 3]},
     {"faction": "soviet", "type": "artillery", "name": "122 mm", "at": [1, 11]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "break_maxim_nest",
+      "label": "突破機槍據點",
+      "type": "destroy_unit",
+      "faction": "axis",
+      "target_unit": "Maxim",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "southern_screen",
+      "label": "南側警戒線",
+      "type": "recon_hex",
+      "faction": "axis",
+      "target": [5, 4],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "axis": {
       "type": "capture",

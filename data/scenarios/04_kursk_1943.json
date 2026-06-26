@@ -61,6 +61,24 @@
     {"faction": "soviet", "type": "infantry", "name": "蘇步 2", "at": [18, 12]},
     {"faction": "soviet", "type": "artillery", "name": "152 mm", "at": [1, 4], "general": "zhukov"}
   ],
+  "secondary_objectives": [
+    {
+      "id": "neutralize_su152",
+      "label": "壓制 SU-152",
+      "type": "destroy_unit",
+      "faction": "axis",
+      "target_unit": "SU-152",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "northern_ridge_recon",
+      "label": "北側高地偵察",
+      "type": "recon_hex",
+      "faction": "axis",
+      "target": [18, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "axis": {
       "type": "capture",

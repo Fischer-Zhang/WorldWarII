@@ -55,6 +55,24 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [4, 4], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "clear_mg42",
+      "label": "清除 MG 42",
+      "type": "destroy_unit",
+      "faction": "allies",
+      "target_unit": "MG 42",
+      "rewards": [{"type": "xp", "amount": 1}]
+    },
+    {
+      "id": "counterbattery_105",
+      "label": "反砲兵偵察",
+      "type": "recon_hex",
+      "faction": "allies",
+      "target": [22, 2],
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "capture",
