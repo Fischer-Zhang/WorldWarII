@@ -31,6 +31,8 @@ const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
 const ENGINEER_BREACH_TARGET_BONUS := 2.5
 const ENGINEER_HIGH_COVER_BONUS := 0.8
+const ENGINEER_BREACH_SETUP_BONUS := 1.4
+const BREACH_SETUP_BAND := 3
 
 const DIFFICULTY_PROFILE := {
 	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false},
@@ -438,9 +440,38 @@ func _role_position_score(
 	var score := 0.0
 	if unit.type_id == "light_tank":
 		score += _scout_position_score(pos, known, visible_enemies, atk_def)
+	if unit.type_id == "engineer":
+		score += _engineer_breach_position_score(pos, visible_enemies, atk_def)
 	if atk_def.get("indirect", false):
 		score += _artillery_standoff_score(pos, known)
 	return score
+
+func _engineer_breach_position_score(
+	pos: Vector2i,
+	visible_enemies: Array,
+	atk_def: Dictionary,
+) -> float:
+	var best := 0.0
+	var rng := int(atk_def.get("range", 1))
+	for e in visible_enemies:
+		var enemy = e
+		var dig_in := int(enemy.dig_in_level)
+		if dig_in <= 0:
+			continue
+		var terrain_def: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(enemy.coord))
+		var cover := int(terrain_def.get("defense", 0))
+		if cover < 2 and dig_in < 2:
+			continue
+		var gap: int = max(0, HexCoord.distance(pos, enemy.coord) - rng)
+		if gap == 0:
+			best = max(best, ENGINEER_BREACH_TARGET_BONUS + ENGINEER_HIGH_COVER_BONUS)
+		elif gap <= BREACH_SETUP_BAND:
+			var setup: float = float(BREACH_SETUP_BAND + 1 - gap) * ENGINEER_BREACH_SETUP_BONUS
+			setup += float(dig_in) * 0.2
+			if cover >= 2:
+				setup += ENGINEER_HIGH_COVER_BONUS * 0.5
+			best = max(best, setup)
+	return best
 
 func _scout_position_score(
 	pos: Vector2i,

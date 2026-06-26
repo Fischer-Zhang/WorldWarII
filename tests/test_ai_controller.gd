@@ -303,5 +303,37 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should prefer breaching entrenched urban target")
 
+	# 12) Engineers should approach entrenched urban defenders before they are in attack range.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	var assault_engineer := make_unit("engineer", "axis", Vector2i(0, 0), 8)
+	var plain_enemy := make_unit("infantry", "allies", Vector2i(-4, 0), 10)
+	var urban_enemy := make_unit("infantry", "allies", Vector2i(4, 0), 10)
+	urban_enemy.dig_in_level = 3
+	battle.hex_map.terrain_overrides[urban_enemy.coord] = "town"
+	var engineer_known := [
+		{"coord": plain_enemy.coord, "visible": true, "unit": plain_enemy},
+		{"coord": urban_enemy.coord, "visible": true, "unit": urban_enemy},
+	]
+	var visible_assault_targets := [plain_enemy, urban_enemy]
+	var toward_plain: float = ai._score_position(
+		assault_engineer, Vector2i(-1, 0), engineer_known, visible_assault_targets,
+		battle.hex_map, ENGINEER_DEF, {plain_enemy.coord: true, urban_enemy.coord: true}
+	)
+	var toward_urban: float = ai._score_position(
+		assault_engineer, Vector2i(1, 0), engineer_known, visible_assault_targets,
+		battle.hex_map, ENGINEER_DEF, {plain_enemy.coord: true, urban_enemy.coord: true}
+	)
+	if toward_urban > toward_plain:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: engineer should approach entrenched urban target, urban %.2f plain %.2f"
+			% [toward_urban, toward_plain]
+		)
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
