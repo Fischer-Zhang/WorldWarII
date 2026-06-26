@@ -27,6 +27,7 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	var map_bounds := _map_bounds(scenario)
 	var player_pool: Array = pools["attacker"] if role == "attack" else pools["defender"]
 	var enemy_pool: Array = pools["defender"] if role == "attack" else pools["attacker"]
+	scenario["conquest_deployment_anchors"] = player_pool.duplicate(true)
 
 	var occupied := {}
 	for arr in pools.values():

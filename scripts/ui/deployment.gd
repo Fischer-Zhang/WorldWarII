@@ -148,9 +148,7 @@ func _build_deployment_zone() -> void:
 	var deploy_radius := _deployment_radius()
 	if _conquest_free_deploy():
 		var shared_zone := {}
-		for u in player_units:
-			var unit: Unit = u
-			var anchor: Vector2i = original_coords.get(_unit_key(unit), unit.coord)
+		for anchor in _conquest_deployment_anchors():
 			for coord in hex_map.tiles.keys():
 				var c: Vector2i = coord
 				if HexCoord.distance(anchor, c) > deploy_radius:
@@ -400,6 +398,22 @@ func _deployment_radius() -> int:
 	if _deployment_locked():
 		return 0
 	return int(scenario.get("deployment_radius", DEPLOY_RADIUS))
+
+func _conquest_deployment_anchors() -> Array[Vector2i]:
+	var anchors: Array[Vector2i] = []
+	var raw: Array = scenario.get("conquest_deployment_anchors", [])
+	for at in raw:
+		var anchor_arr: Array = at
+		if anchor_arr.size() < 2:
+			continue
+		var row := int(anchor_arr[1])
+		anchors.append(Vector2i(int(anchor_arr[0]) - (row >> 1), row))
+	if not anchors.is_empty():
+		return anchors
+	for u in player_units:
+		var unit: Unit = u
+		anchors.append(original_coords.get(_unit_key(unit), unit.coord))
+	return anchors
 
 func _reposition_unit(unit: Unit, coord: Vector2i) -> void:
 	unit.coord = coord

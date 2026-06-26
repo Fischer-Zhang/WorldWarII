@@ -15,6 +15,8 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_overflow_slots_stay_in_bounds(): pass_count += 1
 	else: fail_count += 1
+	if _test_deployment_anchors_ignore_overflow(): pass_count += 1
+	else: fail_count += 1
 	if _test_duplicate_roster_names_become_unique(): pass_count += 1
 	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
@@ -98,6 +100,10 @@ func _test_attack_setup() -> bool:
 		return false
 	if String((victory.get("soviet", {}) as Dictionary).get("type", "")) != "survive":
 		printerr("FAIL: defender victory should be survive")
+		return false
+	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	if anchors.size() != 2 or not _has_coord(anchors, [0, 0]) or not _has_coord(anchors, [1, 0]):
+		printerr("FAIL: attack deployment anchors should mirror authored attacker slots: %s" % str(anchors))
 		return false
 	return true
 
@@ -188,6 +194,37 @@ func _test_overflow_slots_stay_in_bounds() -> bool:
 		return false
 	return true
 
+func _test_deployment_anchors_ignore_overflow() -> bool:
+	var scenario := _themed()
+	var garrison: Array = []
+	for i in range(6):
+		garrison.append({"id": i, "type": "infantry", "xp": 0, "rank": 0, "name": "anchor%d" % i})
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": garrison,
+		"defender_types": [],
+		"role": "attack",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	if anchors.size() != 2 or not _has_coord(anchors, [0, 0]) or not _has_coord(anchors, [1, 0]):
+		printerr("FAIL: overflow should not expand deployment anchors: %s" % str(anchors))
+		return false
+	var player_spawns := {}
+	for u in scenario["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) == "germany":
+			var at: Array = unit.get("at", [])
+			player_spawns["%d,%d" % [int(at[0]), int(at[1])]] = true
+	if player_spawns.size() <= anchors.size():
+		printerr("FAIL: test setup did not create overflow player spawns")
+		return false
+	if anchors.size() == player_spawns.size():
+		printerr("FAIL: deployment anchors should stay smaller than overflow spawns")
+		return false
+	return true
+
 func _test_duplicate_roster_names_become_unique() -> bool:
 	var scenario := _themed()
 	var pending := {
@@ -214,6 +251,10 @@ func _test_duplicate_roster_names_become_unique() -> bool:
 	if seen.size() != 2:
 		printerr("FAIL: expected two player roster entries, got %d" % seen.size())
 		return false
+	var anchors: Array = scenario.get("conquest_deployment_anchors", [])
+	if anchors.size() != 2 or not _has_coord(anchors, [4, 0]) or not _has_coord(anchors, [5, 0]):
+		printerr("FAIL: defense deployment anchors should mirror authored defender slots: %s" % str(anchors))
+		return false
 	return true
 
 func _in_bounds(at: Array, scenario: Dictionary) -> bool:
@@ -223,3 +264,10 @@ func _in_bounds(at: Array, scenario: Dictionary) -> bool:
 	var col := int(at[0])
 	var row := int(at[1])
 	return col >= 0 and row >= 0 and col < int(map.get("width", 0)) and row < int(map.get("height", 0))
+
+func _has_coord(coords: Array, expected: Array) -> bool:
+	for coord in coords:
+		var at: Array = coord
+		if at.size() >= 2 and int(at[0]) == int(expected[0]) and int(at[1]) == int(expected[1]):
+			return true
+	return false
