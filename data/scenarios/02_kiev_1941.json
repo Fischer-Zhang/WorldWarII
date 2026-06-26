@@ -19,7 +19,7 @@
       ["plain", "plain", "town", "forest", "plain", "plain", "river", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "forest", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
       ["plain", "plain", "plain", "plain", "plain", "plain", "forest", "plain", "plain", "road", "forest", "road", "forest", "river", "forest", "plain", "plain", "plain", "road", "plain", "plain", "plain", "forest", "plain"],
       ["plain", "plain", "plain", "plain", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "forest", "plain", "plain", "forest", "plain", "plain", "road", "plain", "plain", "plain", "forest", "plain"],
-      ["plain", "plain", "river", "river", "river", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "road", "plain", "forest", "plain", "plain", "road", "plain", "plain", "plain", "plain", "plain"],
+      ["plain", "plain", "river", "plain", "river", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "road", "plain", "forest", "plain", "plain", "road", "plain", "plain", "plain", "plain", "plain"],
       ["plain", "plain", "river", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "road", "plain", "plain", "plain", "plain", "river", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain"],
       ["plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "river", "plain", "forest", "plain", "plain", "plain", "plain", "plain", "plain", "plain"]
     ]

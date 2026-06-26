@@ -123,11 +123,12 @@ static func _terrain_table(terrains: Dictionary) -> String:
 	for tid in terrains:
 		var t: Dictionary = terrains[tid]
 		var parts := PackedStringArray()
-		var move_cost := int(t.get("move_cost", 1))
-		if move_cost >= 9:
+		if bool(t.get("impassable", false)):
 			parts.append("不可通行")
+		elif bool(t.get("road_bonus", false)):
+			parts.append("移動最快(道路)")
 		else:
-			parts.append("移動 %d" % move_cost)
+			parts.append("移動 %d" % int(t.get("move_cost", 1)))
 		var df := int(t.get("defense", 0))
 		parts.append("防禦 %s" % (("+%d" % df) if df > 0 else str(df)))
 		if bool(t.get("blocks_los", false)):

@@ -108,6 +108,29 @@ func _run() -> void:
 			printerr("FAIL: backing out of the attack menu spent the unit's action")
 			fail_count += 1
 
+		# Engineer bridge: an adjacent water hex becomes passable; bridging is the action.
+		player_unit.type_id = "engineer"
+		player_unit.has_attacked = false
+		var water := Vector2i(-999, -999)
+		for nb in HexCoord.neighbors(player_unit.coord):
+			if battle.hex_map.terrain_at(nb) != "" and battle.hex_map.unit_at(nb) == null:
+				water = nb
+				break
+		if water != Vector2i(-999, -999):
+			battle.hex_map.tiles[water] = "river"  # force an adjacent impassable water hex
+			var btargets: Array = battle._engineer_bridge_targets(player_unit)
+			battle._do_bridge(player_unit, water)
+			if water in btargets and battle.hex_map.is_bridged(water) and player_unit.has_attacked:
+				pass_count += 1
+			else:
+				printerr("FAIL: engineer bridge: in_targets=%s bridged=%s acted=%s" % [
+					water in btargets, battle.hex_map.is_bridged(water), player_unit.has_attacked,
+				])
+				fail_count += 1
+		else:
+			printerr("FAIL: could not stage an adjacent hex for the bridge test")
+			fail_count += 1
+
 	battle.queue_free()
 	await process_frame
 	print("Battle action economy tests: %d pass, %d fail" % [pass_count, fail_count])

@@ -7,8 +7,8 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | scenario | title | terrain pressure | objective distance | risk notes |
 | --- | --- | --- | --- | --- |
 | 00_sandbox | 沙盒測試地圖 | plain 71%, forest 11%, road 7%; def>=2 19%; move>=3 8% | n/a | no major static risks |
-| 01_sedan_1940 | 色當突破 1940 | plain 62%, forest 21%, road 6%; def>=2 26%; move>=3 7% | axis->20,14 min 2 avg 7.3 | high forest density: LOS and breakthrough tempo risk; force power ratio above 1.35: check victory-clock compensation |
-| 02_kiev_1941 | 基輔包圍戰 1941 | plain 78%, forest 7%, road 7%; def>=2 8%; move>=3 7% | n/a | river crossings may dominate tempo; axis artillery-heavy: watch standoff dominance |
+| 01_sedan_1940 | 色當突破 1940 | plain 63%, forest 21%, road 6%; def>=2 26%; move>=3 7% | axis->20,14 min 2 avg 7.3 | high forest density: LOS and breakthrough tempo risk; force power ratio above 1.35: check victory-clock compensation |
+| 02_kiev_1941 | 基輔包圍戰 1941 | plain 78%, forest 7%, road 7%; def>=2 8%; move>=3 7% | n/a | axis artillery-heavy: watch standoff dominance |
 | 03_stalingrad_1942 | 史達林格勒巷戰 1942 | plain 47%, town 42%, river 6%; def>=2 42%; move>=3 6% | n/a | high town density: dig-in pacing risk |
 | 04_kursk_1943 | 庫斯克裝甲決戰 1943 | plain 83%, forest 7%, road 6%; def>=2 11%; move>=3 4% | axis->5,2 min 17 avg 20.9 | axis lacks AT against 3 enemy armor units |
 | 05_bastogne_1944 | 突出部戰役:Bastogne 1944 | plain 63%, forest 18%, road 16%; def>=2 21%; move>=3 0% | axis->6,4 min 3 avg 12.6 | no major static risks |
@@ -28,13 +28,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | conq_pacific_carrier | 太平洋海空決戰 | plain 73%, sea 17%, town 6%; def>=2 10%; move>=3 17% | n/a | no major static risks |
 | conq_pacific_island | 太平洋島嶼登陸 | plain 80%, sea 10%, jungle 8%; def>=2 10%; move>=3 10% | n/a | no major static risks |
 | east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 72%, road 13%, forest 7%; def>=2 12%; move>=3 3% | axis->4,3 min 19 avg 21.7 | force power ratio above 1.35: check victory-clock compensation |
-| east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 8%; def>=2 14%; move>=3 9% | soviet->18,3 min 21 avg 22.1 | force power ratio above 1.35: check victory-clock compensation |
+| east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 7%; def>=2 14%; move>=3 8% | soviet->18,3 min 21 avg 22.1 | force power ratio above 1.35: check victory-clock compensation |
 | east_10_berlin_1945 | 柏林終局 1945 | town 60%, plain 22%, road 18%; def>=2 60%; move>=3 0% | soviet->19,4 min 20 avg 21.8 | high town density: dig-in pacing risk |
 | west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, forest 12%, road 10%; def>=2 17%; move>=3 2% | allies->21,4 min 19 avg 22.4 | no major static risks |
 | west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 73%, road 10%, forest 10%; def>=2 13%; move>=3 4% | allies->2,2 min 2 avg 8.6 | no major static risks |
 | west_09_aachen_1944 | 亞琛巷戰 1944 | plain 74%, road 11%, forest 9%; def>=2 12%; move>=3 3% | allies->5,11 min 2 avg 5.7 | no major static risks |
 | west_09_hurtgen_1944 | 赫特根森林 1944 | plain 70%, road 12%, forest 11%; def>=2 16%; move>=3 2% | allies->5,4 min 3 avg 7.7 | no major static risks |
-| west_10_remagen_1945 | 雷馬根大橋 1945 | plain 71%, road 11%, forest 10%; def>=2 13%; move>=3 4% | allies->17,4 min 15 avg 18.4 | no major static risks |
+| west_10_remagen_1945 | 雷馬根大橋 1945 | plain 72%, road 11%, forest 10%; def>=2 13%; move>=3 4% | allies->17,4 min 15 avg 18.4 | no major static risks |
 | west_11_colmar_1945 | 科爾馬口袋 1945 | plain 71%, road 12%, forest 10%; def>=2 14%; move>=3 3% | allies->19,11 min 16 avg 19.4 | no major static risks |
 
 ## 00_sandbox

@@ -133,6 +133,14 @@ offset_right = 1260.0
 offset_bottom = 560.0
 text = "技能"
 
+[node name="BridgeButton" type="Button" parent="UI"]
+visible = false
+offset_left = 1050.0
+offset_top = 470.0
+offset_right = 1260.0
+offset_bottom = 510.0
+text = "架橋"
+
 [node name="OverwatchButton" type="Button" parent="UI"]
 offset_left = 1050.0
 offset_top = 570.0

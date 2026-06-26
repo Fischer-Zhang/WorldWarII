@@ -346,7 +346,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
 | 00_sandbox | 384 | plain 71%, forest 11%, road 7% |
-| 01_sedan_1940 | 384 | plain 62%, forest 21%, road 6% |
+| 01_sedan_1940 | 384 | plain 63%, forest 21%, road 6% |
 | 02_kiev_1941 | 384 | plain 78%, forest 7%, road 7% |
 | 03_stalingrad_1942 | 384 | plain 47%, town 42%, river 6% |
 | 04_kursk_1943 | 384 | plain 83%, forest 7%, road 6% |
@@ -367,13 +367,13 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | conq_pacific_carrier | 384 | plain 73%, sea 17%, town 6% |
 | conq_pacific_island | 384 | plain 80%, sea 10%, jungle 8% |
 | east_05_kharkov_1943 | 384 | plain 72%, road 13%, forest 7% |
-| east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 8% |
+| east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 7% |
 | east_10_berlin_1945 | 384 | town 60%, plain 22%, road 18% |
 | west_08_falaise_1944 | 384 | plain 72%, forest 12%, road 10% |
 | west_08_normandy_cobra_1944 | 384 | plain 73%, road 10%, forest 10% |
 | west_09_aachen_1944 | 384 | plain 74%, road 11%, forest 9% |
 | west_09_hurtgen_1944 | 384 | plain 70%, road 12%, forest 11% |
-| west_10_remagen_1945 | 384 | plain 71%, road 11%, forest 10% |
+| west_10_remagen_1945 | 384 | plain 72%, road 11%, forest 10% |
 | west_11_colmar_1945 | 384 | plain 71%, road 12%, forest 10% |
 
 ## Rule Risks

@@ -31,7 +31,7 @@ const HelpContent := preload("res://scripts/ui/help_content.gd")
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"
 
-enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET }
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
@@ -41,6 +41,7 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET }
 @onready var overwatch_button: Button = $UI/OverwatchButton
 @onready var rally_button: Button = $UI/RallyButton
 @onready var skill_button: Button = $UI/SkillButton
+@onready var bridge_button: Button = $UI/BridgeButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var result_summary: RichTextLabel = $UI/ResultPanel/ResultSummary
@@ -72,6 +73,7 @@ var selected_unit: Unit = null
 var movement_range: Dictionary = {}
 var attack_targets: Array = []
 var airdrop_targets: Array = []  # valid drop hexes while phase == AIRDROP_TARGET
+var bridge_targets: Array = []   # adjacent water hexes an engineer can bridge (BRIDGE_TARGET)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var player_faction_id: String = ""
@@ -148,6 +150,7 @@ func _ready() -> void:
 	overwatch_button.pressed.connect(_on_overwatch_pressed)
 	rally_button.pressed.connect(_on_rally_pressed)
 	skill_button.pressed.connect(_on_skill_pressed)
+	bridge_button.pressed.connect(_on_bridge_pressed)
 	legend_button.pressed.connect(_toggle_legend)
 	legend_close_button.pressed.connect(_close_legend)
 	legend_text.text = HelpContent.legend_bbcode()
@@ -607,6 +610,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				_do_airdrop(selected_unit, coord)
 			else:
 				_cancel_airdrop()
+		Phase.BRIDGE_TARGET:
+			if coord in bridge_targets:
+				_do_bridge(selected_unit, coord)
+			else:
+				_enter_attack_phase()  # cancel: back to the action menu
 
 func _select_unit(unit: Unit) -> void:
 	if selected_unit != null and selected_unit != unit:
@@ -645,6 +653,7 @@ func _enter_attack_phase() -> void:
 		overwatch_button.visible = false
 		rally_button.visible = false
 		skill_button.visible = false
+		bridge_button.visible = false
 		damage_preview_panel.visible = false
 		info_label.text = "%s 本回合已行動 — 點空地結束" % selected_unit.display_name
 		return
@@ -657,6 +666,8 @@ func _enter_attack_phase() -> void:
 	rally_button.visible = selected_unit.suppression > 0
 	# Skill button: only if attached general has a skill and cooldown is ready.
 	_refresh_skill_button(selected_unit)
+	# Engineer bridge: when adjacent to impassable water it can build a crossing.
+	bridge_button.visible = not _engineer_bridge_targets(selected_unit).is_empty()
 	if attack_targets.is_empty():
 		if CombatEffects.is_pinned(selected_unit.suppression):
 			info_label.text = "%s 被壓制 — 可整隊,或點空地待機" % selected_unit.display_name
@@ -811,6 +822,47 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 func _cancel_airdrop() -> void:
 	airdrop_targets.clear()
 	_enter_attack_phase()
+
+func _engineer_bridge_targets(unit: Unit) -> Array:
+	# Adjacent impassable water (river/sea) an engineer can bridge — not mountains.
+	if unit == null or unit.type_id != "engineer":
+		return []
+	var out: Array = []
+	for nb in HexCoord.neighbors(unit.coord):
+		var terrain := hex_map.terrain_at(nb)
+		if (terrain == "river" or terrain == "sea") and not hex_map.is_bridged(nb):
+			out.append(nb)
+	return out
+
+func _on_bridge_pressed() -> void:
+	if phase != Phase.ATTACK_PHASE or selected_unit == null or selected_unit.has_attacked:
+		return
+	var targets := _engineer_bridge_targets(selected_unit)
+	if targets.is_empty():
+		return
+	bridge_targets = targets
+	phase = Phase.BRIDGE_TARGET
+	overwatch_button.visible = false
+	rally_button.visible = false
+	skill_button.visible = false
+	bridge_button.visible = false
+	damage_preview_panel.visible = false
+	hex_map.show_movement_range(bridge_targets)
+	hex_map.highlight_coord(selected_unit.coord)
+	info_label.text = "架橋:點藍色水域格搭橋(之後可通行),或點別處取消"
+
+func _do_bridge(unit: Unit, coord: Vector2i) -> void:
+	hex_map.add_bridge(coord)
+	unit.has_attacked = true  # bridging is the unit's action this turn
+	unit.queue_redraw()
+	action_log.record_skill(unit, "bridge", turn_manager.turn_number)
+	AudioBank.play("select")
+	bridge_targets.clear()
+	hex_map.clear_movement_range()
+	info_label.text = "★ %s 在 (%d, %d) 架起橋樑" % [unit.display_name, coord.x, coord.y]
+	_recompute_visibility()
+	_deselect()
+	_update_status()
 
 func _on_overwatch_pressed() -> void:
 	if phase != Phase.ATTACK_PHASE or selected_unit == null:
@@ -1070,12 +1122,15 @@ func _deselect() -> void:
 	movement_range.clear()
 	attack_targets.clear()
 	airdrop_targets.clear()
+	bridge_targets.clear()
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
 	rally_button.visible = false
 	if skill_button != null:
 		skill_button.visible = false
+	if bridge_button != null:
+		bridge_button.visible = false
 	if damage_preview_panel != null:
 		damage_preview_panel.visible = false
 	if phase != Phase.GAME_OVER:

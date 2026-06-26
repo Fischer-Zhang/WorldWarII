@@ -317,8 +317,16 @@ func is_bridged(coord: Vector2i) -> bool:
 	return bridges.has(coord)
 
 func add_bridge(coord: Vector2i) -> void:
+	if bridges.has(coord):
+		return
 	bridges[coord] = true
-	queue_redraw()
+	# Road-colored deck over the water hex; z=9 keeps the crossing visible (over fog).
+	var deck := Polygon2D.new()
+	deck.polygon = _hex_vertices(HEX_SIZE * 0.72)
+	deck.color = Color("#a89060")
+	deck.position = HexCoord.to_pixel(coord, HEX_SIZE)
+	deck.z_index = 9
+	add_child(deck)
 
 func blocks_los_at(coord: Vector2i) -> bool:
 	var terrain_id: String = tiles.get(coord, "")
