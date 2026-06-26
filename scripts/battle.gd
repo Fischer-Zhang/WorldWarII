@@ -339,12 +339,14 @@ func _on_end_turn_pressed() -> void:
 	_deselect()
 	AudioBank.play("end_turn")
 	_update_dig_in_for_current_faction()
-	_check_secondary_objective_hold_turns(turn_manager.current_faction())
+	var secondary_messages := _check_secondary_objective_hold_turns(turn_manager.current_faction())
 	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
 	if winner != "":
 		_handle_game_over(winner)
 		return
 	turn_manager.end_turn()
+	if not secondary_messages.is_empty() and phase != Phase.GAME_OVER:
+		_set_prompt("次要目標", "；".join(secondary_messages))
 
 func _update_dig_in_for_current_faction() -> void:
 	# Units that ended turn without moving, attacking or going on overwatch
@@ -1359,7 +1361,11 @@ func _update_status() -> void:
 	var parts: Array[String] = []
 	for fid in factions.keys():
 		parts.append("%s %d" % [factions[fid]["name"], int(counts.get(fid, 0))])
-	status_label.text = "  |  ".join(parts) + "    回合 %d" % turn_manager.turn_number
+	var objective_summary := _secondary_objective_status_summary(player_faction_id)
+	var text := "  |  ".join(parts) + "    回合 %d" % turn_manager.turn_number
+	if objective_summary != "":
+		text += "    目標 %s" % objective_summary
+	status_label.text = text
 
 func _apply_player_objective_pulse() -> void:
 	# Highlights the hexes the player should care about: primary capture target plus
@@ -1391,7 +1397,7 @@ func _apply_player_objective_pulse() -> void:
 			markers.append({
 				"coord": coord_value,
 				"kind": "secondary",
-				"label": String(objective.get("label", key)),
+				"label": _secondary_objective_marker_label(objective, key),
 			})
 	hex_map.set_objective_markers(markers)
 
@@ -1481,6 +1487,51 @@ func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
 
 func _secondary_objective_type(objective: Dictionary) -> String:
 	return String(objective.get("type", "capture"))
+
+func _secondary_objective_required_turns(objective: Dictionary) -> int:
+	return max(1, int(objective.get("required_turns", 1)))
+
+func _secondary_objective_progress_text(objective: Dictionary, key: String) -> String:
+	var progress: int = int(secondary_objective_progress.get(key, 0))
+	var required: int = _secondary_objective_required_turns(objective)
+	return "%d/%d" % [progress, required]
+
+func _secondary_objective_marker_label(objective: Dictionary, key: String) -> String:
+	var label := String(objective.get("label", key))
+	if _secondary_objective_type(objective) == "hold_turns":
+		return "%s %s" % [label, _secondary_objective_progress_text(objective, key)]
+	return label
+
+func _secondary_objective_status_summary(faction_id: String) -> String:
+	if faction_id == "":
+		return ""
+	var parts: Array[String] = []
+	var skipped := 0
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured_secondary_objectives.has(key):
+			continue
+		var objective_faction := String(objective.get("faction", faction_id))
+		if objective_faction != "" and objective_faction != faction_id:
+			continue
+		if parts.size() >= 2:
+			skipped += 1
+			continue
+		parts.append(_secondary_objective_status_text(objective, key))
+	if skipped > 0:
+		parts.append("+%d" % skipped)
+	return "；".join(parts)
+
+func _secondary_objective_status_text(objective: Dictionary, key: String) -> String:
+	var label := String(objective.get("label", key))
+	var reward_text := _secondary_objective_reward_text(_secondary_objective_rewards(objective))
+	if _secondary_objective_type(objective) == "hold_turns":
+		return "%s %s %s" % [label, _secondary_objective_progress_text(objective, key), reward_text]
+	return "%s %s" % [label, reward_text]
 
 func _secondary_objective_rewards(objective: Dictionary) -> Array[Dictionary]:
 	var rewards: Array[Dictionary] = []

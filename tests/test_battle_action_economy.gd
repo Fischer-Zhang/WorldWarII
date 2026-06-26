@@ -199,7 +199,7 @@ func _run() -> void:
 			battle.scenario["secondary_objectives"] = [{
 				"id": "test_hold",
 				"type": "hold_turns",
-				"label": "Hold Point",
+				"label": "守備點",
 				"faction": battle.player_faction_id,
 				"target": [hold_offset.x, hold_offset.y],
 				"required_turns": 2,
@@ -224,6 +224,21 @@ func _run() -> void:
 			else:
 				fail_count += 1
 				printerr("FAIL: first held turn should track progress 1/2")
+			battle._apply_player_objective_pulse()
+			var hold_labels: Array[String] = []
+			for overlay in battle.hex_map.objective_overlays:
+				for child in overlay.get_children():
+					if child.name == "ObjectiveLabel":
+						hold_labels.append(String(child.text))
+			battle._update_status()
+			if _labels_contain(hold_labels, "守備點 1/2") \
+					and battle.status_label.text.find("守備點 1/2") != -1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: hold objective progress should be visible; labels=%s status=%s" % [
+					str(hold_labels), battle.status_label.text,
+				])
 			var clear_coord := Vector2i(-999, -999)
 			for c in battle.hex_map.tiles.keys():
 				if battle.hex_map.unit_at(c) == null and c != hold_coord:
@@ -317,3 +332,9 @@ func _run() -> void:
 
 func _axial_to_offset(coord: Vector2i) -> Vector2i:
 	return Vector2i(coord.x + (coord.y >> 1), coord.y)
+
+func _labels_contain(labels: Array[String], needle: String) -> bool:
+	for label in labels:
+		if label.find(needle) != -1:
+			return true
+	return false
