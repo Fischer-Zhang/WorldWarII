@@ -10,15 +10,23 @@ from __future__ import annotations
 
 import collections
 import glob
+import heapq
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
 UNITS_PATH = ROOT / "data" / "units.json"
+TERRAINS_PATH = ROOT / "data" / "terrains.json"
 SCENARIOS_GLOB = str(ROOT / "data" / "scenarios" / "*.json")
 DEFAULT_OUTPUT = ROOT / "docs" / "progress" / "scenario_probe.md"
+
+NEIGHBORS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
+SUBHEX = 2
+ZOC_PENALTY = 2
+IMPASSABLE = 1 << 20
 
 SUPPRESSION_BY_TYPE = {
     "infantry": 1,
@@ -47,6 +55,11 @@ def hex_distance(a: tuple[int, int], b: tuple[int, int]) -> int:
     return (abs(dq) + abs(dr) + abs(dq + dr)) // 2
 
 
+def neighbors(coord: tuple[int, int]) -> list[tuple[int, int]]:
+    q, r = coord
+    return [(q + dq, r + dr) for dq, dr in NEIGHBORS]
+
+
 def table(headers: list[str], rows: list[list[Any]]) -> str:
     out = ["| " + " | ".join(headers) + " |"]
     out.append("| " + " | ".join(["---"] * len(headers)) + " |")
@@ -71,6 +84,91 @@ def unit_power(unit_type: str, units: dict[str, Any]) -> float:
 
 def initial_units(scenario: dict[str, Any]) -> list[dict[str, Any]]:
     return list(scenario.get("units", []))
+
+
+def scenario_tiles(scenario: dict[str, Any]) -> dict[tuple[int, int], str]:
+    tiles: dict[tuple[int, int], str] = {}
+    for row_idx, row in enumerate(scenario.get("map", {}).get("tiles", [])):
+        for col_idx, terrain_id in enumerate(row):
+            tiles[axial_from_offset([col_idx, row_idx])] = str(terrain_id)
+    return tiles
+
+
+def occupied_by_initial_units(scenario: dict[str, Any]) -> dict[tuple[int, int], dict[str, Any]]:
+    occupied: dict[tuple[int, int], dict[str, Any]] = {}
+    for unit in initial_units(scenario):
+        occupied[axial_from_offset(unit.get("at", [0, 0]))] = unit
+    return occupied
+
+
+def movement_step_cost(
+    coord: tuple[int, int],
+    tiles: dict[tuple[int, int], str],
+    terrains: dict[str, Any],
+    occupied: dict[tuple[int, int], dict[str, Any]],
+    mover_faction: str,
+    unit_type: str,
+) -> int:
+    terrain_id = tiles.get(coord, "")
+    if terrain_id == "":
+        return IMPASSABLE
+    terrain = terrains.get(terrain_id, {})
+    if bool(terrain.get("impassable", False)):
+        return IMPASSABLE
+
+    if terrain_id == "road":
+        step_cost = 1
+    elif unit_type == "infantry" and int(terrain.get("move_cost", 1)) >= 2:
+        step_cost = SUBHEX
+    else:
+        step_cost = int(terrain.get("move_cost", 1)) * SUBHEX
+
+    if mover_faction and enters_enemy_zoc(coord, occupied, mover_faction):
+        step_cost += ZOC_PENALTY * SUBHEX
+    return step_cost
+
+
+def enters_enemy_zoc(
+    coord: tuple[int, int],
+    occupied: dict[tuple[int, int], dict[str, Any]],
+    mover_faction: str,
+) -> bool:
+    for neighbor in neighbors(coord):
+        unit = occupied.get(neighbor)
+        if unit is not None and str(unit.get("faction", "")) != mover_faction:
+            return True
+    return False
+
+
+def movement_costs(
+    start: tuple[int, int],
+    scenario: dict[str, Any],
+    terrains: dict[str, Any],
+    occupied: dict[tuple[int, int], dict[str, Any]],
+    mover_faction: str,
+    unit_type: str,
+    max_cost: int | None = None,
+) -> dict[tuple[int, int], int]:
+    tiles = scenario_tiles(scenario)
+    cost_to: dict[tuple[int, int], int] = {start: 0}
+    frontier: list[tuple[int, tuple[int, int]]] = [(0, start)]
+    while frontier:
+        current_cost, current = heapq.heappop(frontier)
+        if current_cost != cost_to[current]:
+            continue
+        for neighbor in neighbors(current):
+            if neighbor != start and occupied.get(neighbor) is not None:
+                continue
+            step_cost = movement_step_cost(neighbor, tiles, terrains, occupied, mover_faction, unit_type)
+            if step_cost >= IMPASSABLE:
+                continue
+            new_cost = current_cost + step_cost
+            if max_cost is not None and new_cost > max_cost:
+                continue
+            if neighbor not in cost_to or new_cost < cost_to[neighbor]:
+                cost_to[neighbor] = new_cost
+                heapq.heappush(frontier, (new_cost, neighbor))
+    return cost_to
 
 
 def suppression_sources(scenario: dict[str, Any]) -> str:
@@ -229,6 +327,107 @@ def breach_path_pressure(scenario: dict[str, Any], units: dict[str, Any]) -> str
     return "; ".join(parts) if parts else "n/a"
 
 
+def engineer_breach_tempo(
+    scenario: dict[str, Any],
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    parts: list[str] = []
+    occupied = occupied_by_initial_units(scenario)
+    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+    for faction_id in faction_ids:
+        if not needs_breach_pressure(scenario, faction_id):
+            continue
+        targets = breach_targets_for_faction(scenario, faction_id)
+        if not targets:
+            continue
+        engineers = [
+            unit for unit in initial_units(scenario)
+            if str(unit.get("faction", "")) == faction_id and str(unit.get("type", "")) == "engineer"
+        ]
+        if not engineers:
+            parts.append(f"{faction_id}: eng turns none")
+            continue
+
+        best_turns: int | None = None
+        for engineer in engineers:
+            engineer_def = units.get(str(engineer.get("type", "")), {})
+            move_budget = int(engineer_def.get("move", 0)) * SUBHEX
+            attack_range = int(engineer_def.get("range", 1))
+            if move_budget <= 0:
+                continue
+            costs = movement_costs(
+                axial_from_offset(engineer.get("at", [0, 0])),
+                scenario,
+                terrains,
+                occupied,
+                faction_id,
+                str(engineer.get("type", "")),
+            )
+            for target in targets:
+                target_coord = axial_from_offset(target.get("at", [0, 0]))
+                attack_costs = [
+                    cost for coord, cost in costs.items()
+                    if hex_distance(coord, target_coord) <= attack_range
+                ]
+                if not attack_costs:
+                    continue
+                turns = max(0, math.ceil(min(attack_costs) / move_budget))
+                best_turns = turns if best_turns is None else min(best_turns, turns)
+        if best_turns is None:
+            parts.append(f"{faction_id}: eng turns blocked")
+        else:
+            parts.append(f"{faction_id}: eng turns {best_turns}")
+    return "; ".join(parts) if parts else "n/a"
+
+
+def artillery_reposition_pressure(
+    scenario: dict[str, Any],
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    parts: list[str] = []
+    occupied = occupied_by_initial_units(scenario)
+    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+    for faction_id in faction_ids:
+        if not needs_breach_pressure(scenario, faction_id):
+            continue
+        targets = breach_targets_for_faction(scenario, faction_id)
+        if not targets:
+            continue
+        target_coords = [axial_from_offset(target.get("at", [0, 0])) for target in targets]
+        indirect = [
+            unit for unit in initial_units(scenario)
+            if str(unit.get("faction", "")) == faction_id
+            and bool(units.get(str(unit.get("type", "")), {}).get("indirect", False))
+        ]
+        if not indirect:
+            parts.append(f"{faction_id}: art move none")
+            continue
+
+        covered_targets: set[tuple[int, int]] = set()
+        for gun in indirect:
+            gun_type = str(gun.get("type", ""))
+            gun_def = units.get(gun_type, {})
+            move_budget = int(gun_def.get("move", 0)) * SUBHEX
+            attack_range = int(gun_def.get("range", 1))
+            costs = movement_costs(
+                axial_from_offset(gun.get("at", [0, 0])),
+                scenario,
+                terrains,
+                occupied,
+                faction_id,
+                gun_type,
+                move_budget,
+            )
+            for coord in costs:
+                for target_coord in target_coords:
+                    if hex_distance(coord, target_coord) <= attack_range:
+                        covered_targets.add(target_coord)
+        parts.append(f"{faction_id}: art move {len(covered_targets)}/{len(target_coords)}")
+    return "; ".join(parts) if parts else "n/a"
+
+
 def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
     by_faction: dict[str, float] = collections.defaultdict(float)
     by_turn: dict[int, list[str]] = collections.defaultdict(list)
@@ -247,6 +446,7 @@ def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
 
 def generate_report() -> str:
     units = load_json(UNITS_PATH)
+    terrains = load_json(TERRAINS_PATH)
     scenarios = [load_json(Path(path)) for path in sorted(glob.glob(SCENARIOS_GLOB))]
 
     rows: list[list[Any]] = []
@@ -258,6 +458,8 @@ def generate_report() -> str:
                 artillery_coverage(scenario, units),
                 spotter_coverage(scenario, units),
                 breach_path_pressure(scenario, units),
+                engineer_breach_tempo(scenario, units, terrains),
+                artillery_reposition_pressure(scenario, units, terrains),
                 objective_pressure(scenario),
                 reinforcement_delta(scenario, units),
             ]
@@ -273,6 +475,8 @@ def generate_report() -> str:
                 "artillery coverage",
                 "spotter coverage",
                 "breach path",
+                "breach tempo",
+                "artillery reposition",
                 "objective pressure",
                 "reinforcement delta",
             ],

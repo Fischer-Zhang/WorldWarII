@@ -76,8 +76,8 @@ Use `python3 tools/scenario_balance_report.py` to regenerate
 `docs/progress/scenario_balance_report.md`.
 Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
-spotter coverage, breach-path distance, objective pressure, and reinforcement
-deltas.
+spotter coverage, breach-path distance, terrain-aware breach tempo, artillery
+reposition coverage, objective pressure, and reinforcement deltas.
 
 Evaluate scenarios in this order:
 
