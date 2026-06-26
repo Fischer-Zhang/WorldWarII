@@ -13,6 +13,8 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_overflow_slots_unique(): pass_count += 1
 	else: fail_count += 1
+	if _test_duplicate_roster_names_become_unique(): pass_count += 1
+	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -120,4 +122,32 @@ func _test_overflow_slots_unique() -> bool:
 			printerr("FAIL: duplicate spawn coord %s" % key)
 			return false
 		seen[key] = true
+	return true
+
+func _test_duplicate_roster_names_become_unique() -> bool:
+	var scenario := _themed()
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": [
+			{"id": -1, "type": "infantry", "xp": 0, "rank": 0, "name": "民兵"},
+			{"id": -1, "type": "infantry", "xp": 0, "rank": 0, "name": "民兵"},
+		],
+		"defender_types": [],
+		"role": "defend",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+	var seen := {}
+	for u in scenario["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) != "germany":
+			continue
+		var name := String(unit.get("name", ""))
+		if seen.has(name):
+			printerr("FAIL: duplicate conquest roster display name %s" % name)
+			return false
+		seen[name] = true
+	if seen.size() != 2:
+		printerr("FAIL: expected two player roster entries, got %d" % seen.size())
+		return false
 	return true

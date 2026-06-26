@@ -100,17 +100,34 @@ static func _spawn_pools(scenario: Dictionary) -> Dictionary:
 
 static func _roster_entries(garrison: Array, faction_id: String, slots: Array, occupied: Dictionary) -> Array:
 	var entries: Array = []
+	var used_names := {}
 	for i in range(garrison.size()):
 		var record: Dictionary = garrison[i]
+		var name := _unique_roster_name(
+			String(record.get("name", "")),
+			String(record.get("type", "infantry")),
+			i,
+			used_names
+		)
 		var entry := {
 			"type": String(record.get("type", "infantry")),
 			"faction": faction_id,
-			"name": String(record.get("name", "")),
+			"name": name,
 			"at": _slot_or_free(slots, i, occupied),
 			"roster_id": int(record.get("id", -1)),
 		}
 		entries.append(entry)
 	return entries
+
+static func _unique_roster_name(raw_name: String, type_id: String, idx: int, used_names: Dictionary) -> String:
+	var base := raw_name if raw_name != "" else "%s #%d" % [type_id, idx + 1]
+	var name := base
+	var suffix := 2
+	while used_names.has(name):
+		name = "%s #%d" % [base, suffix]
+		suffix += 1
+	used_names[name] = true
+	return name
 
 static func _type_entries(types: Array, faction_id: String, slots: Array, occupied: Dictionary) -> Array:
 	var entries: Array = []

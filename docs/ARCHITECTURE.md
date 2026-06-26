@@ -187,7 +187,7 @@ Player attack flow:
 1. Choose friendly source and adjacent enemy target.
 2. `conquest.gd` selects a tactical scenario matching the player's side when possible.
 3. `ConquestBattleContext.from_regions` records attacker/defender power, attacker rank edge, defender dig-in and production reserves.
-4. Normal briefing -> deployment -> battle starts.
+4. Normal briefing -> deployment -> battle starts; in conquest deployment, enemies are on-map first and every player unit must be placed inside the deployment zone before battle can start.
 5. `battle.gd` applies conquest context:
    - attacker power can grant veteran rank to vanguard units
    - defender power can grant enemy dig-in

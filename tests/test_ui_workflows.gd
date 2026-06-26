@@ -13,6 +13,7 @@ func _run() -> void:
 	await _check_scenario_select()
 	await _check_briefing()
 	await _check_deployment()
+	await _check_conquest_deployment()
 	await _check_battle()
 	await _check_campaign()
 	await _check_lounge()
@@ -27,6 +28,8 @@ func _instantiate_scene(path: String, setup: Dictionary = {}) -> Node:
 	game_state.campaign_mode = bool(setup.get("campaign_mode", false))
 	game_state.clear_conquest_battle()
 	game_state.conquest_mode = bool(setup.get("conquest_mode", false))
+	if setup.has("pending"):
+		game_state.pending_conquest_battle = (setup["pending"] as Dictionary).duplicate(true)
 	var packed := load(path)
 	if packed == null:
 		_fail("load scene", path)
@@ -147,6 +150,74 @@ func _check_deployment() -> void:
 	_expect("deployment next step copy", detail.contains("下一步") and detail.contains("藍色格"))
 	_expect("deployment begin tooltip", String(scene.get_node("UI/Root/BottomBar/BeginButton").tooltip_text) != "")
 	await _free_scene(scene)
+
+func _check_conquest_deployment() -> void:
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"player_name": "德軍",
+		"enemy_name": "蘇軍",
+		"player_color": "#a86632",
+		"enemy_color": "#2f6fb0",
+		"battle_location": "測試戰場",
+		"role": "attack",
+		"attacker_garrison": [
+			{"id": 1, "type": "infantry", "name": "步兵 #1", "xp": 0, "rank": 0},
+			{"id": 2, "type": "tank_destroyer", "name": "驅逐戰車 #2", "xp": 0, "rank": 0},
+		],
+		"defender_types": ["infantry", "at_gun"],
+	}
+	var scene := await _instantiate_scene(
+		"res://scenes/deployment.tscn",
+		{"scenario_id": "01_sedan_1940", "conquest_mode": true, "pending": pending}
+	)
+	var player_occupants := 0
+	var enemy_occupants := 0
+	for coord in scene.hex_map.occupants.keys():
+		var unit = scene.hex_map.occupants[coord]
+		if unit.faction_id == scene.player_faction_id:
+			player_occupants += 1
+		else:
+			enemy_occupants += 1
+	_expect(
+		"conquest deployment starts with enemies only",
+		scene.player_units.size() == 2 and player_occupants == 0 and enemy_occupants > 0
+				and scene.begin_button.disabled,
+		"player=%d enemy=%d disabled=%s" % [
+			player_occupants, enemy_occupants, str(scene.begin_button.disabled)
+		]
+	)
+	var detail := String(scene.get_node("UI/Root/Body/RightPanel/Detail").text)
+	_expect("conquest deployment explains pending placement", detail.contains("未部署") and detail.contains("全部部署"))
+	for u in scene.player_units:
+		var unit = u
+		scene._select_unit(unit)
+		var coord := _first_free_deploy_hex(scene, unit)
+		if coord == Vector2i.MIN:
+			_fail("conquest deploy free hex", unit.display_name)
+			continue
+		scene._on_hex_clicked(coord, String(scene.hex_map.tiles[coord]))
+	_expect(
+		"conquest deployment enables battle after all placed",
+		scene._all_player_units_placed() and not scene.begin_button.disabled,
+		"placed=%d units=%d disabled=%s" % [
+			scene._placed_player_count(), scene.player_units.size(), str(scene.begin_button.disabled)
+		]
+	)
+	scene._on_reset_pressed()
+	_expect(
+		"conquest deployment reset returns units to pool",
+		scene._placed_player_count() == 0 and scene.begin_button.disabled,
+		"placed=%d disabled=%s" % [scene._placed_player_count(), str(scene.begin_button.disabled)]
+	)
+	await _free_scene(scene)
+
+func _first_free_deploy_hex(scene: Node, unit) -> Vector2i:
+	var zone: Dictionary = scene.unit_deployment_zones.get(scene._unit_key(unit), {})
+	for coord in zone.keys():
+		if not scene.hex_map.occupants.has(coord):
+			return coord
+	return Vector2i.MIN
 
 func _check_battle() -> void:
 	var scene := await _instantiate_scene("res://scenes/battle.tscn", {"scenario_id": "01_sedan_1940"})

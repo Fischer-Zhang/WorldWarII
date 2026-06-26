@@ -34,6 +34,7 @@ var original_generals: Dictionary = {}
 var deployment_zone: Dictionary = {}
 var unit_deployment_zones: Dictionary = {}
 var general_pool: Array[String] = []
+var placed_unit_keys: Dictionary = {}
 var _refreshing_general_option := false
 
 func _ready() -> void:
@@ -62,10 +63,19 @@ func _ready() -> void:
 
 	var built := UnitFactory.build(scenario, hex_map)
 	factions = built["factions"]
+	for fid in factions.keys():
+		if String(factions[fid].get("controller", "")) == "player":
+			player_faction_id = fid
+			break
 	for u in built["units"]:
 		var unit: Unit = u
+		if _conquest_free_deploy() and unit.faction_id == player_faction_id:
+			units.append(unit)
+			continue
 		if hex_map.register_unit(unit):
 			units.append(unit)
+			if unit.faction_id == player_faction_id:
+				placed_unit_keys[_unit_key(unit)] = true
 		else:
 			push_warning("Skipping stacked scenario unit: %s at %s" % [unit.display_name, unit.coord])
 
@@ -74,11 +84,6 @@ func _ready() -> void:
 		var campaign := DataLoader.get_campaign(GameState.current_campaign_id)
 		var scenario_order: Array = campaign.get("scenario_order", [])
 		CampaignManager.apply_roster_to_units(camp_state, GameState.current_campaign_id, scenario_order, units)
-
-	for fid in factions.keys():
-		if String(factions[fid].get("controller", "")) == "player":
-			player_faction_id = fid
-			break
 
 	LoungeManager.apply_upgrades_to_units(units, factions, DataLoader.tech_tree)
 
@@ -105,6 +110,13 @@ func _ready() -> void:
 	reset_button.tooltip_text = "恢復本作戰的初始部署與將軍配置。"
 	back_button.pressed.connect(_on_back_pressed)
 	back_button.tooltip_text = "返回簡報;目前未開始的部署調整會清除。"
+	_refresh_begin_button()
+
+func _exit_tree() -> void:
+	for u in player_units:
+		var unit: Unit = u
+		if _conquest_free_deploy() and not _is_unit_placed(unit):
+			unit.queue_free()
 
 func _build_general_pool() -> void:
 	var found := {}
@@ -134,6 +146,24 @@ func _build_deployment_zone() -> void:
 	deployment_zone.clear()
 	unit_deployment_zones.clear()
 	var deploy_radius := _deployment_radius()
+	if _conquest_free_deploy():
+		var shared_zone := {}
+		for u in player_units:
+			var unit: Unit = u
+			var anchor: Vector2i = original_coords.get(_unit_key(unit), unit.coord)
+			for coord in hex_map.tiles.keys():
+				var c: Vector2i = coord
+				if HexCoord.distance(anchor, c) > deploy_radius:
+					continue
+				var occupant := hex_map.unit_at(c)
+				if occupant != null and occupant.faction_id != player_faction_id:
+					continue
+				deployment_zone[c] = true
+				shared_zone[c] = true
+		for u in player_units:
+			var unit: Unit = u
+			unit_deployment_zones[_unit_key(unit)] = shared_zone.duplicate()
+		return
 	for u in player_units:
 		var unit: Unit = u
 		var unit_zone := {}
@@ -165,8 +195,11 @@ func _unit_button_text(unit: Unit) -> String:
 	if unit.general_id != "":
 		var g := DataLoader.get_general_def(unit.general_id)
 		general_name = String(g.get("name_zh", unit.general_id))
-	var off := _axial_to_offset(unit.coord)
-	return "%s  (%d,%d)  %s" % [unit.display_name, off.x, off.y, general_name]
+	var location := "未部署"
+	if not _conquest_free_deploy() or _is_unit_placed(unit):
+		var off := _axial_to_offset(unit.coord)
+		location = "(%d,%d)" % [off.x, off.y]
+	return "%s  %s  %s" % [unit.display_name, location, general_name]
 
 func _select_unit(unit: Unit) -> void:
 	if unit == null:
@@ -176,7 +209,11 @@ func _select_unit(unit: Unit) -> void:
 		selected_unit.set_selected(false)
 	selected_unit = unit
 	selected_unit.set_selected(true)
-	hex_map.highlight_coord(unit.coord)
+	if _conquest_free_deploy() and not _is_unit_placed(unit):
+		if hex_map.highlight != null:
+			hex_map.highlight.visible = false
+	else:
+		hex_map.highlight_coord(unit.coord)
 	_refresh_general_option()
 	_update_detail()
 	_rebuild_unit_list()
@@ -209,15 +246,17 @@ func _update_detail() -> void:
 		detail_label.text = "選取單位後配置將軍與部署位置。"
 		return
 	var unit_def := DataLoader.get_unit_def(selected_unit.type_id)
-	var off := _axial_to_offset(selected_unit.coord)
+	var deployment_label := "未部署"
+	if not _conquest_free_deploy() or _is_unit_placed(selected_unit):
+		var off := _axial_to_offset(selected_unit.coord)
+		deployment_label = "(%d,%d)" % [off.x, off.y]
 	var lines: Array[String] = []
 	lines.append("[b]%s[/b]" % selected_unit.display_name)
-	lines.append("%s · HP %d/%d · 部署 (%d,%d)" % [
+	lines.append("%s · HP %d/%d · 部署 %s" % [
 		String(unit_def.get("name_zh", selected_unit.type_id)),
 		selected_unit.hp,
 		selected_unit.max_hp,
-		off.x,
-		off.y,
+		deployment_label,
 	])
 	if selected_unit.general_id == "":
 		lines.append("將軍: 無")
@@ -237,10 +276,15 @@ func _update_detail() -> void:
 	if _deployment_locked():
 		lines.append("下一步:固定部署與將軍配置,可直接開始戰鬥。")
 		status_label.text = "下一步:教學固定部署 · 將軍配置鎖定"
+	elif _conquest_free_deploy():
+		var placed := _placed_player_count()
+		lines.append("下一步:點藍色格部署選取單位;全部部署後才能開始戰鬥。")
+		status_label.text = "下一步:征服部署 %d/%d · 部署區內任意部署" % [placed, player_units.size()]
 	else:
 		lines.append("下一步:點藍色格調整部署,點我方單位切換,點已佔用格可交換。")
 		status_label.text = "下一步:配置部署與將軍 · 部署區半徑 %d · 可重派 %d 名將軍" % [_deployment_radius(), general_pool.size()]
 	detail_label.text = "\n".join(lines)
+	_refresh_begin_button()
 
 func _on_general_selected(_index: int) -> void:
 	if _refreshing_general_option or selected_unit == null or _deployment_locked():
@@ -260,7 +304,12 @@ func _on_general_selected(_index: int) -> void:
 func _on_hex_clicked(coord: Vector2i, _terrain_id: String) -> void:
 	var occupant := hex_map.unit_at(coord)
 	if occupant != null and occupant.faction_id == player_faction_id:
-		if selected_unit != null and selected_unit != occupant and _can_place_selected_at(coord) and _can_place_unit_at(occupant, selected_unit.coord):
+		if selected_unit != null \
+				and selected_unit != occupant \
+				and _is_unit_placed(selected_unit) \
+				and _is_unit_placed(occupant) \
+				and _can_place_selected_at(coord) \
+				and _can_place_unit_at(occupant, selected_unit.coord):
 			_swap_units(selected_unit, occupant)
 			return
 		_select_unit(occupant)
@@ -268,7 +317,12 @@ func _on_hex_clicked(coord: Vector2i, _terrain_id: String) -> void:
 	if selected_unit == null:
 		return
 	if not _can_place_selected_at(coord):
-		status_label.text = "無法部署:教學固定部署只能使用初始位置。" if _deployment_locked() else "無法部署:只能放在該單位原始位置附近的藍色格。"
+		if _deployment_locked():
+			status_label.text = "無法部署:教學固定部署只能使用初始位置。"
+		elif _conquest_free_deploy():
+			status_label.text = "無法部署:只能放在部署區內的藍色格。"
+		else:
+			status_label.text = "無法部署:只能放在該單位原始位置附近的藍色格。"
 		return
 	if occupant != null:
 		status_label.text = "無法部署:該位置已被敵軍佔用。"
@@ -288,6 +342,22 @@ func _on_hex_hovered(coord: Vector2i, terrain_id: String) -> void:
 	]
 
 func _move_unit_to(unit: Unit, coord: Vector2i) -> void:
+	if _conquest_free_deploy() and not _is_unit_placed(unit):
+		var previous := unit.coord
+		unit.coord = coord
+		unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
+		if hex_map.register_unit(unit):
+			placed_unit_keys[_unit_key(unit)] = true
+		else:
+			unit.coord = previous
+			unit.position = HexCoord.to_pixel(previous, HexMap.HEX_SIZE)
+			status_label.text = "無法部署:該位置已被佔用。"
+			return
+		hex_map.highlight_coord(coord)
+		_update_detail()
+		_rebuild_unit_list()
+		_refresh_begin_button()
+		return
 	if hex_map.occupants.get(unit.coord) == unit:
 		hex_map.occupants.erase(unit.coord)
 	hex_map.occupants[coord] = unit
@@ -295,6 +365,7 @@ func _move_unit_to(unit: Unit, coord: Vector2i) -> void:
 	hex_map.highlight_coord(coord)
 	_update_detail()
 	_rebuild_unit_list()
+	_refresh_begin_button()
 
 func _swap_units(a: Unit, b: Unit) -> void:
 	var a_coord := a.coord
@@ -308,6 +379,7 @@ func _swap_units(a: Unit, b: Unit) -> void:
 	hex_map.highlight_coord(a.coord)
 	_update_detail()
 	_rebuild_unit_list()
+	_refresh_begin_button()
 
 func _can_place_selected_at(coord: Vector2i) -> bool:
 	if selected_unit == null:
@@ -320,6 +392,9 @@ func _can_place_unit_at(unit: Unit, coord: Vector2i) -> bool:
 
 func _deployment_locked() -> bool:
 	return bool(scenario.get("deployment_locked", false))
+
+func _conquest_free_deploy() -> bool:
+	return GameState.conquest_mode and not GameState.pending_conquest_battle.is_empty() and not _deployment_locked()
 
 func _deployment_radius() -> int:
 	if _deployment_locked():
@@ -338,6 +413,10 @@ func _on_begin_pressed() -> void:
 		GameState.clear_deployment_overrides()
 		get_tree().change_scene_to_file("res://scenes/battle.tscn")
 		return
+	if _conquest_free_deploy() and not _all_player_units_placed():
+		status_label.text = "無法開始:請先部署所有我方單位。"
+		_refresh_begin_button()
+		return
 	var overrides := {}
 	for u in player_units:
 		var unit: Unit = u
@@ -350,6 +429,19 @@ func _on_begin_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/battle.tscn")
 
 func _on_reset_pressed() -> void:
+	if _conquest_free_deploy():
+		for u in player_units:
+			var unit: Unit = u
+			var key := _unit_key(unit)
+			unit.general_id = String(original_generals.get(key, ""))
+			_unplace_unit(unit)
+			var coord: Vector2i = original_coords.get(key, unit.coord)
+			unit.coord = coord
+			unit.position = HexCoord.to_pixel(coord, HexMap.HEX_SIZE)
+			unit.queue_redraw()
+		_select_unit(player_units[0] if not player_units.is_empty() else null)
+		_refresh_begin_button()
+		return
 	for u in player_units:
 		var unit: Unit = u
 		var key := _unit_key(unit)
@@ -380,6 +472,44 @@ func _general_applies_to(general_id: String, type_id: String) -> bool:
 	var g := DataLoader.get_general_def(general_id)
 	var applies: Array = g.get("applies_to", [])
 	return applies.has(type_id)
+
+func _is_unit_placed(unit: Unit) -> bool:
+	if not _conquest_free_deploy():
+		return true
+	return unit != null and placed_unit_keys.has(_unit_key(unit))
+
+func _placed_player_count() -> int:
+	var count := 0
+	for u in player_units:
+		var unit: Unit = u
+		if _is_unit_placed(unit):
+			count += 1
+	return count
+
+func _all_player_units_placed() -> bool:
+	if not _conquest_free_deploy():
+		return true
+	return not player_units.is_empty() and _placed_player_count() == player_units.size()
+
+func _refresh_begin_button() -> void:
+	if begin_button == null:
+		return
+	if _conquest_free_deploy():
+		begin_button.disabled = not _all_player_units_placed()
+		begin_button.tooltip_text = "部署所有我方單位後開始戰鬥。"
+	else:
+		begin_button.disabled = false
+		begin_button.tooltip_text = "儲存目前部署與將軍配置,進入戰鬥。"
+
+func _unplace_unit(unit: Unit) -> void:
+	if unit == null:
+		return
+	if hex_map.occupants.get(unit.coord) == unit:
+		hex_map.occupants.erase(unit.coord)
+	if unit.get_parent() == hex_map:
+		hex_map.remove_child(unit)
+	placed_unit_keys.erase(_unit_key(unit))
+	unit.set_selected(false)
 
 func _unit_key(unit: Unit) -> String:
 	return DeploymentOverrides.unit_key(unit)

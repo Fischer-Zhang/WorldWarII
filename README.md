@@ -28,7 +28,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|---|
 | Single Battle | Main Menu -> Scenario Select -> Briefing -> Deployment -> Battle | Pick a non-tutorial scenario, choose AI difficulty, assign generals and deploy before fighting. |
 | Campaign | Campaign Map -> Lounge -> Briefing -> Battle -> Result | Campaign progress persists roster XP and general assignment; victories grant lounge upgrade points. |
-| Conquest | World Map -> Briefing -> Deployment -> Battle -> World Map Result | Region attacks launch normal tactical battles. Region strength and production become battle context: attacker veteran edge, defender dig-in and production reserves. |
+| Conquest | World Map -> Briefing -> Deployment -> Battle -> World Map Result | Region attacks launch tactical battles where the enemy starts on-map and the player deploys every recruited unit inside the deployment zone before battle. |
 
 ## Highlights
 
@@ -37,7 +37,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 - Fog of war, line of sight and AI last-known-position memory.
 - Zone of control, overwatch, dig-in, suppression and rally layered into movement and action economy.
 - Historical generals, veteran XP, lounge upgrades and tech upgrades routed through a shared modifier pipeline.
-- Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles and conquest.
+- Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles; conquest uses a free deployment zone for every recruited attacker before battle starts.
 - Conquest battles are real tactical battles, not a separate mini-simulator.
 - Static balance reports and UI smoke coverage are part of normal validation.
 
