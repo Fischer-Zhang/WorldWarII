@@ -66,6 +66,12 @@ func _expect(name: String, condition: bool, detail: String = "") -> void:
 	else:
 		_fail(name, detail)
 
+func _list_has_prefix(list: VBoxContainer, prefix: String) -> bool:
+	for child in list.get_children():
+		if String(child.text).begins_with(prefix):
+			return true
+	return false
+
 func _check_main_menu() -> void:
 	var scene := await _instantiate_scene("res://scenes/main_menu.tscn")
 	_expect("main menu starts on campaign focus", scene.get_node("VBox/CampaignButton").has_focus())
@@ -87,6 +93,7 @@ func _check_scenario_select() -> void:
 	var scene := await _instantiate_scene("res://scenes/scenario_select.tscn")
 	var list: VBoxContainer = scene.get_node("Margin/VBox/ListScroll/List")
 	_expect("scenario select list populated", list.get_child_count() >= 20, "count=%d" % list.get_child_count())
+	_expect("scenario select hides tutorials", not _list_has_prefix(list, "tut_"))
 	scene._set_difficulty("hard")
 	_expect(
 		"scenario select hard difficulty",
@@ -95,9 +102,6 @@ func _check_scenario_select() -> void:
 	scene._set_category("sandbox")
 	await process_frame
 	_expect("scenario select category filter", list.get_child_count() == 1, "sandbox count=%d" % list.get_child_count())
-	scene._set_category("tutorial")
-	await process_frame
-	_expect("scenario select tutorial filter", list.get_child_count() >= 6, "tutorial count=%d" % list.get_child_count())
 	await _free_scene(scene)
 
 func _check_briefing() -> void:
@@ -145,8 +149,15 @@ func _check_campaign() -> void:
 	var scene := await _instantiate_scene("res://scenes/campaign.tscn", {"campaign_mode": true})
 	var list: VBoxContainer = scene.get_node("Margin/VBox/ListScroll/List")
 	_expect("campaign lists campaigns", list.get_child_count() >= 1)
-	scene._select_campaign("blitzkrieg_early_war")
-	_expect("campaign selects next scenario", scene.selected_campaign_id == "blitzkrieg_early_war" and scene.selected_scenario_id != "")
+	_expect("campaign starts with tutorial campaign", list.get_child_count() > 0 and String(list.get_child(0).text).contains("教學戰役 0"))
+	if list.get_child_count() > 0:
+		var first: Button = list.get_child(0)
+		first.pressed.emit()
+		await process_frame
+	_expect(
+		"campaign tutorial starts at scenario zero",
+		scene.selected_campaign_id == "00_tutorial" and scene.selected_scenario_id == "tut_00_basic_turn"
+	)
 	_expect("campaign continue tooltip", String(scene.get_node("Margin/VBox/Buttons/ContinueButton").tooltip_text) != "")
 	await _free_scene(scene)
 

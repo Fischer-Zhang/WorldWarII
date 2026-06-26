@@ -31,11 +31,17 @@ func _init() -> void:
 	var fail_count := 0
 
 	var tutorials := _load_tutorial_scenarios()
+	var tutorial_order := _tutorial_campaign_order()
 	if tutorials.size() >= 6:
 		pass_count += 1
 	else:
 		fail_count += 1
 		printerr("FAIL: expected at least 6 tutorial scenarios, got %d" % tutorials.size())
+	if tutorial_order.size() == tutorials.size() and String(tutorial_order[0]) == "tut_00_basic_turn":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tutorial campaign should contain every tut_* scenario and start at tut_00")
 
 	var covered := {}
 	for scenario in tutorials:
@@ -63,6 +69,11 @@ func _init() -> void:
 
 	print("Tutorial scenario tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+func _tutorial_campaign_order() -> Array:
+	var campaigns := _load_json("res://data/campaigns.json")
+	var campaign: Dictionary = campaigns.get("00_tutorial", {})
+	return campaign.get("scenario_order", [])
 
 func _load_tutorial_scenarios() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []

@@ -461,6 +461,8 @@ def has_engineer_adjacent_water(units: list[Any], scenario: dict[str, Any]) -> b
 
 def validate_campaigns(campaigns: dict[str, Any], scenario_ids: set[str], errors: list[str]) -> None:
     path = DATA / "campaigns.json"
+    tutorial_ids = {scenario_id for scenario_id in scenario_ids if scenario_id.startswith("tut_")}
+    tutorial_order: list[str] = []
     for campaign_id, campaign in campaigns.items():
         if not isinstance(campaign, dict):
             fail(errors, path, f"campaign {campaign_id!r} must be an object")
@@ -472,6 +474,19 @@ def validate_campaigns(campaigns: dict[str, Any], scenario_ids: set[str], errors
         for scenario_id in order:
             if str(scenario_id) not in scenario_ids:
                 fail(errors, path, f"campaign {campaign_id!r} references unknown scenario {scenario_id!r}")
+            if str(scenario_id).startswith("tut_") and str(campaign_id) != "00_tutorial":
+                fail(errors, path, f"campaign {campaign_id!r} must not reference tutorial scenario {scenario_id!r}")
+        if str(campaign_id) == "00_tutorial":
+            tutorial_order = [str(scenario_id) for scenario_id in order]
+    if tutorial_ids:
+        if not tutorial_order:
+            fail(errors, path, "tutorial scenarios require campaign '00_tutorial'")
+        elif set(tutorial_order) != tutorial_ids:
+            missing = sorted(tutorial_ids - set(tutorial_order))
+            extra = sorted(set(tutorial_order) - tutorial_ids)
+            fail(errors, path, f"00_tutorial must reference exactly all tutorial scenarios; missing={missing!r} extra={extra!r}")
+        elif tutorial_order[0] != "tut_00_basic_turn":
+            fail(errors, path, "00_tutorial must start with tut_00_basic_turn")
 
 
 def validate_conquest(errors: list[str]) -> None:

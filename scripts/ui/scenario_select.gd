@@ -7,11 +7,9 @@ const DIFFICULTY_HINTS := {
 }
 
 const CATEGORY_ALL := "all"
-const CATEGORY_TUTORIAL := "tutorial"
 const CATEGORY_SANDBOX := "sandbox"
 const CATEGORY_LABELS := {
 	CATEGORY_ALL: "全部",
-	CATEGORY_TUTORIAL: "教學",
 	"blitzkrieg_early_war": "早期",
 	"eastern_front": "東線",
 	"western_front": "西線",
@@ -48,17 +46,13 @@ func _ready() -> void:
 func _build_categories() -> void:
 	category_scenarios = {
 		CATEGORY_ALL: {},
-		CATEGORY_TUTORIAL: {},
 		CATEGORY_SANDBOX: {"00_sandbox": true},
 	}
-	for s in DataLoader.scenarios:
-		var scenario: Dictionary = s
-		var scenario_id := String(scenario.get("id", ""))
-		if scenario_id.begins_with("tut_"):
-			category_scenarios[CATEGORY_TUTORIAL][scenario_id] = true
 	for campaign in DataLoader.campaigns:
 		var c: Dictionary = campaign
 		var campaign_id := String(c.get("id", ""))
+		if _is_campaign_only(campaign_id):
+			continue
 		category_scenarios[campaign_id] = {}
 		for scenario_id in c.get("scenario_order", []):
 			category_scenarios[campaign_id][String(scenario_id)] = true
@@ -69,9 +63,10 @@ func _build_category_buttons() -> void:
 	category_buttons.clear()
 
 	var category_order: Array[String] = [CATEGORY_ALL]
-	category_order.append(CATEGORY_TUTORIAL)
 	for campaign in DataLoader.campaigns:
-		category_order.append(String(campaign.get("id", "")))
+		var campaign_id := String(campaign.get("id", ""))
+		if not _is_campaign_only(campaign_id):
+			category_order.append(campaign_id)
 	category_order.append(CATEGORY_SANDBOX)
 
 	for category_id in category_order:
@@ -91,6 +86,8 @@ func _rebuild_scenario_list() -> void:
 	for s in DataLoader.scenarios:
 		var scenario: Dictionary = s
 		var scenario_id := String(scenario.get("id", ""))
+		if _is_single_battle_hidden(scenario_id):
+			continue
 		if not _scenario_in_active_category(scenario_id):
 			continue
 		var btn := Button.new()
@@ -117,6 +114,12 @@ func _scenario_in_active_category(scenario_id: String) -> bool:
 		return true
 	var ids: Dictionary = category_scenarios.get(active_category, {})
 	return ids.has(scenario_id)
+
+func _is_single_battle_hidden(scenario_id: String) -> bool:
+	return scenario_id.begins_with("tut_")
+
+func _is_campaign_only(campaign_id: String) -> bool:
+	return campaign_id == "00_tutorial"
 
 func _category_label(category_id: String) -> String:
 	var label := String(CATEGORY_LABELS.get(category_id, ""))

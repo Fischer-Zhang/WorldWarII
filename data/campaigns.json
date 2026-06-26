@@ -1,4 +1,16 @@
 {
+  "00_tutorial": {
+    "title": "教學戰役 0",
+    "description": "從基礎操作到進階機制的短關卡序列。先完成這條戰線,再進入正式戰役。",
+    "scenario_order": [
+      "tut_00_basic_turn",
+      "tut_01_terrain_zoc_overwatch",
+      "tut_02_los_spotting_artillery",
+      "tut_03_suppression_digin_engineer",
+      "tut_04_armor_at_veteran_general",
+      "tut_05_airdrop_reinforcement_rocket"
+    ]
+  },
   "blitzkrieg_early_war": {
     "title": "閃電戰與東進 1940-1941",
     "description": "德軍從西線突破到東線包圍戰的早期高速攻勢。適合裝甲機動、包抄與突破節奏。",
