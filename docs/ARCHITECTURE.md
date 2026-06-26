@@ -138,7 +138,7 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Rally** spends the action to reduce suppression, with better recovery in defensive terrain.
 
-**Secondary Objectives** are optional scenario-authored capture or hold-turn tasks. They do not change victory resolution; the battle scene grants one-time `rewards` such as XP, records the event in `ActionLog`, and tracks hold progress per objective. Primary and secondary objectives render as labeled map markers so the player can distinguish victory hexes from optional reward hexes and see hold progress.
+**Secondary Objectives** are optional scenario-authored capture, hold-turn, destroy-unit or recon-hex tasks. They do not change victory resolution; the battle scene grants one-time `rewards` such as XP, records the event in `ActionLog`, and tracks hold progress per objective. Primary and secondary objectives render as labeled map markers so the player can distinguish victory hexes from optional reward hexes, marked targets and hold progress.
 
 ## AI
 
@@ -152,7 +152,7 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - terrain defense
 - wounded/suppressed target focus
 - role shaping for scouts, AT, artillery and engineers
-- movement pressure toward primary objectives, secondary objectives and visible breach targets
+- movement pressure toward primary objectives, secondary objectives and visible breach targets; destroy-unit secondary objectives also bias attack selection toward the marked unit
 - rally value when suppressed
 - overwatch value when no attack is better
 

@@ -1,7 +1,7 @@
 {
   "id": "03_stalingrad_1942",
   "title": "史達林格勒巷戰 1942",
-  "briefing": "1942 年 10 月。德國第六軍團在伏爾加河西岸的廢墟城市中一棟一棟地推進。崔可夫的第 62 軍團死守河岸的最後幾百公尺。每一棟工廠、每一條街道都化為血肉磨坊。\n\n你的任務:身為紅軍指揮官,守住東半部三座關鍵建築區直到第 12 回合結束。德軍只要在時限內肅清你的部隊便算勝利。\n\n戰術提示:大量的「城鎮」格給你 +3 防禦修正,但移動消耗只有 1。把反戰車砲和機槍埋在建築群裡是教科書打法。\n德軍裝甲在城內因為視野和側翼被破壞,效能會大幅下降。",
+  "briefing": "1942 年 10 月。德國第六軍團在伏爾加河西岸的廢墟城市中一棟一棟地推進。崔可夫的第 62 軍團死守河岸的最後幾百公尺。每一棟工廠、每一條街道都化為血肉磨坊。\n\n你的任務:身為紅軍指揮官,守住東半部三座關鍵建築區直到第 12 回合結束。德軍只要在時限內肅清你的部隊便算勝利。\n\n次要目標:摧毀正在撕開街壘的德軍突擊工兵,可讓參戰部隊取得額外經驗。\n\n戰術提示:大量的「城鎮」格給你 +3 防禦修正,但移動消耗只有 1。把反戰車砲和機槍埋在建築群裡是教科書打法。\n德軍裝甲在城內因為視野和側翼被破壞,效能會大幅下降。",
   "map": {
     "width": 24,
     "height": 16,
@@ -53,9 +53,19 @@
     {"faction": "axis", "type": "light_tank", "name": "Pz.III", "at": [2, 4]},
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [1, 3], "general": "manstein"},
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [1, 12]},
-    {"faction": "axis", "type": "engineer", "name": "突擊工兵", "at": [8, 9]},
+    {"id": "axis_assault_engineer", "faction": "axis", "type": "engineer", "name": "突擊工兵", "at": [8, 9]},
     {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [2, 2]},
     {"faction": "axis", "type": "artillery", "name": "Wespe", "at": [0, 4]}
+  ],
+  "secondary_objectives": [
+    {
+      "id": "stalingrad_destroy_engineers",
+      "type": "destroy_unit",
+      "label": "突擊工兵",
+      "faction": "soviet",
+      "target_unit": "axis_assault_engineer",
+      "rewards": [{"type": "xp", "amount": 1}]
+    }
   ],
   "victory": {
     "soviet": {

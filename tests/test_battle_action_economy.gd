@@ -18,6 +18,11 @@ func _run() -> void:
 		printerr("FAIL: missing GameState autoload")
 		quit(1)
 		return
+	var data_loader := root.get_node_or_null("DataLoader")
+	if data_loader == null:
+		printerr("FAIL: missing DataLoader autoload")
+		quit(1)
+		return
 	game_state.current_scenario_id = "00_sandbox"
 	game_state.campaign_mode = false
 	game_state.clear_conquest_battle()
@@ -342,6 +347,93 @@ func _run() -> void:
 		battle.hex_map.unregister_unit(destroy_target)
 		battle.units.erase(destroy_target)
 		destroy_target.queue_free()
+
+		var splash_attacker_coord := Vector2i(-999, -999)
+		var splash_primary_coord := Vector2i(-999, -999)
+		var splash_target_coord := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) != null:
+				continue
+			for nb in HexCoord.neighbors(c):
+				if battle.hex_map.terrain_at(nb) == "" or battle.hex_map.unit_at(nb) != null:
+					continue
+				for nb2 in HexCoord.neighbors(nb):
+					if nb2 == c:
+						continue
+					if battle.hex_map.terrain_at(nb2) != "" and battle.hex_map.unit_at(nb2) == null:
+						splash_attacker_coord = c
+						splash_primary_coord = nb
+						splash_target_coord = nb2
+						break
+				if splash_target_coord != Vector2i(-999, -999):
+					break
+			if splash_target_coord != Vector2i(-999, -999):
+				break
+		if splash_target_coord == Vector2i(-999, -999):
+			fail_count += 1
+			printerr("FAIL: could not stage splash destroy-unit objective")
+		else:
+			battle.hex_map.tiles[splash_attacker_coord] = "plain"
+			battle.hex_map.tiles[splash_primary_coord] = "plain"
+			battle.hex_map.tiles[splash_target_coord] = "plain"
+			var splash_attacker = unit_script.new()
+			splash_attacker.configure("rocket_artillery", player_unit.faction_id, player_unit.faction_color, splash_attacker_coord, "Test Rocket")
+			var splash_primary = unit_script.new()
+			splash_primary.configure("infantry", destroy_enemy_faction, destroy_enemy_color, splash_primary_coord, "Splash Primary")
+			var splash_target = unit_script.new()
+			splash_target.configure("infantry", destroy_enemy_faction, destroy_enemy_color, splash_target_coord, "Splash Target")
+			splash_target.scenario_unit_id = "splash_target"
+			splash_primary.hp = 1
+			splash_target.hp = 1
+			battle.hex_map.register_unit(splash_attacker)
+			battle.hex_map.register_unit(splash_primary)
+			battle.hex_map.register_unit(splash_target)
+			battle.units.append(splash_attacker)
+			battle.units.append(splash_primary)
+			battle.units.append(splash_target)
+			battle.scenario["secondary_objectives"] = [{
+				"id": "destroy_splash_target",
+				"type": "destroy_unit",
+				"label": "濺射目標",
+				"faction": battle.player_faction_id,
+				"target_unit": "splash_target",
+				"rewards": [{"type": "xp", "amount": 1}],
+			}]
+			battle.captured_secondary_objectives.clear()
+			var splash_before_xp := int(splash_attacker.xp)
+			var splash_result: Dictionary = battle._apply_splash(
+				splash_attacker,
+				data_loader.get_unit_def("rocket_artillery"),
+				splash_primary.coord,
+				splash_primary
+			)
+			var splash_events := 0
+			for event in battle.action_log.events:
+				if String(event.get("type", "")) == "secondary_objective" and String(event.get("objective_id", "")) == "destroy_splash_target":
+					splash_events += 1
+			var splash_destroy_messages: Array = splash_result.get("destroy_messages", [])
+			if int(splash_result.get("hit", 0)) == 1 \
+					and splash_destroy_messages.size() == 1 \
+					and String(splash_destroy_messages[0]).find("濺射目標") != -1 \
+					and battle.captured_secondary_objectives.has("destroy_splash_target") \
+					and int(splash_attacker.xp) == splash_before_xp + 4 \
+					and splash_events == 1:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: splash kill should complete destroy objective; result=%s xp %d->%d events=%d captured=%s" % [
+					str(splash_result), splash_before_xp, int(splash_attacker.xp), splash_events,
+					battle.captured_secondary_objectives.has("destroy_splash_target"),
+				])
+			battle.hex_map.unregister_unit(splash_attacker)
+			battle.hex_map.unregister_unit(splash_primary)
+			battle.hex_map.unregister_unit(splash_target)
+			battle.units.erase(splash_attacker)
+			battle.units.erase(splash_primary)
+			battle.units.erase(splash_target)
+			splash_attacker.queue_free()
+			splash_primary.queue_free()
+			splash_target.queue_free()
 
 		battle._recompute_visibility()
 		var recon_coord: Vector2i = player_unit.coord

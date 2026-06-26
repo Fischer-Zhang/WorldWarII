@@ -205,11 +205,13 @@ def validate_scenario(
             fail(errors, path, f"expected exactly one player faction, found {player_count}")
 
     seen_coords: dict[tuple[int, int], str] = {}
+    seen_unit_ids: dict[str, str] = {}
     scenario_units = scenario.get("units", [])
     if not isinstance(scenario_units, list) or not scenario_units:
         fail(errors, path, "must define at least one unit")
         scenario_units = []
     for index, unit in enumerate(scenario_units):
+        validate_unique_unit_id(path, unit, index, "units", seen_unit_ids, errors)
         validate_unit_entry(path, unit, index, "units", units, generals, faction_ids, width, height, seen_coords, errors)
 
     reinforcements = scenario.get("reinforcements", [])
@@ -217,6 +219,7 @@ def validate_scenario(
         fail(errors, path, "reinforcements must be a list when present")
     else:
         for index, unit in enumerate(reinforcements):
+            validate_unique_unit_id(path, unit, index, "reinforcements", seen_unit_ids, errors)
             validate_unit_entry(path, unit, index, "reinforcements", units, generals, faction_ids, width, height, {}, errors)
             if int(unit.get("at_turn", 0)) <= 0:
                 fail(errors, path, f"reinforcements[{index}] at_turn must be positive")
@@ -360,6 +363,26 @@ def validate_unit_entry(
     if coord in seen_coords:
         fail(errors, path, f"{collection}[{index}] {name!r} stacks with {seen_coords[coord]!r} at {at!r}")
     seen_coords[coord] = name
+
+
+def validate_unique_unit_id(
+    path: Path,
+    unit: Any,
+    index: int,
+    collection: str,
+    seen_unit_ids: dict[str, str],
+    errors: list[str],
+) -> None:
+    if not isinstance(unit, dict):
+        return
+    unit_id = str(unit.get("id", ""))
+    if unit_id == "":
+        return
+    location = f"{collection}[{index}]"
+    if unit_id in seen_unit_ids:
+        fail(errors, path, f"{location} duplicate unit id {unit_id!r}; first seen at {seen_unit_ids[unit_id]}")
+        return
+    seen_unit_ids[unit_id] = location
 
 
 def validate_tutorial_metadata(

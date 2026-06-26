@@ -3,7 +3,7 @@
 
 This report stays static and deterministic. It complements the broader
 scenario balance report by focusing on suppression sources, artillery reach,
-spotter coverage, breach reach, capture-target pressure, and reinforcement power swings.
+spotter coverage, breach reach, objective pressure, and reinforcement power swings.
 """
 
 from __future__ import annotations
@@ -277,8 +277,8 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
     for objective in objectives:
         if not isinstance(objective, dict):
             continue
-        target = objective.get("target", [])
-        if not isinstance(target, list) or len(target) < 2:
+        target = secondary_objective_target_offset(scenario, objective)
+        if target is None:
             continue
         faction_id = str(objective.get("faction", ""))
         target_coord = axial_from_offset(target)
@@ -296,11 +296,51 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
     return "; ".join(parts) if parts else "none"
 
 
+def secondary_objective_target_offset(scenario: dict[str, Any], objective: dict[str, Any]) -> list[Any] | None:
+    objective_type = str(objective.get("type", "capture"))
+    if objective_type in {"capture", "hold_turns", "recon_hex"}:
+        target = objective.get("target", [])
+        if isinstance(target, list) and len(target) >= 2:
+            return target
+        return None
+    if objective_type == "destroy_unit":
+        target_unit = str(objective.get("target_unit", ""))
+        unit = find_secondary_target_unit(scenario, target_unit)
+        if not unit:
+            return None
+        at = unit.get("at", [])
+        if isinstance(at, list) and len(at) >= 2:
+            return at
+    return None
+
+
+def find_secondary_target_unit(scenario: dict[str, Any], target_unit: str) -> dict[str, Any] | None:
+    if target_unit == "":
+        return None
+    for collection in ("units", "reinforcements"):
+        entries = scenario.get(collection, [])
+        if not isinstance(entries, list):
+            continue
+        for unit in entries:
+            if not isinstance(unit, dict):
+                continue
+            unit_id = str(unit.get("id", ""))
+            unit_name = str(unit.get("name", ""))
+            unit_faction = str(unit.get("faction", ""))
+            if target_unit in {unit_id, unit_name, f"{unit_faction}:{unit_name}"}:
+                return unit
+    return None
+
+
 def secondary_objective_type_text(objective: dict[str, Any]) -> str:
     objective_type = str(objective.get("type", "capture"))
     if objective_type == "hold_turns":
         turns = int(objective.get("required_turns", 1))
         return f"hold {turns}t"
+    if objective_type == "recon_hex":
+        return "recon"
+    if objective_type == "destroy_unit":
+        return "destroy"
     return "capture"
 
 

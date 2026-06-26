@@ -24,6 +24,15 @@ def main() -> None:
         and "high town density: dig-in pacing risk" in report,
         "Stalingrad should still flag dense urban dig-in pacing risk",
     )
+    require(
+        "中路渡口 [recon 13,5]" in report,
+        "Sedan should show the recon secondary objective with its target",
+    )
+    require(
+        "突擊工兵 [destroy 突擊工兵@8,9]" in report
+        and "德軍遠程砲 [destroy 150 mm sFH@18,2]" in report,
+        "Destroy secondary objectives should show their marked unit targets",
+    )
     require("east_10_berlin_1945" in report, "scenario report missing Berlin row")
     require(
         "soviet: eng 1, art 1, rocket 0, mg 0" in report,

@@ -22,6 +22,18 @@ def main() -> None:
         "Stalingrad breach probe should show tuned Axis engineer approach and artillery gap",
     )
     require(
+        "01_sedan_1940" in report
+        and "中路渡口 13,5 recon min 9 XP 1" in report,
+        "Sedan probe should show recon secondary objective pressure",
+    )
+    require(
+        "03_stalingrad_1942" in report
+        and "突擊工兵 8,9 destroy min 12 XP 1" in report
+        and "06_market_garden_1944" in report
+        and "德軍遠程砲 18,2 destroy min 12 XP 1" in report,
+        "Destroy secondary objectives should be included in pressure probes",
+    )
+    require(
         "03_stalingrad_1942" in report
         and "axis: eng turns 4" in report
         and "axis: art move 0/6" in report,

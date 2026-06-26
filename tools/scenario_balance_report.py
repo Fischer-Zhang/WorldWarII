@@ -167,7 +167,9 @@ def secondary_objective_summary(scenario: dict[str, Any]) -> str:
         if not isinstance(objective, dict):
             continue
         label = str(objective.get("label", objective.get("id", "secondary")))
-        parts.append(f"{label} [{secondary_objective_type_text(objective)}] ({secondary_reward_text(objective)})")
+        target = secondary_objective_target_text(scenario, objective)
+        target_text = f" {target}" if target else ""
+        parts.append(f"{label} [{secondary_objective_type_text(objective)}{target_text}] ({secondary_reward_text(objective)})")
     return "; ".join(parts) if parts else "none"
 
 
@@ -176,7 +178,49 @@ def secondary_objective_type_text(objective: dict[str, Any]) -> str:
     if objective_type == "hold_turns":
         turns = int(objective.get("required_turns", 1))
         return f"hold {turns}t"
+    if objective_type == "recon_hex":
+        return "recon"
+    if objective_type == "destroy_unit":
+        return "destroy"
     return "capture"
+
+
+def secondary_objective_target_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    objective_type = str(objective.get("type", "capture"))
+    if objective_type in {"capture", "hold_turns", "recon_hex"}:
+        target = objective.get("target", [])
+        if isinstance(target, list) and len(target) >= 2:
+            return f"{target[0]},{target[1]}"
+        return ""
+    if objective_type == "destroy_unit":
+        target_unit = str(objective.get("target_unit", ""))
+        unit = find_secondary_target_unit(scenario, target_unit)
+        if unit:
+            name = str(unit.get("name", target_unit))
+            at = unit.get("at", [])
+            if isinstance(at, list) and len(at) >= 2:
+                return f"{name}@{at[0]},{at[1]}"
+            return name
+        return target_unit
+    return ""
+
+
+def find_secondary_target_unit(scenario: dict[str, Any], target_unit: str) -> dict[str, Any] | None:
+    if target_unit == "":
+        return None
+    for collection in ("units", "reinforcements"):
+        entries = scenario.get(collection, [])
+        if not isinstance(entries, list):
+            continue
+        for unit in entries:
+            if not isinstance(unit, dict):
+                continue
+            unit_id = str(unit.get("id", ""))
+            unit_name = str(unit.get("name", ""))
+            unit_faction = str(unit.get("faction", ""))
+            if target_unit in {unit_id, unit_name, f"{unit_faction}:{unit_name}"}:
+                return unit
+    return None
 
 
 def secondary_reward_text(objective: dict[str, Any]) -> str:

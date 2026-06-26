@@ -1066,9 +1066,12 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		attacker.has_attacked = true
 		attacker.queue_redraw()
 
-	var splashed := _apply_splash(attacker, atk_def, defender.coord, defender)
+	var splash_result := _apply_splash(attacker, atk_def, defender.coord, defender)
+	var splashed := int(splash_result.get("hit", 0))
 	if splashed > 0:
 		msg += " — 範圍波及 %d 單位" % splashed
+		for splash_destroy_text in splash_result.get("destroy_messages", []):
+			destroy_messages.append(String(splash_destroy_text))
 	if not destroy_messages.is_empty():
 		msg += "；%s" % "；".join(destroy_messages)
 
@@ -1090,13 +1093,14 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	if winner != "":
 		_handle_game_over(winner)
 
-func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primary: Unit) -> int:
+func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primary: Unit) -> Dictionary:
 	# Splash/AoE units (rocket artillery) also hit enemies within splash_radius of
 	# the primary target for a fraction of the direct damage, plus the same
 	# suppression / dig-in effects. Indirect, so splash targets never counter.
+	var out := {"hit": 0, "destroy_messages": []}
 	var radius := int(atk_def.get("splash_radius", 0))
 	if radius <= 0 or not attacker.is_alive():
-		return 0
+		return out
 	var pct := int(atk_def.get("splash_damage_pct", CombatEffects.SPLASH_DAMAGE_PCT))
 	var atk_terr := DataLoader.get_terrain_def(hex_map.terrain_at(attacker.coord))
 	var atk_general := DataLoader.get_general_def(attacker.general_id)
@@ -1111,7 +1115,6 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 			continue
 		if HexCoord.distance(center, unit.coord) <= radius:
 			victims.append(unit)
-	var hit := 0
 	for unit in victims:
 		var def_def := DataLoader.get_unit_def(unit.type_id)
 		var def_terr := DataLoader.get_terrain_def(hex_map.terrain_at(unit.coord))
@@ -1130,7 +1133,7 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 		unit.add_suppression(result.suppression_to_defender)
 		unit.reduce_dig_in(result.defender_dig_in_loss)
 		DamagePopup.spawn(hex_map, unit.position, dmg, Color(1.0, 0.6, 0.2))
-		hit += 1
+		out.hit += 1
 		if attacker.is_alive():
 			attacker.gain_xp(3 if not unit.is_alive() else 1)
 		if not unit.is_alive():
@@ -1138,9 +1141,12 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 			hex_map.place_wreckage(unit.coord, unit.faction_color)
 			unit.play_death_animation()
 			AudioBank.play("death")
-	if hit > 0:
+			var destroy_text := _check_secondary_objective_destroy_unit(attacker, unit)
+			if destroy_text != "":
+				out.destroy_messages.append(destroy_text)
+	if int(out.hit) > 0:
 		units = units.filter(func(u): return u.is_alive())
-	return hit
+	return out
 
 func _visible_attack_targets(attacker: Unit, atk_def: Dictionary) -> Array:
 	var visible: Dictionary = visibility_by_faction.get(attacker.faction_id, {})
