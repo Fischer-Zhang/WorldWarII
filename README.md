@@ -203,7 +203,7 @@ tools/validate.sh
 - JSON syntax checks for unit data and balance baselines.
 - Python compile checks for report, probe and validator scripts.
 - `tools/validate_data.py` for unknown refs, bounds, duplicate coordinates, campaign references and conquest graph integrity.
-- Generated diagnostics: unit balance report, scenario pressure report, scenario probe and tutorial probe.
+- Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe and Godot AI trace report.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
 - 314 headless GDScript checks through `bash tests/run_all.sh`.
@@ -240,7 +240,7 @@ damage = max(1, round(base * attacker_hp / attacker_max_hp))
 
 Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary.
 
-AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. Hard difficulty enables a one-ply lookahead against visible player retaliation.
+AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. Hard difficulty enables a one-ply lookahead against visible player retaliation. `tools/ai_trace_report.gd` regenerates `docs/progress/ai_trace_report.md` from the live `AIController.plan_trace_for_unit()` diagnostics.
 
 Conquest region data is stored in `data/conquest_map.json`. Player attacks choose an existing tactical scenario through `ConquestCatalog`; `ConquestBattleSetup` reuses that battlefield's terrain while replacing factions, rosters and victory rules, then `ConquestManager` applies the fought result back to ownership, strength and surviving garrisons.
 

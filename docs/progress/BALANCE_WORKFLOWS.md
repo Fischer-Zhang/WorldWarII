@@ -38,6 +38,7 @@ Use `tools/validate_fast.sh` for validation that does not launch Godot:
 Use `tools/validate.sh` for the full standard validation sequence:
 
 - Everything in `tools/validate_fast.sh`.
+- Regeneration of the Godot AI trace report.
 - `bash tests/run_all.sh`.
 
 Use `tools/install_hooks.sh` to install a local git `pre-commit` hook that runs
@@ -78,8 +79,8 @@ Use `python3 tools/scenario_balance_report.py` to regenerate
 Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
 spotter coverage, breach-path distance, terrain-aware breach tempo, artillery
-reposition coverage, objective pressure, secondary pressure, and reinforcement
-deltas.
+reposition coverage, objective pressure, secondary pressure, reinforcement
+deltas, and the Stalingrad/Berlin urban breach focus gate.
 
 Evaluate scenarios in this order:
 
@@ -99,6 +100,11 @@ Urban breach gates before scenario edits:
 ## Workflow 5: AI Compatibility
 
 After rule or stat changes, inspect whether AI scoring still understands the new roles.
+
+Use `godot --headless --path . --script res://tools/ai_trace_report.gd` to
+regenerate `docs/progress/ai_trace_report.md` when AI scoring, role shaping or
+action selection changes. The trace report calls `AIController.plan_trace_for_unit()`
+instead of mirroring the scoring formula in Python.
 
 Current role-shaping pass:
 

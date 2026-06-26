@@ -157,6 +157,9 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - overwatch value when no attack is better
 
 Hard difficulty adds one-ply lookahead against visible player retaliation.
+`tools/ai_trace_report.gd` generates `docs/progress/ai_trace_report.md` through
+`AIController.plan_trace_for_unit()` so AI diagnostics stay tied to the runtime
+scoring path.
 
 ## Campaign
 
@@ -224,7 +227,8 @@ AI-vs-AI conquest moves still use deterministic strategic resolution during `end
 - conquest owner/neighbor/production/coordinate errors
 - non-reciprocal conquest neighbors
 
-`tools/validate.sh` adds `bash tests/run_all.sh`.
+`tools/validate.sh` adds the Godot AI trace report generator and
+`bash tests/run_all.sh`.
 
 Headless GDScript coverage currently includes combat, AI, pathfinding, visibility, campaign, conquest, deployment, lounge, reinforcements, UI smoke, and formatter behavior.
 

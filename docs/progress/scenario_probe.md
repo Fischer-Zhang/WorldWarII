@@ -40,3 +40,12 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | west_09_hurtgen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,4 own min 3 enemy min 0 | none | none |
 | west_10_remagen_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 17,4 own min 15 enemy min 0 | none | none |
 | west_11_colmar_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 19,11 own min 16 enemy min 0 | none | none |
+
+## Urban Breach Focus
+
+Focused gate for city assaults that already have breach tools but still need manual survivability checks.
+
+| scenario | faction | high-cover targets | eng min | eng turns | art now | art after move | check |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach support |
+| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach support |

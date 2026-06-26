@@ -16,6 +16,7 @@ def main() -> None:
     require("breach path" in report, "scenario probe missing breach path column")
     require("breach tempo" in report, "scenario probe missing breach tempo column")
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
+    require("## Urban Breach Focus" in report, "scenario probe missing urban breach focus section")
     require(
         "03_stalingrad_1942" in report
         and "axis: eng min 12, art 0/6, targets 6" in report,
@@ -49,6 +50,16 @@ def main() -> None:
         and "soviet: eng turns 4" in report
         and "soviet: art move 0/3" in report,
         "Berlin tempo probe should show improved engineer timing and poor artillery access",
+    )
+    require(
+        "| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach support |"
+        in report,
+        "Stalingrad urban breach focus should keep the engineer survivability gate visible",
+    )
+    require(
+        "| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach support |"
+        in report,
+        "Berlin urban breach focus should keep the engineer survivability gate visible",
     )
     require(
         "tut_03_suppression_digin_engineer" in report

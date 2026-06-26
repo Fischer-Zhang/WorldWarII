@@ -12,6 +12,7 @@ const CombatResolver := preload("res://scripts/combat/combat_resolver.gd")
 const CombatRules := preload("res://scripts/combat/combat_rules.gd")
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
+const OverwatchResolver := preload("res://scripts/combat/overwatch_resolver.gd")
 const DamagePreview := preload("res://scripts/ui/damage_preview.gd")
 const UnitDetailFormatter := preload("res://scripts/ui/unit_detail_formatter.gd")
 const TurnManager := preload("res://scripts/turn/turn_manager.gd")
@@ -1616,63 +1617,20 @@ func _secondary_objective_status_text(objective: Dictionary, key: String) -> Str
 			return "佔領:%s %s" % [label, reward_text]
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
-	# As `mover` passes through each hex along `path`, every watcher that
-	# sees the hex and has it in attack range snap-shots the mover. Each
-	# watcher fires at most once (on_overwatch consumed). Returns the
-	# path index at which the mover died, or -1 if it survived.
-	for i in range(1, path.size()):
-		if not mover.is_alive():
-			return i - 1
-		var step: Vector2i = path[i]
-		var step_world := HexCoord.to_pixel(step, HexMap.HEX_SIZE)
-		for u in units:
-			var watcher: Unit = u
-			if not watcher.is_alive() or not watcher.on_overwatch:
-				continue
-			if watcher.faction_id == mover.faction_id:
-				continue
-			var w_vis: Dictionary = visibility_by_faction.get(watcher.faction_id, {})
-			if not w_vis.has(step):
-				continue
-			var w_def := DataLoader.get_unit_def(watcher.type_id)
-			var w_rng := int(w_def.get("range", 1))
-			if HexCoord.distance(watcher.coord, step) > w_rng:
-				continue
-			var dmg: int = _compute_overwatch_damage(watcher, mover, step)
-			watcher.play_attack_animation(step_world)
-			AudioBank.play("attack")
-			mover.take_damage(dmg)
-			var w_def_for_effect := DataLoader.get_unit_def(watcher.type_id)
-			var suppression := CombatEffects.suppression_for_attack(w_def_for_effect, dmg, not mover.is_alive())
-			mover.add_suppression(suppression)
-			DamagePopup.spawn(hex_map, step_world, dmg, Color(1.0, 0.85, 0.4))
-			action_log.record_overwatch(watcher, mover, dmg, turn_manager.turn_number)
-			watcher.on_overwatch = false
-			watcher.queue_redraw()
-			_set_prompt("警戒射擊", "%s 射擊 %s @(%d,%d) → -%d" % [
-				watcher.display_name, mover.display_name, step.x, step.y, dmg,
-			])
-			if not mover.is_alive():
-				return i
-	return -1
+	return OverwatchResolver.trigger_along_path(
+		mover,
+		path,
+		units,
+		visibility_by_faction,
+		hex_map,
+		DataLoader,
+		action_log,
+		turn_manager.turn_number,
+		Callable(self, "_set_prompt")
+	)
 
 func _compute_overwatch_damage(watcher: Unit, target: Unit, target_step: Vector2i) -> int:
-	var w_def := DataLoader.get_unit_def(watcher.type_id)
-	var t_def := DataLoader.get_unit_def(target.type_id)
-	var w_terr := DataLoader.get_terrain_def(hex_map.terrain_at(watcher.coord))
-	var t_terr := DataLoader.get_terrain_def(hex_map.terrain_at(target_step))
-	var d := HexCoord.distance(watcher.coord, target_step)
-	var w_general := DataLoader.get_general_def(watcher.general_id)
-	var t_general := DataLoader.get_general_def(target.general_id)
-	var w_mods: Dictionary = CombatModifiers.for_unit(watcher, w_general)
-	var t_mods: Dictionary = CombatModifiers.for_unit(target, t_general)
-	w_mods.attack -= CombatEffects.attack_penalty(watcher.suppression)
-	var result := CombatResolver.resolve(
-		w_def, t_def, watcher.hp, target.hp,
-		w_terr, t_terr, d, target.dig_in_level,
-		w_mods, t_mods,
-	)
-	return CombatEffects.overwatch_damage(result.damage_to_defender, w_def)
+	return OverwatchResolver.compute_damage(watcher, target, target_step, hex_map, DataLoader)
 
 func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 	# Resolves overwatch along the path; truncates the move if the mover

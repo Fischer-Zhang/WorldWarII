@@ -386,43 +386,22 @@ def breach_targets_for_faction(scenario: dict[str, Any], faction_id: str) -> lis
     return targets
 
 
-def breach_path_pressure(scenario: dict[str, Any], units: dict[str, Any]) -> str:
+def breach_path_pressure(
+    scenario: dict[str, Any],
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
     parts: list[str] = []
     faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
     for faction_id in faction_ids:
-        if not needs_breach_pressure(scenario, faction_id):
+        stats = breach_stats_for_faction(scenario, faction_id, units, terrains)
+        if stats is None:
             continue
-        targets = breach_targets_for_faction(scenario, faction_id)
-        if not targets:
-            continue
-        own_units = [u for u in initial_units(scenario) if str(u.get("faction", "")) == faction_id]
-        engineers = [u for u in own_units if str(u.get("type", "")) == "engineer"]
-        indirect = [
-            u for u in own_units
-            if bool(units.get(str(u.get("type", "")), {}).get("indirect", False))
-        ]
-
-        target_coords = [axial_from_offset(t.get("at", [0, 0])) for t in targets]
-        if engineers:
-            eng_distances = [
-                hex_distance(axial_from_offset(engineer.get("at", [0, 0])), target)
-                for engineer in engineers
-                for target in target_coords
-            ]
-            engineer_bit = f"eng min {min(eng_distances)}"
-        else:
-            engineer_bit = "eng none"
-
-        covered_targets: set[tuple[int, int]] = set()
-        for gun in indirect:
-            gun_def = units.get(str(gun.get("type", "")), {})
-            gun_coord = axial_from_offset(gun.get("at", [0, 0]))
-            rng = int(gun_def.get("range", 1))
-            for target in target_coords:
-                if hex_distance(gun_coord, target) <= rng:
-                    covered_targets.add(target)
-        artillery_bit = f"art {len(covered_targets)}/{len(target_coords)}"
-        parts.append(f"{faction_id}: {engineer_bit}, {artillery_bit}, targets {len(target_coords)}")
+        engineer_bit = "eng none"
+        if int(stats["engineers"]) > 0:
+            engineer_bit = f"eng min {stats['engineer_min']}"
+        artillery_bit = f"art {stats['artillery_coverage']}/{stats['targets']}"
+        parts.append(f"{faction_id}: {engineer_bit}, {artillery_bit}, targets {stats['targets']}")
     return "; ".join(parts) if parts else "n/a"
 
 
@@ -432,23 +411,79 @@ def engineer_breach_tempo(
     terrains: dict[str, Any],
 ) -> str:
     parts: list[str] = []
-    occupied = occupied_by_initial_units(scenario)
     faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
     for faction_id in faction_ids:
-        if not needs_breach_pressure(scenario, faction_id):
+        stats = breach_stats_for_faction(scenario, faction_id, units, terrains)
+        if stats is None:
             continue
-        targets = breach_targets_for_faction(scenario, faction_id)
-        if not targets:
-            continue
-        engineers = [
-            unit for unit in initial_units(scenario)
-            if str(unit.get("faction", "")) == faction_id and str(unit.get("type", "")) == "engineer"
-        ]
-        if not engineers:
+        if int(stats["engineers"]) <= 0:
             parts.append(f"{faction_id}: eng turns none")
             continue
+        if stats["engineer_turns"] is None:
+            parts.append(f"{faction_id}: eng turns blocked")
+        else:
+            parts.append(f"{faction_id}: eng turns {stats['engineer_turns']}")
+    return "; ".join(parts) if parts else "n/a"
 
-        best_turns: int | None = None
+
+def artillery_reposition_pressure(
+    scenario: dict[str, Any],
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> str:
+    parts: list[str] = []
+    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+    for faction_id in faction_ids:
+        stats = breach_stats_for_faction(scenario, faction_id, units, terrains)
+        if stats is None:
+            continue
+        if int(stats["artillery"]) <= 0:
+            parts.append(f"{faction_id}: art move none")
+            continue
+        parts.append(f"{faction_id}: art move {stats['artillery_move_coverage']}/{stats['targets']}")
+    return "; ".join(parts) if parts else "n/a"
+
+
+def breach_stats_for_faction(
+    scenario: dict[str, Any],
+    faction_id: str,
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not needs_breach_pressure(scenario, faction_id):
+        return None
+    targets = breach_targets_for_faction(scenario, faction_id)
+    if not targets:
+        return None
+
+    own_units = [u for u in initial_units(scenario) if str(u.get("faction", "")) == faction_id]
+    engineers = [u for u in own_units if str(u.get("type", "")) == "engineer"]
+    indirect = [
+        u for u in own_units
+        if bool(units.get(str(u.get("type", "")), {}).get("indirect", False))
+    ]
+    target_coords = [axial_from_offset(target.get("at", [0, 0])) for target in targets]
+
+    engineer_min: int | None = None
+    if engineers:
+        engineer_min = min(
+            hex_distance(axial_from_offset(engineer.get("at", [0, 0])), target)
+            for engineer in engineers
+            for target in target_coords
+        )
+
+    covered_targets: set[tuple[int, int]] = set()
+    for gun in indirect:
+        gun_def = units.get(str(gun.get("type", "")), {})
+        gun_coord = axial_from_offset(gun.get("at", [0, 0]))
+        rng = int(gun_def.get("range", 1))
+        for target in target_coords:
+            if hex_distance(gun_coord, target) <= rng:
+                covered_targets.add(target)
+
+    best_turns: int | None = None
+    if engineers:
+        occupied = occupied_by_initial_units(scenario)
         for engineer in engineers:
             engineer_def = units.get(str(engineer.get("type", "")), {})
             move_budget = int(engineer_def.get("move", 0)) * SUBHEX
@@ -463,48 +498,19 @@ def engineer_breach_tempo(
                 faction_id,
                 str(engineer.get("type", "")),
             )
-            for target in targets:
-                target_coord = axial_from_offset(target.get("at", [0, 0]))
+            for target in target_coords:
                 attack_costs = [
                     cost for coord, cost in costs.items()
-                    if hex_distance(coord, target_coord) <= attack_range
+                    if hex_distance(coord, target) <= attack_range
                 ]
                 if not attack_costs:
                     continue
                 turns = max(0, math.ceil(min(attack_costs) / move_budget))
                 best_turns = turns if best_turns is None else min(best_turns, turns)
-        if best_turns is None:
-            parts.append(f"{faction_id}: eng turns blocked")
-        else:
-            parts.append(f"{faction_id}: eng turns {best_turns}")
-    return "; ".join(parts) if parts else "n/a"
 
-
-def artillery_reposition_pressure(
-    scenario: dict[str, Any],
-    units: dict[str, Any],
-    terrains: dict[str, Any],
-) -> str:
-    parts: list[str] = []
-    occupied = occupied_by_initial_units(scenario)
-    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
-    for faction_id in faction_ids:
-        if not needs_breach_pressure(scenario, faction_id):
-            continue
-        targets = breach_targets_for_faction(scenario, faction_id)
-        if not targets:
-            continue
-        target_coords = [axial_from_offset(target.get("at", [0, 0])) for target in targets]
-        indirect = [
-            unit for unit in initial_units(scenario)
-            if str(unit.get("faction", "")) == faction_id
-            and bool(units.get(str(unit.get("type", "")), {}).get("indirect", False))
-        ]
-        if not indirect:
-            parts.append(f"{faction_id}: art move none")
-            continue
-
-        covered_targets: set[tuple[int, int]] = set()
+    movable_artillery_coverage: set[tuple[int, int]] = set()
+    if indirect:
+        occupied = occupied_by_initial_units(scenario)
         for gun in indirect:
             gun_type = str(gun.get("type", ""))
             gun_def = units.get(gun_type, {})
@@ -522,9 +528,69 @@ def artillery_reposition_pressure(
             for coord in costs:
                 for target_coord in target_coords:
                     if hex_distance(coord, target_coord) <= attack_range:
-                        covered_targets.add(target_coord)
-        parts.append(f"{faction_id}: art move {len(covered_targets)}/{len(target_coords)}")
-    return "; ".join(parts) if parts else "n/a"
+                        movable_artillery_coverage.add(target_coord)
+
+    high_cover_targets = 0
+    tiles = scenario_tiles(scenario)
+    for target in targets:
+        coord = axial_from_offset(target.get("at", [0, 0]))
+        terrain_id = tiles.get(coord, "")
+        terrain_def = terrains.get(terrain_id, {})
+        if int(terrain_def.get("defense", 0)) >= 2 or int(target.get("dig_in", 0)) > 0:
+            high_cover_targets += 1
+
+    return {
+        "targets": len(target_coords),
+        "high_cover_targets": high_cover_targets,
+        "engineers": len(engineers),
+        "engineer_min": engineer_min,
+        "engineer_turns": best_turns,
+        "artillery": len(indirect),
+        "artillery_coverage": len(covered_targets),
+        "artillery_move_coverage": len(movable_artillery_coverage),
+    }
+
+
+def urban_breach_focus_rows(
+    scenarios: list[dict[str, Any]],
+    units: dict[str, Any],
+    terrains: dict[str, Any],
+) -> list[list[Any]]:
+    focus_ids = {"03_stalingrad_1942", "east_10_berlin_1945"}
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if scenario_id not in focus_ids:
+            continue
+        faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+        for faction_id in faction_ids:
+            stats = breach_stats_for_faction(scenario, faction_id, units, terrains)
+            if stats is None:
+                continue
+            check = urban_breach_check_text(stats)
+            rows.append([
+                scenario_id,
+                faction_id,
+                f"{stats['high_cover_targets']}/{stats['targets']}",
+                "none" if stats["engineer_min"] is None else stats["engineer_min"],
+                "blocked" if stats["engineer_turns"] is None else stats["engineer_turns"],
+                f"{stats['artillery_coverage']}/{stats['targets']}",
+                f"{stats['artillery_move_coverage']}/{stats['targets']}",
+                check,
+            ])
+    return rows
+
+
+def urban_breach_check_text(stats: dict[str, Any]) -> str:
+    if int(stats["engineers"]) <= 0:
+        return "missing engineer"
+    if stats["engineer_turns"] is None:
+        return "engineer route blocked"
+    if int(stats["artillery_coverage"]) == 0 and int(stats["artillery_move_coverage"]) == 0:
+        return "playtest engineer survivability; no artillery breach support"
+    if int(stats["engineer_turns"]) >= 4:
+        return "playtest breach timing"
+    return "supported"
 
 
 def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
@@ -556,7 +622,7 @@ def generate_report() -> str:
                 suppression_sources(scenario),
                 artillery_coverage(scenario, units),
                 spotter_coverage(scenario, units),
-                breach_path_pressure(scenario, units),
+                breach_path_pressure(scenario, units, terrains),
                 engineer_breach_tempo(scenario, units, terrains),
                 artillery_reposition_pressure(scenario, units, terrains),
                 objective_pressure(scenario),
@@ -582,6 +648,21 @@ def generate_report() -> str:
                 "reinforcement delta",
             ],
             rows,
+        ),
+        "## Urban Breach Focus",
+        "Focused gate for city assaults that already have breach tools but still need manual survivability checks.",
+        table(
+            [
+                "scenario",
+                "faction",
+                "high-cover targets",
+                "eng min",
+                "eng turns",
+                "art now",
+                "art after move",
+                "check",
+            ],
+            urban_breach_focus_rows(scenarios, units, terrains),
         ),
     ]
     return "\n\n".join(sections) + "\n"
