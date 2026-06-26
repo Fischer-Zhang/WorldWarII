@@ -10,12 +10,37 @@ extends Node2D
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const Unit := preload("res://scripts/units/unit.gd")
 
+class ObjectiveBadge:
+	extends Node2D
+
+	var text: String = ""
+	var accent: Color = Color.WHITE
+
+	func configure(label_text: String, accent_color: Color) -> void:
+		text = label_text
+		accent = accent_color
+		queue_redraw()
+
+	func _draw() -> void:
+		var font := ThemeDB.fallback_font
+		var font_size := 12
+		var width := 132.0
+		var height := 24.0
+		var rect := Rect2(Vector2(-width / 2.0, -height / 2.0), Vector2(width, height))
+		draw_rect(rect, Color(0.03, 0.04, 0.05, 0.86), true)
+		draw_rect(rect, accent, false, 2.0)
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+		var text_pos := Vector2(-text_size.x / 2.0, text_size.y / 2.8)
+		draw_string(font, text_pos + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(0, 0, 0, 0.95))
+		draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(1, 1, 1, 1))
+
 const HEX_SIZE := 40.0  # pointy-top, distance from center to vertex
 const HIGHLIGHT_COLOR := Color(1.0, 0.95, 0.2, 0.55)
 const RANGE_OVERLAY_COLOR := Color(0.3, 0.7, 1.0, 0.35)
 const ATTACK_OVERLAY_COLOR := Color(1.0, 0.3, 0.25, 0.45)
 const THREAT_OVERLAY_COLOR := Color(1.0, 0.45, 0.05, 0.25)
-const OBJECTIVE_RGB := Color(1.0, 0.85, 0.2)
+const OBJECTIVE_PRIMARY_RGB := Color(1.0, 0.85, 0.2)
+const OBJECTIVE_SECONDARY_RGB := Color(0.2, 0.9, 1.0)
 const FOG_COLOR := Color(0.04, 0.04, 0.07, 0.72)
 
 var tiles: Dictionary = {}     # Vector2i (axial) -> terrain_id (String)
@@ -27,6 +52,7 @@ var range_overlays: Node2D
 var threat_overlays: Node2D
 var fog_overlays: Dictionary = {}  # Vector2i -> Polygon2D
 var objective_overlays: Array[Polygon2D] = []
+var objective_overlay_colors: Dictionary = {}
 var _objective_phase: float = 0.0
 var bounds_min := Vector2.ZERO
 var bounds_max := Vector2.ZERO
@@ -234,21 +260,72 @@ func unit_at(coord: Vector2i) -> Unit:
 	return occupants.get(coord)
 
 func set_objective_coords(coords: Array) -> void:
+	var markers: Array = []
+	for c in coords:
+		markers.append({"coord": c, "kind": "primary", "label": "目標"})
+	set_objective_markers(markers)
+
+func set_objective_markers(markers: Array) -> void:
 	for old in objective_overlays:
 		old.queue_free()
 	objective_overlays.clear()
-	for c in coords:
-		var coord: Vector2i = c
+	objective_overlay_colors.clear()
+	for marker_value in markers:
+		if typeof(marker_value) != TYPE_DICTIONARY:
+			continue
+		var marker: Dictionary = marker_value
+		var coord_value: Variant = marker.get("coord")
+		if typeof(coord_value) != TYPE_VECTOR2I:
+			continue
+		var coord: Vector2i = coord_value
 		if not tiles.has(coord):
 			continue
-		var p := Polygon2D.new()
-		p.polygon = _hex_vertices(HEX_SIZE * 0.88)
-		p.color = Color(OBJECTIVE_RGB.r, OBJECTIVE_RGB.g, OBJECTIVE_RGB.b, 0.35)
-		p.position = HexCoord.to_pixel(coord, HEX_SIZE)
-		p.z_index = 4
-		add_child(p)
-		objective_overlays.append(p)
+		var kind := String(marker.get("kind", "primary"))
+		var label := String(marker.get("label", "目標"))
+		_spawn_objective_marker(coord, kind, label)
 	set_process(not objective_overlays.is_empty())
+
+func _spawn_objective_marker(coord: Vector2i, kind: String, label: String) -> void:
+	var rgb := _objective_rgb(kind)
+	var p := Polygon2D.new()
+	p.polygon = _hex_vertices(HEX_SIZE * 0.95)
+	p.color = Color(rgb.r, rgb.g, rgb.b, 0.42)
+	p.position = HexCoord.to_pixel(coord, HEX_SIZE)
+	p.z_index = 11
+
+	var outline := Line2D.new()
+	var outline_points := _hex_vertices(HEX_SIZE * 1.03)
+	outline_points.append(outline_points[0])
+	outline.points = outline_points
+	outline.width = 4.0 if kind == "primary" else 3.4
+	outline.default_color = Color(rgb.r, rgb.g, rgb.b, 0.95)
+	p.add_child(outline)
+
+	var text := _objective_label_text(kind, label)
+	var badge := ObjectiveBadge.new()
+	badge.name = "ObjectiveLabel"
+	badge.configure(text, rgb)
+	badge.position = Vector2(0, -HEX_SIZE - 10)
+	badge.z_index = 2
+	p.add_child(badge)
+
+	add_child(p)
+	objective_overlays.append(p)
+	objective_overlay_colors[p] = rgb
+
+func _objective_rgb(kind: String) -> Color:
+	if kind == "secondary":
+		return OBJECTIVE_SECONDARY_RGB
+	return OBJECTIVE_PRIMARY_RGB
+
+func _objective_label_text(kind: String, label: String) -> String:
+	var prefix := "主目標" if kind == "primary" else "次要"
+	var text := prefix
+	if label != "" and label != "目標" and label != prefix:
+		text = "%s:%s" % [prefix, label]
+	if text.length() > 14:
+		text = text.substr(0, 13) + "..."
+	return text
 
 func _process(delta: float) -> void:
 	if objective_overlays.is_empty():
@@ -256,7 +333,8 @@ func _process(delta: float) -> void:
 	_objective_phase += delta * 2.4
 	var alpha: float = 0.28 + (sin(_objective_phase) + 1.0) * 0.18
 	for p in objective_overlays:
-		p.color = Color(OBJECTIVE_RGB.r, OBJECTIVE_RGB.g, OBJECTIVE_RGB.b, alpha)
+		var rgb: Color = objective_overlay_colors.get(p, OBJECTIVE_PRIMARY_RGB)
+		p.color = Color(rgb.r, rgb.g, rgb.b, alpha)
 
 func _hex_vertices(size: float) -> PackedVector2Array:
 	# Pointy-top: vertex angles at 30, 90, 150, 210, 270, 330 degrees.
@@ -349,6 +427,7 @@ func _clear() -> void:
 	polys.clear()
 	occupants.clear()
 	objective_overlays.clear()
+	objective_overlay_colors.clear()
 	fog_overlays.clear()
 	highlight = null
 	range_overlays = null

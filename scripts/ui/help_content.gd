@@ -13,7 +13,7 @@ const HELP_PATH := "res://data/help.json"
 const COLOR_MOVE := "#4db3ff"        # RANGE_OVERLAY_COLOR
 const COLOR_ATTACK := "#ff4d40"      # ATTACK_OVERLAY_COLOR
 const COLOR_THREAT := "#ff730d"      # THREAT_OVERLAY_COLOR
-const COLOR_OBJECTIVE := "#ffd933"   # OBJECTIVE_RGB
+const COLOR_OBJECTIVE := "#ffd933"   # OBJECTIVE_PRIMARY_RGB
 
 const _HEADING := "#e6c84d"
 const _TERM := "#9ad0ff"

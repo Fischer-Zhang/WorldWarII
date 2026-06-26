@@ -84,7 +84,7 @@
       { "key": "move", "label": "可移動範圍" },
       { "key": "attack", "label": "可攻擊目標" },
       { "key": "threat", "label": "敵軍威脅範圍" },
-      { "key": "objective", "label": "目標 / 勝利格" }
+      { "key": "objective", "label": "主目標金色 / 次要目標藍色" }
     ],
     "status_short": [
       { "term": "壓制", "body": "被火力壓制;達 2 不能警戒/構工/形成管制區。機槍/砲兵 +3,每回合 −1。" },

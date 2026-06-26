@@ -1363,7 +1363,7 @@ func _apply_player_objective_pulse() -> void:
 	# Highlights the hexes the player should care about: primary capture target plus
 	# optional secondary objectives that can grant side rewards.
 	var victory_cfg: Dictionary = scenario.get("victory", {})
-	var coords: Array[Vector2i] = []
+	var markers: Array[Dictionary] = []
 	for fid in factions.keys():
 		if String(factions[fid].get("controller", "")) != "player":
 			continue
@@ -1371,7 +1371,7 @@ func _apply_player_objective_pulse() -> void:
 		if String(v.get("type", "")) == "capture":
 			var coord_value: Variant = _coord_from_offset_array(v.get("target", []))
 			if coord_value != null:
-				coords.append(coord_value)
+				markers.append({"coord": coord_value, "kind": "primary", "label": "勝利格"})
 		break
 	var secondary_objectives: Array = scenario.get("secondary_objectives", [])
 	for i in range(secondary_objectives.size()):
@@ -1386,8 +1386,12 @@ func _apply_player_objective_pulse() -> void:
 			continue
 		var coord_value: Variant = _coord_from_offset_array(objective.get("target", []))
 		if coord_value != null:
-			coords.append(coord_value)
-	hex_map.set_objective_coords(coords)
+			markers.append({
+				"coord": coord_value,
+				"kind": "secondary",
+				"label": String(objective.get("label", key)),
+			})
+	hex_map.set_objective_markers(markers)
 
 func _coord_from_offset_array(value) -> Variant:
 	if typeof(value) != TYPE_ARRAY or value.size() < 2:
