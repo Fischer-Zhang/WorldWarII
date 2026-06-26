@@ -128,5 +128,18 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: splash_damage did not match expected falloff")
 
+	# 13) Overwatch defaults to half damage, while unit data can define stronger reaction fire.
+	var default_overwatch := CombatEffects.overwatch_damage(5, infantry)
+	var mg_overwatch := CombatEffects.overwatch_damage(5, {"id": "mg_team", "overwatch_damage_pct": 100})
+	var zero_overwatch := CombatEffects.overwatch_damage(0, mg)
+	if default_overwatch == 3 and mg_overwatch == 5 and zero_overwatch == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: overwatch damage expected 3/5/0 got %d/%d/%d"
+			% [default_overwatch, mg_overwatch, zero_overwatch]
+		)
+
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

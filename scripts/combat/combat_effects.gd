@@ -9,6 +9,7 @@ const RALLY_RECOVERY := 2
 const RALLY_COVER_BONUS := 1
 const SPOTTER_SUPPRESSION_BONUS := 1
 const SPLASH_DAMAGE_PCT := 50  # default falloff for splash targets when a unit omits splash_damage_pct
+const OVERWATCH_DAMAGE_PCT := 50  # default reaction-fire damage when a unit omits overwatch_damage_pct
 
 const SUPPRESSION_BY_TYPE := {
 	"infantry": 1,
@@ -65,6 +66,12 @@ static func splash_damage(full_damage: int, pct: int) -> int:
 	if full_damage <= 0:
 		return 0
 	return max(1, int(round(full_damage * pct / 100.0)))
+
+static func overwatch_damage(full_damage: int, atk_def: Dictionary) -> int:
+	if full_damage <= 0:
+		return 0
+	var pct := int(atk_def.get("overwatch_damage_pct", OVERWATCH_DAMAGE_PCT))
+	return max(1, int(ceil(full_damage * pct / 100.0)))
 
 static func is_pinned(suppression: int) -> bool:
 	return suppression >= SUPPRESSION_PIN_THRESHOLD

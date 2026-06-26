@@ -131,6 +131,54 @@ func _run() -> void:
 			printerr("FAIL: could not stage an adjacent hex for the bridge test")
 			fail_count += 1
 
+		# MG overwatch uses its unit-data reaction-fire profile: full damage instead of the default half hit.
+		var mg_coord := Vector2i(-999, -999)
+		var target_coord := Vector2i(-999, -999)
+		for c in battle.hex_map.tiles.keys():
+			if battle.hex_map.unit_at(c) != null:
+				continue
+			for nb in HexCoord.neighbors(c):
+				if battle.hex_map.terrain_at(nb) != "" and battle.hex_map.unit_at(nb) == null:
+					mg_coord = c
+					target_coord = nb
+					break
+			if mg_coord != Vector2i(-999, -999):
+				break
+		if mg_coord == Vector2i(-999, -999):
+			fail_count += 1
+			printerr("FAIL: could not stage adjacent empty hexes for MG overwatch test")
+		else:
+			battle.hex_map.tiles[mg_coord] = "plain"
+			battle.hex_map.tiles[target_coord] = "plain"
+			var unit_script: Script = player_unit.get_script()
+			var mg = unit_script.new()
+			mg.configure("mg_team", player_unit.faction_id, player_unit.faction_color, mg_coord, "Test MG")
+			var target = unit_script.new()
+			var enemy_faction := ""
+			var enemy_color := Color(0.2, 0.4, 0.8)
+			for fid in battle.factions.keys():
+				if String(fid) != player_unit.faction_id:
+					enemy_faction = String(fid)
+					enemy_color = battle.factions[fid].get("color", enemy_color)
+					break
+			target.configure("infantry", enemy_faction, enemy_color, target_coord, "Test Target")
+			battle.hex_map.register_unit(mg)
+			battle.hex_map.register_unit(target)
+			battle.units.append(mg)
+			battle.units.append(target)
+			var mg_overwatch_damage: int = battle._compute_overwatch_damage(mg, target, target.coord)
+			if mg_overwatch_damage == 4:
+				pass_count += 1
+			else:
+				fail_count += 1
+				printerr("FAIL: MG overwatch should deal full 4 damage, got %d" % mg_overwatch_damage)
+			battle.hex_map.unregister_unit(mg)
+			battle.hex_map.unregister_unit(target)
+			battle.units.erase(mg)
+			battle.units.erase(target)
+			mg.queue_free()
+			target.queue_free()
+
 	battle.queue_free()
 	await process_frame
 	print("Battle action economy tests: %d pass, %d fail" % [pass_count, fail_count])

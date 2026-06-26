@@ -20,6 +20,10 @@ const ENGINEER_DEF := {
 	"id": "engineer", "hp": 8, "attack": 3, "defense": 2, "range": 1, "move": 3,
 	"vision": 3, "vs_armor": 1, "armor": 0,
 }
+const MG_DEF := {
+	"id": "mg_team", "hp": 8, "attack": 6, "defense": 1, "range": 1, "move": 2,
+	"vision": 3, "vs_armor": 0, "armor": 0, "overwatch_damage_pct": 100,
+}
 
 class StubHexMap:
 	var terrain_overrides: Dictionary = {}
@@ -48,6 +52,7 @@ class StubBattle:
 class StubDataLoader:
 	var defs: Dictionary = {
 		"infantry": {"hp": 10, "attack": 4, "defense": 2, "range": 1, "move": 3, "vision": 3, "vs_armor": 1, "armor": 0},
+		"mg_team": MG_DEF,
 		"medium_tank": {"hp": 16, "attack": 7, "defense": 5, "range": 1, "move": 4, "vision": 4, "vs_armor": 4, "armor": 4},
 		"at_gun": AT_DEF,
 		"artillery": ARTILLERY_DEF,
@@ -303,7 +308,32 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should prefer breaching entrenched urban target")
 
-	# 12) Engineers should approach entrenched urban defenders before they are in attack range.
+	# 12) MG teams should value overwatch more than equal-position infantry because they use full reaction damage.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	var overwatch_enemy := make_unit("infantry", "allies", Vector2i(2, 0), 10)
+	var overwatch_infantry := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var overwatch_mg := make_unit("mg_team", "axis", Vector2i(0, 0), 8)
+	var infantry_ow_score: float = ai._overwatch_score(
+		overwatch_infantry, overwatch_infantry.coord, [overwatch_enemy],
+		battle.hex_map, ai._get_unit_def("infantry"), 1
+	)
+	var mg_ow_score: float = ai._overwatch_score(
+		overwatch_mg, overwatch_mg.coord, [overwatch_enemy],
+		battle.hex_map, MG_DEF, 1
+	)
+	if mg_ow_score > infantry_ow_score:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: MG overwatch score should beat infantry overwatch, mg %.2f infantry %.2f"
+			% [mg_ow_score, infantry_ow_score]
+		)
+
+	# 13) Engineers should approach entrenched urban defenders before they are in attack range.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()

@@ -1411,7 +1411,7 @@ func _compute_overwatch_damage(watcher: Unit, target: Unit, target_step: Vector2
 		w_terr, t_terr, d, target.dig_in_level,
 		w_mods, t_mods,
 	)
-	return int(ceil(float(result.damage_to_defender) / 2.0))
+	return CombatEffects.overwatch_damage(result.damage_to_defender, w_def)
 
 func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 	# Resolves overwatch along the path; truncates the move if the mover

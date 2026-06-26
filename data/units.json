@@ -21,7 +21,8 @@
     "move": 2,
     "vision": 3,
     "vs_armor": 0,
-    "armor": 0
+    "armor": 0,
+    "overwatch_damage_pct": 100
   },
   "at_gun": {
     "name_zh": "反戰車砲",

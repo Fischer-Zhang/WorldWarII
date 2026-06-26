@@ -130,7 +130,7 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Zone of Control** lives in `Pathfinding`. Entering enemy-adjacent hexes costs extra movement, but pinned enemies do not project ZoC.
 
-**Overwatch** is resolved along the movement path, not only at the destination. A watcher must see and be in range of the crossed hex.
+**Overwatch** is resolved along the movement path, not only at the destination. A watcher must see and be in range of the crossed hex. Default overwatch uses half damage; MG teams use full reaction-fire damage through `overwatch_damage_pct`.
 
 **Dig In** rewards no-action turns with defense, capped by `Unit.MAX_DIG_IN`.
 

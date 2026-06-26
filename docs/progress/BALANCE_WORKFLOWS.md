@@ -63,7 +63,7 @@ These semantics materially affect artillery, AT guns, overwatch, and fog-of-war 
 Target identities:
 
 - Infantry: durable terrain holder and ZoC anchor.
-- MG team: anti-infantry overwatch and static fire support.
+- MG team: anti-infantry overwatch and static fire support; MG overwatch uses full reaction-fire damage while normal overwatch remains half damage.
 - AT gun: anti-armor specialist with weak soft-target pressure.
 - Light tank: scouting, flanking, capture pressure, wounded-target cleanup.
 - Medium tank: general-purpose armored mainstay.
@@ -112,4 +112,4 @@ Current role-shaping pass:
 
 Likely follow-up:
 
-- Revisit overwatch scoring if MG teams become the premier reaction-fire unit.
+- Keep overwatch scoring aligned with unit-data reaction-fire percentages so AI values MG lane denial correctly.

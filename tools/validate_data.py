@@ -78,6 +78,8 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
                 fail(errors, path, f"unit {unit_id!r} has negative {key!r}")
         if int(unit.get("hp", 0)) <= 0:
             fail(errors, path, f"unit {unit_id!r} hp must be positive")
+        if "overwatch_damage_pct" in unit and int(unit.get("overwatch_damage_pct", 0)) <= 0:
+            fail(errors, path, f"unit {unit_id!r} overwatch_damage_pct must be positive")
         req = unit.get("requires_tech")
         if req is not None:
             if not isinstance(req, dict) or "id" not in req or "level" not in req:

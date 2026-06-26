@@ -5,19 +5,19 @@ Generated from `data/units.json`, `data/terrains.json`, and `data/scenarios/*.js
 
 ## Unit Catalog
 
-| id | name | hp | atk | def | rng | move | vision | vs armor | armor | indirect |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| infantry | 步兵 | 10 | 4 | 2 | 1 | 3 | 3 | 1 | 0 |  |
-| mg_team | 機槍組 | 8 | 6 | 1 | 1 | 2 | 3 | 0 | 0 |  |
-| at_gun | 反戰車砲 | 6 | 5 | 1 | 2 | 2 | 2 | 6 | 0 |  |
-| light_tank | 輕戰車 | 12 | 5 | 4 | 1 | 5 | 5 | 2 | 2 |  |
-| medium_tank | 中戰車 | 16 | 7 | 5 | 1 | 4 | 4 | 4 | 4 |  |
-| artillery | 砲兵 | 8 | 7 | 1 | 4 | 2 | 2 | 1 | 0 | yes |
-| paratrooper | 傘兵 | 8 | 5 | 2 | 1 | 3 | 4 | 2 | 0 |  |
-| engineer | 工兵 | 8 | 3 | 2 | 1 | 3 | 3 | 1 | 0 |  |
-| tank_destroyer | 驅逐戰車 | 12 | 5 | 4 | 1 | 3 | 3 | 7 | 3 |  |
-| heavy_tank | 重戰車 | 22 | 9 | 5 | 1 | 3 | 4 | 7 | 6 |  |
-| rocket_artillery | 火箭砲 | 8 | 6 | 1 | 3 | 2 | 2 | 0 | 0 | yes |
+| id | name | hp | atk | def | rng | move | vision | vs armor | armor | ow% | indirect |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| infantry | 步兵 | 10 | 4 | 2 | 1 | 3 | 3 | 1 | 0 | 50 |  |
+| mg_team | 機槍組 | 8 | 6 | 1 | 1 | 2 | 3 | 0 | 0 | 100 |  |
+| at_gun | 反戰車砲 | 6 | 5 | 1 | 2 | 2 | 2 | 6 | 0 | 50 |  |
+| light_tank | 輕戰車 | 12 | 5 | 4 | 1 | 5 | 5 | 2 | 2 | 50 |  |
+| medium_tank | 中戰車 | 16 | 7 | 5 | 1 | 4 | 4 | 4 | 4 | 50 |  |
+| artillery | 砲兵 | 8 | 7 | 1 | 4 | 2 | 2 | 1 | 0 | 50 | yes |
+| paratrooper | 傘兵 | 8 | 5 | 2 | 1 | 3 | 4 | 2 | 0 | 50 |  |
+| engineer | 工兵 | 8 | 3 | 2 | 1 | 3 | 3 | 1 | 0 | 50 |  |
+| tank_destroyer | 驅逐戰車 | 12 | 5 | 4 | 1 | 3 | 3 | 7 | 3 | 50 |  |
+| heavy_tank | 重戰車 | 22 | 9 | 5 | 1 | 3 | 4 | 7 | 6 | 50 |  |
+| rocket_artillery | 火箭砲 | 8 | 6 | 1 | 3 | 2 | 2 | 0 | 0 | 50 | yes |
 
 ## Plain Damage / Counter
 
@@ -271,6 +271,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 | id | name | changes |
 | --- | --- | --- |
+| mg_team | 機槍組 | overwatch_damage_pct 50->100 (+50) |
 | at_gun | 反戰車砲 | attack 7->5 (-2)<br>range 1->2 (+1)<br>move 1->2 (+1)<br>vs_armor 5->6 (+1) |
 | light_tank | 輕戰車 | vision 4->5 (+1) |
 | artillery | 砲兵 | attack 8->7 (-1)<br>range 3->4 (+1)<br>vision 5->2 (-3)<br>vs_armor 2->1 (-1) |
@@ -414,6 +415,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | indirect semantics | Resolved: indirect units cannot counter while defending, but close indirect attacks can still be countered. | Preserve this distinction in UI text and combat tests. |
 | ZoC path reconstruction | Resolved: movement range and path reconstruction share the same terrain + active-ZoC step cost; pinned units do not project ZoC. | Keep new pathfinding callsites passing occupied + mover_faction. |
 | Town + dig-in | Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits. | Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls. |
+| MG overwatch | MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, making MGs the premier lane-denial unit. | Keep AI overwatch scoring and help text aligned with unit-data reaction-fire percentages. |
 
 ## Recommended Next Pass
 

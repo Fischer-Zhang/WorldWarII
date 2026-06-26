@@ -212,11 +212,12 @@ def unit_stat_table(units: dict[str, Any]) -> str:
                 unit.get("vision", 0),
                 unit.get("vs_armor", 0),
                 unit.get("armor", 0),
+                unit.get("overwatch_damage_pct", 50),
                 "yes" if unit.get("indirect", False) else "",
             ]
         )
     return table(
-        ["id", "name", "hp", "atk", "def", "rng", "move", "vision", "vs armor", "armor", "indirect"],
+        ["id", "name", "hp", "atk", "def", "rng", "move", "vision", "vs armor", "armor", "ow%", "indirect"],
         rows,
     )
 
@@ -373,6 +374,8 @@ def baseline_delta_section(
 
 def unit_delta_table(units: dict[str, Any], baseline_units: dict[str, Any]) -> str:
     stat_keys = ["hp", "attack", "defense", "range", "move", "vision", "vs_armor", "armor"]
+    defaults = {"overwatch_damage_pct": 50}
+    unit_keys = stat_keys + ["overwatch_damage_pct"]
     rows: list[list[Any]] = []
     for unit_id, unit in units.items():
         if unit_id not in baseline_units:
@@ -380,9 +383,10 @@ def unit_delta_table(units: dict[str, Any], baseline_units: dict[str, Any]) -> s
             continue
         baseline = baseline_units[unit_id]
         changes: list[str] = []
-        for key in stat_keys:
-            old = int(baseline.get(key, 0))
-            new = int(unit.get(key, 0))
+        for key in unit_keys:
+            default = defaults.get(key, 0)
+            old = int(baseline.get(key, default))
+            new = int(unit.get(key, default))
             if old != new:
                 changes.append(f"{key} {old}->{new} ({fmt_delta(new - old)})")
         if bool(baseline.get("indirect", False)) != bool(unit.get("indirect", False)):
@@ -571,6 +575,11 @@ def rule_risk_section() -> str:
             "Town + dig-in",
             "Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits.",
             "Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls.",
+        ],
+        [
+            "MG overwatch",
+            "MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, making MGs the premier lane-denial unit.",
+            "Keep AI overwatch scoring and help text aligned with unit-data reaction-fire percentages.",
         ],
     ]
     return table(["risk", "why it matters", "next action"], rows)

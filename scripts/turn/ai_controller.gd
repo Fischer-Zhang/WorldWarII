@@ -282,7 +282,7 @@ func _overwatch_score(
 			atk_def, edef, unit.hp, enemy.hp, atk_terr, def_terr, rng,
 			0, atk_mods_ow, def_mods_ow
 		)
-		var snap: float = max(1.0, ceil(float(r.damage_to_defender) / 2.0))
+		var snap: float = float(CombatEffects.overwatch_damage(r.damage_to_defender, atk_def))
 		if snap >= enemy.hp:
 			snap += _kill_bonus * 0.5  # half kill bonus — less reliable
 		if snap > best_snap:
