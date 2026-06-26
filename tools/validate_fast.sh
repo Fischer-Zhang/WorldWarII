@@ -23,6 +23,7 @@ python3 -m json.tool docs/progress/baselines/units_pre_balance_patch.json >/tmp/
 python3 -m py_compile \
   tools/balance_report.py \
   tools/check_scenario_balance_report.py \
+  tools/check_scenario_probe.py \
   tools/scenario_balance_report.py \
   tools/scenario_probe.py \
   tools/tutorial_probe.py \
@@ -32,6 +33,7 @@ python3 tools/balance_report.py --baseline docs/progress/baselines/units_pre_bal
 python3 tools/scenario_balance_report.py
 python3 tools/check_scenario_balance_report.py
 python3 tools/scenario_probe.py
+python3 tools/check_scenario_probe.py
 python3 tools/tutorial_probe.py
 git diff --check
 

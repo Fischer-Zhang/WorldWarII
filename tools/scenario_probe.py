@@ -3,7 +3,7 @@
 
 This report stays static and deterministic. It complements the broader
 scenario balance report by focusing on suppression sources, artillery reach,
-spotter coverage, capture-target pressure, and reinforcement power swings.
+spotter coverage, breach reach, capture-target pressure, and reinforcement power swings.
 """
 
 from __future__ import annotations
@@ -166,6 +166,69 @@ def objective_pressure(scenario: dict[str, Any]) -> str:
     return "; ".join(parts) if parts else "n/a"
 
 
+def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:
+    objective = scenario.get("victory", {}).get(faction_id, {})
+    return str(objective.get("type", "")) in {"capture", "eliminate"}
+
+
+def breach_targets_for_faction(scenario: dict[str, Any], faction_id: str) -> list[dict[str, Any]]:
+    targets: list[dict[str, Any]] = []
+    tiles = scenario.get("map", {}).get("tiles", [])
+    for unit in initial_units(scenario):
+        if str(unit.get("faction", "")) == faction_id:
+            continue
+        at = unit.get("at", [0, 0])
+        row = int(at[1])
+        col = int(at[0])
+        terrain = ""
+        if 0 <= row < len(tiles) and 0 <= col < len(tiles[row]):
+            terrain = str(tiles[row][col])
+        dig_in = int(unit.get("dig_in", 0))
+        if terrain in {"town", "forest", "jungle"} or dig_in > 0:
+            targets.append(unit)
+    return targets
+
+
+def breach_path_pressure(scenario: dict[str, Any], units: dict[str, Any]) -> str:
+    parts: list[str] = []
+    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+    for faction_id in faction_ids:
+        if not needs_breach_pressure(scenario, faction_id):
+            continue
+        targets = breach_targets_for_faction(scenario, faction_id)
+        if not targets:
+            continue
+        own_units = [u for u in initial_units(scenario) if str(u.get("faction", "")) == faction_id]
+        engineers = [u for u in own_units if str(u.get("type", "")) == "engineer"]
+        indirect = [
+            u for u in own_units
+            if bool(units.get(str(u.get("type", "")), {}).get("indirect", False))
+        ]
+
+        target_coords = [axial_from_offset(t.get("at", [0, 0])) for t in targets]
+        if engineers:
+            eng_distances = [
+                hex_distance(axial_from_offset(engineer.get("at", [0, 0])), target)
+                for engineer in engineers
+                for target in target_coords
+            ]
+            engineer_bit = f"eng min {min(eng_distances)}"
+        else:
+            engineer_bit = "eng none"
+
+        covered_targets: set[tuple[int, int]] = set()
+        for gun in indirect:
+            gun_def = units.get(str(gun.get("type", "")), {})
+            gun_coord = axial_from_offset(gun.get("at", [0, 0]))
+            rng = int(gun_def.get("range", 1))
+            for target in target_coords:
+                if hex_distance(gun_coord, target) <= rng:
+                    covered_targets.add(target)
+        artillery_bit = f"art {len(covered_targets)}/{len(target_coords)}"
+        parts.append(f"{faction_id}: {engineer_bit}, {artillery_bit}, targets {len(target_coords)}")
+    return "; ".join(parts) if parts else "n/a"
+
+
 def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
     by_faction: dict[str, float] = collections.defaultdict(float)
     by_turn: dict[int, list[str]] = collections.defaultdict(list)
@@ -194,6 +257,7 @@ def generate_report() -> str:
                 suppression_sources(scenario),
                 artillery_coverage(scenario, units),
                 spotter_coverage(scenario, units),
+                breach_path_pressure(scenario, units),
                 objective_pressure(scenario),
                 reinforcement_delta(scenario, units),
             ]
@@ -208,6 +272,7 @@ def generate_report() -> str:
                 "suppression sources",
                 "artillery coverage",
                 "spotter coverage",
+                "breach path",
                 "objective pressure",
                 "reinforcement delta",
             ],
