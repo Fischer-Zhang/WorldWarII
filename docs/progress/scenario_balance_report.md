@@ -30,6 +30,12 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 72%, road 13%, forest 7%; def>=2 12%; move>=3 3% | axis: eng 0, art 1, rocket 0, mg 0; soviet: eng 0, art 1, rocket 0, mg 1 | axis->4,3 min 19 avg 21.7 | force power ratio above 1.35: check victory-clock compensation |
 | east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 7%; def>=2 14%; move>=3 8% | soviet: eng 0, art 1, rocket 1, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | soviet->18,3 min 21 avg 22.1 | force power ratio above 1.35: check victory-clock compensation; soviet artillery-heavy: watch standoff dominance |
 | east_10_berlin_1945 | 柏林終局 1945 | town 60%, plain 22%, road 18%; def>=2 60%; move>=3 0% | soviet: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 2 | soviet->19,4 min 20 avg 21.8 | high town density: dig-in pacing risk |
+| tut_00_basic_turn | 教學 00: 移動、攻擊與佔領 | plain 88%, road 10%, town 2%; def>=2 2%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,2 min 5 avg 5.0 | force power ratio above 1.35: check victory-clock compensation |
+| tut_01_terrain_zoc_overwatch | 教學 01: 地形、管制區與警戒 | plain 81%, road 9%, forest 7%; def>=2 9%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 1; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,0 min 4 avg 4.7 | no major static risks |
+| tut_02_los_spotting_artillery | 教學 02: 視線、觀測與間接火力 | plain 77%, forest 14%, road 9%; def>=2 14%; move>=3 0% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | n/a | force power ratio above 1.35: check victory-clock compensation |
+| tut_03_suppression_digin_engineer | 教學 03: 壓制、整隊、構工與工兵破障 | plain 81%, river 14%, town 3%; def>=2 4%; move>=3 14% | allies: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | allies->7,3 min 5 avg 6.2 | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
+| tut_04_armor_at_veteran_general | 教學 04: 裝甲、反戰車、老兵與將領技能 | plain 85%, road 11%, forest 4%; def>=2 4%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | n/a | no major static risks |
+| tut_05_airdrop_reinforcement_rocket | 教學 05: 空降、援軍與火箭濺射 | plain 90%, road 4%, forest 3%; def>=2 6%; move>=3 0% | allies: eng 0, art 0, rocket 1, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | n/a | force power ratio above 1.35: check victory-clock compensation |
 | west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, forest 12%, road 10%; def>=2 17%; move>=3 2% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->21,4 min 19 avg 22.4 | no major static risks |
 | west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 73%, road 10%, forest 10%; def>=2 13%; move>=3 4% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->2,2 min 2 avg 8.6 | no major static risks |
 | west_09_aachen_1944 | 亞琛巷戰 1944 | plain 74%, road 11%, forest 9%; def>=2 12%; move>=3 3% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->5,11 min 2 avg 5.7 | no major static risks |
@@ -204,6 +210,48 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍突擊群 | player | 6 | 228.4 | armor:2, artillery:1, engineer:1, infantry:2 |
 | axis | 柏林守備隊 | ai | 9 | 284.0 | anti_armor:2, armor:1, artillery:1, infantry:3, support:2 |
+
+## tut_00_basic_turn
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 教學部隊 | player | 2 | 77.6 | armor:1, infantry:1 |
+| axis | 目標守軍 | ai | 2 | 51.4 | infantry:2 |
+
+## tut_01_terrain_zoc_overwatch
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 教學防線 | player | 3 | 102.2 | armor:1, infantry:1, support:1 |
+| axis | 突入部隊 | ai | 3 | 90.5 | infantry:2, scout_armor:1 |
+
+## tut_02_los_spotting_artillery
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 觀測分隊 | player | 3 | 127.9 | armor:1, artillery:1, scout_armor:1 |
+| axis | 隱蔽火點 | ai | 2 | 52.6 | anti_armor:1, infantry:1 |
+
+## tut_03_suppression_digin_engineer
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 攻堅教學隊 | player | 4 | 136.2 | armor:1, artillery:1, engineer:1, infantry:1 |
+| axis | 構工守軍 | ai | 2 | 50.3 | infantry:1, support:1 |
+
+## tut_04_armor_at_veteran_general
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 裝甲教學隊 | player | 3 | 120.8 | anti_armor:2, armor:1 |
+| axis | 裝甲目標 | ai | 3 | 144.1 | armor:2, infantry:1 |
+
+## tut_05_airdrop_reinforcement_rocket
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 空降教學隊 | player | 5 | 162.4 | armor:1, artillery:1, infantry:3 |
+| axis | 密集守軍 | ai | 4 | 102.9 | anti_armor:1, infantry:2, support:1 |
 
 ## west_08_falaise_1944
 

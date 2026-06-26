@@ -28,6 +28,12 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis target 4,3 own min 19 enemy min 1 | none |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet target 18,3 own min 21 enemy min 0 | none |
 | east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 23/384 (6%) | none | soviet target 19,4 own min 20 enemy min 0 | none |
+| tut_00_basic_turn | none | none | none | allies target 6,2 own min 5 enemy min 0 | none |
+| tut_01_terrain_zoc_overwatch | allies mg_team:1 | none | axis 38/54 (70%), spots 3 | allies target 6,0 own min 4 enemy min 2 | none |
+| tut_02_los_spotting_artillery | allies artillery:1 | allies 27/70 (39%) | allies 45/70 (64%), spots 1 | n/a | none |
+| tut_03_suppression_digin_engineer | allies artillery:1; axis mg_team:1 | allies 34/70 (49%) | none | allies target 7,3 own min 5 enemy min 0 | none |
+| tut_04_armor_at_veteran_general | none | none | none | n/a | none |
+| tut_05_airdrop_reinforcement_rocket | axis mg_team:1 | allies 31/70 (44%) | none | n/a | allies +77.6; T3 2 units |
 | west_08_falaise_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies target 21,4 own min 19 enemy min 0 | none |
 | west_08_normandy_cobra_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies target 2,2 own min 2 enemy min 0 | none |
 | west_09_aachen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies target 5,11 own min 2 enemy min 0 | none |

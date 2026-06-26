@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-159%2F159-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-253%2F253-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -16,10 +16,10 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|
 | Engine | Godot 4 project, validated locally and in CI with Godot 4.2.2 stable |
 | Language | GDScript for runtime/tests, Python 3 for validators/reports, Bash for validation entrypoints |
-| Content | 30 scenario JSON files: 29 playable scenarios plus `00_sandbox` |
+| Content | 36 scenario JSON files: 29 campaign/conquest battlefields, 6 tutorial scenarios and `00_sandbox` |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 3 campaigns and a 19-region conquest map |
-| Tests | 159 headless GDScript checks plus static data/report validators |
+| Tests | 253 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -275,13 +275,14 @@ Done:
 - Deployment setup and upgrade visibility.
 - Per-region conquest battlefields with terrain notes surfaced in briefing.
 - In-game how-to-play screen and battlefield legend (rules, combat formula, terrain/unit tables, status glossary).
+- Playable tutorial scenarios covering movement, attacks, capture, terrain, ZoC, overwatch, suppression, rally, dig-in, LOS, indirect fire, spotting, armor/AT, engineer bridge/breach, airdrop, generals, veterans, reinforcements and splash damage.
 - Headless validators, balance reports and UI smoke coverage.
 
 Open:
 
 - Save/load mid-scenario.
 - Art replacement for tiles and units.
-- Guided, step-by-step first-battle tutorial (the static how-to-play reference now ships; an interactive guided battle does not yet).
+- Guided, step-by-step first-battle overlay (the static reference and playable tutorial scenarios now ship; an interactive step tracker does not yet).
 - Packaged release workflow for generated desktop/web builds.
 
 ## License

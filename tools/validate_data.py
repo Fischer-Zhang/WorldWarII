@@ -12,6 +12,34 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 SCENARIOS = DATA / "scenarios"
 
+MAX_SUPPRESSION = 5
+MAX_DIG_IN = 3
+MAX_RANK = 3
+REQUIRED_TUTORIAL_MECHANICS = {
+    "movement",
+    "attack",
+    "counterattack",
+    "capture",
+    "terrain_defense",
+    "zoc",
+    "overwatch",
+    "suppression",
+    "rally",
+    "dig_in",
+    "direct_fire_los",
+    "indirect_fire",
+    "spotting",
+    "armor",
+    "anti_armor",
+    "engineer_bridge",
+    "engineer_breach",
+    "airdrop",
+    "general_skill",
+    "veteran",
+    "reinforcements",
+    "splash_damage",
+}
+
 
 def load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
@@ -181,6 +209,8 @@ def validate_scenario(
                 if not in_bounds(target, width, height):
                     fail(errors, path, f"victory {faction_id!r} capture target out of bounds: {target!r}")
 
+    validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
+
 
 def validate_unit_entry(
     path: Path,
@@ -212,10 +242,106 @@ def validate_unit_entry(
     if not in_bounds(at, width, height):
         fail(errors, path, f"{collection}[{index}] {name!r} coordinate out of bounds: {at!r}")
         return
+    hp = unit.get("hp")
+    if hp is not None:
+        try:
+            hp_value = int(hp)
+            max_hp = int(units.get(type_id, {}).get("hp", 0))
+            if hp_value <= 0 or (max_hp > 0 and hp_value > max_hp):
+                fail(errors, path, f"{collection}[{index}] {name!r} hp {hp!r} out of range 1..{max_hp}")
+        except (TypeError, ValueError):
+            fail(errors, path, f"{collection}[{index}] {name!r} hp must be an integer")
+    for field, max_value in (("suppression", MAX_SUPPRESSION), ("dig_in", MAX_DIG_IN), ("rank", MAX_RANK)):
+        if field in unit:
+            try:
+                value = int(unit[field])
+            except (TypeError, ValueError):
+                fail(errors, path, f"{collection}[{index}] {name!r} {field} must be an integer")
+                continue
+            if not (0 <= value <= max_value):
+                fail(errors, path, f"{collection}[{index}] {name!r} {field} {value} out of range 0..{max_value}")
+    if "xp" in unit:
+        try:
+            if int(unit["xp"]) < 0:
+                fail(errors, path, f"{collection}[{index}] {name!r} xp must be non-negative")
+        except (TypeError, ValueError):
+            fail(errors, path, f"{collection}[{index}] {name!r} xp must be an integer")
+    if "on_overwatch" in unit and not isinstance(unit["on_overwatch"], bool):
+        fail(errors, path, f"{collection}[{index}] {name!r} on_overwatch must be a boolean")
     coord = offset_to_axial(at)
     if coord in seen_coords:
         fail(errors, path, f"{collection}[{index}] {name!r} stacks with {seen_coords[coord]!r} at {at!r}")
     seen_coords[coord] = name
+
+
+def validate_tutorial_metadata(
+    path: Path,
+    scenario: dict[str, Any],
+    units_catalog: dict[str, Any],
+    terrains: dict[str, Any],
+    width: int,
+    height: int,
+    errors: list[str],
+) -> None:
+    scenario_id = str(scenario.get("id", ""))
+    mechanics_raw = scenario.get("tutorial_mechanics", [])
+    if not scenario_id.startswith("tut_"):
+        if mechanics_raw:
+            fail(errors, path, "tutorial_mechanics is only allowed on tut_* scenarios")
+        return
+    if not isinstance(mechanics_raw, list) or not mechanics_raw:
+        fail(errors, path, "tutorial scenario must list tutorial_mechanics")
+        return
+
+    mechanics = {str(m) for m in mechanics_raw}
+    unknown = sorted(mechanics - REQUIRED_TUTORIAL_MECHANICS)
+    for name in unknown:
+        fail(errors, path, f"unknown tutorial mechanic {name!r}")
+
+    scenario_units = scenario.get("units", [])
+    reinforcements = scenario.get("reinforcements", [])
+    if not isinstance(scenario_units, list):
+        scenario_units = []
+    if not isinstance(reinforcements, list):
+        reinforcements = []
+    all_units = list(scenario_units) + list(reinforcements)
+    unit_types = {str(u.get("type", "")) for u in all_units if isinstance(u, dict)}
+    initial_units = [u for u in scenario_units if isinstance(u, dict)]
+    terrain_counts = terrain_counter(scenario)
+    player_faction = player_faction_id(scenario)
+    capture_targets = [
+        cfg.get("target", [])
+        for fid, cfg in scenario.get("victory", {}).items()
+        if isinstance(cfg, dict) and str(fid) == player_faction and cfg.get("type") == "capture"
+    ]
+
+    checks = {
+        "movement": lambda: len(initial_units) >= 2 and width * height >= 16,
+        "attack": lambda: has_enemy_units(scenario),
+        "counterattack": lambda: has_close_enemy_pair(initial_units, 1),
+        "capture": lambda: bool(capture_targets),
+        "terrain_defense": lambda: any(int(terrains.get(t, {}).get("defense", 0)) >= 2 for t in terrain_counts),
+        "zoc": lambda: has_close_enemy_pair(initial_units, 2),
+        "overwatch": lambda: "mg_team" in unit_types or any(bool(u.get("on_overwatch", False)) for u in initial_units),
+        "suppression": lambda: has_initial_value(initial_units, "suppression") or bool({"mg_team", "artillery", "rocket_artillery"} & unit_types),
+        "rally": lambda: any(int(u.get("suppression", 0)) > 0 for u in initial_units),
+        "dig_in": lambda: has_initial_value(initial_units, "dig_in") or "engineer" in unit_types,
+        "direct_fire_los": lambda: any(terrains.get(t, {}).get("blocks_los", False) for t in terrain_counts),
+        "indirect_fire": lambda: any(units_catalog.get(t, {}).get("indirect", False) for t in unit_types),
+        "spotting": lambda: "light_tank" in unit_types and any(units_catalog.get(t, {}).get("indirect", False) for t in unit_types),
+        "armor": lambda: any(int(units_catalog.get(t, {}).get("armor", 0)) > 0 for t in unit_types),
+        "anti_armor": lambda: any(int(units_catalog.get(t, {}).get("vs_armor", 0)) >= 6 for t in unit_types),
+        "engineer_bridge": lambda: "engineer" in unit_types and has_engineer_adjacent_water(initial_units, scenario),
+        "engineer_breach": lambda: "engineer" in unit_types and any(int(u.get("dig_in", 0)) > 0 for u in initial_units if str(u.get("faction", "")) != player_faction),
+        "airdrop": lambda: "paratrooper" in unit_types,
+        "general_skill": lambda: any(str(u.get("general", "")) for u in all_units if isinstance(u, dict)),
+        "veteran": lambda: any(int(u.get("rank", 0)) > 0 or int(u.get("xp", 0)) > 0 for u in all_units if isinstance(u, dict)),
+        "reinforcements": lambda: bool(reinforcements),
+        "splash_damage": lambda: "rocket_artillery" in unit_types,
+    }
+    for mechanic in sorted(mechanics & REQUIRED_TUTORIAL_MECHANICS):
+        if not checks[mechanic]():
+            fail(errors, path, f"tutorial mechanic {mechanic!r} is declared but not supported by scenario data")
 
 
 def in_bounds(at: Any, width: int, height: int) -> bool:
@@ -227,6 +353,110 @@ def in_bounds(at: Any, width: int, height: int) -> bool:
     except (TypeError, ValueError):
         return False
     return 0 <= col < width and 0 <= row < height
+
+
+def terrain_counter(scenario: dict[str, Any]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in scenario.get("map", {}).get("tiles", []):
+        if not isinstance(row, list):
+            continue
+        for terrain_id in row:
+            tid = str(terrain_id)
+            counts[tid] = counts.get(tid, 0) + 1
+    return counts
+
+
+def player_faction_id(scenario: dict[str, Any]) -> str:
+    for faction in scenario.get("factions", []):
+        if isinstance(faction, dict) and str(faction.get("controller", "")) == "player":
+            return str(faction.get("id", ""))
+    return ""
+
+
+def has_enemy_units(scenario: dict[str, Any]) -> bool:
+    player = player_faction_id(scenario)
+    if player == "":
+        return False
+    own = False
+    enemy = False
+    for unit in scenario.get("units", []):
+        if not isinstance(unit, dict):
+            continue
+        if str(unit.get("faction", "")) == player:
+            own = True
+        else:
+            enemy = True
+    return own and enemy
+
+
+def hex_distance(a: tuple[int, int], b: tuple[int, int]) -> int:
+    dq = a[0] - b[0]
+    dr = a[1] - b[1]
+    return (abs(dq) + abs(dr) + abs(dq + dr)) // 2
+
+
+def has_close_enemy_pair(units: list[Any], max_distance: int) -> bool:
+    typed = [u for u in units if isinstance(u, dict) and isinstance(u.get("at", []), list)]
+    for idx, first in enumerate(typed):
+        first_faction = str(first.get("faction", ""))
+        first_coord = offset_to_axial(first.get("at", [0, 0]))
+        for second in typed[idx + 1 :]:
+            if str(second.get("faction", "")) == first_faction:
+                continue
+            if hex_distance(first_coord, offset_to_axial(second.get("at", [0, 0]))) <= max_distance:
+                return True
+    return False
+
+
+def has_initial_value(units: list[Any], field: str) -> bool:
+    for unit in units:
+        if isinstance(unit, dict) and int(unit.get(field, 0)) > 0:
+            return True
+    return False
+
+
+def offset_neighbors(at: list[Any]) -> list[list[int]]:
+    q, r = offset_to_axial(at)
+    axial_neighbors = [
+        (q + 1, r),
+        (q + 1, r - 1),
+        (q, r - 1),
+        (q - 1, r),
+        (q - 1, r + 1),
+        (q, r + 1),
+    ]
+    out: list[list[int]] = []
+    for nq, nr in axial_neighbors:
+        col = nq + (nr >> 1)
+        out.append([col, nr])
+    return out
+
+
+def terrain_at_offset(scenario: dict[str, Any], at: list[Any]) -> str:
+    if not isinstance(at, list) or len(at) < 2:
+        return ""
+    col = int(at[0])
+    row = int(at[1])
+    rows = scenario.get("map", {}).get("tiles", [])
+    if not isinstance(rows, list) or row < 0 or row >= len(rows):
+        return ""
+    tiles_row = rows[row]
+    if not isinstance(tiles_row, list) or col < 0 or col >= len(tiles_row):
+        return ""
+    return str(tiles_row[col])
+
+
+def has_engineer_adjacent_water(units: list[Any], scenario: dict[str, Any]) -> bool:
+    for unit in units:
+        if not isinstance(unit, dict) or str(unit.get("type", "")) != "engineer":
+            continue
+        at = unit.get("at", [])
+        if not isinstance(at, list):
+            continue
+        for neighbor in offset_neighbors(at):
+            if terrain_at_offset(scenario, neighbor) in {"river", "sea"}:
+                return True
+    return False
 
 
 def validate_campaigns(campaigns: dict[str, Any], scenario_ids: set[str], errors: list[str]) -> None:

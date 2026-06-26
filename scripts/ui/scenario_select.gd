@@ -7,9 +7,11 @@ const DIFFICULTY_HINTS := {
 }
 
 const CATEGORY_ALL := "all"
+const CATEGORY_TUTORIAL := "tutorial"
 const CATEGORY_SANDBOX := "sandbox"
 const CATEGORY_LABELS := {
 	CATEGORY_ALL: "全部",
+	CATEGORY_TUTORIAL: "教學",
 	"blitzkrieg_early_war": "早期",
 	"eastern_front": "東線",
 	"western_front": "西線",
@@ -46,8 +48,14 @@ func _ready() -> void:
 func _build_categories() -> void:
 	category_scenarios = {
 		CATEGORY_ALL: {},
+		CATEGORY_TUTORIAL: {},
 		CATEGORY_SANDBOX: {"00_sandbox": true},
 	}
+	for s in DataLoader.scenarios:
+		var scenario: Dictionary = s
+		var scenario_id := String(scenario.get("id", ""))
+		if scenario_id.begins_with("tut_"):
+			category_scenarios[CATEGORY_TUTORIAL][scenario_id] = true
 	for campaign in DataLoader.campaigns:
 		var c: Dictionary = campaign
 		var campaign_id := String(c.get("id", ""))
@@ -61,6 +69,7 @@ func _build_category_buttons() -> void:
 	category_buttons.clear()
 
 	var category_order: Array[String] = [CATEGORY_ALL]
+	category_order.append(CATEGORY_TUTORIAL)
 	for campaign in DataLoader.campaigns:
 		category_order.append(String(campaign.get("id", "")))
 	category_order.append(CATEGORY_SANDBOX)

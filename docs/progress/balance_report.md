@@ -353,13 +353,19 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | east_05_kharkov_1943 | 4 | 1 | 1 | 1 | 5 | 2 | 0 | 0 | 1 | 1 | 0 |
 | east_09_seelow_1945 | 4 | 1 | 2 | 0 | 2 | 2 | 0 | 0 | 1 | 1 | 1 |
 | east_10_berlin_1945 | 5 | 2 | 1 | 0 | 2 | 2 | 0 | 1 | 1 | 1 | 0 |
+| tut_00_basic_turn | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| tut_01_terrain_zoc_overwatch | 3 | 1 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| tut_02_los_spotting_artillery | 1 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| tut_03_suppression_digin_engineer | 2 | 1 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 0 | 0 |
+| tut_04_armor_at_veteran_general | 1 | 0 | 1 | 0 | 2 | 0 | 0 | 0 | 1 | 1 | 0 |
+| tut_05_airdrop_reinforcement_rocket | 4 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 1 |
 | west_08_falaise_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_08_normandy_cobra_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_09_aachen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 130 | 37 | 56 | 17 | 81 | 55 | 5 | 4 | 25 | 8 | 6 |
+| TOTAL | 144 | 40 | 59 | 19 | 88 | 57 | 6 | 5 | 26 | 9 | 7 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -387,6 +393,12 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | east_05_kharkov_1943 | 384 | plain 72%, road 13%, forest 7% |
 | east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 7% |
 | east_10_berlin_1945 | 384 | town 60%, plain 22%, road 18% |
+| tut_00_basic_turn | 48 | plain 88%, road 10%, town 2% |
+| tut_01_terrain_zoc_overwatch | 54 | plain 81%, road 9%, forest 7% |
+| tut_02_los_spotting_artillery | 70 | plain 77%, forest 14%, road 9% |
+| tut_03_suppression_digin_engineer | 70 | plain 81%, river 14%, town 3% |
+| tut_04_armor_at_veteran_general | 54 | plain 85%, road 11%, forest 4% |
+| tut_05_airdrop_reinforcement_rocket | 70 | plain 90%, road 4%, forest 3% |
 | west_08_falaise_1944 | 384 | plain 72%, forest 12%, road 10% |
 | west_08_normandy_cobra_1944 | 384 | plain 73%, road 10%, forest 10% |
 | west_09_aachen_1944 | 384 | plain 74%, road 11%, forest 9% |

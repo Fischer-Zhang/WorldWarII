@@ -4,6 +4,8 @@ extends RefCounted
 const HexCoord := preload("res://scripts/grid/hex_coord.gd")
 const HexMap := preload("res://scripts/grid/hex_map.gd")
 const Unit := preload("res://scripts/units/unit.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
+const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 
 # Builds Unit instances from a scenario JSON.
 # Returns: { "units": Array[Unit], "factions": Dictionary[String, Dictionary] }
@@ -51,4 +53,10 @@ static func create_unit(data: Dictionary, factions: Dictionary) -> Unit:
 	if general_id != "":
 		unit.general_id = general_id
 	unit.roster_id = int(data.get("roster_id", -1))
+	unit.hp = clampi(int(data.get("hp", unit.max_hp)), 1, unit.max_hp)
+	unit.xp = max(0, int(data.get("xp", 0)))
+	unit.rank = clampi(int(data.get("rank", 0)), 0, CombatModifiers.MAX_RANK)
+	unit.suppression = clampi(int(data.get("suppression", 0)), 0, CombatEffects.MAX_SUPPRESSION)
+	unit.dig_in_level = clampi(int(data.get("dig_in", 0)), 0, Unit.MAX_DIG_IN)
+	unit.on_overwatch = bool(data.get("on_overwatch", false))
 	return unit

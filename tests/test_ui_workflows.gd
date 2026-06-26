@@ -95,6 +95,9 @@ func _check_scenario_select() -> void:
 	scene._set_category("sandbox")
 	await process_frame
 	_expect("scenario select category filter", list.get_child_count() == 1, "sandbox count=%d" % list.get_child_count())
+	scene._set_category("tutorial")
+	await process_frame
+	_expect("scenario select tutorial filter", list.get_child_count() >= 6, "tutorial count=%d" % list.get_child_count())
 	await _free_scene(scene)
 
 func _check_briefing() -> void:
