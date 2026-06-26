@@ -289,8 +289,19 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
         own_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own]
         label = str(objective.get("label", objective.get("id", "secondary")))
         if own_dist:
-            parts.append(f"{label} {target[0]},{target[1]} min {min(own_dist)} {secondary_reward_text(objective)}")
+            parts.append(
+                f"{label} {target[0]},{target[1]} {secondary_objective_type_text(objective)} "
+                f"min {min(own_dist)} {secondary_reward_text(objective)}"
+            )
     return "; ".join(parts) if parts else "none"
+
+
+def secondary_objective_type_text(objective: dict[str, Any]) -> str:
+    objective_type = str(objective.get("type", "capture"))
+    if objective_type == "hold_turns":
+        turns = int(objective.get("required_turns", 1))
+        return f"hold {turns}t"
+    return "capture"
 
 
 def secondary_reward_text(objective: dict[str, Any]) -> str:

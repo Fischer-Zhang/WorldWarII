@@ -109,6 +109,7 @@ Current role-shaping pass:
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
 - Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.
+- Unfinished secondary objectives add a smaller movement bias toward their target hex.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 
 Likely follow-up:

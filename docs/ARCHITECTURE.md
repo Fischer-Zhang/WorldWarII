@@ -152,7 +152,7 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - terrain defense
 - wounded/suppressed target focus
 - role shaping for scouts, AT, artillery and engineers
-- movement pressure toward objectives and visible breach targets
+- movement pressure toward primary objectives, secondary objectives and visible breach targets
 - rally value when suppressed
 - overwatch value when no attack is better
 

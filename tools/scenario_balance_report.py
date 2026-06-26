@@ -167,8 +167,16 @@ def secondary_objective_summary(scenario: dict[str, Any]) -> str:
         if not isinstance(objective, dict):
             continue
         label = str(objective.get("label", objective.get("id", "secondary")))
-        parts.append(f"{label} ({secondary_reward_text(objective)})")
+        parts.append(f"{label} [{secondary_objective_type_text(objective)}] ({secondary_reward_text(objective)})")
     return "; ".join(parts) if parts else "none"
+
+
+def secondary_objective_type_text(objective: dict[str, Any]) -> str:
+    objective_type = str(objective.get("type", "capture"))
+    if objective_type == "hold_turns":
+        turns = int(objective.get("required_turns", 1))
+        return f"hold {turns}t"
+    return "capture"
 
 
 def secondary_reward_text(objective: dict[str, Any]) -> str:

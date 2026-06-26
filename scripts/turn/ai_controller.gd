@@ -24,6 +24,7 @@ const W_ARTILLERY_STANDOFF := 2.5
 const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
+const W_SECONDARY_OBJECTIVE := 1.1
 const W_RALLY := 4.0
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
@@ -191,7 +192,8 @@ func _score_position(
 	var terr_def: Dictionary = _get_terrain_def(hex_map.terrain_at(pos))
 	var terrain_term: float = float(terr_def.get("defense", 0)) * W_TERRAIN
 	var role_term: float = _role_position_score(unit, pos, known, visible_enemies, atk_def)
-	var objective_term: float = _objective_position_score(unit.faction_id, pos)
+	var objective_term: float = _objective_position_score(unit.faction_id, pos) \
+		+ _secondary_objective_position_score(unit.faction_id, pos)
 
 	# 1-ply lookahead: discount by worst counter the player could deliver
 	# *after* we land on this hex. Only enabled on Hard difficulty.
@@ -514,6 +516,37 @@ func _objective_position_score(faction_id: String, pos: Vector2i) -> float:
 	var row := int(target[1])
 	var target_coord := Vector2i(col - (row >> 1), row)
 	return -float(HexCoord.distance(pos, target_coord)) * W_CAPTURE_OBJECTIVE
+
+func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> float:
+	var objectives: Array = battle.scenario.get("secondary_objectives", [])
+	if objectives.is_empty():
+		return 0.0
+	var captured: Dictionary = {}
+	var captured_value: Variant = battle.get("captured_secondary_objectives")
+	if typeof(captured_value) == TYPE_DICTIONARY:
+		captured = captured_value
+	var best := -INF
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := String(objective.get("id", "secondary_%d" % i))
+		if captured.has(key):
+			continue
+		var objective_faction := String(objective.get("faction", faction_id))
+		if objective_faction != "" and objective_faction != faction_id:
+			continue
+		var target: Variant = objective.get("target", [])
+		if typeof(target) != TYPE_ARRAY or target.size() < 2:
+			continue
+		var col := int(target[0])
+		var row := int(target[1])
+		var target_coord := Vector2i(col - (row >> 1), row)
+		var score := -float(HexCoord.distance(pos, target_coord)) * W_SECONDARY_OBJECTIVE
+		best = max(best, score)
+	if best == -INF:
+		return 0.0
+	return best
 
 # ---------- 1-ply lookahead ----------
 

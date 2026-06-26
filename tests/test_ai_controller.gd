@@ -41,6 +41,7 @@ class StubBattle:
 	var units: Array = []
 	var factions: Dictionary = {}
 	var scenario: Dictionary = {}
+	var captured_secondary_objectives: Dictionary = {}
 	func get_known_enemies(faction_id: String) -> Array:
 		var out: Array = []
 		var visible: Dictionary = visibility_by_faction.get(faction_id, {})
@@ -205,6 +206,32 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: capture objective score expected near %.2f > far %.2f" % [objective_near, objective_far])
 	battle.scenario = {}
+
+	# 6b) Unfinished secondary objectives should also pull AI movement, but completed ones stop scoring.
+	battle.scenario = {
+		"secondary_objectives": [{
+			"id": "forward_cache",
+			"type": "hold_turns",
+			"faction": "axis",
+			"target": [4, 0],
+			"required_turns": 2,
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+	}
+	battle.captured_secondary_objectives.clear()
+	var secondary_far: float = ai._secondary_objective_position_score("axis", Vector2i(0, 0))
+	var secondary_near: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	battle.captured_secondary_objectives["forward_cache"] = true
+	var completed_score: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	if secondary_near > secondary_far and completed_score == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: unfinished secondary objective should score near, completed should stop; near %.2f far %.2f completed %.2f" % [
+			secondary_near, secondary_far, completed_score,
+		])
+	battle.scenario = {}
+	battle.captured_secondary_objectives.clear()
 
 	# 7) A pinned unit with no profitable contact should choose Rally in place.
 	var pinned_mg := make_unit("infantry", "axis", Vector2i(0, 0), 10)
