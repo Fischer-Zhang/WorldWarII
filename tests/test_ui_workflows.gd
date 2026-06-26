@@ -1,5 +1,7 @@
 extends SceneTree
 
+const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+
 var pass_count := 0
 var fail_count := 0
 
@@ -14,6 +16,7 @@ func _run() -> void:
 	await _check_briefing()
 	await _check_deployment()
 	await _check_conquest_deployment()
+	await _check_conquest_defense_deployment()
 	await _check_battle()
 	await _check_campaign()
 	await _check_lounge()
@@ -48,6 +51,25 @@ func _free_scene(scene: Node) -> void:
 
 func _game_state() -> Node:
 	return root.get_node_or_null("GameState")
+
+func _snapshot_campaign_save() -> Dictionary:
+	if not FileAccess.file_exists(CampaignManager.SAVE_PATH):
+		return {"exists": false, "text": ""}
+	var f := FileAccess.open(CampaignManager.SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return {"exists": false, "text": ""}
+	var text := f.get_as_text()
+	f.close()
+	return {"exists": true, "text": text}
+
+func _restore_campaign_save(snapshot: Dictionary) -> void:
+	if bool(snapshot.get("exists", false)):
+		var f := FileAccess.open(CampaignManager.SAVE_PATH, FileAccess.WRITE)
+		if f != null:
+			f.store_string(String(snapshot.get("text", "")))
+			f.close()
+	else:
+		CampaignManager.reset()
 
 func _pass(name: String, detail: String = "") -> void:
 	pass_count += 1
@@ -212,6 +234,63 @@ func _check_conquest_deployment() -> void:
 	)
 	await _free_scene(scene)
 
+func _check_conquest_defense_deployment() -> void:
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"player_name": "德軍",
+		"enemy_name": "蘇軍",
+		"player_color": "#a86632",
+		"enemy_color": "#2f6fb0",
+		"battle_location": "防守測試戰場",
+		"role": "defend",
+		"attacker_garrison": [
+			{"id": -1, "type": "infantry", "name": "民兵", "xp": 0, "rank": 0},
+			{"id": -1, "type": "infantry", "name": "民兵", "xp": 0, "rank": 0},
+		],
+		"defender_types": ["infantry", "at_gun"],
+	}
+	var scene := await _instantiate_scene(
+		"res://scenes/deployment.tscn",
+		{"scenario_id": "01_sedan_1940", "conquest_mode": true, "pending": pending}
+	)
+	var player_occupants := 0
+	var enemy_occupants := 0
+	for coord in scene.hex_map.occupants.keys():
+		var unit = scene.hex_map.occupants[coord]
+		if unit.faction_id == scene.player_faction_id:
+			player_occupants += 1
+		else:
+			enemy_occupants += 1
+	var names := {}
+	for u in scene.player_units:
+		var unit = u
+		names[unit.display_name] = true
+	_expect(
+		"conquest defense deployment starts with enemies only",
+		scene.player_units.size() == 2 and names.size() == 2 and player_occupants == 0
+				and enemy_occupants > 0 and scene.begin_button.disabled,
+		"names=%d player=%d enemy=%d disabled=%s" % [
+			names.size(), player_occupants, enemy_occupants, str(scene.begin_button.disabled)
+		]
+	)
+	for u in scene.player_units:
+		var unit = u
+		scene._select_unit(unit)
+		var coord := _first_free_deploy_hex(scene, unit)
+		if coord == Vector2i.MIN:
+			_fail("conquest defense deploy free hex", unit.display_name)
+			continue
+		scene._on_hex_clicked(coord, String(scene.hex_map.tiles[coord]))
+	_expect(
+		"conquest defense deployment enables battle after all placed",
+		scene._all_player_units_placed() and not scene.begin_button.disabled,
+		"placed=%d units=%d disabled=%s" % [
+			scene._placed_player_count(), scene.player_units.size(), str(scene.begin_button.disabled)
+		]
+	)
+	await _free_scene(scene)
+
 func _first_free_deploy_hex(scene: Node, unit) -> Vector2i:
 	var zone: Dictionary = scene.unit_deployment_zones.get(scene._unit_key(unit), {})
 	for coord in zone.keys():
@@ -241,6 +320,8 @@ func _check_battle() -> void:
 	await _free_scene(scene)
 
 func _check_campaign() -> void:
+	var save_snapshot := _snapshot_campaign_save()
+	CampaignManager.reset_campaign("00_tutorial")
 	var scene := await _instantiate_scene("res://scenes/campaign.tscn", {"campaign_mode": true})
 	var list: VBoxContainer = scene.get_node("Margin/VBox/ListScroll/List")
 	_expect("campaign lists campaigns", list.get_child_count() >= 1)
@@ -259,6 +340,7 @@ func _check_campaign() -> void:
 				and not String(scene.get_node("Margin/VBox/Buttons/ContinueButton").tooltip_text).contains("部署")
 	)
 	await _free_scene(scene)
+	_restore_campaign_save(save_snapshot)
 
 func _check_lounge() -> void:
 	var scene := await _instantiate_scene("res://scenes/lounge.tscn")
