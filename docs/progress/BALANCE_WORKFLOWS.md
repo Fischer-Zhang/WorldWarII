@@ -28,6 +28,7 @@ Use `tools/validate_fast.sh` for validation that does not launch Godot:
 - JSON validation for unit catalogs.
 - Python syntax checks for report tools.
 - Regeneration of balance and scenario reports.
+- Scenario balance report smoke checks for urban breach diagnostics.
 - Regeneration of scenario probe report.
 - `git diff --check`.
 
@@ -64,6 +65,7 @@ Target identities:
 - Light tank: scouting, flanking, capture pressure, wounded-target cleanup.
 - Medium tank: general-purpose armored mainstay.
 - Artillery: long-range suppression with clear close-range vulnerability.
+- Engineer: close assault support that can strip up to two dig-in levels from entrenched defenders, but still has low raw damage and must accept counter-risk.
 
 ## Workflow 4: Scenario Pass
 
@@ -81,6 +83,13 @@ Evaluate scenarios in this order:
 4. `02_kiev_1941`: artillery dominance and screening requirements.
 5. `01_sedan_1940`: river/forest breakthrough tempo.
 
+Urban breach gates before scenario edits:
+
+- Check `urban breach tools` in `scenario_balance_report.md` before changing rosters.
+- `03_stalingrad_1942` currently flags Axis with artillery but no engineer; playtest whether AI artillery + engineer-aware scoring is enough before replacing an Axis infantry.
+- `east_10_berlin_1945` already gives the Soviet assault group one engineer and one artillery unit; tune turns or defenders only after confirming the engineer survives long enough to open dig-in.
+- Do not treat MG teams as breach tools. They are suppression support for the assault sequence.
+
 ## Workflow 5: AI Compatibility
 
 After rule or stat changes, inspect whether AI scoring still understands the new roles.
@@ -90,6 +99,7 @@ Current role-shaping pass:
 - Light tanks get a scouting-position bonus when no enemy is currently visible.
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
+- Engineers prefer entrenched urban/high-cover targets when their attack would remove dig-in.
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
 - Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.
