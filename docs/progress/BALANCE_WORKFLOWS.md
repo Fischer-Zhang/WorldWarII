@@ -25,11 +25,14 @@ This workflow should run before and after every proposed stat patch.
 
 Use `tools/validate_fast.sh` for validation that does not launch Godot:
 
+- Godot 4.2 project-feature gate.
 - JSON validation for unit catalogs.
-- Python syntax checks for report tools.
+- Python syntax checks for report, probe and validator tools.
 - Regeneration of balance and scenario reports.
 - Scenario balance report smoke checks for urban breach diagnostics.
 - Regeneration of scenario probe report.
+- Scenario probe smoke checks for breach-path diagnostics.
+- Regeneration of tutorial probe report.
 - `git diff --check`.
 
 Use `tools/validate.sh` for the full standard validation sequence:
@@ -73,7 +76,8 @@ Use `python3 tools/scenario_balance_report.py` to regenerate
 `docs/progress/scenario_balance_report.md`.
 Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
-spotter coverage, objective pressure, and reinforcement deltas.
+spotter coverage, breach-path distance, objective pressure, and reinforcement
+deltas.
 
 Evaluate scenarios in this order:
 
@@ -86,8 +90,8 @@ Evaluate scenarios in this order:
 Urban breach gates before scenario edits:
 
 - Check `urban breach tools` in `scenario_balance_report.md` before changing rosters.
-- `03_stalingrad_1942` currently flags Axis with artillery but no engineer; playtest whether AI artillery + engineer-aware scoring is enough before replacing an Axis infantry.
-- `east_10_berlin_1945` already gives the Soviet assault group one engineer and one artillery unit; tune turns or defenders only after confirming the engineer survives long enough to open dig-in.
+- `03_stalingrad_1942` now gives the Axis one engineer and one artillery unit, but `scenario_probe.md` still shows a long Axis breach path (`eng min 18`, `art 0/6`); playtest whether AI engineer approach scoring creates real breach decisions before further roster or turn-clock changes.
+- `east_10_berlin_1945` gives the Soviet assault group one engineer and one artillery unit, but `scenario_probe.md` still shows a long Soviet breach path (`eng min 17`, `art 0/3`); tune turns or defenders only after confirming the engineer survives and reaches dig-in targets in time.
 - Do not treat MG teams as breach tools. They are suppression support for the assault sequence.
 
 ## Workflow 5: AI Compatibility
@@ -100,6 +104,7 @@ Current role-shaping pass:
 - AT guns prefer armored targets over soft targets when damage is otherwise close.
 - Artillery avoids close positions near known enemies.
 - Engineers prefer entrenched urban/high-cover targets when their attack would remove dig-in.
+- Engineers can also move toward visible entrenched/high-cover breach targets before they are already in attack range.
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
 - Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.

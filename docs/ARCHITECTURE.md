@@ -148,7 +148,8 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - exposure
 - terrain defense
 - wounded/suppressed target focus
-- role shaping for scouts, AT and artillery
+- role shaping for scouts, AT, artillery and engineers
+- movement pressure toward objectives and visible breach targets
 - rally value when suppressed
 - overwatch value when no attack is better
 
@@ -200,12 +201,16 @@ AI-country conquest moves still use deterministic strategic resolution during `e
 
 `tools/validate_fast.sh`:
 
+- Godot 4.2 project-feature gate
 - JSON syntax checks
 - Python compile checks
 - `tools/validate_data.py`
 - balance report
 - scenario report
+- scenario report smoke checks
 - scenario probe
+- scenario breach-path smoke checks
+- tutorial probe
 - `git diff --check`
 
 `tools/validate_data.py` catches:
