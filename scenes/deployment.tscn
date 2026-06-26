@@ -22,9 +22,10 @@ anchor_bottom = 1.0
 mouse_filter = 2
 
 [node name="TopBar" type="Panel" parent="UI/Root"]
+anchor_right = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 1268.0
+offset_right = -12.0
 offset_bottom = 64.0
 mouse_filter = 1
 
@@ -38,9 +39,11 @@ text = "編成"
 vertical_alignment = 1
 
 [node name="Status" type="Label" parent="UI/Root/TopBar"]
-offset_left = 660.0
+anchor_left = 0.5
+anchor_right = 1.0
+offset_left = 20.0
 offset_top = 12.0
-offset_right = 1238.0
+offset_right = -30.0
 offset_bottom = 42.0
 theme_override_font_sizes/font_size = 15
 text = ""
@@ -48,15 +51,19 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="Body" type="HBoxContainer" parent="UI/Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = 78.0
-offset_right = 1268.0
-offset_bottom = 644.0
+offset_right = -12.0
+offset_bottom = -76.0
 mouse_filter = 2
-theme_override_constants/separation = 756
+theme_override_constants/separation = 12
 
 [node name="LeftPanel" type="Panel" parent="UI/Root/Body"]
 custom_minimum_size = Vector2(250, 560)
+size_flags_horizontal = 0
+size_flags_vertical = 3
 mouse_filter = 1
 modulate = Color(1, 1, 1, 0.86)
 
@@ -82,8 +89,14 @@ mouse_filter = 1
 custom_minimum_size = Vector2(224, 0)
 theme_override_constants/separation = 6
 
+[node name="MapSpacer" type="Control" parent="UI/Root/Body"]
+size_flags_horizontal = 3
+mouse_filter = 2
+
 [node name="RightPanel" type="Panel" parent="UI/Root/Body"]
 custom_minimum_size = Vector2(250, 560)
+size_flags_horizontal = 0
+size_flags_vertical = 3
 mouse_filter = 1
 modulate = Color(1, 1, 1, 0.88)
 
@@ -113,10 +126,14 @@ theme_override_font_sizes/normal_font_size = 14
 text = ""
 
 [node name="BottomBar" type="HBoxContainer" parent="UI/Root"]
-offset_left = 12.0
-offset_top = 658.0
-offset_right = 1268.0
-offset_bottom = 708.0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -550.0
+offset_top = -62.0
+offset_right = -12.0
+offset_bottom = -12.0
 alignment = 2
 theme_override_constants/separation = 14
 
