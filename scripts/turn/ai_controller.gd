@@ -22,6 +22,7 @@ const W_TERRAIN := 0.3
 const W_LOOKAHEAD := 1.0
 const W_SCOUT := 0.45
 const W_ARTILLERY_STANDOFF := 2.5
+const W_ARMOR_STANDOFF := 2.0
 const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
@@ -42,6 +43,7 @@ const ENGINEER_BREACH_TARGET_BONUS := 2.5
 const ENGINEER_HIGH_COVER_BONUS := 0.8
 const ENGINEER_BREACH_SETUP_BONUS := 1.4
 const BREACH_SETUP_BAND := 3
+const ARMOR_STANDOFF_SETUP_BAND := 2
 
 const DIFFICULTY_PROFILE := {
 	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false},
@@ -850,9 +852,37 @@ func _role_position_score(
 		score += _scout_position_score(pos, known, visible_enemies, atk_def)
 	if unit.type_id == "engineer":
 		score += _engineer_breach_position_score(pos, visible_enemies, atk_def)
+	if int(atk_def.get("armor_standoff_vs_armor_bonus", 0)) > 0:
+		score += _armor_standoff_position_score(pos, known, atk_def)
 	if atk_def.get("indirect", false):
 		score += _artillery_standoff_score(pos, known)
 	return score
+
+func _armor_standoff_position_score(pos: Vector2i, known: Array, atk_def: Dictionary) -> float:
+	var min_range := int(atk_def.get("armor_standoff_min_range", 0))
+	var standoff_bonus := int(atk_def.get("armor_standoff_vs_armor_bonus", 0))
+	var weapon_range := int(atk_def.get("range", 1))
+	if min_range <= 1 or standoff_bonus <= 0 or weapon_range < min_range:
+		return 0.0
+	var score := 0.0
+	var best_setup := 0.0
+	for k in known:
+		var enemy = k.get("unit", null)
+		if enemy == null:
+			continue
+		var enemy_def: Dictionary = _get_unit_def(enemy.type_id)
+		if int(enemy_def.get("armor", 0)) <= 0:
+			continue
+		var d: int = HexCoord.distance(pos, k["coord"])
+		if d < min_range:
+			score -= W_ARMOR_STANDOFF * float(min_range - d + 1)
+		elif d <= weapon_range:
+			best_setup = max(best_setup, W_ARMOR_STANDOFF + float(standoff_bonus) * 0.4)
+		elif d <= weapon_range + ARMOR_STANDOFF_SETUP_BAND:
+			var setup: float = float(weapon_range + ARMOR_STANDOFF_SETUP_BAND + 1 - d) \
+				* W_ARMOR_STANDOFF * 0.5
+			best_setup = max(best_setup, setup)
+	return score + best_setup
 
 func _engineer_breach_position_score(
 	pos: Vector2i,

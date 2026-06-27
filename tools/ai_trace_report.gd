@@ -208,6 +208,16 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"notes": "MG reaction-fire profile should appear in overwatch candidate scores.",
 		},
 		{
+			"id": "tank_destroyer_standoff",
+			"title": "Tank destroyer standoff",
+			"difficulty": "normal",
+			"attacker": _unit("tank_destroyer", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("medium_tank", "allies", Vector2i(3, 0), data_loader), "visible": true},
+			],
+			"notes": "Tank destroyers should prefer the authored anti-armor standoff band over adjacent armor contact.",
+		},
+		{
 			"id": "secondary_objective_pull",
 			"title": "Secondary objective pull",
 			"difficulty": "normal",

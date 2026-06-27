@@ -36,6 +36,11 @@ const MG_DEF := {
 	"id": "mg_team", "hp": 8, "attack": 6, "defense": 1, "range": 1, "move": 2,
 	"vision": 3, "vs_armor": 0, "armor": 0, "overwatch_damage_pct": 100,
 }
+const TANK_DESTROYER_DEF := {
+	"id": "tank_destroyer", "hp": 12, "attack": 5, "defense": 4, "range": 2, "move": 3,
+	"vision": 3, "vs_armor": 7, "armor": 3,
+	"armor_standoff_min_range": 2, "armor_standoff_vs_armor_bonus": 2,
+}
 
 class StubHexMap:
 	var terrain_overrides: Dictionary = {}
@@ -69,6 +74,7 @@ class StubDataLoader:
 		"infantry": {"hp": 10, "attack": 4, "defense": 2, "range": 1, "move": 3, "vision": 3, "vs_armor": 1, "armor": 0},
 		"mg_team": MG_DEF,
 		"medium_tank": {"hp": 16, "attack": 7, "defense": 5, "range": 1, "move": 4, "vision": 4, "vs_armor": 4, "armor": 4},
+		"tank_destroyer": TANK_DESTROYER_DEF,
 		"at_gun": AT_DEF,
 		"artillery": ARTILLERY_DEF,
 		"light_tank": LIGHT_TANK_DEF,
@@ -558,7 +564,34 @@ func _init() -> void:
 			% [toward_urban, toward_plain]
 		)
 
-	# 17) Engineers should prepare a breach when a follow-up attacker can use the extra dig-in loss.
+	# 17) Tank destroyers should preserve authored standoff range against armor.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var td := make_unit("tank_destroyer", "axis", Vector2i(0, 0), 12)
+	var armor_target := make_unit("medium_tank", "allies", Vector2i(3, 0), 16)
+	var td_known := [{"coord": armor_target.coord, "visible": true, "unit": armor_target}]
+	var td_visible := [armor_target]
+	var adjacent_score: float = ai._score_position(
+		td, Vector2i(2, 0), td_known, td_visible,
+		battle.hex_map, TANK_DESTROYER_DEF, {armor_target.coord: true}
+	)
+	var standoff_score: float = ai._score_position(
+		td, Vector2i(1, 0), td_known, td_visible,
+		battle.hex_map, TANK_DESTROYER_DEF, {armor_target.coord: true}
+	)
+	if standoff_score > adjacent_score:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: tank destroyer should prefer standoff range, standoff %.2f adjacent %.2f"
+			% [standoff_score, adjacent_score]
+		)
+
+	# 18) Engineers should prepare a breach when a follow-up attacker can use the extra dig-in loss.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -594,7 +627,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should not mark breach while skill is on cooldown")
 
-	# 18) Plan trace should explain the same selected plan without changing the decision.
+	# 19) Plan trace should explain the same selected plan without changing the decision.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()

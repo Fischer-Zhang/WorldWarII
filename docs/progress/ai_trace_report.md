@@ -89,6 +89,19 @@ Plan: `overwatch` to `0,0`, target `none`, score `3.00`.
 | 4 | `2,-2` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 | 5 | `0,2` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
+## Tank destroyer standoff
+Tank destroyers should prefer the authored anti-armor standoff band over adjacent armor contact.
+
+Plan: `attack` to `1,0`, target `medium_tank@3,0`, score `32.20`.
+
+| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `1,0` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `1,2` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `3,-2` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `2,-1` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `1,1` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+
 ## Secondary objective pull
 Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.
 
