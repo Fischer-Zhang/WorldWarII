@@ -47,8 +47,8 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| axis | Axis | player | 7 | 294.2 | anti_armor:1, armor:2, artillery:2, infantry:1, scout_armor:1 |
-| allies | Allies | ai | 8 | 295.4 | anti_armor:2, armor:2, artillery:1, infantry:2, support:1 |
+| axis | Axis | player | 7 | 297.4 | anti_armor:1, armor:2, artillery:2, infantry:1, scout_armor:1 |
+| allies | Allies | ai | 8 | 298.6 | anti_armor:2, armor:2, artillery:1, infantry:2, support:1 |
 
 ## 01_sedan_1940
 
@@ -61,7 +61,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| axis | 德軍裝甲群 | player | 8 | 322.9 | anti_armor:1, armor:3, artillery:2, infantry:2 |
+| axis | 德軍裝甲群 | player | 8 | 326.1 | anti_armor:1, armor:3, artillery:2, infantry:2 |
 | soviet | 蘇軍殘部 | ai | 8 | 246.5 | anti_armor:2, armor:1, infantry:3, scout_armor:1, support:1 |
 
 ## 03_stalingrad_1942
@@ -69,20 +69,20 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍第 62 軍團 | player | 8 | 212.2 | anti_armor:2, artillery:1, infantry:3, support:2 |
-| axis | 德軍第六軍團 | ai | 8 | 267.6 | anti_armor:1, armor:1, artillery:1, engineer:1, infantry:2, scout_armor:1, support:1 |
+| axis | 德軍第六軍團 | ai | 8 | 270.8 | anti_armor:1, armor:1, artillery:1, engineer:1, infantry:2, scout_armor:1, support:1 |
 
 ## 04_kursk_1943
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| axis | 德軍第四裝甲軍 | player | 9 | 417.8 | anti_armor:1, armor:5, artillery:1, infantry:1, scout_armor:1 |
-| soviet | 蘇軍中央方面軍 | ai | 11 | 393.6 | anti_armor:5, armor:3, artillery:1, infantry:2 |
+| axis | 德軍第四裝甲軍 | player | 9 | 421.0 | anti_armor:1, armor:5, artillery:1, infantry:1, scout_armor:1 |
+| soviet | 蘇軍中央方面軍 | ai | 11 | 396.8 | anti_armor:5, armor:3, artillery:1, infantry:2 |
 
 ## 05_bastogne_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美 101 空降師 | player | 11 | 361.3 | anti_armor:2, armor:2, artillery:1, engineer:1, infantry:4, support:1 |
+| allies | 美 101 空降師 | player | 11 | 364.5 | anti_armor:2, armor:2, artillery:1, engineer:1, infantry:4, support:1 |
 | axis | 德軍第 5 裝甲軍 | ai | 7 | 310.5 | armor:4, artillery:1, infantry:2 |
 
 ## 06_market_garden_1944
@@ -90,14 +90,14 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | allies | 美 82 空降師 | player | 10 | 320.6 | anti_armor:1, armor:2, artillery:1, engineer:1, infantry:4, support:1 |
-| axis | 德軍第 9 SS 裝甲 | ai | 8 | 285.6 | anti_armor:2, armor:2, artillery:1, infantry:2, support:1 |
+| axis | 德軍第 9 SS 裝甲 | ai | 8 | 288.8 | anti_armor:2, armor:2, artillery:1, infantry:2, support:1 |
 
 ## 07_bagration_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍第 1 白俄方面軍 | player | 12 | 471.7 | anti_armor:1, armor:5, artillery:2, infantry:3, support:1 |
-| axis | 德軍中央集團軍 | ai | 9 | 302.6 | anti_armor:4, armor:1, artillery:1, infantry:2, support:1 |
+| axis | 德軍中央集團軍 | ai | 9 | 309.0 | anti_armor:4, armor:1, artillery:1, infantry:2, support:1 |
 
 ## blitz_00_poland_1939
 
@@ -194,7 +194,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| axis | 德軍南方集團軍群 | player | 9 | 391.6 | anti_armor:1, armor:4, artillery:1, infantry:2, scout_armor:1 |
+| axis | 德軍南方集團軍群 | player | 9 | 394.8 | anti_armor:1, armor:4, artillery:1, infantry:2, scout_armor:1 |
 | soviet | 蘇軍沃羅涅日方面軍 | ai | 7 | 243.6 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
 
 ## east_09_seelow_1945
@@ -202,14 +202,14 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍第 1 白俄方面軍 | player | 7 | 290.7 | armor:3, artillery:2, infantry:2 |
-| axis | 德軍第 9 集團軍 | ai | 7 | 208.7 | anti_armor:3, artillery:1, infantry:2, support:1 |
+| axis | 德軍第 9 集團軍 | ai | 7 | 211.9 | anti_armor:3, artillery:1, infantry:2, support:1 |
 
 ## east_10_berlin_1945
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | soviet | 蘇軍突擊群 | player | 6 | 228.4 | armor:2, artillery:1, engineer:1, infantry:2 |
-| axis | 柏林守備隊 | ai | 9 | 284.0 | anti_armor:2, armor:1, artillery:1, infantry:3, support:2 |
+| axis | 柏林守備隊 | ai | 9 | 287.2 | anti_armor:2, armor:1, artillery:1, infantry:3, support:2 |
 
 ## tut_00_basic_turn
 
@@ -243,7 +243,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 裝甲教學隊 | player | 3 | 120.8 | anti_armor:2, armor:1 |
+| allies | 裝甲教學隊 | player | 3 | 124.0 | anti_armor:2, armor:1 |
 | axis | 裝甲目標 | ai | 3 | 144.1 | armor:2, infantry:1 |
 
 ## tut_05_airdrop_reinforcement_rocket
@@ -257,40 +257,40 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 盟軍封鎖部隊 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 德軍撤退縱隊 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 盟軍封鎖部隊 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 德軍撤退縱隊 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_08_normandy_cobra_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美軍第 3 裝甲師 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 德軍諾曼第防線 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 美軍第 3 裝甲師 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 德軍諾曼第防線 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_09_aachen_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美軍第 1 步兵師 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 亞琛守備隊 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 美軍第 1 步兵師 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 亞琛守備隊 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_09_hurtgen_1944
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美軍步兵師 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 德軍森林防線 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 美軍步兵師 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 德軍森林防線 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_10_remagen_1945
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 美軍第 9 裝甲師 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 德軍萊茵防線 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 美軍第 9 裝甲師 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 德軍萊茵防線 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_11_colmar_1945
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
-| allies | 法美聯軍 | player | 7 | 261.0 | anti_armor:2, armor:2, artillery:1, infantry:2 |
-| axis | 德軍第 19 軍 | ai | 7 | 233.7 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+| allies | 法美聯軍 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
+| axis | 德軍第 19 軍 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |

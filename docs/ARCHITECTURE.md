@@ -96,13 +96,14 @@ Damage formula:
 ```text
 base = max(1, attacker.attack
               + attacker.vs_armor if defender.armor > 0
+              + attacker.armor_standoff_vs_armor_bonus if standoff rule applies
               - defender.defense
               - defender_terrain.defense)
 
 damage = max(1, round(base * attacker.hp / attacker.max_hp))
 ```
 
-`CombatResolver.resolve` also handles counter-damage, dig-in, suppression side effects and active modifier dictionaries. Artillery/indirect units do not counter while defending, but they can still be countered if they attack from close range.
+`CombatResolver.resolve` also handles counter-damage, dig-in, suppression side effects, standoff anti-armor bonuses and active modifier dictionaries. Artillery/indirect units do not counter while defending, but they can still be countered if they attack from close range.
 
 `CombatRules` owns attack legality:
 

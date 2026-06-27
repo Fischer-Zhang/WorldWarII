@@ -69,6 +69,7 @@ Target identities:
 - Infantry: durable terrain holder and ZoC anchor.
 - MG team: anti-infantry overwatch and static fire support; MG overwatch uses full reaction-fire damage while normal overwatch remains half damage.
 - AT gun: anti-armor specialist with weak soft-target pressure.
+- Tank destroyer: mobile anti-armor ambusher; it gets extra anti-armor only when firing from its authored standoff range.
 - Light tank: scouting, flanking, capture pressure, wounded-target cleanup.
 - Medium tank: general-purpose armored mainstay.
 - Artillery: long-range suppression with clear close-range vulnerability.

@@ -80,7 +80,8 @@ def unit_power(unit_type: str, units: dict[str, Any]) -> float:
     rng = float(data.get("range", 1))
     vs_armor = float(data.get("vs_armor", 0))
     indirect_bonus = 4.0 if data.get("indirect", False) else 0.0
-    return hp + attack * 2.0 + defense * 1.5 + armor * 1.5 + move * 0.8 + vision * 0.5 + (rng - 1.0) * 2.0 + vs_armor * 0.8 + indirect_bonus
+    standoff_bonus = float(data.get("armor_standoff_vs_armor_bonus", 0)) * 0.6
+    return hp + attack * 2.0 + defense * 1.5 + armor * 1.5 + move * 0.8 + vision * 0.5 + (rng - 1.0) * 2.0 + vs_armor * 0.8 + standoff_bonus + indirect_bonus
 
 
 def initial_units(scenario: dict[str, Any]) -> list[dict[str, Any]]:

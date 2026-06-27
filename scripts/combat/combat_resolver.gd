@@ -36,7 +36,7 @@ static func resolve(
 	var out := Result.new()
 	out.damage_to_defender = _compute_damage(
 		atk_def, def_def, attacker_hp, defender_terrain_def, false,
-		defender_dig_in, attacker_mods, defender_mods
+		defender_dig_in, attacker_mods, defender_mods, distance
 	)
 	var defender_hp_after := defender_hp - out.damage_to_defender
 	out.defender_dies = defender_hp_after <= 0
@@ -57,7 +57,7 @@ static func resolve(
 			1,
 			_compute_damage(
 				def_def, atk_def, defender_hp_after, attacker_terrain_def, true,
-				0, defender_mods, attacker_mods
+				0, defender_mods, attacker_mods, distance
 			)
 		)
 		out.attacker_dies = (attacker_hp - out.counter_damage) <= 0
@@ -72,11 +72,14 @@ static func _compute_damage(
 	defender_dig_in: int = 0,
 	atk_mods: Dictionary = {},
 	def_mods: Dictionary = {},
+	distance: int = 1,
 ) -> int:
 	var atk: int = int(atk_def.get("attack", 0)) + int(atk_mods.get("attack", 0))
 	var bonus := 0
 	if int(def_def.get("armor", 0)) > 0:
 		bonus = int(atk_def.get("vs_armor", 0)) + int(atk_mods.get("vs_armor", 0))
+		if distance >= int(atk_def.get("armor_standoff_min_range", 9999)):
+			bonus += int(atk_def.get("armor_standoff_vs_armor_bonus", 0))
 	var def_val: int = int(def_def.get("defense", 0)) + int(def_mods.get("defense", 0)) + defender_dig_in
 	var terrain_def := int(defender_terrain_def.get("defense", 0))
 	var base: int = max(1, atk + bonus - def_val - terrain_def)

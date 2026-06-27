@@ -152,6 +152,11 @@ static func _unit_table(units: Dictionary) -> String:
 		parts.append("移動 %d" % int(u.get("move", 0)))
 		if int(u.get("vs_armor", 0)) > 0:
 			parts.append("反裝甲 %d" % int(u.get("vs_armor", 0)))
+		if int(u.get("armor_standoff_vs_armor_bonus", 0)) > 0:
+			parts.append("伏擊反裝甲 +%d@%d格" % [
+				int(u.get("armor_standoff_vs_armor_bonus", 0)),
+				int(u.get("armor_standoff_min_range", 0)),
+			])
 		if int(u.get("armor", 0)) > 0:
 			parts.append("裝甲 %d" % int(u.get("armor", 0)))
 		if bool(u.get("indirect", false)):

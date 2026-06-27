@@ -15,6 +15,9 @@ func _init() -> void:
 	var medium_tank := {
 		"id": "medium_tank", "hp": 16, "attack": 7, "defense": 5, "range": 1, "vs_armor": 4, "armor": 4
 	}
+	var armored_scout := {
+		"id": "light_tank", "hp": 12, "attack": 5, "defense": 4, "range": 2, "vs_armor": 2, "armor": 2
+	}
 	var at_gun := {
 		"id": "at_gun", "hp": 6, "attack": 7, "defense": 1, "range": 1, "vs_armor": 5, "armor": 0
 	}
@@ -27,6 +30,10 @@ func _init() -> void:
 	var artillery := {
 		"id": "artillery", "hp": 8, "attack": 8, "defense": 1, "range": 3, "vs_armor": 2, "armor": 0,
 		"indirect": true
+	}
+	var tank_destroyer := {
+		"id": "tank_destroyer", "hp": 12, "attack": 5, "defense": 4, "range": 2, "vs_armor": 7, "armor": 3,
+		"armor_standoff_min_range": 2, "armor_standoff_vs_armor_bonus": 2,
 	}
 	var plain := {"defense": 0}
 	var forest := {"defense": 2}
@@ -211,6 +218,27 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: suppress_counter expected dmg=2 counter=0 got dmg=%d counter=%d" % [
 			r18.damage_to_defender, r18.counter_damage
+		])
+
+	# 19) Tank destroyers get extra anti-armor only when preserving standoff range.
+	var r19_close := CombatResolver.resolve(tank_destroyer, medium_tank, 12, 16, plain, plain, 1)
+	var r19_standoff := CombatResolver.resolve(tank_destroyer, medium_tank, 12, 16, plain, plain, 2)
+	var r19_defensive_close := CombatResolver.resolve(armored_scout, tank_destroyer, 12, 12, plain, plain, 1)
+	var r19_defensive_standoff := CombatResolver.resolve(armored_scout, tank_destroyer, 12, 12, plain, plain, 2)
+	if r19_close.damage_to_defender == 7 \
+			and r19_standoff.damage_to_defender == 9 \
+			and r19_close.counter_damage > 0 \
+			and r19_standoff.counter_damage == 0 \
+			and r19_defensive_close.counter_damage == 3 \
+			and r19_defensive_standoff.counter_damage == 4:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tank destroyer standoff expected close 7/counter>0, range2 9/no counter, defensive counters 3/4 got %d/%d, %d/%d, defensive %d/%d" % [
+			r19_close.damage_to_defender, r19_close.counter_damage,
+			r19_standoff.damage_to_defender, r19_standoff.counter_damage,
+			r19_defensive_close.counter_damage,
+			r19_defensive_standoff.counter_damage,
 		])
 
 	print("CombatResolver tests: %d pass, %d fail" % [pass_count, fail_count])

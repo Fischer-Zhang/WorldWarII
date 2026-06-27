@@ -73,6 +73,7 @@ def compute_damage(
     defender_terrain_id: str = "plain",
     defender_dig_in: int = 0,
     is_counter: bool = False,
+    distance: int = 1,
 ) -> int:
     attacker = units[attacker_id]
     defender = units[defender_id]
@@ -80,6 +81,8 @@ def compute_damage(
         attacker_hp = int(attacker.get("hp", 1))
 
     armor_bonus = int(attacker.get("vs_armor", 0)) if int(defender.get("armor", 0)) > 0 else 0
+    if armor_bonus > 0 and distance >= int(attacker.get("armor_standoff_min_range", 9999)):
+        armor_bonus += int(attacker.get("armor_standoff_vs_armor_bonus", 0))
     defender_defense = int(defender.get("defense", 0)) + defender_dig_in
     terrain_defense = int(terrains[defender_terrain_id].get("defense", 0))
     base = max(1, int(attacker.get("attack", 0)) + armor_bonus - defender_defense - terrain_defense)
@@ -142,6 +145,7 @@ def resolve(
         attacker_hp=attacker_hp,
         defender_terrain_id=defender_terrain_id,
         defender_dig_in=defender_dig_in,
+        distance=distance,
     )
     defender_after = defender_hp - damage
     defender_dies = defender_after <= 0
@@ -160,6 +164,7 @@ def resolve(
             attacker_hp=defender_after,
             defender_terrain_id=attacker_terrain_id,
             is_counter=True,
+            distance=distance,
         )
         attacker_dies = attacker_hp - counter <= 0
 
@@ -211,13 +216,17 @@ def unit_stat_table(units: dict[str, Any]) -> str:
                 unit.get("move", 0),
                 unit.get("vision", 0),
                 unit.get("vs_armor", 0),
+                "%s@%s" % (
+                    unit.get("armor_standoff_vs_armor_bonus", 0),
+                    unit.get("armor_standoff_min_range", ""),
+                ) if int(unit.get("armor_standoff_vs_armor_bonus", 0)) > 0 else "",
                 unit.get("armor", 0),
                 unit.get("overwatch_damage_pct", 50),
                 "yes" if unit.get("indirect", False) else "",
             ]
         )
     return table(
-        ["id", "name", "hp", "atk", "def", "rng", "move", "vision", "vs armor", "armor", "ow%", "indirect"],
+        ["id", "name", "hp", "atk", "def", "rng", "move", "vision", "vs armor", "standoff", "armor", "ow%", "indirect"],
         rows,
     )
 
@@ -373,7 +382,18 @@ def baseline_delta_section(
 
 
 def unit_delta_table(units: dict[str, Any], baseline_units: dict[str, Any]) -> str:
-    stat_keys = ["hp", "attack", "defense", "range", "move", "vision", "vs_armor", "armor"]
+    stat_keys = [
+        "hp",
+        "attack",
+        "defense",
+        "range",
+        "move",
+        "vision",
+        "vs_armor",
+        "armor",
+        "armor_standoff_min_range",
+        "armor_standoff_vs_armor_bonus",
+    ]
     defaults = {"overwatch_damage_pct": 50}
     unit_keys = stat_keys + ["overwatch_damage_pct"]
     rows: list[list[Any]] = []

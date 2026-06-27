@@ -110,6 +110,18 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
                 fail(errors, path, f"unit {unit_id!r} has negative {key!r}")
         if int(unit.get("hp", 0)) <= 0:
             fail(errors, path, f"unit {unit_id!r} hp must be positive")
+        if "armor_standoff_vs_armor_bonus" in unit or "armor_standoff_min_range" in unit:
+            try:
+                bonus = int(unit.get("armor_standoff_vs_armor_bonus", 0))
+                min_range = int(unit.get("armor_standoff_min_range", 0))
+                if bonus <= 0:
+                    fail(errors, path, f"unit {unit_id!r} armor_standoff_vs_armor_bonus must be positive")
+                if min_range <= 0:
+                    fail(errors, path, f"unit {unit_id!r} armor_standoff_min_range must be positive")
+                if min_range > int(unit.get("range", 1)):
+                    fail(errors, path, f"unit {unit_id!r} armor_standoff_min_range exceeds range")
+            except (TypeError, ValueError):
+                fail(errors, path, f"unit {unit_id!r} armor standoff fields must be integers")
         if "overwatch_damage_pct" in unit and int(unit.get("overwatch_damage_pct", 0)) <= 0:
             fail(errors, path, f"unit {unit_id!r} overwatch_damage_pct must be positive")
         req = unit.get("requires_tech")
