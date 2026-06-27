@@ -28,6 +28,11 @@ def main() -> None:
         "scenario probe missing conquest secondary coverage section",
     )
     require(
+        "## Gameplay Depth Coverage" in report
+        and "| scenario | secondary objectives | xp-only objectives | enriched objectives | check |" in report,
+        "scenario probe missing gameplay depth coverage section",
+    )
+    require(
         "03_stalingrad_1942" in report
         and "axis: eng min 7, art 0/6, targets 6" in report,
         "Stalingrad breach probe should show forward Axis engineer approach",
@@ -121,6 +126,28 @@ def main() -> None:
         "| conq_cbi_jungle | 1 | 1 | -2 | covered |" in report
         and "| conq_atlantic_convoy | 1 | 1 | -1 | covered |" in report,
         "Conquest secondary coverage should expose enemy-strength pressure amounts",
+    )
+    depth_section = report.split("## Gameplay Depth Coverage", 1)[1]
+    depth_rows = [
+        line for line in depth_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| scenario |")
+    ]
+    require(len(depth_rows) == 19, "Gameplay depth coverage should include every main battle")
+    require(
+        not any("| missing secondary |" in line for line in depth_rows),
+        "Every main battle should have secondary objective pressure",
+    )
+    require(
+        any("| xp-only |" in line for line in depth_rows)
+        and any("| covered |" in line for line in depth_rows),
+        "Gameplay depth coverage should expose XP-only and enriched objective states",
+    )
+    require(
+        "| west_08_normandy_cobra_1944 | 2 | 2 | 0 | xp-only |" in report
+        and "| east_10_berlin_1945 | 2 | 0 | 2 | covered |" in report,
+        "Gameplay depth coverage should expose XP-only and enriched objective counts",
     )
     print("Scenario probe checks passed")
 

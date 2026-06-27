@@ -115,3 +115,29 @@ Focused gate for conquest templates: each conq_* battle should give optional obj
 | conq_north_sea_raid | 1 | 1 | -1 | covered |
 | conq_pacific_carrier | 1 | 1 | -1 | covered |
 | conq_pacific_island | 1 | 1 | -1 | covered |
+
+## Gameplay Depth Coverage
+
+Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.
+
+| scenario | secondary objectives | xp-only objectives | enriched objectives | check |
+| --- | --- | --- | --- | --- |
+| 01_sedan_1940 | 2 | 2 | 0 | xp-only |
+| 02_kiev_1941 | 2 | 1 | 1 | covered |
+| 03_stalingrad_1942 | 1 | 0 | 1 | covered |
+| 04_kursk_1943 | 2 | 2 | 0 | xp-only |
+| 05_bastogne_1944 | 1 | 1 | 0 | xp-only |
+| 06_market_garden_1944 | 2 | 2 | 0 | xp-only |
+| 07_bagration_1944 | 2 | 1 | 1 | covered |
+| blitz_00_poland_1939 | 2 | 2 | 0 | xp-only |
+| blitz_02_dunkirk_1940 | 2 | 1 | 1 | covered |
+| blitz_03_moscow_1941 | 2 | 2 | 0 | xp-only |
+| east_05_kharkov_1943 | 2 | 2 | 0 | xp-only |
+| east_09_seelow_1945 | 2 | 2 | 0 | xp-only |
+| east_10_berlin_1945 | 2 | 0 | 2 | covered |
+| west_08_falaise_1944 | 1 | 0 | 1 | covered |
+| west_08_normandy_cobra_1944 | 2 | 2 | 0 | xp-only |
+| west_09_aachen_1944 | 1 | 0 | 1 | covered |
+| west_09_hurtgen_1944 | 1 | 0 | 1 | covered |
+| west_10_remagen_1945 | 1 | 0 | 1 | covered |
+| west_11_colmar_1945 | 1 | 0 | 1 | covered |

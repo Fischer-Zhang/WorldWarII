@@ -609,6 +609,69 @@ def conquest_secondary_check_text(objective_count: int, strategic_objectives: in
     return "covered"
 
 
+def gameplay_depth_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not is_main_battle_scenario(scenario_id):
+            continue
+        objectives = [
+            objective
+            for objective in scenario.get("secondary_objectives", [])
+            if isinstance(objective, dict)
+        ]
+        xp_only = sum(1 for objective in objectives if is_xp_only_secondary(objective))
+        enriched = len(objectives) - xp_only
+        rows.append([
+            scenario_id,
+            len(objectives),
+            xp_only,
+            enriched,
+            gameplay_depth_check_text(len(objectives), xp_only),
+        ])
+    return rows
+
+
+def is_main_battle_scenario(scenario_id: str) -> bool:
+    return (
+        scenario_id != "00_sandbox"
+        and not scenario_id.startswith("tut_")
+        and not scenario_id.startswith("conq_")
+    )
+
+
+def is_xp_only_secondary(objective: dict[str, Any]) -> bool:
+    rewards = objective.get("rewards", [])
+    strategic_effects = objective.get("strategic_effects", [])
+    has_xp = int(objective.get("xp_reward", 0)) > 0
+    non_xp_reward = False
+    if isinstance(rewards, list):
+        for reward in rewards:
+            if not isinstance(reward, dict):
+                continue
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            reward_type = str(reward.get("type", ""))
+            if reward_type == "xp":
+                has_xp = True
+            else:
+                non_xp_reward = True
+    has_strategic = isinstance(strategic_effects, list) and any(
+        isinstance(effect, dict) and int(effect.get("amount", 0)) != 0
+        for effect in strategic_effects
+    )
+    return has_xp and not non_xp_reward and not has_strategic
+
+
+def gameplay_depth_check_text(objective_count: int, xp_only: int) -> str:
+    if objective_count <= 0:
+        return "missing secondary"
+    if xp_only == objective_count:
+        return "xp-only"
+    return "covered"
+
+
 def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:
     objective = scenario.get("victory", {}).get(faction_id, {})
     return str(objective.get("type", "")) in {"capture", "eliminate"}
@@ -935,6 +998,18 @@ def generate_report() -> str:
                 "check",
             ],
             conquest_secondary_coverage_rows(scenarios),
+        ),
+        "## Gameplay Depth Coverage",
+        "Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.",
+        table(
+            [
+                "scenario",
+                "secondary objectives",
+                "xp-only objectives",
+                "enriched objectives",
+                "check",
+            ],
+            gameplay_depth_coverage_rows(scenarios),
         ),
     ]
     return "\n\n".join(sections) + "\n"
