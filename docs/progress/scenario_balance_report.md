@@ -31,8 +31,15 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | east_06_dnieper_1943 | 第聶伯河橋頭堡 1943 | plain 65%, road 13%, forest 11%; def>=2 13%; move>=3 9% | soviet: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | soviet->9,5 min 6 avg 7.5 | 控制東岸渡口 [hold 2t 5,4] (XP 1, reinforce -2t); 偵察西岸觀測點 [recon 12,4] (XP 1, enemy dig -1 R2) | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
 | east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 7%; def>=2 14%; move>=3 8% | soviet: eng 0, art 1, rocket 1, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | soviet->18,3 min 21 avg 22.1 | 清除 MG 42 [destroy MG 42@19,2] (XP 1); 偵察砲兵觀測點 [recon 21,1] (XP 1) | force power ratio above 1.35: check victory-clock compensation; soviet artillery-heavy: watch standoff dominance |
 | east_10_berlin_1945 | 柏林終局 1945 | town 60%, plain 22%, road 18%; def>=2 60%; move>=3 0% | soviet: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 2 | soviet->19,4 min 9 avg 17.7 | 清除西側 MG 42 [destroy MG 42 a@18,3] (XP 1, repair 2, enemy supp +1 R2); 標定重砲陣地 [recon 22,2] (XP 1, enemy dig -1 R2, campaign +1p) | high town density: dig-in pacing risk |
+| north_00_gazala_1942 | 加查拉側翼戰 1942 | desert 74%, road 16%, mountain 8%; def>=2 11%; move>=3 8% | axis: eng 0, art 1, rocket 0, mg 0; allies: eng 0, art 1, rocket 0, mg 1 | axis->11,4 min 8 avg 10.3 | 偵察北側崖線 [recon 8,1] (XP 1, enemy supp +1 R2); 摧毀 6-pdr 反戰車砲 [destroy 6-pdr 反戰車砲@10,2] (XP 1, repair 2) | no major static risks |
 | north_01_el_alamein_1942 | 阿拉曼防線 1942 | desert 76%, road 14%, mountain 7%; def>=2 9%; move>=3 7% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 0 | n/a | 奪取綠洲補給 [capture 8,5] (XP 1, repair 2); 偵察北側山脊 [recon 10,2] (XP 1, enemy supp +1 R2) | no major static risks |
+| north_02_kasserine_1943 | 凱塞林山口 1943 | desert 67%, road 21%, mountain 10%; def>=2 12%; move>=3 10% | allies: eng 0, art 1, rocket 0, mg 1; axis: eng 0, art 1, rocket 0, mg 0 | axis->5,4 min 7 avg 9.0 | 守住山口補給 [hold 2t 5,4] (XP 1, reinforce -2t); 偵察南側山脊 [recon 10,6] (XP 1, enemy supp +1 R2) | no major static risks |
+| north_03_tunis_1943 | 突尼斯山口 1943 | desert 71%, road 18%, mountain 8%; def>=2 11%; move>=3 8% | allies: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 奪取山口補給站 [capture 8,5] (XP 1, repair 2); 摧毀山地遠程砲 [destroy 山地遠程砲@14,8] (XP 1, enemy supp +1 R2) | no major static risks |
 | pacific_01_guadalcanal_1942 | 瓜達康納爾叢林戰 1942 | plain 67%, jungle 14%, sea 11%; def>=2 18%; move>=3 11% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 奪取補給村 [capture 8,4] (XP 1, supp -2); 摧毀叢林機槍 [destroy 叢林機槍火點@12,6] (XP 1, enemy supp +1 R2) | no major static risks |
+| pacific_02_tarawa_1943 | 塔拉瓦灘頭 1943 | plain 64%, jungle 12%, sea 11%; def>=2 18%; move>=3 11% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.2 | 奪取棧橋補給 [capture 7,6] (XP 1, supp -2); 摧毀海堤機槍 [destroy 海堤機槍火點@10,4] (XP 1, enemy supp +1 R2) | no major static risks |
+| pacific_03_peleliu_1944 | 貝里琉機場 1944 | plain 61%, jungle 13%, road 9%; def>=2 21%; move>=3 12% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.0 | 摧毀洞窟機槍 [destroy 洞窟機槍火點@10,4] (XP 1, enemy supp +1 R2); 偵察北側山脊 [recon 12,2] (XP 1, enemy dig -1 R2) | no major static risks |
+| pacific_04_manila_1945 | 馬尼拉城區戰 1945 | plain 42%, town 28%, road 21%; def>=2 29%; move>=3 8% | allies: eng 1, art 1, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | n/a | 奪取醫院補給 [capture 8,5] (XP 1, supp -2); 標定城北砲位 [recon 12,2] (XP 1, enemy dig -1 R2, campaign +1p) | high town density: dig-in pacing risk; river crossings may dominate tempo; allies artillery-heavy: watch standoff dominance |
+| pacific_05_okinawa_1945 | 沖繩首里防線 1945 | plain 53%, road 18%, town 15%; def>=2 29%; move>=3 4% | allies: eng 1, art 1, rocket 2, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | n/a | 控制前進觀測所 [hold 2t 8,4] (XP 1, reinforce -2t); 摧毀首里機槍 [destroy 首里機槍火點@10,4] (XP 1, enemy supp +1 R2) | force power ratio above 1.35: check victory-clock compensation; allies artillery-heavy: watch standoff dominance |
 | tut_00_basic_turn | 教學 00: 移動、攻擊與佔領 | plain 88%, road 10%, town 2%; def>=2 2%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,2 min 5 avg 5.0 | none | force power ratio above 1.35: check victory-clock compensation |
 | tut_01_terrain_zoc_overwatch | 教學 01: 地形、管制區與警戒 | plain 81%, road 9%, forest 7%; def>=2 9%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 1; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,0 min 4 avg 4.7 | 道路檢查點 [capture 4,0] (XP 1) | no major static risks |
 | tut_02_los_spotting_artillery | 教學 02: 視線、觀測與間接火力 | plain 77%, forest 14%, road 9%; def>=2 14%; move>=3 0% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | n/a | none | force power ratio above 1.35: check victory-clock compensation |
@@ -222,6 +229,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | soviet | 蘇軍突擊群 | player | 6 | 228.4 | armor:2, artillery:1, engineer:1, infantry:2 |
 | axis | 柏林守備隊 | ai | 9 | 287.2 | anti_armor:2, armor:1, artillery:1, infantry:3, support:2 |
 
+## north_00_gazala_1942
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| axis | 德意非洲軍機動群 | player | 7 | 277.6 | anti_armor:2, armor:2, artillery:1, infantry:1, scout_armor:1 |
+| allies | 英軍沙漠縱隊 | ai | 7 | 243.6 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
+
 ## north_01_el_alamein_1942
 
 | faction | name | controller | units | power | roles |
@@ -229,12 +243,54 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | allies | 英軍第八軍團 | player | 7 | 277.6 | anti_armor:2, armor:2, artillery:1, infantry:1, scout_armor:1 |
 | axis | 德意非洲軍 | ai | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
 
+## north_02_kasserine_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍山口守備隊 | player | 10 | 353.6 | anti_armor:2, armor:2, artillery:1, infantry:3, scout_armor:1, support:1 |
+| axis | 德意裝甲突擊群 | ai | 8 | 303.3 | anti_armor:2, armor:2, artillery:1, infantry:2, scout_armor:1 |
+
+## north_03_tunis_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 盟軍突尼斯遠征隊 | player | 8 | 273.1 | anti_armor:2, armor:1, artillery:1, engineer:1, infantry:2, scout_armor:1 |
+| axis | 軸心山口守軍 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+
 ## pacific_01_guadalcanal_1942
 
 | faction | name | controller | units | power | roles |
 | --- | --- | --- | --- | --- | --- |
 | allies | 美國陸戰隊 | player | 6 | 168.9 | artillery:1, engineer:1, infantry:2, scout_armor:1, support:1 |
 | axis | 日軍守備隊 | ai | 6 | 165.5 | anti_armor:1, artillery:1, infantry:3, support:1 |
+
+## pacific_02_tarawa_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美國陸戰隊 | player | 6 | 168.9 | artillery:1, engineer:1, infantry:2, scout_armor:1, support:1 |
+| axis | 日軍環礁守備隊 | ai | 7 | 190.1 | anti_armor:1, artillery:1, infantry:3, support:2 |
+
+## pacific_03_peleliu_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美國陸戰隊 | player | 6 | 168.9 | artillery:1, engineer:1, infantry:2, scout_armor:1, support:1 |
+| axis | 日軍貝里琉守備隊 | ai | 7 | 190.1 | anti_armor:1, artillery:1, infantry:3, support:2 |
+
+## pacific_04_manila_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍第六軍 | player | 9 | 302.9 | anti_armor:1, armor:1, artillery:2, engineer:1, infantry:2, scout_armor:1, support:1 |
+| axis | 日軍馬尼拉守備隊 | ai | 8 | 242.0 | anti_armor:1, armor:1, artillery:1, infantry:3, support:2 |
+
+## pacific_05_okinawa_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美軍沖繩突擊群 | player | 12 | 412.6 | anti_armor:1, armor:2, artillery:3, engineer:1, infantry:3, scout_armor:1, support:1 |
+| axis | 日軍首里守備隊 | ai | 8 | 242.0 | anti_armor:1, armor:1, artillery:1, infantry:3, support:2 |
 
 ## tut_00_basic_turn
 

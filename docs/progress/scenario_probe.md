@@ -29,8 +29,15 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | east_06_dnieper_1943 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 29/160 (18%); soviet 37/160 (23%) | soviet 61/160 (38%), spots 0 | soviet: eng min 5, art 0/3, targets 3 | soviet: eng turns 2 | soviet: art move 0/3 | soviet target 9,5 own min 6 enemy min 1 | 控制東岸渡口 5,4 hold 2t min 1 XP 1, reinforce -2t; 偵察西岸觀測點 12,4 recon min 8 XP 1, enemy dig -1 R2 | soviet +77.6; T6 2 units |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 18,3 own min 21 enemy min 0 | 清除 MG 42 19,2 destroy min 22 XP 1; 偵察砲兵觀測點 21,1 recon min 25 XP 1 | none |
 | east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 56/384 (15%) | none | soviet: eng min 7, art 0/3, targets 3 | soviet: eng turns 3 | soviet: art move 1/3 | soviet target 19,4 own min 9 enemy min 0 | 清除西側 MG 42 18,3 destroy min 9 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon min 13 XP 1, enemy dig -1 R2, campaign +1p | none |
+| north_00_gazala_1942 | allies artillery:1, mg_team:1; axis artillery:1 | allies 32/160 (20%); axis 23/160 (14%) | axis 49/160 (31%), spots 0 | axis: eng none, art 0/4, targets 4 | axis: eng turns none | axis: art move 0/4 | axis target 11,4 own min 8 enemy min 0 | 偵察北側崖線 8,1 recon min 7 XP 1, enemy supp +1 R2; 摧毀 6-pdr 反戰車砲 10,2 destroy min 8 XP 1, repair 2 | none |
 | north_01_el_alamein_1942 | allies artillery:1; axis artillery:1 | allies 23/160 (14%); axis 26/160 (16%) | allies 49/160 (31%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 奪取綠洲補給 8,5 capture min 6 XP 1, repair 2; 偵察北側山脊 10,2 recon min 9 XP 1, enemy supp +1 R2 | none |
+| north_02_kasserine_1943 | allies artillery:1, mg_team:1; axis artillery:1 | allies 29/160 (18%); axis 26/160 (16%) | allies 68/160 (42%), spots 0; axis 57/160 (36%), spots 0 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 0/3 | axis target 5,4 own min 7 enemy min 0 | 守住山口補給 5,4 hold 2t min 0 XP 1, reinforce -2t; 偵察南側山脊 10,6 recon min 5 XP 1, enemy supp +1 R2 | allies +122.8; T6 3 units |
+| north_03_tunis_1943 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 55/160 (34%), spots 0 | allies: eng min 8, art 0/4, targets 4 | allies: eng turns 3 | allies: art move 0/4 | n/a | 奪取山口補給站 8,5 capture min 6 XP 1, repair 2; 摧毀山地遠程砲 14,8 destroy min 11 XP 1, enemy supp +1 R2 | none |
 | pacific_01_guadalcanal_1942 | allies mg_team:1; axis artillery:1, mg_team:1 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 9, art 0/4, targets 4 | allies: eng turns 4 | allies: art move 0/4 | n/a | 奪取補給村 8,4 capture min 6 XP 1, supp -2; 摧毀叢林機槍 12,6 destroy min 9 XP 1, enemy supp +1 R2 | none |
+| pacific_02_tarawa_1943 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 25/160 (16%); axis 34/160 (21%) | allies 68/160 (42%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 奪取棧橋補給 7,6 capture min 4 XP 1, supp -2; 摧毀海堤機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2 | none |
+| pacific_03_peleliu_1944 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 摧毀洞窟機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2; 偵察北側山脊 12,2 recon min 11 XP 1, enemy dig -1 R2 | none |
+| pacific_04_manila_1945 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 8, art 0/7, targets 7 | allies: eng turns 4 | allies: art move 0/7 | n/a | 奪取醫院補給 8,5 capture min 6 XP 1, supp -2; 標定城北砲位 12,2 recon min 11 XP 1, enemy dig -1 R2, campaign +1p | none |
+| pacific_05_okinawa_1945 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/5, targets 5 | allies: eng turns 4 | allies: art move 0/5 | n/a | 控制前進觀測所 8,4 hold 2t min 6 XP 1, reinforce -2t; 摧毀首里機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2 | allies +109.7; T6 3 units |
 | tut_00_basic_turn | none | none | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,2 own min 5 enemy min 0 | none | none |
 | tut_01_terrain_zoc_overwatch | allies mg_team:1 | none | axis 38/54 (70%), spots 3 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,0 own min 4 enemy min 2 | 道路檢查點 4,0 capture min 2 XP 1 | none |
 | tut_02_los_spotting_artillery | allies artillery:1 | allies 50/70 (71%) | allies 62/70 (89%), spots 2 | allies: eng none, art 1/1, targets 1 | allies: eng turns none | allies: art move 1/1 | n/a | none | none |
@@ -96,10 +103,24 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | east_09_seelow_1945 | 偵察砲兵觀測點 | recon 21,1 | soviet | own 25 / enemy 0 | XP 1 | enemy closer |
 | east_10_berlin_1945 | 清除西側 MG 42 | destroy 18,3 | soviet | own 9 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2 |
 | east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| north_00_gazala_1942 | 偵察北側崖線 | recon 8,1 | axis | own 7 / enemy 2 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| north_00_gazala_1942 | 摧毀 6-pdr 反戰車砲 | destroy 10,2 | axis | own 8 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
 | north_01_el_alamein_1942 | 奪取綠洲補給 | capture 8,5 | allies | own 6 / enemy 3 | XP 1, repair 2 | enemy closer; damage recovery |
 | north_01_el_alamein_1942 | 偵察北側山脊 | recon 10,2 | allies | own 9 / enemy 2 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| north_02_kasserine_1943 | 守住山口補給 | hold 2t 5,4 | allies | own 0 / enemy 7 | XP 1, reinforce -2t | starts held; reinforce best T6->T4 |
+| north_02_kasserine_1943 | 偵察南側山脊 | recon 10,6 | allies | own 5 / enemy 1 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| north_03_tunis_1943 | 奪取山口補給站 | capture 8,5 | allies | own 6 / enemy 2 | XP 1, repair 2 | enemy closer; damage recovery |
+| north_03_tunis_1943 | 摧毀山地遠程砲 | destroy 14,8 | allies | own 11 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_01_guadalcanal_1942 | 奪取補給村 | capture 8,4 | allies | own 6 / enemy 4 | XP 1, supp -2 | enemy closer; sustain reward |
 | pacific_01_guadalcanal_1942 | 摧毀叢林機槍 | destroy 12,6 | allies | own 9 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| pacific_02_tarawa_1943 | 奪取棧橋補給 | capture 7,6 | allies | own 4 / enemy 3 | XP 1, supp -2 | enemy closer; sustain reward |
+| pacific_02_tarawa_1943 | 摧毀海堤機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| pacific_03_peleliu_1944 | 摧毀洞窟機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| pacific_03_peleliu_1944 | 偵察北側山脊 | recon 12,2 | allies | own 11 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
+| pacific_04_manila_1945 | 奪取醫院補給 | capture 8,5 | allies | own 6 / enemy 2 | XP 1, supp -2 | enemy closer; sustain reward |
+| pacific_04_manila_1945 | 標定城北砲位 | recon 12,2 | allies | own 11 / enemy 2 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| pacific_05_okinawa_1945 | 控制前進觀測所 | hold 2t 8,4 | allies | own 6 / enemy 2 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
+| pacific_05_okinawa_1945 | 摧毀首里機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
 | west_08_falaise_1944 | 封鎖撤退道路 | recon 22,11 | allies | own 19 / enemy 0 | XP 1, enemy supp +1 R1 | enemy closer; tactical suppression reward R1 |
 | west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1 | enemy closer |
@@ -148,8 +169,15 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | east_06_dnieper_1943 | 2 | 0 | 2 | covered |
 | east_09_seelow_1945 | 2 | 2 | 0 | xp-only |
 | east_10_berlin_1945 | 2 | 0 | 2 | covered |
+| north_00_gazala_1942 | 2 | 0 | 2 | covered |
 | north_01_el_alamein_1942 | 2 | 0 | 2 | covered |
+| north_02_kasserine_1943 | 2 | 0 | 2 | covered |
+| north_03_tunis_1943 | 2 | 0 | 2 | covered |
 | pacific_01_guadalcanal_1942 | 2 | 0 | 2 | covered |
+| pacific_02_tarawa_1943 | 2 | 0 | 2 | covered |
+| pacific_03_peleliu_1944 | 2 | 0 | 2 | covered |
+| pacific_04_manila_1945 | 2 | 0 | 2 | covered |
+| pacific_05_okinawa_1945 | 2 | 0 | 2 | covered |
 | west_08_falaise_1944 | 1 | 0 | 1 | covered |
 | west_08_normandy_cobra_1944 | 2 | 2 | 0 | xp-only |
 | west_08_pegasus_bridge_1944 | 2 | 0 | 2 | covered |
@@ -166,6 +194,6 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | --- | --- | --- | --- | --- | --- |
 | blitzkrieg_early_war | 5 | capture:3, eliminate:1, survive:1 | river:3 | scout:2 | tracked |
 | eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
-| north_africa | 1 | eliminate:1 | desert:1 | scout:1 | tracked |
-| pacific_front | 1 | eliminate:1 | jungle:1, sea:1 | scout:1, engineer:1 | tracked |
+| north_africa | 4 | capture:1, eliminate:2, survive:1 | desert:4 | reinforcement:1, scout:4, engineer:1 | tracked |
+| pacific_front | 5 | capture:2, eliminate:3 | jungle:4, sea:3, river:1, town:3 | reinforcement:1, scout:5, engineer:5 | tracked |
 | western_front | 9 | capture:8, survive:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |

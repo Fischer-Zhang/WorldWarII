@@ -36,17 +36,24 @@
     ]
   },
   "north_africa": {
-    "title": "北非沙漠戰 1942",
-    "description": "從阿拉曼防線開始,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",
+    "title": "北非沙漠戰 1942-1943",
+    "description": "從加查拉側翼機動、阿拉曼突破到凱塞林山口防禦,再推進至突尼斯山口,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",
     "scenario_order": [
-      "north_01_el_alamein_1942"
+      "north_00_gazala_1942",
+      "north_01_el_alamein_1942",
+      "north_02_kasserine_1943",
+      "north_03_tunis_1943"
     ]
   },
   "pacific_front": {
-    "title": "太平洋島嶼戰 1942",
-    "description": "以叢林、海岸與構工火點為主的太平洋正式戰役,強調偵察、火力準備與步兵攻堅。",
+    "title": "太平洋島嶼戰 1942-1945",
+    "description": "從瓜達康納爾叢林戰到塔拉瓦、貝里琉、馬尼拉與沖繩攻堅,以叢林、海岸與構工火點為主的太平洋正式戰役,強調偵察、火力準備與步兵攻堅。",
     "scenario_order": [
-      "pacific_01_guadalcanal_1942"
+      "pacific_01_guadalcanal_1942",
+      "pacific_02_tarawa_1943",
+      "pacific_03_peleliu_1944",
+      "pacific_04_manila_1945",
+      "pacific_05_okinawa_1945"
     ]
   },
   "western_front": {
