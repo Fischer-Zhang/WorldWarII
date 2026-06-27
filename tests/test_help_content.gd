@@ -26,7 +26,7 @@ func _run() -> void:
 	var units: Dictionary = data_loader.units if data_loader else {}
 	var full := HelpContent.full_bbcode(terrains, units)
 	# Mechanics glossary + generated catalog tables must all be present.
-	for term in ["壓制", "警戒", "管制區", "構工", "突破準備", "整隊", "老兵", "城鎮", "步兵"]:
+	for term in ["壓制", "警戒", "管制區", "構工", "突破準備", "整隊", "老兵", "伏擊反裝甲", "敵戰力", "城鎮", "步兵"]:
 		if full.find(term) == -1:
 			printerr("FAIL: full help missing term %s" % term)
 			fail_count += 1
@@ -39,7 +39,7 @@ func _run() -> void:
 		fail_count += 1
 	else:
 		pass_count += 1
-	for term in ["可移動範圍", "可攻擊目標", HelpContent.COLOR_MOVE]:
+	for term in ["可移動範圍", "可攻擊目標", "征服敵戰力", HelpContent.COLOR_MOVE]:
 		if legend.find(term) == -1:
 			printerr("FAIL: legend missing %s" % term)
 			fail_count += 1

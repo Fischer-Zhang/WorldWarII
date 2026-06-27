@@ -18,6 +18,7 @@ const REQUIRED_MECHANICS := {
 	"spotting": true,
 	"armor": true,
 	"anti_armor": true,
+	"armor_standoff": true,
 	"engineer_bridge": true,
 	"engineer_breach": true,
 	"airdrop": true,

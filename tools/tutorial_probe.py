@@ -362,6 +362,40 @@ def has_light_tank_spotter_for_indirect_target(
     return False
 
 
+def tank_destroyer_standoff_pairs(
+    scenario: dict[str, Any], pmap: ProbeMap, units_catalog: dict[str, Any], faction_id: str
+) -> list[str]:
+    visible = visible_hexes(scenario, pmap, units_catalog, faction_id)
+    out: list[str] = []
+    for attacker in scenario_units(scenario):
+        if str(attacker.get("faction", "")) != faction_id:
+            continue
+        attacker_def = units_catalog.get(str(attacker.get("type", "")), {})
+        if int(attacker_def.get("armor_standoff_vs_armor_bonus", 0)) <= 0:
+            continue
+        attacker_coord = unit_coord(attacker)
+        min_range = int(attacker_def.get("armor_standoff_min_range", 0))
+        attack_range = int(attacker_def.get("range", 1))
+        for target in scenario_units(scenario):
+            if str(target.get("faction", "")) == faction_id:
+                continue
+            target_def = units_catalog.get(str(target.get("type", "")), {})
+            if int(target_def.get("armor", 0)) <= 0:
+                continue
+            target_coord = unit_coord(target)
+            distance = hex_distance(attacker_coord, target_coord)
+            if distance < min_range or distance > attack_range:
+                continue
+            if target_coord not in visible:
+                continue
+            if not has_direct_fire_los(scenario, pmap, attacker_coord, target_coord):
+                continue
+            out.append(
+                f"{attacker.get('name', attacker.get('type'))}->{target.get('name', target.get('type'))} at {distance}"
+            )
+    return out
+
+
 def engineer_breach_pairs(
     scenario: dict[str, Any], pmap: ProbeMap, units_catalog: dict[str, Any], faction_id: str
 ) -> list[str]:
@@ -489,6 +523,8 @@ def probe_scenario(scenario: dict[str, Any], units_catalog: dict[str, Any], terr
         any(str(u.get("faction", "")) == faction_id and int(units_catalog.get(str(u.get("type", "")), {}).get("vs_armor", 0)) >= 6 for u in scenario_units(scenario)),
         "player AT weapon present",
     )
+    standoff_pairs = tank_destroyer_standoff_pairs(scenario, pmap, units_catalog, faction_id)
+    record("armor_standoff", bool(standoff_pairs), ", ".join(standoff_pairs[:2]))
     record("engineer_bridge", has_engineer_adjacent_water(scenario, pmap, faction_id), "engineer adjacent to water")
     engineer_breaches = engineer_breach_pairs(scenario, pmap, units_catalog, faction_id)
     record("engineer_breach", bool(engineer_breaches), ", ".join(engineer_breaches[:2]))

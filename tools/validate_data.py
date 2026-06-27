@@ -45,6 +45,7 @@ REQUIRED_TUTORIAL_MECHANICS = {
     "spotting",
     "armor",
     "anti_armor",
+    "armor_standoff",
     "engineer_bridge",
     "engineer_breach",
     "airdrop",
@@ -490,6 +491,18 @@ def validate_tutorial_metadata(
         "spotting": lambda: "light_tank" in unit_types and any(units_catalog.get(t, {}).get("indirect", False) for t in unit_types),
         "armor": lambda: any(int(units_catalog.get(t, {}).get("armor", 0)) > 0 for t in unit_types),
         "anti_armor": lambda: any(int(units_catalog.get(t, {}).get("vs_armor", 0)) >= 6 for t in unit_types),
+        "armor_standoff": lambda: any(
+            str(u.get("faction", "")) == player_faction
+            and int(units_catalog.get(str(u.get("type", "")), {}).get("armor_standoff_vs_armor_bonus", 0)) > 0
+            for u in all_units
+            if isinstance(u, dict)
+        )
+        and any(
+            str(u.get("faction", "")) != player_faction
+            and int(units_catalog.get(str(u.get("type", "")), {}).get("armor", 0)) > 0
+            for u in all_units
+            if isinstance(u, dict)
+        ),
         "engineer_bridge": lambda: "engineer" in unit_types and has_engineer_adjacent_water(initial_units, scenario),
         "engineer_breach": lambda: "engineer" in unit_types and any(int(u.get("dig_in", 0)) > 0 for u in initial_units if str(u.get("faction", "")) != player_faction),
         "airdrop": lambda: "paratrooper" in unit_types,
