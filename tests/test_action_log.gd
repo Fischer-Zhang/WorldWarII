@@ -12,7 +12,13 @@ func _init() -> void:
 
 	var log := ActionLog.new()
 	var unit := StubUnit.new()
-	log.record_secondary_objective(unit, "road_checkpoint", [{"type": "xp", "amount": 1}], 3)
+	log.record_secondary_objective(
+		unit,
+		"road_checkpoint",
+		[{"type": "xp", "amount": 1}],
+		3,
+		[{"type": "campaign_bonus_points", "amount": 1}]
+	)
 	if log.events.size() == 1:
 		pass_count += 1
 	else:
@@ -26,6 +32,7 @@ func _init() -> void:
 			and String(event.get("objective_id", "")) == "road_checkpoint" \
 			and int(event.get("xp_reward", 0)) == 1 \
 			and (event.get("rewards", []) as Array).size() == 1 \
+			and (event.get("strategic_effects", []) as Array).size() == 1 \
 			and int(event.get("turn", 0)) == 3:
 		pass_count += 1
 	else:

@@ -110,7 +110,8 @@ static func complete_scenario(
 	campaign_id: String,
 	scenario_order: Array,
 	scenario_id: String,
-	surviving_units: Array
+	surviving_units: Array,
+	strategic_effects: Array = []
 ) -> void:
 	# Bump progress if this completion is in order. Snapshot survivors of
 	# every faction into the roster (matched by display_name across runs).
@@ -133,7 +134,26 @@ static func complete_scenario(
 			"general_id": String(unit.general_id),
 		}
 	cstate["roster"] = roster
+	apply_strategic_effects(cstate, strategic_effects)
 	save_state(state)
+
+static func apply_strategic_effects(cstate: Dictionary, effects: Array) -> void:
+	var changed := false
+	for effect in effects:
+		if typeof(effect) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = effect
+		var amount := int(item.get("amount", 0))
+		if amount <= 0:
+			continue
+		match String(item.get("type", "")):
+			"campaign_bonus_points":
+				cstate["bonus_points"] = int(cstate.get("bonus_points", 0)) + amount
+				changed = true
+			_:
+				continue
+	if changed:
+		cstate["bonus_points"] = max(0, int(cstate.get("bonus_points", 0)))
 
 static func apply_roster_to_units(state: Dictionary, campaign_id: String, scenario_order: Array, units: Array) -> void:
 	# For each unit, if its display_name matches an entry in the saved

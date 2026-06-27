@@ -443,25 +443,28 @@ func _handle_game_over(winner: String) -> void:
 		var scenario_order: Array = campaign.get("scenario_order", [])
 		var scenario_id := String(scenario.get("id", ""))
 		var survivors: Array = units.filter(func(u): return u.is_alive())
+		var strategic_effects := _completed_secondary_strategic_effects()
+		var strategic_bonus_points := _campaign_bonus_points(strategic_effects)
 		var progress_before := int(CampaignManager.campaign_state(
 			camp_state, GameState.current_campaign_id, scenario_order
 		).get("progress", 0))
 		if player_won:
 			CampaignManager.complete_scenario(
-				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors
+				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors, strategic_effects
 			)
 			var progress_after := int(CampaignManager.campaign_state(
 				camp_state, GameState.current_campaign_id, scenario_order
 			).get("progress", 0))
-			campaign_reward_points = 2 if progress_after > progress_before else 0
+			campaign_reward_points = (2 if progress_after > progress_before else 0) + strategic_bonus_points
 			next_campaign_scenario_id = CampaignManager.current_scenario_id(
 				camp_state, GameState.current_campaign_id, scenario_order
 			)
 		else:
 			# Defeat: snapshot survivors but don't advance progress.
 			CampaignManager.complete_scenario(
-				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors
+				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors, strategic_effects
 			)
+			campaign_reward_points = strategic_bonus_points
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
 		lounge_button.visible = true
@@ -479,6 +482,7 @@ func _handle_game_over(winner: String) -> void:
 					"roster_id": unit.roster_id, "xp": unit.xp, "rank": unit.rank,
 				})
 		GameState.last_result["conquest_survivors"] = conquest_survivors
+		GameState.last_result["strategic_effects"] = _completed_secondary_strategic_effects()
 
 func _populate_battle_summary() -> void:
 	# Build a compact battle-log card for the result panel:
@@ -1864,10 +1868,11 @@ func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: Strin
 	captured_secondary_objectives[key] = true
 	secondary_objective_progress.erase(key)
 	var rewards := SecondaryObjectiveRules.rewards(objective)
+	var strategic_effects := SecondaryObjectiveRules.strategic_effects(objective)
 	_apply_secondary_objective_rewards(unit, rewards)
-	action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number)
+	action_log.record_secondary_objective(unit, key, rewards, turn_manager.turn_number, strategic_effects)
 	var label := String(objective.get("label", key))
-	var reward_text := SecondaryObjectiveRules.reward_text(rewards)
+	var reward_text := SecondaryObjectiveRules.objective_reward_text(objective)
 	_apply_player_objective_pulse()
 	return "%s %s %s (%s)" % [unit.display_name, verb, label, reward_text]
 
@@ -2002,7 +2007,7 @@ func _secondary_objective_status_summary(faction_id: String) -> String:
 
 func _secondary_objective_status_text(objective: Dictionary, key: String) -> String:
 	var label := String(objective.get("label", key))
-	var reward_text := SecondaryObjectiveRules.reward_text(SecondaryObjectiveRules.rewards(objective))
+	var reward_text := SecondaryObjectiveRules.objective_reward_text(objective)
 	match SecondaryObjectiveRules.objective_type(objective):
 		"hold_turns":
 			return "守備:%s %s %s" % [label, _secondary_objective_progress_text(objective, key), reward_text]
@@ -2012,6 +2017,30 @@ func _secondary_objective_status_text(objective: Dictionary, key: String) -> Str
 			return "偵察:%s %s" % [label, reward_text]
 		_:
 			return "佔領:%s %s" % [label, reward_text]
+
+func _completed_secondary_strategic_effects() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := SecondaryObjectiveRules.key(objective, i)
+		if not captured_secondary_objectives.has(key):
+			continue
+		for effect in SecondaryObjectiveRules.strategic_effects(objective):
+			out.append(effect)
+	return out
+
+func _campaign_bonus_points(effects: Array) -> int:
+	var total := 0
+	for effect in effects:
+		if typeof(effect) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = effect
+		if String(item.get("type", "")) == "campaign_bonus_points":
+			total += max(0, int(item.get("amount", 0)))
+	return total
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 	return OverwatchResolver.trigger_along_path(

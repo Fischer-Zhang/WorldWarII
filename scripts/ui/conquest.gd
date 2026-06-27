@@ -498,19 +498,20 @@ func _apply_pending_battle_result() -> String:
 	var winner := String(result.get("winner", ""))
 	var player_won := winner != "" and winner == player_faction
 	var survivors: Array = result.get("conquest_survivors", [])
+	var strategic_effects: Array = result.get("strategic_effects", [])
 	GameState.clear_conquest_battle()
 	GameState.last_result = {}
 	target_region_id = ""
 	if role == "defend":
 		var attacker_country := String(pending.get("enemy_faction", ""))
 		var applied_def := ConquestManager.resolve_defense_result(
-			state, DataLoader.conquest_map, attacker_country, from_id, to_id, player_won, survivors
+			state, DataLoader.conquest_map, attacker_country, from_id, to_id, player_won, survivors, strategic_effects
 		)
 		selected_region_id = to_id if player_won else ""
 		return String(applied_def.get("message", ""))
 	# Attack: surviving army holds the captured region on a win, retreats on loss.
 	var applied := ConquestManager.resolve_battle_result(
-		state, DataLoader.conquest_map, from_id, to_id, player_won, survivors
+		state, DataLoader.conquest_map, from_id, to_id, player_won, survivors, strategic_effects
 	)
 	selected_region_id = to_id if player_won else from_id
 	if not bool(applied.get("ok", false)):

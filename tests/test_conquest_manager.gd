@@ -193,13 +193,19 @@ func _test_resolve_real_battle_result() -> bool:
 	]
 	var before := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
 	var loss := ConquestManager.resolve_battle_result(
-		state, map_data, "alpha", "bravo", false, [{"roster_id": 2, "xp": 1, "rank": 0}]
+		state,
+		map_data,
+		"alpha",
+		"bravo",
+		false,
+		[{"roster_id": 2, "xp": 1, "rank": 0}],
+		[{"type": "conquest_reduce_enemy_strength", "amount": 2}]
 	)
 	bravo = ConquestManager.region_state(state, map_data, "bravo")
 	alpha = ConquestManager.region_state(state, map_data, "alpha")
 	if bool(loss.get("ok", false)) \
 			and String(bravo.get("owner", "")) == "b" \
-			and int(bravo.get("strength", 0)) < before \
+			and int(bravo.get("strength", 0)) == maxi(1, before - 3) \
 			and (alpha.get("garrison", []) as Array).size() == 1:
 		return true
 	printerr("FAIL: conquest loss should retreat survivors and weaken the enemy target")
@@ -214,13 +220,23 @@ func _test_defense_result() -> bool:
 		{"id": 2, "type": "infantry", "xp": 0, "rank": 0, "name": "d2"},
 	]
 	# Held: region stays ours, only the surviving defender remains.
+	var before_attacker := int(ConquestManager.region_state(state, map_data, "bravo").get("strength", 0))
 	var held := ConquestManager.resolve_defense_result(
-		state, map_data, "b", "bravo", "alpha", true, [{"roster_id": 1, "xp": 2, "rank": 0}]
+		state,
+		map_data,
+		"b",
+		"bravo",
+		"alpha",
+		true,
+		[{"roster_id": 1, "xp": 2, "rank": 0}],
+		[{"type": "conquest_reduce_enemy_strength", "amount": 1}]
 	)
 	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	var bravo := ConquestManager.region_state(state, map_data, "bravo")
 	if not bool(held.get("ok", false)) \
 			or String(alpha.get("owner", "")) != "a" \
-			or (alpha.get("garrison", []) as Array).size() != 1:
+			or (alpha.get("garrison", []) as Array).size() != 1 \
+			or int(bravo.get("strength", 0)) != maxi(1, before_attacker - 3):
 		printerr("FAIL: held defense should keep the region and surviving defenders")
 		return false
 	# Fell: region captured by the attacker, defenders wiped.

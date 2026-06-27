@@ -47,12 +47,12 @@ func _init() -> void:
 func _test_point_accounting() -> bool:
 	var state := {
 		"campaigns": {
-			"east": {"progress": 2},
-			"west": {"progress": 1},
+			"east": {"progress": 2, "bonus_points": 1},
+			"west": {"progress": 1, "bonus_points": 2},
 		},
 		"lounge": {"spent_points": 3},
 	}
-	if LoungeManager.total_points(state) == 9 and LoungeManager.available_points(state) == 6:
+	if LoungeManager.total_points(state) == 12 and LoungeManager.available_points(state) == 9:
 		return true
 	printerr("FAIL: lounge point accounting")
 	return false

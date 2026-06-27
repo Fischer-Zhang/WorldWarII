@@ -1,6 +1,7 @@
 extends SceneTree
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const LoungeManager := preload("res://scripts/scenario/lounge_manager.gd")
 
 class StubUnit:
 	var faction_id: String
@@ -57,6 +58,22 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: campaign roster should restore xp/rank/general")
+
+	CampaignManager.complete_scenario(
+		state,
+		"east",
+		east_order,
+		"04_kursk_1943",
+		[],
+		[{"type": "campaign_bonus_points", "amount": 1}]
+	)
+	if int(east_state.get("progress", 0)) == 2 \
+			and int(east_state.get("bonus_points", 0)) == 1 \
+			and LoungeManager.total_points(state) == 8:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: campaign strategic effects should add lounge resource points")
 
 	var old_save := {
 		"version": 1,

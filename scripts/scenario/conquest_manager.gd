@@ -118,6 +118,7 @@ static func resolve_battle_result(
 	to_id: String,
 	player_won: bool,
 	survivors: Array = [],
+	strategic_effects: Array = []
 ) -> Dictionary:
 	# Applies a fought conquest battle to the strategic map. The attacking
 	# region's garrison is reduced to the survivors (keeping their gained xp);
@@ -141,6 +142,7 @@ static func resolve_battle_result(
 	else:
 		source["garrison"] = survived
 		target["strength"] = maxi(1, int(target.get("strength", 0)) - 1)
+		_apply_conquest_strategic_effects(target, strategic_effects)
 		message = "%s 進攻受挫,殘部撤回(剩 %d 支)。" % [_region_name(source), survived.size()]
 	regions[from_id] = source
 	regions[to_id] = target
@@ -164,6 +166,20 @@ static func _apply_survivors(garrison: Array, survivors: Array) -> Array:
 			record["rank"] = int(surv.get("rank", record.get("rank", 0)))
 			kept.append(record)
 	return kept
+
+static func _apply_conquest_strategic_effects(region: Dictionary, effects: Array) -> void:
+	for effect in effects:
+		if typeof(effect) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = effect
+		var amount := int(item.get("amount", 0))
+		if amount <= 0:
+			continue
+		match String(item.get("type", "")):
+			"conquest_reduce_enemy_strength":
+				region["strength"] = maxi(1, int(region.get("strength", 0)) - amount)
+			_:
+				continue
 
 static func is_enemy_phase(state: Dictionary, map_data: Dictionary) -> bool:
 	return bool(conquest_state(state, map_data).get("ai_phase", false))
@@ -276,6 +292,7 @@ static func resolve_defense_result(
 	to_id: String,
 	player_defended: bool,
 	survivors: Array = [],
+	strategic_effects: Array = []
 ) -> Dictionary:
 	# Applies a player-fought defensive battle: held -> surviving defenders stay
 	# and the attacker is bloodied; fell -> the region is captured by the enemy.
@@ -289,11 +306,13 @@ static func resolve_defense_result(
 	if player_defended:
 		target["garrison"] = _apply_survivors(target.get("garrison", []), survivors)
 		source["strength"] = maxi(1, int(source.get("strength", 0)) - 2)
+		_apply_conquest_strategic_effects(source, strategic_effects)
 		message = "守住了 %s。" % _region_name(target)
 	else:
 		target["owner"] = attacker_country
 		target["garrison"] = []
 		target["strength"] = maxi(1, int(target.get("production", 1)))
+		_apply_conquest_strategic_effects(source, strategic_effects)
 		message = "%s 失守,落入敵手。" % _region_name(target)
 	regions[from_id] = source
 	regions[to_id] = target

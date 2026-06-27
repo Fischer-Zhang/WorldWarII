@@ -376,6 +376,19 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
     legacy_xp = int(objective.get("xp_reward", 0))
     if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
         parts.append(f"XP {legacy_xp}")
+    strategic_effects = objective.get("strategic_effects", [])
+    if isinstance(strategic_effects, list):
+        for effect in strategic_effects:
+            if not isinstance(effect, dict):
+                continue
+            effect_type = str(effect.get("type", ""))
+            amount = int(effect.get("amount", 0))
+            if amount <= 0:
+                continue
+            if effect_type == "campaign_bonus_points":
+                parts.append(f"campaign +{amount}p")
+            elif effect_type == "conquest_reduce_enemy_strength":
+                parts.append(f"conquest enemy -{amount}")
     return ", ".join(parts) if parts else "no reward"
 
 
@@ -476,30 +489,45 @@ def secondary_objective_audit_text(scenario: dict[str, Any], objective: dict[str
 
 def secondary_reward_audit_notes(scenario: dict[str, Any], objective: dict[str, Any]) -> list[str]:
     rewards = objective.get("rewards", [])
+    strategic_effects = objective.get("strategic_effects", [])
     notes: list[str] = []
     if not isinstance(rewards, list) or not rewards:
-        if int(objective.get("xp_reward", 0)) <= 0:
+        if int(objective.get("xp_reward", 0)) <= 0 and not (
+            isinstance(strategic_effects, list) and strategic_effects
+        ):
             return ["no reward"]
-        return notes
-    for reward in rewards:
-        if not isinstance(reward, dict):
-            continue
-        reward_type = str(reward.get("type", ""))
-        amount = int(reward.get("amount", 0))
-        if amount <= 0:
-            continue
-        if reward_type == "advance_reinforcements":
-            notes.append(secondary_reinforcement_reward_audit(scenario, objective, amount))
-        elif reward_type == "recover_suppression":
-            notes.append("sustain reward")
-        elif reward_type == "repair_hp":
-            notes.append("damage recovery")
-        elif reward_type == "suppress_enemies":
-            radius = int(reward.get("radius", 1))
-            notes.append(f"tactical suppression reward R{radius}")
-        elif reward_type == "strip_enemy_dig_in":
-            radius = int(reward.get("radius", 1))
-            notes.append(f"breach reward R{radius}")
+    if isinstance(rewards, list):
+        for reward in rewards:
+            if not isinstance(reward, dict):
+                continue
+            reward_type = str(reward.get("type", ""))
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            if reward_type == "advance_reinforcements":
+                notes.append(secondary_reinforcement_reward_audit(scenario, objective, amount))
+            elif reward_type == "recover_suppression":
+                notes.append("sustain reward")
+            elif reward_type == "repair_hp":
+                notes.append("damage recovery")
+            elif reward_type == "suppress_enemies":
+                radius = int(reward.get("radius", 1))
+                notes.append(f"tactical suppression reward R{radius}")
+            elif reward_type == "strip_enemy_dig_in":
+                radius = int(reward.get("radius", 1))
+                notes.append(f"breach reward R{radius}")
+    if isinstance(strategic_effects, list):
+        for effect in strategic_effects:
+            if not isinstance(effect, dict):
+                continue
+            effect_type = str(effect.get("type", ""))
+            amount = int(effect.get("amount", 0))
+            if amount <= 0:
+                continue
+            if effect_type == "campaign_bonus_points":
+                notes.append(f"campaign bonus +{amount}")
+            elif effect_type == "conquest_reduce_enemy_strength":
+                notes.append(f"conquest pressure -{amount}")
     return notes
 
 

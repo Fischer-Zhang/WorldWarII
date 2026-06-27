@@ -75,6 +75,23 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: tactical reward value should rank combined tactical rewards above XP-only")
 
+	var strategic_objective := {
+		"rewards": [{"type": "xp", "amount": 1}],
+		"strategic_effects": [
+			{"type": "campaign_bonus_points", "amount": 1},
+			{"type": "conquest_reduce_enemy_strength", "amount": 2},
+		],
+	}
+	var strategic_effects := SecondaryObjectiveRules.strategic_effects(strategic_objective)
+	var strategic_text := SecondaryObjectiveRules.strategic_effect_text(strategic_effects)
+	if strategic_effects.size() == 2 \
+			and strategic_text == "戰役資源 +1, 敵戰力 -2" \
+			and SecondaryObjectiveRules.objective_reward_text(strategic_objective) == "XP +1, 戰役資源 +1, 敵戰力 -2":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: strategic effects should parse and render, got %s / %s" % [str(strategic_effects), strategic_text])
+
 	var target := StubUnit.new("ammo_truck", "Ammo Truck", "axis", Vector2i(2, 1))
 	if SecondaryObjectiveRules.target_matches_unit({"target_unit": "ammo_truck"}, target) \
 			and SecondaryObjectiveRules.target_matches_unit({"target_unit": "Ammo Truck"}, target) \

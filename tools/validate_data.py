@@ -23,6 +23,10 @@ ALLOWED_SECONDARY_REWARD_TYPES = {
     "suppress_enemies",
     "strip_enemy_dig_in",
 }
+ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
+    "campaign_bonus_points",
+    "conquest_reduce_enemy_strength",
+}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
@@ -312,6 +316,22 @@ def validate_scenario(
                                 fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] radius must be non-negative")
                         except (TypeError, ValueError):
                             fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] radius must be an integer")
+            strategic_effects = objective.get("strategic_effects", [])
+            if "strategic_effects" in objective and not isinstance(strategic_effects, list):
+                fail(errors, path, f"secondary_objectives[{index}] strategic_effects must be a list when present")
+            elif isinstance(strategic_effects, list):
+                for effect_index, effect in enumerate(strategic_effects):
+                    if not isinstance(effect, dict):
+                        fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] must be an object")
+                        continue
+                    effect_type = str(effect.get("type", ""))
+                    if effect_type not in ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES:
+                        fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] unknown type {effect_type!r}")
+                    try:
+                        if int(effect.get("amount", 0)) <= 0:
+                            fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] amount must be positive")
+                    except (TypeError, ValueError):
+                        fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] amount must be an integer")
 
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
 

@@ -104,6 +104,45 @@ static func tactical_reward_value(rewards: Array[Dictionary]) -> float:
 				value += float(amount) * (0.7 + 0.2 * float(max(0, radius)))
 	return value
 
+static func strategic_effects(objective: Dictionary) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var raw_effects: Array = objective.get("strategic_effects", [])
+	for raw in raw_effects:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var effect: Dictionary = raw
+		var effect_type := String(effect.get("type", ""))
+		var amount := int(effect.get("amount", 0))
+		if effect_type == "" or amount <= 0:
+			continue
+		out.append({"type": effect_type, "amount": amount})
+	return out
+
+static func strategic_effect_text(effects: Array[Dictionary]) -> String:
+	var parts: Array[String] = []
+	for effect in effects:
+		var effect_type := String(effect.get("type", ""))
+		var amount := int(effect.get("amount", 0))
+		if amount <= 0:
+			continue
+		match effect_type:
+			"campaign_bonus_points":
+				parts.append("戰役資源 +%d" % amount)
+			"conquest_reduce_enemy_strength":
+				parts.append("敵戰力 -%d" % amount)
+	if parts.is_empty():
+		return ""
+	return ", ".join(parts)
+
+static func objective_reward_text(objective: Dictionary) -> String:
+	var tactical_text := reward_text(rewards(objective))
+	var strategic_text := strategic_effect_text(strategic_effects(objective))
+	if strategic_text == "":
+		return tactical_text
+	if tactical_text == "已控制":
+		return strategic_text
+	return "%s, %s" % [tactical_text, strategic_text]
+
 static func reward_text(rewards: Array[Dictionary]) -> String:
 	var parts: Array[String] = []
 	for reward in rewards:

@@ -27,7 +27,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | none | none |
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 1 | 突破機槍據點 5,3 destroy min 18 XP 1; 南側警戒線 5,4 recon min 19 XP 1 | none |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 18,3 own min 21 enemy min 0 | 清除 MG 42 19,2 destroy min 22 XP 1; 偵察砲兵觀測點 21,1 recon min 25 XP 1 | none |
-| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 23/384 (6%) | none | soviet: eng min 12, art 0/3, targets 3 | soviet: eng turns 4 | soviet: art move 0/3 | soviet target 19,4 own min 15 enemy min 0 | 清除西側 MG 42 18,3 destroy min 15 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon min 19 XP 1, enemy dig -1 R2 | none |
+| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 23/384 (6%) | none | soviet: eng min 12, art 0/3, targets 3 | soviet: eng turns 4 | soviet: art move 0/3 | soviet target 19,4 own min 15 enemy min 0 | 清除西側 MG 42 18,3 destroy min 15 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon min 19 XP 1, enemy dig -1 R2, campaign +1p | none |
 | tut_00_basic_turn | none | none | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,2 own min 5 enemy min 0 | none | none |
 | tut_01_terrain_zoc_overwatch | allies mg_team:1 | none | axis 38/54 (70%), spots 3 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,0 own min 4 enemy min 2 | 道路檢查點 4,0 capture min 2 XP 1 | none |
 | tut_02_los_spotting_artillery | allies artillery:1 | allies 50/70 (71%) | allies 62/70 (89%), spots 2 | allies: eng none, art 1/1, targets 1 | allies: eng turns none | allies: art move 1/1 | n/a | none | none |
@@ -79,7 +79,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | east_09_seelow_1945 | 清除 MG 42 | destroy 19,2 | soviet | own 22 / enemy 0 | XP 1 | enemy closer |
 | east_09_seelow_1945 | 偵察砲兵觀測點 | recon 21,1 | soviet | own 25 / enemy 0 | XP 1 | enemy closer |
 | east_10_berlin_1945 | 清除西側 MG 42 | destroy 18,3 | soviet | own 15 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2 |
-| east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 | soviet | own 19 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
+| east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 | soviet | own 19 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
 | west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1 | enemy closer |
 | west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 | allies | own 21 / enemy 0 | XP 1 | enemy closer |

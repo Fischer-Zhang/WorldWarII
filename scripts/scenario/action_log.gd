@@ -57,7 +57,13 @@ func record_skill(unit, skill_id: String, turn_number: int) -> void:
 		"turn": turn_number,
 	})
 
-func record_secondary_objective(unit, objective_id: String, rewards: Array, turn_number: int) -> void:
+func record_secondary_objective(
+	unit,
+	objective_id: String,
+	rewards: Array,
+	turn_number: int,
+	strategic_effects: Array = []
+) -> void:
 	var xp_reward := 0
 	for reward in rewards:
 		if typeof(reward) == TYPE_DICTIONARY and String(reward.get("type", "")) == "xp":
@@ -67,6 +73,7 @@ func record_secondary_objective(unit, objective_id: String, rewards: Array, turn
 		"faction": String(unit.faction_id),
 		"objective_id": objective_id,
 		"rewards": rewards.duplicate(true),
+		"strategic_effects": strategic_effects.duplicate(true),
 		"xp_reward": xp_reward,
 		"turn": turn_number,
 	})

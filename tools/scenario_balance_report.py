@@ -251,6 +251,19 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
     legacy_xp = int(objective.get("xp_reward", 0))
     if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
         parts.append(f"XP {legacy_xp}")
+    strategic_effects = objective.get("strategic_effects", [])
+    if isinstance(strategic_effects, list):
+        for effect in strategic_effects:
+            if not isinstance(effect, dict):
+                continue
+            effect_type = str(effect.get("type", ""))
+            amount = int(effect.get("amount", 0))
+            if amount <= 0:
+                continue
+            if effect_type == "campaign_bonus_points":
+                parts.append(f"campaign +{amount}p")
+            elif effect_type == "conquest_reduce_enemy_strength":
+                parts.append(f"conquest enemy -{amount}")
     return ", ".join(parts) if parts else "no reward"
 
 

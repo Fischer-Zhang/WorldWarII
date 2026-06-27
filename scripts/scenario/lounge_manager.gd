@@ -23,6 +23,7 @@ static func total_points(state: Dictionary) -> int:
 	for campaign_id in campaigns.keys():
 		var cstate: Dictionary = campaigns[campaign_id]
 		total += int(cstate.get("progress", 0)) * 2
+		total += int(cstate.get("bonus_points", 0))
 	return total
 
 static func spent_points(state: Dictionary) -> int:
