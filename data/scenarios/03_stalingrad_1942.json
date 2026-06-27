@@ -64,7 +64,7 @@
       "label": "突擊工兵",
       "faction": "soviet",
       "target_unit": "axis_assault_engineer",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {
