@@ -367,6 +367,9 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
                 parts.append(f"repair {amount}")
             elif reward_type == "advance_reinforcements":
                 parts.append(f"reinforce -{amount}t")
+            elif reward_type == "suppress_enemies":
+                radius = int(reward.get("radius", 1))
+                parts.append(f"enemy supp +{amount} R{radius}")
     legacy_xp = int(objective.get("xp_reward", 0))
     if legacy_xp > 0 and not any(part.startswith("XP ") for part in parts):
         parts.append(f"XP {legacy_xp}")
@@ -488,6 +491,9 @@ def secondary_reward_audit_notes(scenario: dict[str, Any], objective: dict[str, 
             notes.append("sustain reward")
         elif reward_type == "repair_hp":
             notes.append("damage recovery")
+        elif reward_type == "suppress_enemies":
+            radius = int(reward.get("radius", 1))
+            notes.append(f"tactical suppression reward R{radius}")
     return notes
 
 

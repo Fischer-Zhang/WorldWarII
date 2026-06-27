@@ -20,6 +20,7 @@ ALLOWED_SECONDARY_REWARD_TYPES = {
     "recover_suppression",
     "repair_hp",
     "advance_reinforcements",
+    "suppress_enemies",
 }
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 REQUIRED_TUTORIAL_MECHANICS = {
@@ -304,6 +305,12 @@ def validate_scenario(
                             fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] amount must be positive")
                     except (TypeError, ValueError):
                         fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] amount must be an integer")
+                    if reward_type == "suppress_enemies":
+                        try:
+                            if int(reward.get("radius", 1)) < 0:
+                                fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] radius must be non-negative")
+                        except (TypeError, ValueError):
+                            fail(errors, path, f"secondary_objectives[{index}].rewards[{reward_index}] radius must be an integer")
 
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
 

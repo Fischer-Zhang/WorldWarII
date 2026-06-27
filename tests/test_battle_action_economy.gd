@@ -297,6 +297,40 @@ func _run() -> void:
 		battle.turn_manager.turn_number = 2
 		player_unit.suppression = 4
 		player_unit.hp = max(1, player_unit.max_hp - 3)
+		var reward_near_enemy = null
+		var reward_far_enemy = null
+		for u in battle.units:
+			if u.faction_id == player_unit.faction_id:
+				continue
+			if reward_near_enemy == null:
+				reward_near_enemy = u
+			elif reward_far_enemy == null:
+				reward_far_enemy = u
+				break
+		var near_enemy_before := -1
+		var far_enemy_before := -1
+		if reward_near_enemy != null:
+			var staged_near := false
+			for nb in HexCoord.neighbors(player_unit.coord):
+				var terrain: String = battle.hex_map.terrain_at(nb)
+				if terrain != "" and not battle.hex_map.terrain_impassable(terrain) \
+						and battle.hex_map.unit_at(nb) == null:
+					battle.hex_map.move_unit(reward_near_enemy, nb, 0.0)
+					staged_near = true
+					break
+			if staged_near:
+				reward_near_enemy.suppression = 0
+				near_enemy_before = int(reward_near_enemy.suppression)
+		if reward_far_enemy != null:
+			for c in battle.hex_map.tiles.keys():
+				var far_terrain: String = battle.hex_map.terrain_at(c)
+				if far_terrain != "" and not battle.hex_map.terrain_impassable(far_terrain) \
+						and battle.hex_map.unit_at(c) == null \
+						and HexCoord.distance(player_unit.coord, c) > 1:
+					battle.hex_map.move_unit(reward_far_enemy, c, 0.0)
+					reward_far_enemy.suppression = 0
+					far_enemy_before = int(reward_far_enemy.suppression)
+					break
 		var reward_before_xp := int(player_unit.xp)
 		var reward_text: String = battle._complete_secondary_objective(player_unit, {
 			"id": "reward_combo",
@@ -306,23 +340,31 @@ func _run() -> void:
 				{"type": "recover_suppression", "amount": 2},
 				{"type": "repair_hp", "amount": 3},
 				{"type": "advance_reinforcements", "amount": 2},
+				{"type": "suppress_enemies", "amount": 1, "radius": 1},
 			],
 		}, "reward_combo", "完成")
 		var reward_reinforcements: Array = battle.scenario.get("reinforcements", [])
+		var near_reward_ok := reward_near_enemy == null or near_enemy_before < 0 \
+				or int(reward_near_enemy.suppression) == near_enemy_before + 1
+		var far_reward_ok := reward_far_enemy == null or far_enemy_before < 0 \
+				or int(reward_far_enemy.suppression) == far_enemy_before
 		if int(player_unit.xp) == reward_before_xp + 1 \
 				and int(player_unit.suppression) == 2 \
 				and int(player_unit.hp) == player_unit.max_hp \
 				and int(reward_reinforcements[0].get("at_turn", 0)) == 4 \
 				and int(reward_reinforcements[1].get("at_turn", 0)) == 2 \
 				and int(reward_reinforcements[2].get("at_turn", 0)) == 6 \
+				and near_reward_ok \
+				and far_reward_ok \
 				and reward_text.find("戰地補給") != -1 \
-				and reward_text.find("援軍提前 2T") != -1:
+				and reward_text.find("援軍提前 2T") != -1 \
+				and reward_text.find("敵壓制 +1 R1") != -1:
 			pass_count += 1
 		else:
 			fail_count += 1
-			printerr("FAIL: secondary reward effects should apply deterministically; text=%s xp %d->%d hp=%d suppression=%d reinforcements=%s" % [
+			printerr("FAIL: secondary reward effects should apply deterministically; text=%s xp %d->%d hp=%d suppression=%d near=%s far=%s reinforcements=%s" % [
 				reward_text, reward_before_xp, int(player_unit.xp), int(player_unit.hp),
-				int(player_unit.suppression), str(reward_reinforcements),
+				int(player_unit.suppression), str(near_reward_ok), str(far_reward_ok), str(reward_reinforcements),
 			])
 		battle.scenario = original_scenario_rewards
 		battle.spawned_reinforcements = original_spawned_reinforcements

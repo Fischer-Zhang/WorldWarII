@@ -64,7 +64,7 @@
       "type": "destroy_unit",
       "faction": "axis",
       "target_unit": "Maxim",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     },
     {
       "id": "southern_sweep",

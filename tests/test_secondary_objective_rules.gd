@@ -53,11 +53,13 @@ func _init() -> void:
 			{"type": "recover_suppression", "amount": 2},
 			{"type": "repair_hp", "amount": 3},
 			{"type": "advance_reinforcements", "amount": 2},
+			{"type": "suppress_enemies", "amount": 1, "radius": 2},
 		],
 	})
 	var combo_text := SecondaryObjectiveRules.reward_text(combo_rewards)
 	if SecondaryObjectiveRules.xp_reward(combo_rewards) == 1 \
-			and combo_text == "XP +1, 壓制 -2, 修復 +3, 援軍提前 2T":
+			and combo_text == "XP +1, 壓制 -2, 修復 +3, 援軍提前 2T, 敵壓制 +1 R2" \
+			and int(combo_rewards[4].get("radius", 0)) == 2:
 		pass_count += 1
 	else:
 		fail_count += 1

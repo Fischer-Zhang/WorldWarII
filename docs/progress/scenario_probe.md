@@ -6,7 +6,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00_sandbox | allies mg_team:1; axis artillery:1 | allies 24/384 (6%); axis 54/384 (14%) | axis 43/384 (11%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | none | none |
 | 01_sedan_1940 | allies mg_team:2; axis artillery:1 | axis 33/384 (9%) | axis 64/384 (17%), spots 1 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 1/3 | axis target 20,14 own min 2 enemy min 0 | 橋頭補給 15,5 capture min 7 XP 1; 中路渡口 13,5 recon min 9 XP 1 | none |
-| 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 壓制馬克沁火點 4,4 destroy min 19 XP 1; 南翼掃蕩 3,13 recon min 18 XP 1 | none |
+| 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 壓制馬克沁火點 4,4 destroy min 19 XP 1, enemy supp +1 R2; 南翼掃蕩 3,13 recon min 18 XP 1 | none |
 | 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 33/384 (9%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 12, art 0/6, targets 6 | axis: eng turns 4 | axis: art move 0/6 | n/a | 突擊工兵 8,9 destroy min 12 XP 1 | none |
 | 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 5,2 own min 17 enemy min 0 | 壓制 SU-152 4,0 destroy min 18 XP 1; 北側高地偵察 18,2 recon min 4 XP 1 | none |
 | 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0 | 鎮心補給 6,4 hold 2t min 0 XP 1 | allies +129.5; T7 3 units |
@@ -58,7 +58,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | --- | --- | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 橋頭補給 | capture 15,5 | axis | own 7 / enemy 9 | XP 1 | ok |
 | 01_sedan_1940 | 中路渡口 | recon 13,5 | axis | own 9 / enemy 11 | XP 1 | ok |
-| 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 | axis | own 19 / enemy 0 | XP 1 | enemy closer |
+| 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 | axis | own 19 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 02_kiev_1941 | 南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1 | enemy closer |
 | 03_stalingrad_1942 | 突擊工兵 | destroy 8,9 | soviet | own 12 / enemy 0 | XP 1 | enemy closer |
 | 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 | axis | own 18 / enemy 0 | XP 1 | enemy closer |

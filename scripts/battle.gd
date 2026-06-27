@@ -1888,6 +1888,18 @@ func _apply_secondary_objective_rewards(unit: Unit, rewards: Array[Dictionary]) 
 				unit.queue_redraw()
 			"advance_reinforcements":
 				_advance_reinforcements(unit.faction_id, amount)
+			"suppress_enemies":
+				_suppress_enemies_near(unit, amount, int(reward.get("radius", 1)))
+
+func _suppress_enemies_near(source: Unit, amount: int, radius: int) -> void:
+	if source == null or amount <= 0 or radius < 0:
+		return
+	for u in units:
+		var target: Unit = u
+		if not target.is_alive() or target.faction_id == source.faction_id:
+			continue
+		if HexCoord.distance(source.coord, target.coord) <= radius:
+			target.add_suppression(amount)
 
 func _advance_reinforcements(faction_id: String, turns: int) -> void:
 	var reinforcements: Array = scenario.get("reinforcements", [])
