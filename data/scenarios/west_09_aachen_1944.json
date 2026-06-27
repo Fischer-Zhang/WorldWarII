@@ -55,6 +55,16 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [17, 13], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "clear_western_at",
+      "label": "清除西側 PaK 40",
+      "type": "destroy_unit",
+      "faction": "allies",
+      "target_unit": "PaK 40",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 1}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "capture",

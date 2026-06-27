@@ -55,6 +55,16 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [21, 13], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "suppress_colmar_mg",
+      "label": "壓制口袋機槍",
+      "type": "destroy_unit",
+      "faction": "allies",
+      "target_unit": "MG 42",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "capture",

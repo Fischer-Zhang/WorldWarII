@@ -55,6 +55,17 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [17, 12], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "secure_forest_track",
+      "label": "控制森林林道",
+      "type": "hold_turns",
+      "faction": "allies",
+      "target": [4, 4],
+      "required_turns": 2,
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "recover_suppression", "amount": 2}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "capture",

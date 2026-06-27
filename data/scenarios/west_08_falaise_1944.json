@@ -55,6 +55,16 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [23, 12], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "seal_escape_road",
+      "label": "封鎖撤退道路",
+      "type": "recon_hex",
+      "faction": "allies",
+      "target": [22, 11],
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 1}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "capture",
