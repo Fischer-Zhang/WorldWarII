@@ -13,6 +13,7 @@ const CATEGORY_LABELS := {
 	"blitzkrieg_early_war": "早期",
 	"eastern_front": "東線",
 	"north_africa": "北非",
+	"pacific_front": "太平洋",
 	"western_front": "西線",
 	CATEGORY_SANDBOX: "沙盒",
 }

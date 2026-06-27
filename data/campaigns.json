@@ -41,6 +41,13 @@
       "north_01_el_alamein_1942"
     ]
   },
+  "pacific_front": {
+    "title": "太平洋島嶼戰 1942",
+    "description": "以叢林、海岸與構工火點為主的太平洋正式戰役,強調偵察、火力準備與步兵攻堅。",
+    "scenario_order": [
+      "pacific_01_guadalcanal_1942"
+    ]
+  },
   "western_front": {
     "title": "西線反攻 1944-1945",
     "description": "從諾曼第突破到萊茵河橋頭堡,串起盟軍空降、裝甲突破、城市攻堅與德軍反擊。",

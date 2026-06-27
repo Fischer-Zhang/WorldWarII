@@ -355,6 +355,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | east_09_seelow_1945 | 4 | 1 | 2 | 0 | 2 | 2 | 0 | 0 | 1 | 1 | 1 |
 | east_10_berlin_1945 | 5 | 2 | 1 | 0 | 2 | 2 | 0 | 1 | 1 | 1 | 0 |
 | north_01_el_alamein_1942 | 3 | 0 | 2 | 1 | 4 | 2 | 0 | 0 | 2 | 0 | 0 |
+| pacific_01_guadalcanal_1942 | 5 | 2 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
 | tut_00_basic_turn | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | tut_01_terrain_zoc_overwatch | 3 | 1 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | tut_02_los_spotting_artillery | 1 | 0 | 2 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
@@ -367,7 +368,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 146 | 40 | 62 | 20 | 91 | 59 | 6 | 6 | 28 | 9 | 7 |
+| TOTAL | 151 | 42 | 63 | 21 | 91 | 60 | 6 | 7 | 28 | 9 | 8 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -396,6 +397,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 7% |
 | east_10_berlin_1945 | 384 | town 60%, plain 22%, road 18% |
 | north_01_el_alamein_1942 | 160 | desert 76%, road 14%, mountain 7% |
+| pacific_01_guadalcanal_1942 | 160 | plain 67%, jungle 14%, sea 11% |
 | tut_00_basic_turn | 48 | plain 88%, road 10%, town 2% |
 | tut_01_terrain_zoc_overwatch | 54 | plain 81%, road 9%, forest 7% |
 | tut_02_los_spotting_artillery | 70 | plain 77%, forest 14%, road 9% |
