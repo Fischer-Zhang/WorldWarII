@@ -352,6 +352,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | conq_pacific_carrier | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 0 | 0 | 0 | 0 |
 | conq_pacific_island | 6 | 2 | 2 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | east_05_kharkov_1943 | 4 | 1 | 1 | 1 | 5 | 2 | 0 | 0 | 1 | 1 | 0 |
+| east_06_dnieper_1943 | 5 | 1 | 1 | 1 | 3 | 2 | 0 | 1 | 0 | 0 | 0 |
 | east_09_seelow_1945 | 4 | 1 | 2 | 0 | 2 | 2 | 0 | 0 | 1 | 1 | 1 |
 | east_10_berlin_1945 | 5 | 2 | 1 | 0 | 2 | 2 | 0 | 1 | 1 | 1 | 0 |
 | north_01_el_alamein_1942 | 3 | 0 | 2 | 1 | 4 | 2 | 0 | 0 | 2 | 0 | 0 |
@@ -368,7 +369,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 151 | 42 | 63 | 21 | 91 | 60 | 6 | 7 | 28 | 9 | 8 |
+| TOTAL | 156 | 43 | 64 | 22 | 94 | 62 | 6 | 8 | 28 | 9 | 8 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -394,6 +395,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | conq_pacific_carrier | 384 | plain 73%, sea 17%, town 6% |
 | conq_pacific_island | 384 | plain 80%, sea 10%, jungle 8% |
 | east_05_kharkov_1943 | 384 | plain 72%, road 13%, forest 7% |
+| east_06_dnieper_1943 | 160 | plain 65%, road 13%, forest 11% |
 | east_09_seelow_1945 | 384 | plain 75%, road 10%, mountain 7% |
 | east_10_berlin_1945 | 384 | town 60%, plain 22%, road 18% |
 | north_01_el_alamein_1942 | 160 | desert 76%, road 14%, mountain 7% |

@@ -28,6 +28,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | conq_pacific_carrier | 太平洋海空決戰 | plain 73%, sea 17%, town 6%; def>=2 10%; move>=3 17% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 環礁通信站 [capture 11,3] (XP 1, conquest enemy -1) | no major static risks |
 | conq_pacific_island | 太平洋島嶼登陸 | plain 80%, sea 10%, jungle 8%; def>=2 10%; move>=3 10% | allies: eng 0, art 0, rocket 0, mg 1; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 中央港鎮倉庫 [capture 11,6] (XP 1, conquest enemy -1) | no major static risks |
 | east_05_kharkov_1943 | 第三次哈爾科夫 1943 | plain 72%, road 13%, forest 7%; def>=2 12%; move>=3 3% | axis: eng 0, art 1, rocket 0, mg 0; soviet: eng 0, art 1, rocket 0, mg 1 | axis->4,3 min 19 avg 21.7 | 突破機槍據點 [destroy Maxim@5,3] (XP 1); 南側警戒線 [recon 5,4] (XP 1) | force power ratio above 1.35: check victory-clock compensation |
+| east_06_dnieper_1943 | 第聶伯河橋頭堡 1943 | plain 65%, road 13%, forest 11%; def>=2 13%; move>=3 9% | soviet: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | soviet->9,5 min 6 avg 7.5 | 控制東岸渡口 [hold 2t 5,4] (XP 1, reinforce -2t); 偵察西岸觀測點 [recon 12,4] (XP 1, enemy dig -1 R2) | river crossings may dominate tempo; force power ratio above 1.35: check victory-clock compensation |
 | east_09_seelow_1945 | 澤洛高地 1945 | plain 75%, road 10%, mountain 7%; def>=2 14%; move>=3 8% | soviet: eng 0, art 1, rocket 1, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | soviet->18,3 min 21 avg 22.1 | 清除 MG 42 [destroy MG 42@19,2] (XP 1); 偵察砲兵觀測點 [recon 21,1] (XP 1) | force power ratio above 1.35: check victory-clock compensation; soviet artillery-heavy: watch standoff dominance |
 | east_10_berlin_1945 | 柏林終局 1945 | town 60%, plain 22%, road 18%; def>=2 60%; move>=3 0% | soviet: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 2 | soviet->19,4 min 9 avg 17.7 | 清除西側 MG 42 [destroy MG 42 a@18,3] (XP 1, repair 2, enemy supp +1 R2); 標定重砲陣地 [recon 22,2] (XP 1, enemy dig -1 R2, campaign +1p) | high town density: dig-in pacing risk |
 | north_01_el_alamein_1942 | 阿拉曼防線 1942 | desert 76%, road 14%, mountain 7%; def>=2 9%; move>=3 7% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 0 | n/a | 奪取綠洲補給 [capture 8,5] (XP 1, repair 2); 偵察北側山脊 [recon 10,2] (XP 1, enemy supp +1 R2) | no major static risks |
@@ -198,6 +199,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | axis | 德軍南方集團軍群 | player | 9 | 394.8 | anti_armor:1, armor:4, artillery:1, infantry:2, scout_armor:1 |
 | soviet | 蘇軍沃羅涅日方面軍 | ai | 7 | 243.6 | anti_armor:1, armor:2, artillery:1, infantry:2, support:1 |
+
+## east_06_dnieper_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| soviet | 蘇軍第 3 近衛軍 | player | 8 | 278.6 | armor:2, artillery:1, engineer:1, infantry:3, scout_armor:1 |
+| axis | 德軍南方集團軍 | ai | 6 | 191.7 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
 
 ## east_09_seelow_1945
 

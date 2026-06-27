@@ -26,6 +26,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1 | none |
 | conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | 中央港鎮倉庫 11,6 capture min 9 XP 1, conquest enemy -1 | none |
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 1 | 突破機槍據點 5,3 destroy min 18 XP 1; 南側警戒線 5,4 recon min 19 XP 1 | none |
+| east_06_dnieper_1943 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 29/160 (18%); soviet 37/160 (23%) | soviet 61/160 (38%), spots 0 | soviet: eng min 5, art 0/3, targets 3 | soviet: eng turns 2 | soviet: art move 0/3 | soviet target 9,5 own min 6 enemy min 1 | 控制東岸渡口 5,4 hold 2t min 1 XP 1, reinforce -2t; 偵察西岸觀測點 12,4 recon min 8 XP 1, enemy dig -1 R2 | soviet +77.6; T6 2 units |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 18,3 own min 21 enemy min 0 | 清除 MG 42 19,2 destroy min 22 XP 1; 偵察砲兵觀測點 21,1 recon min 25 XP 1 | none |
 | east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 56/384 (15%) | none | soviet: eng min 7, art 0/3, targets 3 | soviet: eng turns 3 | soviet: art move 1/3 | soviet target 19,4 own min 9 enemy min 0 | 清除西側 MG 42 18,3 destroy min 9 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon min 13 XP 1, enemy dig -1 R2, campaign +1p | none |
 | north_01_el_alamein_1942 | allies artillery:1; axis artillery:1 | allies 23/160 (14%); axis 26/160 (16%) | allies 49/160 (31%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 奪取綠洲補給 8,5 capture min 6 XP 1, repair 2; 偵察北側山脊 10,2 recon min 9 XP 1, enemy supp +1 R2 | none |
@@ -88,6 +89,8 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | conq_pacific_island | 中央港鎮倉庫 | capture 11,6 | allies | own 9 / enemy 11 | XP 1, conquest enemy -1 | conquest pressure -1 |
 | east_05_kharkov_1943 | 突破機槍據點 | destroy 5,3 | axis | own 18 / enemy 0 | XP 1 | enemy closer |
 | east_05_kharkov_1943 | 南側警戒線 | recon 5,4 | axis | own 19 / enemy 0 | XP 1 | enemy closer |
+| east_06_dnieper_1943 | 控制東岸渡口 | hold 2t 5,4 | soviet | own 1 / enemy 4 | XP 1, reinforce -2t | reinforce best T6->T4 |
+| east_06_dnieper_1943 | 偵察西岸觀測點 | recon 12,4 | soviet | own 8 / enemy 1 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_09_seelow_1945 | 清除 MG 42 | destroy 19,2 | soviet | own 22 / enemy 0 | XP 1 | enemy closer |
 | east_09_seelow_1945 | 偵察砲兵觀測點 | recon 21,1 | soviet | own 25 / enemy 0 | XP 1 | enemy closer |
 | east_10_berlin_1945 | 清除西側 MG 42 | destroy 18,3 | soviet | own 9 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2 |
@@ -139,6 +142,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | blitz_02_dunkirk_1940 | 2 | 1 | 1 | covered |
 | blitz_03_moscow_1941 | 2 | 2 | 0 | xp-only |
 | east_05_kharkov_1943 | 2 | 2 | 0 | xp-only |
+| east_06_dnieper_1943 | 2 | 0 | 2 | covered |
 | east_09_seelow_1945 | 2 | 2 | 0 | xp-only |
 | east_10_berlin_1945 | 2 | 0 | 2 | covered |
 | north_01_el_alamein_1942 | 2 | 0 | 2 | covered |
@@ -157,7 +161,7 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | campaign | scenarios | victory mix | special terrain | role hooks | check |
 | --- | --- | --- | --- | --- | --- |
 | blitzkrieg_early_war | 5 | capture:3, eliminate:1, survive:1 | river:3 | scout:2 | tracked |
-| eastern_front | 6 | capture:5, survive:1 | river:1, town:3 | reinforcement:1, scout:2, engineer:1 | tracked |
+| eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
 | north_africa | 1 | eliminate:1 | desert:1 | scout:1 | tracked |
 | pacific_front | 1 | eliminate:1 | jungle:1, sea:1 | scout:1, engineer:1 | tracked |
 | western_front | 8 | capture:7, survive:1 | river:1 | reinforcement:2, engineer:2, airdrop:2 | tracked |

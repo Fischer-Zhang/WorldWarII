@@ -16,7 +16,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|
 | Engine | Godot 4 project, validated locally and in CI with Godot 4.2.2 stable |
 | Language | GDScript for runtime/tests, Python 3 for validators/reports, Bash for validation entrypoints |
-| Content | 38 scenario JSON files: 32 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
+| Content | 39 scenario JSON files: 33 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 6 campaigns, including tutorial campaign 0, and a 19-region conquest map |
 | Tests | 314 headless GDScript checks plus static data/report validators |
