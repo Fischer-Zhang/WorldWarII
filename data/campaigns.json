@@ -34,6 +34,13 @@
       "east_10_berlin_1945"
     ]
   },
+  "north_africa": {
+    "title": "北非沙漠戰 1942",
+    "description": "從阿拉曼防線開始,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",
+    "scenario_order": [
+      "north_01_el_alamein_1942"
+    ]
+  },
   "western_front": {
     "title": "西線反攻 1944-1945",
     "description": "從諾曼第突破到萊茵河橋頭堡,串起盟軍空降、裝甲突破、城市攻堅與德軍反擊。",
