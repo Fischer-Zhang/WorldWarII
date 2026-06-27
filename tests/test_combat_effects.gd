@@ -135,7 +135,24 @@ func _init() -> void:
 			% [marked_fire_support, unmarked_fire_support, lethal_fire_support, no_damage_fire_support]
 		)
 
-	# 13) Splash damage is a floored percentage of a direct hit; no base = no splash.
+	# 13) Breach support only helps a marked damaging hit against remaining dig-in.
+	var marked_breach_support := CombatEffects.breach_support_dig_in_bonus(true, 2, 3)
+	var unmarked_breach_support := CombatEffects.breach_support_dig_in_bonus(false, 2, 3)
+	var no_damage_breach_support := CombatEffects.breach_support_dig_in_bonus(true, 0, 3)
+	var no_dig_breach_support := CombatEffects.breach_support_dig_in_bonus(true, 2, 0)
+	if marked_breach_support == CombatEffects.BREACH_SUPPORT_DIG_IN_BONUS \
+			and unmarked_breach_support == 0 \
+			and no_damage_breach_support == 0 \
+			and no_dig_breach_support == 0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr(
+			"FAIL: breach-support guardrails expected 1/0/0/0 got %d/%d/%d/%d"
+			% [marked_breach_support, unmarked_breach_support, no_damage_breach_support, no_dig_breach_support]
+		)
+
+	# 14) Splash damage is a floored percentage of a direct hit; no base = no splash.
 	if CombatEffects.splash_damage(8, 50) == 4 \
 			and CombatEffects.splash_damage(1, 50) == 1 \
 			and CombatEffects.splash_damage(5, 100) == 5 \
@@ -145,7 +162,7 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: splash_damage did not match expected falloff")
 
-	# 14) Overwatch defaults to half damage, while unit data can define stronger reaction fire.
+	# 15) Overwatch defaults to half damage, while unit data can define stronger reaction fire.
 	var default_overwatch := CombatEffects.overwatch_damage(5, infantry)
 	var mg_overwatch := CombatEffects.overwatch_damage(5, {"id": "mg_team", "overwatch_damage_pct": 100})
 	var zero_overwatch := CombatEffects.overwatch_damage(0, mg)

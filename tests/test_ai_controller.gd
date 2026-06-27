@@ -25,6 +25,12 @@ const LIGHT_TANK_DEF := {
 const ENGINEER_DEF := {
 	"id": "engineer", "hp": 8, "attack": 3, "defense": 2, "range": 1, "move": 3,
 	"vision": 3, "vs_armor": 1, "armor": 0,
+	"skills": [{
+		"id": "breach_support",
+		"cooldown": 2,
+		"duration": 0,
+		"breach_support_range": 2,
+	}],
 }
 const MG_DEF := {
 	"id": "mg_team", "hp": 8, "attack": 6, "defense": 1, "range": 1, "move": 2,
@@ -518,7 +524,43 @@ func _init() -> void:
 			% [toward_urban, toward_plain]
 		)
 
-	# 17) Plan trace should explain the same selected plan without changing the decision.
+	# 17) Engineers should prepare a breach when a follow-up attacker can use the extra dig-in loss.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var breach_engineer := make_unit("engineer", "axis", Vector2i(0, 0), 8)
+	var breach_artillery := make_unit("artillery", "axis", Vector2i(0, -1), 8)
+	var breach_target := make_unit("infantry", "allies", Vector2i(2, 0), 10)
+	breach_target.dig_in_level = 3
+	battle.hex_map.terrain_overrides[breach_target.coord] = "town"
+	for river_hex in [
+		Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, -1),
+		Vector2i(3, -1), Vector2i(3, 0), Vector2i(2, 1),
+	]:
+		battle.hex_map.terrain_overrides[river_hex] = "river"
+	battle.units = [breach_engineer, breach_artillery, breach_target]
+	battle.hex_map.occupants[breach_engineer.coord] = breach_engineer
+	battle.hex_map.occupants[breach_artillery.coord] = breach_artillery
+	battle.hex_map.occupants[breach_target.coord] = breach_target
+	battle.visibility_by_faction = {"axis": {breach_target.coord: true}}
+	var breach_plan: Dictionary = ai.plan_for_unit(breach_engineer)
+	if String(breach_plan.get("action", "")) == "breach_support" \
+			and breach_plan.get("breach_support_target") == breach_target:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: engineer should mark breach for artillery follow-up, got %s" % str(breach_plan))
+	breach_engineer.skill_cooldowns["breach_support"] = 99
+	var breach_cooldown_plan: Dictionary = ai.plan_for_unit(breach_engineer)
+	if String(breach_cooldown_plan.get("action", "")) != "breach_support":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: engineer should not mark breach while skill is on cooldown")
+
+	# 18) Plan trace should explain the same selected plan without changing the decision.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -553,6 +595,7 @@ func _init() -> void:
 			and traced_plan.get("action") == direct_plan.get("action") \
 			and traced_plan.get("attack") == direct_plan.get("attack") \
 			and traced_plan.get("fire_support_target") == direct_plan.get("fire_support_target") \
+			and traced_plan.get("breach_support_target") == direct_plan.get("breach_support_target") \
 			and not candidates.is_empty() \
 			and top.has("coord") \
 			and components.has("distance") \
@@ -561,6 +604,7 @@ func _init() -> void:
 			and components.has("secondary_objective") \
 			and components.has("total") \
 			and top.has("fire_support_score") \
+			and top.has("breach_support_score") \
 			and abs(float(components.get("objective", 0.0)) - (
 				float(components.get("primary_objective", 0.0))
 				+ float(components.get("secondary_objective", 0.0))

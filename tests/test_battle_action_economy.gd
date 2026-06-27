@@ -435,6 +435,114 @@ func _run() -> void:
 						preview_bonus, support_bonus, battle.fire_support_marks.has(mark_key),
 					])
 
+		# Engineers can prepare a breach so the next same-faction damaging hit
+		# strips one additional dig-in level from that target.
+		var breach_engineer = player_unit
+		var breach_attacker = null
+		for u in battle.units:
+			if u != breach_engineer and u.faction_id == battle.player_faction_id:
+				breach_attacker = u
+				break
+		var breach_target = null
+		for u in battle.units:
+			if u.faction_id != battle.player_faction_id:
+				breach_target = u
+				break
+		if breach_attacker == null or breach_target == null:
+			fail_count += 1
+			printerr("FAIL: could not stage units for breach-support test")
+		else:
+			breach_engineer.type_id = "engineer"
+			breach_engineer.has_moved = false
+			breach_engineer.has_attacked = false
+			breach_engineer.skill_cooldowns.clear()
+			breach_attacker.type_id = "infantry"
+			breach_attacker.has_attacked = false
+			breach_attacker.suppression = 0
+			breach_target.type_id = "infantry"
+			breach_target.hp = breach_target.max_hp
+			breach_target.suppression = 0
+			breach_target.dig_in_level = 3
+			var breach_target_coord := Vector2i(-999, -999)
+			var engineer_coord := Vector2i(-999, -999)
+			var breach_attacker_coord := Vector2i(-999, -999)
+			var breach_staged := false
+			for c in battle.hex_map.tiles.keys():
+				var breach_terrain: String = battle.hex_map.terrain_at(c)
+				if breach_terrain == "" or battle.hex_map.terrain_impassable(breach_terrain):
+					continue
+				if battle.hex_map.unit_at(c) != null and battle.hex_map.unit_at(c) != breach_target:
+					continue
+				var breach_neighbors: Array = []
+				for nb in HexCoord.neighbors(c):
+					var terrain: String = battle.hex_map.terrain_at(nb)
+					if terrain != "" and not battle.hex_map.terrain_impassable(terrain) \
+							and battle.hex_map.unit_at(nb) == null:
+						breach_neighbors.append(nb)
+				if breach_neighbors.size() >= 2:
+					breach_target_coord = c
+					engineer_coord = breach_neighbors[0]
+					breach_attacker_coord = breach_neighbors[1]
+					breach_staged = true
+					break
+			if not breach_staged:
+				fail_count += 1
+				printerr("FAIL: could not stage adjacent open hexes for breach-support test")
+			else:
+				battle.hex_map.move_unit(breach_target, breach_target_coord, 0.0)
+				battle.hex_map.move_unit(breach_engineer, engineer_coord, 0.0)
+				battle.hex_map.move_unit(breach_attacker, breach_attacker_coord, 0.0)
+				breach_target.has_moved = false
+				breach_engineer.has_moved = false
+				breach_attacker.has_moved = false
+				battle._recompute_visibility()
+				var breach_skill: Dictionary = battle._resolve_skill_by_id(breach_engineer, "breach_support")
+				var breach_targets: Array = battle._breach_support_targets(breach_engineer, breach_skill)
+				battle.selected_unit = breach_engineer
+				battle.phase = battle.Phase.UNIT_SELECTED
+				battle.breach_support_return_phase = battle.Phase.UNIT_SELECTED
+				battle.breach_support_targets = breach_targets
+				battle._cancel_breach_support()
+				if battle.phase == battle.Phase.UNIT_SELECTED \
+						and battle.selected_unit == breach_engineer \
+						and not battle.movement_range.is_empty():
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: cancelling breach-support from selection should restore movement phase")
+				breach_targets = battle._breach_support_targets(breach_engineer, breach_skill)
+				battle.breach_support_skill = breach_skill
+				battle._do_breach_support(breach_engineer, breach_target)
+				var breach_key: int = battle._breach_support_mark_key(breach_target)
+				if breach_target in breach_targets \
+						and breach_engineer.has_attacked \
+						and breach_engineer.skill_cooldowns.has("breach_support") \
+						and battle.breach_support_marks.has(breach_key):
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: breach-support should target, spend action and start cooldown")
+				var breach_preview_bonus: int = battle._breach_support_preview_bonus(breach_attacker, breach_target, 1)
+				var breach_bonus: int = battle._breach_support_dig_in_bonus(breach_attacker, breach_target, 1)
+				if breach_preview_bonus == CombatEffects.BREACH_SUPPORT_DIG_IN_BONUS \
+						and breach_bonus == CombatEffects.BREACH_SUPPORT_DIG_IN_BONUS \
+						and not battle.breach_support_marks.has(breach_key):
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: breach-support bonus should preview, apply once and consume; preview=%d bonus=%d marked=%s" % [
+						breach_preview_bonus, breach_bonus, battle.breach_support_marks.has(breach_key),
+					])
+				battle.breach_support_marks[breach_key] = {"faction": breach_attacker.faction_id}
+				var exhausted_bonus: int = battle._breach_support_dig_in_bonus(
+					breach_attacker, breach_target, 1, breach_target.dig_in_level
+				)
+				if exhausted_bonus == 0 and not battle.breach_support_marks.has(breach_key):
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: breach-support should consume without bonus when natural dig-in loss already clears the target")
+
 		# Destroy-unit and recon secondary objectives complete from combat and visibility events.
 		var unit_script: Script = player_unit.get_script()
 		var destroy_target = unit_script.new()

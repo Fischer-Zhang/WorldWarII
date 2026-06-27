@@ -33,8 +33,9 @@ const HelpContent := preload("res://scripts/ui/help_content.gd")
 
 const DEFAULT_SCENARIO_ID := "00_sandbox"
 const FIRE_SUPPORT_SKILL_ID := "fire_support_mark"
+const BREACH_SUPPORT_SKILL_ID := "breach_support"
 
-enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET, FIRE_SUPPORT_TARGET }
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET, FIRE_SUPPORT_TARGET, BREACH_SUPPORT_TARGET }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
@@ -82,6 +83,10 @@ var fire_support_targets: Array = []  # visible enemy units while phase == FIRE_
 var fire_support_skill: Dictionary = {}
 var fire_support_marks: Dictionary = {}  # target instance id -> {faction, spotter, target, turn}
 var fire_support_return_phase: Phase = Phase.ATTACK_PHASE
+var breach_support_targets: Array = []  # visible entrenched enemies while phase == BREACH_SUPPORT_TARGET
+var breach_support_skill: Dictionary = {}
+var breach_support_marks: Dictionary = {}  # target instance id -> {faction, engineer, target, turn}
+var breach_support_return_phase: Phase = Phase.ATTACK_PHASE
 var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one per active skill)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
@@ -345,6 +350,19 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				else:
 					u.has_attacked = true
 					u.queue_redraw()
+			"breach_support":
+				var breach_target: Unit = plan.get("breach_support_target")
+				var breach_skill := _resolve_skill_by_id(u, BREACH_SUPPORT_SKILL_ID)
+				if breach_target != null and not breach_skill.is_empty() \
+						and breach_target.is_alive() \
+						and u.skill_ready(String(breach_skill.get("id", BREACH_SUPPORT_SKILL_ID)), turn_manager.turn_number) \
+						and breach_target in _breach_support_targets(u, breach_skill):
+					breach_support_skill = breach_skill
+					_do_breach_support(u, breach_target)
+					await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+				else:
+					u.has_attacked = true
+					u.queue_redraw()
 			"rally":
 				var recovered := _rally_unit(u)
 				_set_prompt("AI 行動", "%s 整隊,壓制 -%d" % [u.display_name, recovered])
@@ -596,6 +614,11 @@ func _show_damage_preview(attacker: Unit, defender: Unit) -> void:
 	)
 	if fire_support_bonus > 0:
 		lines.append("[color=#79d6ff]標定火力:壓制 +%d[/color]" % fire_support_bonus)
+	var breach_support_bonus := _breach_support_preview_bonus(
+		attacker, defender, int(preview.dmg), int(preview.get("defender_dig_in_loss", 0))
+	)
+	if breach_support_bonus > 0:
+		lines.append("[color=#f0c36a]突破準備:構工 -%d[/color]" % breach_support_bonus)
 	if not mod_bits.is_empty():
 		lines.append("[color=#88aaff]修正: %s[/color]" % " · ".join(mod_bits))
 	damage_preview_content.text = "\n".join(lines)
@@ -670,6 +693,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				_do_fire_support_mark(selected_unit, clicked_unit)
 			else:
 				_cancel_fire_support_mark()
+		Phase.BREACH_SUPPORT_TARGET:
+			if clicked_unit != null and clicked_unit in breach_support_targets:
+				_do_breach_support(selected_unit, clicked_unit)
+			else:
+				_cancel_breach_support()
 
 func _select_unit(unit: Unit) -> void:
 	if selected_unit != null and selected_unit != unit:
@@ -817,6 +845,8 @@ func _refresh_skill_buttons(unit: Unit) -> void:
 			continue
 		if skill.has("fire_support_range") and unit.has_attacked:
 			continue
+		if skill.has("breach_support_range") and unit.has_attacked:
+			continue
 		var skill_id := String(skill.get("id", ""))
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(0, 40)
@@ -845,6 +875,9 @@ func _on_skill_pressed(skill: Dictionary) -> void:
 		return
 	if skill.has("fire_support_range"):
 		_begin_fire_support_mark(selected_unit, skill)
+		return
+	if skill.has("breach_support_range"):
+		_begin_breach_support(selected_unit, skill)
 		return
 	# Special instant effects (e.g. engineer's Fortify) are applied
 	# immediately, in addition to recording the active_effect entry so the
@@ -1029,6 +1062,86 @@ func _cancel_fire_support_mark() -> void:
 	else:
 		_enter_attack_phase()
 
+func _begin_breach_support(unit: Unit, skill: Dictionary) -> void:
+	if unit == null or unit.has_attacked:
+		return
+	breach_support_targets = _breach_support_targets(unit, skill)
+	if breach_support_targets.is_empty():
+		_set_prompt("無可突破", "%s 附近沒有可標定的構工敵軍" % unit.display_name)
+		return
+	breach_support_skill = skill
+	breach_support_return_phase = phase
+	phase = Phase.BREACH_SUPPORT_TARGET
+	overwatch_button.visible = false
+	rally_button.visible = false
+	_hide_skill_buttons()
+	bridge_button.visible = false
+	damage_preview_panel.visible = false
+	hex_map.show_attack_targets(breach_support_targets.map(func(u): return u.coord))
+	hex_map.highlight_coord(unit.coord)
+	_set_prompt("選擇突破", "點紅色構工敵軍標定突破點;同陣營下一次主動攻擊造成傷害時構工額外 -1,或點別處取消")
+
+func _breach_support_targets(unit: Unit, skill: Dictionary) -> Array:
+	if unit == null:
+		return []
+	var radius := int(skill.get("breach_support_range", 2))
+	var visible: Dictionary = visibility_by_faction.get(unit.faction_id, {})
+	var out: Array = []
+	for u in units:
+		var target: Unit = u
+		if not target.is_alive() or target.faction_id == unit.faction_id:
+			continue
+		if target.dig_in_level <= 0:
+			continue
+		if not visible.has(target.coord):
+			continue
+		if HexCoord.distance(unit.coord, target.coord) > radius:
+			continue
+		if not Visibility.has_los(unit.coord, target.coord, hex_map):
+			continue
+		out.append(target)
+	return out
+
+func _do_breach_support(unit: Unit, target: Unit) -> void:
+	if unit == null or target == null or not target.is_alive():
+		_cancel_breach_support()
+		return
+	var skill := breach_support_skill if not breach_support_skill.is_empty() else _resolve_skill_by_id(unit, BREACH_SUPPORT_SKILL_ID)
+	var skill_id := String(skill.get("id", BREACH_SUPPORT_SKILL_ID))
+	var cooldown: int = int(skill.get("cooldown", 0))
+	breach_support_marks[_breach_support_mark_key(target)] = {
+		"faction": unit.faction_id,
+		"engineer": unit.display_name,
+		"target": target.display_name,
+		"turn": turn_manager.turn_number,
+	}
+	unit.skill_cooldowns[skill_id] = turn_manager.turn_number + cooldown
+	unit.skill_used.emit(skill_id)
+	unit.has_attacked = true
+	unit.queue_redraw()
+	action_log.record_skill(unit, skill_id, turn_manager.turn_number)
+	AudioBank.play("select")
+	breach_support_targets.clear()
+	breach_support_skill = {}
+	hex_map.clear_movement_range()
+	_set_prompt("突破準備", "%s 標定 %s — 下一次同陣營主動攻擊造成傷害時構工額外 -1" % [
+		unit.display_name, target.display_name,
+	])
+	_update_info_panel_for_unit(target)
+	_deselect()
+	_update_status()
+
+func _cancel_breach_support() -> void:
+	var return_phase := breach_support_return_phase
+	breach_support_targets.clear()
+	breach_support_skill = {}
+	breach_support_return_phase = Phase.ATTACK_PHASE
+	if return_phase == Phase.UNIT_SELECTED and selected_unit != null \
+			and not selected_unit.has_moved and not selected_unit.has_attacked:
+		_present_unit_actions(selected_unit)
+	else:
+		_enter_attack_phase()
+
 func _resolve_skill_by_id(unit: Unit, skill_id: String) -> Dictionary:
 	for skill in _resolve_active_skills(unit):
 		if String(skill.get("id", "")) == skill_id:
@@ -1133,6 +1246,12 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		attacker, defender, result.damage_to_defender, result.defender_dies
 	)
 	result.suppression_to_defender += spotter_bonus + fire_support_bonus
+	var breach_support_bonus := _breach_support_dig_in_bonus(
+		attacker, defender, result.damage_to_defender, result.defender_dig_in_loss
+	)
+	result.defender_dig_in_loss = min(
+		defender.dig_in_level, result.defender_dig_in_loss + breach_support_bonus
+	)
 
 	attacker.play_attack_animation(defender.position)
 	AudioBank.play("attack")
@@ -1147,6 +1266,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		msg += ",偵察校射 +%d" % spotter_bonus
 	if fire_support_bonus > 0:
 		msg += ",標定火力 +%d" % fire_support_bonus
+	if breach_support_bonus > 0:
+		msg += ",突破準備 +%d" % breach_support_bonus
 	if result.defender_dig_in_loss > 0:
 		msg += ",構工 -%d" % result.defender_dig_in_loss
 	if result.counter_damage > 0:
@@ -1170,6 +1291,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	var destroy_messages: Array[String] = []
 	if not defender.is_alive():
 		_clear_fire_support_mark(defender)
+		_clear_breach_support_mark(defender)
 		hex_map.unregister_unit(defender)
 		hex_map.place_wreckage(defender.coord, defender.faction_color)
 		defender.play_death_animation()
@@ -1180,6 +1302,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 			destroy_messages.append(defender_destroy_text)
 	if not attacker.is_alive():
 		_clear_fire_support_mark(attacker)
+		_clear_breach_support_mark(attacker)
 		hex_map.unregister_unit(attacker)
 		hex_map.place_wreckage(attacker.coord, attacker.faction_color)
 		attacker.play_death_animation()
@@ -1264,6 +1387,7 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 			attacker.gain_xp(3 if not unit.is_alive() else 1)
 		if not unit.is_alive():
 			_clear_fire_support_mark(unit)
+			_clear_breach_support_mark(unit)
 			hex_map.unregister_unit(unit)
 			hex_map.place_wreckage(unit.coord, unit.faction_color)
 			unit.play_death_animation()
@@ -1307,6 +1431,12 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 	var fire_support_bonus := _fire_support_preview_bonus(
 		attacker, defender, result.damage_to_defender, result.defender_dies
 	)
+	var breach_support_bonus := _breach_support_preview_bonus(
+		attacker, defender, result.damage_to_defender, result.defender_dig_in_loss
+	)
+	var total_dig_loss: int = min(
+		defender.dig_in_level, result.defender_dig_in_loss + breach_support_bonus
+	)
 	var total_suppression := result.suppression_to_defender + spotter_bonus + fire_support_bonus
 	var parts: Array[String] = ["傷害 %d" % result.damage_to_defender]
 	if result.counter_damage > 0:
@@ -1317,8 +1447,10 @@ func _attack_preview(attacker: Unit, defender: Unit) -> String:
 		parts.append("偵察校射 +%d壓制" % spotter_bonus)
 	if fire_support_bonus > 0:
 		parts.append("標定火力 +%d壓制" % fire_support_bonus)
-	if result.defender_dig_in_loss > 0:
-		parts.append("構工 -%d" % result.defender_dig_in_loss)
+	if breach_support_bonus > 0:
+		parts.append("突破準備 +%d構工" % breach_support_bonus)
+	if total_dig_loss > 0:
+		parts.append("構工 -%d" % total_dig_loss)
 	if int(atk_def.get("splash_radius", 0)) > 0:
 		parts.append("範圍殺傷 %d%%" % int(atk_def.get("splash_damage_pct", CombatEffects.SPLASH_DAMAGE_PCT)))
 	var future_suppression := CombatEffects.apply_suppression(defender.suppression, total_suppression)
@@ -1364,6 +1496,34 @@ func _clear_fire_support_mark(unit: Unit) -> void:
 	if unit != null:
 		fire_support_marks.erase(_fire_support_mark_key(unit))
 
+func _breach_support_mark_key(unit: Unit) -> int:
+	return unit.get_instance_id() if unit != null else 0
+
+func _has_breach_support_mark(attacker: Unit, defender: Unit) -> bool:
+	if attacker == null or defender == null:
+		return false
+	var mark: Dictionary = breach_support_marks.get(_breach_support_mark_key(defender), {})
+	if mark.is_empty():
+		return false
+	return String(mark.get("faction", "")) == attacker.faction_id
+
+func _breach_support_preview_bonus(attacker: Unit, defender: Unit, damage: int, natural_dig_loss: int = 0) -> int:
+	var remaining_dig_in: int = max(0, defender.dig_in_level - natural_dig_loss)
+	return CombatEffects.breach_support_dig_in_bonus(
+		_has_breach_support_mark(attacker, defender), damage, remaining_dig_in
+	)
+
+func _breach_support_dig_in_bonus(attacker: Unit, defender: Unit, damage: int, natural_dig_loss: int = 0) -> int:
+	var marked := _has_breach_support_mark(attacker, defender)
+	var remaining_dig_in: int = max(0, defender.dig_in_level - natural_dig_loss)
+	if marked and damage > 0:
+		_clear_breach_support_mark(defender)
+	return CombatEffects.breach_support_dig_in_bonus(marked, damage, remaining_dig_in)
+
+func _clear_breach_support_mark(unit: Unit) -> void:
+	if unit != null:
+		breach_support_marks.erase(_breach_support_mark_key(unit))
+
 func _has_light_tank_spotter(faction_id: String, target_coord: Vector2i) -> bool:
 	var visible: Dictionary = visibility_by_faction.get(faction_id, {})
 	if not visible.has(target_coord):
@@ -1394,6 +1554,9 @@ func _deselect() -> void:
 	fire_support_targets.clear()
 	fire_support_skill = {}
 	fire_support_return_phase = Phase.ATTACK_PHASE
+	breach_support_targets.clear()
+	breach_support_skill = {}
+	breach_support_return_phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
@@ -1500,6 +1663,14 @@ func _update_info_panel_for_unit(unit: Unit) -> void:
 		var faction_name := String(mark_faction.get("name", mark_faction_id))
 		lines.append("[color=#79d6ff]標定: %s 下次主動攻擊未致死壓制 +%d[/color]" % [
 			faction_name, CombatEffects.FIRE_SUPPORT_SUPPRESSION_BONUS,
+		])
+	var breach_support_mark: Dictionary = breach_support_marks.get(_breach_support_mark_key(unit), {})
+	if not breach_support_mark.is_empty():
+		var breach_faction_id := String(breach_support_mark.get("faction", ""))
+		var breach_faction: Dictionary = factions.get(breach_faction_id, {})
+		var breach_faction_name := String(breach_faction.get("name", breach_faction_id))
+		lines.append("[color=#f0c36a]突破: %s 下次主動攻擊造成傷害構工 -%d[/color]" % [
+			breach_faction_name, CombatEffects.BREACH_SUPPORT_DIG_IN_BONUS,
 		])
 	if unit.has_moved:
 		lines.append("[color=#aaaaaa](本回合已行動)[/color]")
@@ -1850,6 +2021,7 @@ func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 		var safe_idx: int = clampi(death_idx, 0, effective_path.size() - 1)
 		var death_coord: Vector2i = effective_path[safe_idx]
 		_clear_fire_support_mark(mover)
+		_clear_breach_support_mark(mover)
 		hex_map.unregister_unit(mover)
 		hex_map.place_wreckage(death_coord, mover.faction_color)
 		mover.play_death_animation()

@@ -140,6 +140,8 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Fire-Support Marking** lets a light tank spend its action to mark a visible enemy in LOS. The mark is stored by the battle scene and consumed by the next same-faction active attack against that target, adding +1 suppression through `CombatEffects` only when the hit deals non-lethal damage.
 
+**Breach Support** lets an engineer spend its action to mark a nearby visible entrenched enemy in LOS. The mark is stored by the battle scene and consumed by the next same-faction active attack against that target, adding +1 dig-in loss through `CombatEffects` when the hit deals damage.
+
 **Secondary Objectives** are optional scenario-authored capture, hold-turn, destroy-unit or recon-hex tasks. They do not change victory resolution; the battle scene grants one-time `rewards` such as XP, suppression recovery, repair or reinforcement timing, records the event in `ActionLog`, and tracks hold progress per objective. Primary and secondary objectives render as labeled map markers so the player can distinguish victory hexes from optional reward hexes, marked targets and hold progress.
 
 ## AI
@@ -158,12 +160,13 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 - rally value when suppressed
 - overwatch value when no attack is better
 - fire-support marking when a light tank has a visible LOS target and a same-faction follow-up attacker can use the suppression bonus
+- breach-support marking when an engineer has a nearby visible entrenched target and a same-faction follow-up attacker can use the extra dig-in loss
 
 Hard difficulty adds one-ply lookahead against visible player retaliation.
 `tools/ai_trace_report.gd` generates `docs/progress/ai_trace_report.md` through
 `AIController.plan_trace_for_unit()` so AI diagnostics stay tied to the runtime
-scoring path, including primary/secondary objective score splits and fire-support
-mark scores.
+scoring path, including primary/secondary objective score splits, fire-support
+mark scores and breach-support mark scores.
 
 ## Campaign
 

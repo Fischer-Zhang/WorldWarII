@@ -31,6 +31,7 @@ const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_FIRE_SUPPORT := 2.0
+const W_BREACH_SUPPORT := 2.0
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
 const AT_ARMOR_TARGET_BONUS := 2.0
@@ -101,6 +102,7 @@ func plan_for_unit(unit) -> Dictionary:
 			"move_to": unit.coord,
 			"attack": null,
 			"fire_support_target": null,
+			"breach_support_target": null,
 			"action": "wait",
 			"score": 0.0,
 			"reachable": reachable,
@@ -116,9 +118,11 @@ func plan_for_unit(unit) -> Dictionary:
 	var best_score: float = -INF
 	var best_target = null
 	var best_fire_support_target = null
-	var best_action := "wait"  # "attack", "overwatch", "rally", "fire_support_mark", or "wait"
+	var best_breach_support_target = null
+	var best_action := "wait"  # "attack", "overwatch", "rally", "fire_support_mark", "breach_support", or "wait"
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 	var fire_support_skill := _fire_support_skill(unit, atk_def)
+	var breach_support_skill := _breach_support_skill(unit, atk_def)
 
 	for cand in candidates:
 		var coord: Vector2i = cand
@@ -140,12 +144,19 @@ func plan_for_unit(unit) -> Dictionary:
 		var fire_support_score := -INF
 		if fire_support.get("target", null) != null:
 			fire_support_score = base_score - attack_value + float(fire_support.get("score", 0.0))
+		var breach_support := _best_breach_support_from(
+			unit, coord, visible_enemies, breach_support_skill, visible_hexes
+		)
+		var breach_support_score := -INF
+		if breach_support.get("target", null) != null:
+			breach_support_score = base_score - attack_value + float(breach_support.get("score", 0.0))
 
 		if base_score > best_score:
 			best_score = base_score
 			best = coord
 			best_target = target
 			best_fire_support_target = null
+			best_breach_support_target = null
 			best_action = "attack" if target != null else "wait"
 		if overwatch_score > best_score and not atk_def.get("indirect", false) \
 				and not CombatEffects.is_pinned(unit.suppression):
@@ -153,24 +164,35 @@ func plan_for_unit(unit) -> Dictionary:
 			best = coord
 			best_target = null
 			best_fire_support_target = null
+			best_breach_support_target = null
 			best_action = "overwatch"
 		if fire_support_score > best_score:
 			best_score = fire_support_score
 			best = coord
 			best_target = null
 			best_fire_support_target = fire_support.get("target", null)
+			best_breach_support_target = null
 			best_action = "fire_support_mark"
+		if breach_support_score > best_score:
+			best_score = breach_support_score
+			best = coord
+			best_target = null
+			best_fire_support_target = null
+			best_breach_support_target = breach_support.get("target", null)
+			best_action = "breach_support"
 		if rally_score > best_score:
 			best_score = rally_score
 			best = coord
 			best_target = null
 			best_fire_support_target = null
+			best_breach_support_target = null
 			best_action = "rally"
 
 	return {
 		"move_to": best,
 		"attack": best_target,
 		"fire_support_target": best_fire_support_target,
+		"breach_support_target": best_breach_support_target,
 		"action": best_action,
 		"score": best_score,
 		"reachable": reachable,
@@ -188,6 +210,7 @@ func plan_trace_for_unit(unit) -> Dictionary:
 			visible_enemies.append(k["unit"])
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 	var fire_support_skill := _fire_support_skill(unit, atk_def)
+	var breach_support_skill := _breach_support_skill(unit, atk_def)
 	var candidates: Array = [unit.coord]
 	var reachable: Dictionary = plan.get("reachable", {})
 	for c in reachable.keys():
@@ -210,13 +233,21 @@ func plan_trace_for_unit(unit) -> Dictionary:
 		var fire_support_score := -INF
 		if fire_support.get("target", null) != null:
 			fire_support_score = float(breakdown.total) - attack_value + float(fire_support.get("score", 0.0))
+		var breach_support := _best_breach_support_from(
+			unit, coord, visible_enemies, breach_support_skill, visible_hexes
+		)
+		var breach_support_score := -INF
+		if breach_support.get("target", null) != null:
+			breach_support_score = float(breakdown.total) - attack_value + float(breach_support.get("score", 0.0))
 		traces.append({
 			"coord": coord,
 			"target": target,
 			"fire_support_target": fire_support.get("target", null),
+			"breach_support_target": breach_support.get("target", null),
 			"base_score": float(breakdown.total),
 			"overwatch_score": float(breakdown.total) - attack_value + overwatch_value,
 			"fire_support_score": fire_support_score,
+			"breach_support_score": breach_support_score,
 			"rally_score": rally_value,
 			"components": breakdown,
 		})
@@ -323,7 +354,10 @@ func _trace_sort_score(trace: Dictionary) -> float:
 		float(trace.get("base_score", -INF)),
 		max(
 			float(trace.get("overwatch_score", -INF)),
-			max(float(trace.get("fire_support_score", -INF)), float(trace.get("rally_score", -INF)))
+			max(
+				float(trace.get("fire_support_score", -INF)),
+				max(float(trace.get("breach_support_score", -INF)), float(trace.get("rally_score", -INF)))
+			)
 		)
 	)
 
@@ -537,6 +571,98 @@ func _fire_support_followup_attack_score(ally, enemy, ally_def: Dictionary) -> f
 	score += float(result.damage_to_defender) * 0.15
 	return score
 
+func _best_breach_support_from(
+	unit,
+	pos: Vector2i,
+	visible_enemies: Array,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> Dictionary:
+	if skill.is_empty() or unit == null or unit.has_attacked:
+		return {"target": null, "score": -INF}
+	var skill_id := String(skill.get("id", ""))
+	if skill_id == "" or not _skill_ready(unit, skill_id):
+		return {"target": null, "score": -INF}
+	var best = null
+	var best_score := -INF
+	for e in visible_enemies:
+		var enemy = e
+		var score := _breach_support_score(unit, pos, enemy, skill, visible_hexes)
+		if score > best_score:
+			best_score = score
+			best = enemy
+	if best == null:
+		return {"target": null, "score": -INF}
+	return {"target": best, "score": best_score}
+
+func _breach_support_score(
+	unit,
+	pos: Vector2i,
+	enemy,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> float:
+	if enemy == null or not enemy.is_alive() or enemy.faction_id == unit.faction_id:
+		return -INF
+	if int(enemy.dig_in_level) <= 0:
+		return -INF
+	if not visible_hexes.has(enemy.coord):
+		return -INF
+	if HexCoord.distance(pos, enemy.coord) > int(skill.get("breach_support_range", 0)):
+		return -INF
+	if not Visibility.has_los(pos, enemy.coord, battle.hex_map):
+		return -INF
+	if _target_has_breach_support_mark(unit.faction_id, enemy):
+		return -INF
+	var followup_score := _best_breach_support_followup_score(unit, enemy, visible_hexes)
+	if followup_score <= 0.0:
+		return -INF
+	var terrain_def: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(enemy.coord))
+	return followup_score + float(max(0, int(enemy.dig_in_level) - 1)) * 0.3 \
+		+ (ENGINEER_HIGH_COVER_BONUS if int(terrain_def.get("defense", 0)) >= 2 else 0.0)
+
+func _best_breach_support_followup_score(marker, enemy, visible_hexes: Dictionary) -> float:
+	var best := 0.0
+	for u in battle.units:
+		var ally = u
+		if ally == marker or not ally.is_alive() or ally.faction_id != marker.faction_id:
+			continue
+		if ally.has_method("is_done_for_turn") and ally.is_done_for_turn():
+			continue
+		var ally_def: Dictionary = _get_unit_def(ally.type_id)
+		if not CombatRules.can_attack_from_coord(
+			ally.coord, ally.faction_id, enemy, ally_def, battle.hex_map, visible_hexes
+		):
+			continue
+		var score := _breach_support_followup_attack_score(ally, enemy, ally_def)
+		best = max(best, score)
+	return best
+
+func _breach_support_followup_attack_score(ally, enemy, ally_def: Dictionary) -> float:
+	var distance := HexCoord.distance(ally.coord, enemy.coord)
+	var atk_terr: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(ally.coord))
+	var def_terr: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(enemy.coord))
+	var ally_general: Dictionary = _get_general_def(ally.general_id)
+	var enemy_general: Dictionary = _get_general_def(enemy.general_id)
+	var ally_mods: Dictionary = CombatModifiers.for_unit(ally, ally_general)
+	var enemy_mods: Dictionary = CombatModifiers.for_unit(enemy, enemy_general)
+	ally_mods.attack = int(ally_mods.get("attack", 0)) - CombatEffects.attack_penalty(ally.suppression)
+	var result: CombatResolver.Result = CombatResolver.resolve(
+		ally_def, _get_unit_def(enemy.type_id), ally.hp, enemy.hp,
+		atk_terr, def_terr, distance, enemy.dig_in_level, ally_mods, enemy_mods,
+	)
+	var bonus: int = CombatEffects.breach_support_dig_in_bonus(true, result.damage_to_defender, enemy.dig_in_level)
+	if bonus <= 0:
+		return 0.0
+	var natural_loss: int = min(int(enemy.dig_in_level), int(result.defender_dig_in_loss))
+	var total_loss: int = min(int(enemy.dig_in_level), natural_loss + bonus)
+	var extra_loss: int = max(0, total_loss - natural_loss)
+	if extra_loss <= 0:
+		return 0.0
+	var score := float(extra_loss) * W_DIG_IN_BREAK * W_BREACH_SUPPORT
+	score += float(result.damage_to_defender) * 0.1
+	return score
+
 func _attack_candidate_score(
 	attacker,
 	pos: Vector2i,
@@ -595,6 +721,21 @@ func _fire_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
 			return skill
 	return {}
 
+func _breach_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
+	var def := unit_def
+	if def.is_empty() and unit != null:
+		def = _get_unit_def(unit.type_id)
+	var primary: Dictionary = def.get("skill", {})
+	if primary.has("breach_support_range"):
+		return primary
+	for value in def.get("skills", []):
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var skill: Dictionary = value
+		if skill.has("breach_support_range"):
+			return skill
+	return {}
+
 func _skill_ready(unit, skill_id: String) -> bool:
 	if unit == null:
 		return false
@@ -613,6 +754,13 @@ func _current_turn_number() -> int:
 
 func _target_has_fire_support_mark(faction_id: String, enemy) -> bool:
 	var marks = battle.get("fire_support_marks")
+	if typeof(marks) != TYPE_DICTIONARY:
+		return false
+	var mark: Dictionary = marks.get(enemy.get_instance_id(), {})
+	return String(mark.get("faction", "")) == faction_id
+
+func _target_has_breach_support_mark(faction_id: String, enemy) -> bool:
+	var marks = battle.get("breach_support_marks")
 	if typeof(marks) != TYPE_DICTIONARY:
 		return false
 	var mark: Dictionary = marks.get(enemy.get_instance_id(), {})

@@ -47,8 +47,8 @@ Focused gate for city assaults that already have breach tools but still need man
 
 | scenario | faction | high-cover targets | eng min | eng turns | art now | art after move | check |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach support |
-| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach support |
+| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach coverage |
+| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach coverage |
 
 ## Secondary Objective Reward Audit
 

@@ -60,7 +60,7 @@ func _run() -> void:
 	var ids: Array = []
 	for s in resolved:
 		ids.append(String(s.get("id", "")))
-	if resolved.size() == 2 and "fortify" in ids and "reserve_call" in ids:
+	if resolved.size() == 3 and "fortify" in ids and "breach_support" in ids and "reserve_call" in ids:
 		pass_count += 1
 	else:
 		printerr("FAIL: multi-skill resolution wrong: %s" % str(ids))

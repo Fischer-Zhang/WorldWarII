@@ -125,6 +125,27 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"notes": "Visible high-cover dig-in target should create breach movement pressure before contact.",
 		},
 		{
+			"id": "engineer_breach_support",
+			"title": "Engineer breach support mark",
+			"difficulty": "normal",
+			"attacker": _unit("engineer", "axis", Vector2i(0, 0), data_loader),
+			"allies": [
+				_unit("artillery", "axis", Vector2i(0, -1), data_loader),
+			],
+			"enemies": [
+				{"unit": _dug_in_unit("infantry", "allies", Vector2i(2, 0), 3, data_loader), "visible": true, "terrain": "town"},
+			],
+			"terrain": {
+				Vector2i(1, 0): "river",
+				Vector2i(1, 1): "river",
+				Vector2i(2, -1): "river",
+				Vector2i(3, -1): "river",
+				Vector2i(3, 0): "river",
+				Vector2i(2, 1): "river",
+			},
+			"notes": "An engineer near an entrenched target should mark it when artillery can immediately exploit the breach.",
+		},
+		{
 			"id": "light_tank_fire_support",
 			"title": "Light tank fire-support mark",
 			"difficulty": "normal",
@@ -248,21 +269,23 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | base | overwatch | mark | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
 			_unit_text(row.get("fire_support_target", null)),
+			_unit_text(row.get("breach_support_target", null)),
 			_score(row.get("base_score", 0.0)),
 			_score(row.get("overwatch_score", 0.0)),
 			_score(row.get("fire_support_score", 0.0)),
+			_score(row.get("breach_support_score", 0.0)),
 			_score(row.get("rally_score", 0.0)),
 			_score(c.get("distance", 0.0)),
 			_score(c.get("attack", 0.0)),
@@ -309,6 +332,8 @@ func _unit_text(value: Variant) -> String:
 func _plan_target(plan: Dictionary):
 	if String(plan.get("action", "")) == "fire_support_mark":
 		return plan.get("fire_support_target", null)
+	if String(plan.get("action", "")) == "breach_support":
+		return plan.get("breach_support_target", null)
 	return plan.get("attack", null)
 
 func _score(value: Variant) -> String:

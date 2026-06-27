@@ -57,12 +57,12 @@ def main() -> None:
         "Berlin tempo probe should show improved engineer timing and poor artillery access",
     )
     require(
-        "| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach support |"
+        "| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach coverage |"
         in report,
         "Stalingrad urban breach focus should keep the engineer survivability gate visible",
     )
     require(
-        "| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach support |"
+        "| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach coverage |"
         in report,
         "Berlin urban breach focus should keep the engineer survivability gate visible",
     )

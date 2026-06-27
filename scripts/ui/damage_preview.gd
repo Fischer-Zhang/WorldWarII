@@ -39,6 +39,7 @@ static func preview(
 			"reason": _explain_illegality(attacker, defender, atk_def, hex_map, visible_hexes),
 			"dmg": 0, "counter": 0,
 			"defender_dies": false, "attacker_dies": false,
+			"defender_dig_in_loss": 0,
 			"mods": {"atk": {}, "def": {}},
 			"distance": distance,
 		}
@@ -56,6 +57,7 @@ static func preview(
 		"counter": result.counter_damage,
 		"defender_dies": result.defender_dies,
 		"attacker_dies": result.attacker_dies,
+		"defender_dig_in_loss": result.defender_dig_in_loss,
 		"mods": {"atk": atk_mods, "def": def_mods},
 		"distance": distance,
 	}

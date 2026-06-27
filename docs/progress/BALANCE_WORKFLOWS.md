@@ -55,6 +55,7 @@ Current rules established before large number changes:
 - Damaging attacks apply suppression through `CombatEffects`; MG teams and artillery are the primary pinning sources.
 - Damaging indirect fire gets +1 suppression when a same-faction light tank has LOS and vision to the target.
 - Light tanks can also spend their action to mark a visible LOS target; the next same-faction active attack against that target consumes the mark and adds +1 suppression through `CombatEffects` only on non-lethal damage.
+- Engineers can spend their action to mark a nearby visible entrenched LOS target; the next same-faction active attack against that target consumes the mark and adds +1 dig-in loss through `CombatEffects` on damaging hits.
 - Pinned units cannot overwatch or build dig-in and do not project ZoC; heavier suppression reduces movement/attack, indirect fire strips one dig-in level on damaging hits, and engineers strip up to two dig-in levels on damaging attacks.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
 - Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that grant one-time data-authored rewards such as XP, suppression recovery, repair or reinforcement timing but do not alter victory resolution.
@@ -71,7 +72,7 @@ Target identities:
 - Light tank: scouting, flanking, capture pressure, wounded-target cleanup.
 - Medium tank: general-purpose armored mainstay.
 - Artillery: long-range suppression with clear close-range vulnerability.
-- Engineer: close assault support that can strip up to two dig-in levels from entrenched defenders, but still has low raw damage and must accept counter-risk.
+- Engineer: close assault support that can strip up to two dig-in levels from entrenched defenders and can prepare a breach for a follow-up attack, but still has low raw damage and must accept counter-risk.
 
 ## Workflow 4: Scenario Pass
 
@@ -115,6 +116,7 @@ Current role-shaping pass:
 - Artillery avoids close positions near known enemies.
 - Engineers prefer entrenched urban/high-cover targets when their attack would remove dig-in.
 - Engineers can also move toward visible entrenched/high-cover breach targets before they are already in attack range.
+- Engineers can mark nearby entrenched targets for breach support when a same-faction follow-up attacker can use the extra dig-in loss.
 - Attack value includes suppression and dig-in break, so AI can prefer pinning/siege hits over equal raw damage.
 - Attack value includes light-tank spotter support for artillery, so scouting can break raw-damage ties.
 - Capture factions bias movement toward their target hex.

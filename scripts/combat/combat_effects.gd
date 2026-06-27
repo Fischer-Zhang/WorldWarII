@@ -9,6 +9,7 @@ const RALLY_RECOVERY := 2
 const RALLY_COVER_BONUS := 1
 const SPOTTER_SUPPRESSION_BONUS := 1
 const FIRE_SUPPORT_SUPPRESSION_BONUS := 1
+const BREACH_SUPPORT_DIG_IN_BONUS := 1
 const SPLASH_DAMAGE_PCT := 50  # default falloff for splash targets when a unit omits splash_damage_pct
 const OVERWATCH_DAMAGE_PCT := 50  # default reaction-fire damage when a unit omits overwatch_damage_pct
 
@@ -43,6 +44,11 @@ static func fire_support_suppression_bonus(marked: bool, damage: int, defender_d
 	if defender_dies or damage <= 0 or not marked:
 		return 0
 	return FIRE_SUPPORT_SUPPRESSION_BONUS
+
+static func breach_support_dig_in_bonus(marked: bool, damage: int, defender_dig_in: int) -> int:
+	if damage <= 0 or defender_dig_in <= 0 or not marked:
+		return 0
+	return min(BREACH_SUPPORT_DIG_IN_BONUS, defender_dig_in)
 
 static func dig_in_loss_for_attack(atk_def: Dictionary, damage: int, defender_dig_in: int) -> int:
 	if damage <= 0 or defender_dig_in <= 0:

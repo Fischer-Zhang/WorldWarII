@@ -737,7 +737,7 @@ def urban_breach_check_text(stats: dict[str, Any]) -> str:
     if stats["engineer_turns"] is None:
         return "engineer route blocked"
     if int(stats["artillery_coverage"]) == 0 and int(stats["artillery_move_coverage"]) == 0:
-        return "playtest engineer survivability; no artillery breach support"
+        return "playtest engineer survivability; no artillery breach coverage"
     if int(stats["engineer_turns"]) >= 4:
         return "playtest breach timing"
     return "supported"

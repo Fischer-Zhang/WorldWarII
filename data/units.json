@@ -121,7 +121,17 @@
       "cooldown": 2,
       "duration": 1,
       "instant_dig_in": 1
-    }
+    },
+    "skills": [
+      {
+        "id": "breach_support",
+        "name_zh": "突破準備",
+        "description_zh": "消耗行動標定 2 格內可見且有視線、具構工的敵軍;同陣營下一次主動攻擊造成傷害時額外拆除構工 +1。",
+        "cooldown": 2,
+        "duration": 0,
+        "breach_support_range": 2
+      }
+    ]
   },
   "tank_destroyer": {
     "name_zh": "驅逐戰車",
