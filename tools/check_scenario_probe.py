@@ -23,6 +23,11 @@ def main() -> None:
         "scenario probe missing secondary objective reward audit section",
     )
     require(
+        "## Conquest Secondary Coverage" in report
+        and "| scenario | secondary objectives | strategic objectives | enemy strength pressure | check |" in report,
+        "scenario probe missing conquest secondary coverage section",
+    )
+    require(
         "03_stalingrad_1942" in report
         and "axis: eng min 7, art 0/6, targets 6" in report,
         "Stalingrad breach probe should show forward Axis engineer approach",
@@ -106,6 +111,16 @@ def main() -> None:
         and "標定重砲陣地 | recon 22,2 | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
         in report,
         "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
+    )
+    conquest_rows = [
+        line for line in report.splitlines()
+        if line.startswith("| conq_") and line.endswith("| covered |")
+    ]
+    require(len(conquest_rows) == 10, "Every conquest template should have covered strategic secondary pressure")
+    require(
+        "| conq_cbi_jungle | 1 | 1 | -2 | covered |" in report
+        and "| conq_atlantic_convoy | 1 | 1 | -1 | covered |" in report,
+        "Conquest secondary coverage should expose enemy-strength pressure amounts",
     )
     print("Scenario probe checks passed")
 

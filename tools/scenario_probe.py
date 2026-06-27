@@ -554,6 +554,61 @@ def secondary_reinforcement_reward_audit(
     return "reinforce best " + ", ".join(sorted(set(bits)))
 
 
+def conquest_secondary_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not scenario_id.startswith("conq_"):
+            continue
+        objectives = scenario.get("secondary_objectives", [])
+        objective_count = 0
+        strategic_objectives = 0
+        pressure = 0
+        if isinstance(objectives, list):
+            for objective in objectives:
+                if not isinstance(objective, dict):
+                    continue
+                objective_count += 1
+                objective_pressure = conquest_pressure_amount(objective)
+                if objective_pressure > 0:
+                    strategic_objectives += 1
+                    pressure += objective_pressure
+        rows.append([
+            scenario_id,
+            objective_count,
+            strategic_objectives,
+            f"-{pressure}" if pressure > 0 else "0",
+            conquest_secondary_check_text(objective_count, strategic_objectives, pressure),
+        ])
+    return rows
+
+
+def conquest_pressure_amount(objective: dict[str, Any]) -> int:
+    total = 0
+    strategic_effects = objective.get("strategic_effects", [])
+    if not isinstance(strategic_effects, list):
+        return 0
+    for effect in strategic_effects:
+        if not isinstance(effect, dict):
+            continue
+        if str(effect.get("type", "")) != "conquest_reduce_enemy_strength":
+            continue
+        amount = int(effect.get("amount", 0))
+        if amount > 0:
+            total += amount
+    return total
+
+
+def conquest_secondary_check_text(objective_count: int, strategic_objectives: int, pressure: int) -> str:
+    if objective_count <= 0:
+        return "missing secondary"
+    if strategic_objectives <= 0 or pressure <= 0:
+        return "missing conquest pressure"
+    if strategic_objectives < objective_count:
+        return "partial"
+    return "covered"
+
+
 def needs_breach_pressure(scenario: dict[str, Any], faction_id: str) -> bool:
     objective = scenario.get("victory", {}).get(faction_id, {})
     return str(objective.get("type", "")) in {"capture", "eliminate"}
@@ -868,6 +923,18 @@ def generate_report() -> str:
                 "audit",
             ],
             secondary_objective_focus_rows(scenarios),
+        ),
+        "## Conquest Secondary Coverage",
+        "Focused gate for conquest templates: each conq_* battle should give optional objectives a strategic enemy-strength effect instead of XP-only pressure.",
+        table(
+            [
+                "scenario",
+                "secondary objectives",
+                "strategic objectives",
+                "enemy strength pressure",
+                "check",
+            ],
+            conquest_secondary_coverage_rows(scenarios),
         ),
     ]
     return "\n\n".join(sections) + "\n"

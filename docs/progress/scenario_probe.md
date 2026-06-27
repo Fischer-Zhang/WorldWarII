@@ -93,3 +93,20 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
 | west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1 | enemy closer |
 | west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 | allies | own 21 / enemy 0 | XP 1 | enemy closer |
+
+## Conquest Secondary Coverage
+
+Focused gate for conquest templates: each conq_* battle should give optional objectives a strategic enemy-strength effect instead of XP-only pressure.
+
+| scenario | secondary objectives | strategic objectives | enemy strength pressure | check |
+| --- | --- | --- | --- | --- |
+| conq_atlantic_convoy | 1 | 1 | -1 | covered |
+| conq_cbi_jungle | 1 | 1 | -2 | covered |
+| conq_china_plains | 1 | 1 | -1 | covered |
+| conq_desert_north_africa | 1 | 1 | -1 | covered |
+| conq_home_islands | 1 | 1 | -2 | covered |
+| conq_mediterranean_coast | 1 | 1 | -1 | covered |
+| conq_middle_east_oilfields | 1 | 1 | -2 | covered |
+| conq_north_sea_raid | 1 | 1 | -1 | covered |
+| conq_pacific_carrier | 1 | 1 | -1 | covered |
+| conq_pacific_island | 1 | 1 | -1 | covered |
