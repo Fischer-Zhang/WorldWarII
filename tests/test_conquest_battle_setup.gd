@@ -19,6 +19,8 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_duplicate_roster_names_become_unique(): pass_count += 1
 	else: fail_count += 1
+	if _test_secondary_objectives_remap_to_conquest_player(): pass_count += 1
+	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -41,6 +43,23 @@ func _themed() -> Dictionary:
 			{"faction": "axis", "type": "infantry", "at": [5, 0]},
 		],
 		"victory": {},
+		"secondary_objectives": [
+			{
+				"id": "forward_cache",
+				"type": "capture",
+				"faction": "soviet",
+				"target": [3, 0],
+				"rewards": [{"type": "xp", "amount": 1}],
+				"strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+			},
+			{
+				"id": "enemy_cache",
+				"type": "capture",
+				"faction": "axis",
+				"target": [6, 0],
+				"rewards": [{"type": "xp", "amount": 1}],
+			},
+		],
 	}
 
 func _test_attack_setup() -> bool:
@@ -254,6 +273,30 @@ func _test_duplicate_roster_names_become_unique() -> bool:
 	var anchors: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	if anchors.size() != 2 or not _has_coord(anchors, [4, 0]) or not _has_coord(anchors, [5, 0]):
 		printerr("FAIL: defense deployment anchors should mirror authored defender slots: %s" % str(anchors))
+		return false
+	return true
+
+func _test_secondary_objectives_remap_to_conquest_player() -> bool:
+	var scenario := _themed()
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": [{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"}],
+		"defender_types": ["infantry"],
+		"role": "attack",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	if objectives.size() != 2:
+		printerr("FAIL: conquest setup should preserve secondary objectives")
+		return false
+	var player_obj: Dictionary = objectives[0]
+	var enemy_obj: Dictionary = objectives[1]
+	if String(player_obj.get("faction", "")) != "germany":
+		printerr("FAIL: authored player secondary objective should remap to conquest player, got %s" % String(player_obj.get("faction", "")))
+		return false
+	if String(enemy_obj.get("faction", "")) != "axis":
+		printerr("FAIL: non-player secondary objective should keep authored faction, got %s" % String(enemy_obj.get("faction", "")))
 		return false
 	return true
 

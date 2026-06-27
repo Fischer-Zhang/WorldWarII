@@ -25,6 +25,7 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	# garrison the player actually owns always spawns on the protagonist slots.
 	var role := String(pending.get("role", "attack"))
 	var pools := _spawn_pools(scenario)
+	var authored_player_faction := _authored_player_faction(scenario)
 	var map_bounds := _map_bounds(scenario)
 	var player_pool: Array = pools["attacker"] if role == "attack" else pools["defender"]
 	var enemy_pool: Array = pools["defender"] if role == "attack" else pools["attacker"]
@@ -71,19 +72,22 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 			enemy_faction: {"type": "eliminate"},
 			player_faction: {"type": "survive", "by_turn": DEFENDER_SURVIVE_TURNS},
 		}
+	_remap_secondary_objectives(scenario, authored_player_faction, player_faction)
 
 # --- helpers ---
+
+static func _authored_player_faction(scenario: Dictionary) -> String:
+	for f in scenario.get("factions", []):
+		var faction: Dictionary = f
+		if String(faction.get("controller", "")) == "player":
+			return String(faction.get("id", ""))
+	return ""
 
 static func _spawn_pools(scenario: Dictionary) -> Dictionary:
 	# attacker pool = positions of the authored player faction (the scenario's
 	# offensive start); defender pool = everyone else. Falls back to a half/half
 	# split of all authored positions if no player faction is marked.
-	var player_fid := ""
-	for f in scenario.get("factions", []):
-		var faction: Dictionary = f
-		if String(faction.get("controller", "")) == "player":
-			player_fid = String(faction.get("id", ""))
-			break
+	var player_fid := _authored_player_faction(scenario)
 	var attacker: Array = []
 	var defender: Array = []
 	for u in scenario.get("units", []):
@@ -100,6 +104,23 @@ static func _spawn_pools(scenario: Dictionary) -> Dictionary:
 		attacker = defender.slice(0, half)
 		defender = defender.slice(half)
 	return {"attacker": attacker, "defender": defender}
+
+static func _remap_secondary_objectives(
+	scenario: Dictionary,
+	authored_player_faction: String,
+	player_faction: String
+) -> void:
+	if authored_player_faction == "" or player_faction == "":
+		return
+	var objectives: Array = scenario.get("secondary_objectives", [])
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		if String(objective.get("faction", "")) == authored_player_faction:
+			objective["faction"] = player_faction
+			objectives[i] = objective
+	scenario["secondary_objectives"] = objectives
 
 static func _map_bounds(scenario: Dictionary) -> Dictionary:
 	var map: Dictionary = scenario.get("map", {})

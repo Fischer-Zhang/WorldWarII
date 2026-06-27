@@ -53,6 +53,17 @@
     {"faction": "axis", "type": "artillery", "name": "artillery 5", "at": [22, 13]},
     {"faction": "axis", "type": "mg_team", "name": "mg_team 6", "at": [21, 13]}
   ],
+  "secondary_objectives": [
+    {
+      "id": "oilfield_pump_station",
+      "type": "capture",
+      "label": "油田泵站",
+      "faction": "allies",
+      "target": [12, 4],
+      "rewards": [{"type": "xp", "amount": 1}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 2}]
+    }
+  ],
   "victory": {
     "allies": {
       "type": "eliminate"
