@@ -421,6 +421,6 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 
 1. Run this report before and after every candidate stat patch, then compare role diagnostics plus hits-to-kill.
 2. Use the Urban Breach Baseline, scenario breach tools, and scenario_probe.md breach paths before changing Stalingrad or Berlin rosters or turn clocks.
-3. Validate whether engineers survive the approach and open town+dig3 positions; Stalingrad/Berlin now have closer engineer starts but still lack artillery breach coverage, so playtest before further defender nerfs.
+3. Validate whether engineers survive the approach and open town+dig3 positions; Stalingrad/Berlin now have closer engineer starts and limited artillery reposition coverage, so playtest before further defender nerfs.
 4. Validate Rally and suppression tempo in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.
 

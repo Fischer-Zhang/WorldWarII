@@ -642,7 +642,7 @@ def generate_report(baseline_units: dict[str, Any] | None = None) -> str:
         "## Recommended Next Pass\n\n"
         "1. Run this report before and after every candidate stat patch, then compare role diagnostics plus hits-to-kill.\n"
         "2. Use the Urban Breach Baseline, scenario breach tools, and scenario_probe.md breach paths before changing Stalingrad or Berlin rosters or turn clocks.\n"
-        "3. Validate whether engineers survive the approach and open town+dig3 positions; Stalingrad/Berlin now have closer engineer starts but still lack artillery breach coverage, so playtest before further defender nerfs.\n"
+        "3. Validate whether engineers survive the approach and open town+dig3 positions; Stalingrad/Berlin now have closer engineer starts and limited artillery reposition coverage, so playtest before further defender nerfs.\n"
         "4. Validate Rally and suppression tempo in Stalingrad, Bastogne, Kursk, Kiev, then Sedan, because those scenarios stress the highest-risk mechanics in order.\n"
     )
     return "\n\n".join(sections) + "\n"

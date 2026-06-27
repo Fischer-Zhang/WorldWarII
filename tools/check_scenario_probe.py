@@ -24,8 +24,8 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "axis: eng min 12, art 0/6, targets 6" in report,
-        "Stalingrad breach probe should show tuned Axis engineer approach and artillery gap",
+        and "axis: eng min 7, art 0/6, targets 6" in report,
+        "Stalingrad breach probe should show forward Axis engineer approach",
     )
     require(
         "01_sedan_1940" in report
@@ -34,37 +34,37 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 8,9 destroy min 12 XP 1, enemy supp +1 R2" in report
+        and "突擊工兵 13,10 destroy min 7 XP 1, enemy supp +1 R2" in report
         and "06_market_garden_1944" in report
         and "德軍遠程砲 18,2 destroy min 12 XP 1" in report,
         "Destroy secondary objectives should be included in pressure probes",
     )
     require(
         "03_stalingrad_1942" in report
-        and "axis: eng turns 4" in report
-        and "axis: art move 0/6" in report,
-        "Stalingrad tempo probe should show improved engineer timing and poor artillery access",
+        and "axis: eng turns 3" in report
+        and "axis: art move 1/6" in report,
+        "Stalingrad tempo probe should show supported breach timing",
     )
     require(
         "east_10_berlin_1945" in report
-        and "soviet: eng min 12, art 0/3, targets 3" in report,
-        "Berlin breach probe should show tuned Soviet engineer approach and artillery gap",
+        and "soviet: eng min 7, art 0/3, targets 3" in report,
+        "Berlin breach probe should show forward Soviet engineer approach",
     )
     require(
         "east_10_berlin_1945" in report
-        and "soviet: eng turns 4" in report
-        and "soviet: art move 0/3" in report,
-        "Berlin tempo probe should show improved engineer timing and poor artillery access",
+        and "soviet: eng turns 3" in report
+        and "soviet: art move 1/3" in report,
+        "Berlin tempo probe should show supported breach timing",
     )
     require(
-        "| 03_stalingrad_1942 | axis | 6/6 | 12 | 4 | 0/6 | 0/6 | playtest engineer survivability; no artillery breach coverage |"
+        "| 03_stalingrad_1942 | axis | 6/6 | 7 | 3 | 0/6 | 1/6 | supported |"
         in report,
-        "Stalingrad urban breach focus should keep the engineer survivability gate visible",
+        "Stalingrad urban breach focus should show supported breach access",
     )
     require(
-        "| east_10_berlin_1945 | soviet | 3/3 | 12 | 4 | 0/3 | 0/3 | playtest engineer survivability; no artillery breach coverage |"
+        "| east_10_berlin_1945 | soviet | 3/3 | 7 | 3 | 0/3 | 1/3 | supported |"
         in report,
-        "Berlin urban breach focus should keep the engineer survivability gate visible",
+        "Berlin urban breach focus should show supported breach access",
     )
     require(
         "tut_03_suppression_digin_engineer" in report
@@ -91,19 +91,19 @@ def main() -> None:
     )
     require(
         "east_10_berlin_1945" in report
-        and "清除西側 MG 42 | destroy 18,3 | soviet | own 15 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2"
+        and "清除西側 MG 42 | destroy 18,3 | soviet | own 9 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2"
         in report,
         "Reward audit should show Berlin repair and local suppression reward pressure",
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 | destroy 8,9 | soviet | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
+        and "突擊工兵 | destroy 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
         in report,
         "Reward audit should show Stalingrad local suppression counter-assault reward",
     )
     require(
         "east_10_berlin_1945" in report
-        and "標定重砲陣地 | recon 22,2 | soviet | own 19 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
+        and "標定重砲陣地 | recon 22,2 | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
         in report,
         "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
     )

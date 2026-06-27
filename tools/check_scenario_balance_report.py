@@ -29,7 +29,7 @@ def main() -> None:
         "Sedan should show the recon secondary objective with its target",
     )
     require(
-        "突擊工兵 [destroy 突擊工兵@8,9]" in report
+        "突擊工兵 [destroy 突擊工兵@13,10]" in report
         and "德軍遠程砲 [destroy 150 mm sFH@18,2]" in report,
         "Destroy secondary objectives should show their marked unit targets",
     )

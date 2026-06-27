@@ -96,8 +96,8 @@ Evaluate scenarios in this order:
 Urban breach gates before scenario edits:
 
 - Check `urban breach tools` in `scenario_balance_report.md` before changing rosters.
-- `03_stalingrad_1942` now gives the Axis one engineer and one artillery unit, and the engineer starts closer to the central ruins (`eng min 12`, `eng turns 4`), but artillery still covers no breach targets (`art 0/6`); playtest whether the engineer survives and creates real breach decisions before further roster or turn-clock changes.
-- `east_10_berlin_1945` gives the Soviet assault group one engineer and one artillery unit, and the engineer starts closer to the western approach (`eng min 12`, `eng turns 4`), but artillery still covers no breach targets (`art 0/3`); tune turns or defenders only after confirming the engineer survives and reaches dig-in targets in time.
+- `03_stalingrad_1942` gives the Axis one engineer and one artillery unit, with the engineer forward enough to reach breach contact in about three turns (`eng min 7`, `eng turns 3`) and artillery able to cover one breach target after repositioning (`art move 1/6`); playtest whether this creates pressure without collapsing the Soviet defense too quickly.
+- `east_10_berlin_1945` gives the Soviet assault group one engineer and one artillery unit, with the engineer forward enough to reach breach contact in about three turns (`eng min 7`, `eng turns 3`) and artillery able to cover one breach target after repositioning (`art move 1/3`); tune turns or defenders only after confirming the breach sequence survives enemy fire.
 - Do not treat MG teams as breach tools. They are suppression support for the assault sequence.
 
 ## Workflow 5: AI Compatibility
