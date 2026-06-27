@@ -101,6 +101,12 @@ def main() -> None:
         in report,
         "Reward audit should show Stalingrad local suppression counter-assault reward",
     )
+    require(
+        "east_10_berlin_1945" in report
+        and "標定重砲陣地 | recon 22,2 | soviet | own 19 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2"
+        in report,
+        "Reward audit should show Berlin recon breach reward pressure",
+    )
     print("Scenario probe checks passed")
 
 

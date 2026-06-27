@@ -68,7 +68,7 @@ static func rewards(objective: Dictionary) -> Array[Dictionary]:
 		if reward_type == "" or amount <= 0:
 			continue
 		var normalized := {"type": reward_type, "amount": amount}
-		if reward_type == "suppress_enemies":
+		if reward_type in ["suppress_enemies", "strip_enemy_dig_in"]:
 			normalized["radius"] = max(0, int(reward.get("radius", 1)))
 		out.append(normalized)
 	var legacy_xp := int(objective.get("xp_reward", 0))
@@ -100,6 +100,9 @@ static func reward_text(rewards: Array[Dictionary]) -> String:
 			"suppress_enemies":
 				var radius := int(reward.get("radius", 1))
 				parts.append("敵壓制 +%d R%d" % [amount, radius])
+			"strip_enemy_dig_in":
+				var radius := int(reward.get("radius", 1))
+				parts.append("敵構工 -%d R%d" % [amount, radius])
 	if parts.is_empty():
 		return "已控制"
 	return ", ".join(parts)
