@@ -135,6 +135,8 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
                 max_level = len(tech_tree[str(req["id"])].get("levels", []))
                 if not (1 <= int(req["level"]) <= max_level):
                     fail(errors, path, f"unit {unit_id!r} requires_tech level {req['level']} out of range 1..{max_level}")
+                if unit_id not in tech_tree[str(req["id"])].get("applies_to", []):
+                    fail(errors, path, f"unit {unit_id!r} requires_tech {req['id']!r} but is not in that tech's applies_to")
 
     for terrain_id, terrain in terrains.items():
         path = DATA / "terrains.json"

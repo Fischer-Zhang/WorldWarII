@@ -13,7 +13,7 @@
   "armored_logistics": {
     "name_zh": "裝甲後勤",
     "description_zh": "改善戰車縱隊的機動、火力與反裝甲能力。",
-    "applies_to": ["light_tank", "medium_tank"],
+    "applies_to": ["light_tank", "medium_tank", "tank_destroyer", "heavy_tank"],
     "cost_per_level": [1, 2, 3],
     "levels": [
       {"move": 1},
@@ -24,7 +24,7 @@
   "artillery_coordination": {
     "name_zh": "砲兵協調",
     "description_zh": "提升砲兵觀測、火力調度與轉移陣地能力。",
-    "applies_to": ["artillery"],
+    "applies_to": ["artillery", "rocket_artillery"],
     "cost_per_level": [1, 2, 3],
     "levels": [
       {"vision": 1},

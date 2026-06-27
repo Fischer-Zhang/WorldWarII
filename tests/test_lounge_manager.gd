@@ -36,6 +36,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_tech_catalog_covers_unlocks():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_lounge_state_survives_campaign_normalise():
 		pass_count += 1
 	else:
@@ -97,6 +102,25 @@ func _test_tech_upgrade_and_application() -> bool:
 		return true
 	printerr("FAIL: tech upgrade application")
 	return false
+
+func _test_tech_catalog_covers_unlocks() -> bool:
+	var units := {
+		"tank_destroyer": {"requires_tech": {"id": "armored_logistics", "level": 2}},
+		"heavy_tank": {"requires_tech": {"id": "armored_logistics", "level": 3}},
+		"rocket_artillery": {"requires_tech": {"id": "artillery_coordination", "level": 2}},
+	}
+	var tech_catalog := {
+		"armored_logistics": {"applies_to": ["light_tank", "medium_tank", "tank_destroyer", "heavy_tank"]},
+		"artillery_coordination": {"applies_to": ["artillery", "rocket_artillery"]},
+	}
+	for unit_id in units.keys():
+		var req: Dictionary = units[unit_id].get("requires_tech", {})
+		var tech_def: Dictionary = tech_catalog.get(String(req.get("id", "")), {})
+		var applies: Array = tech_def.get("applies_to", [])
+		if not applies.has(unit_id):
+			printerr("FAIL: unlocked unit %s should receive its unlock tech modifiers" % unit_id)
+			return false
+	return true
 
 func _test_lounge_state_survives_campaign_normalise() -> bool:
 	var state := {
