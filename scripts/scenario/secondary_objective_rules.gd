@@ -83,6 +83,27 @@ static func xp_reward(rewards: Array[Dictionary]) -> int:
 			total += int(reward.get("amount", 0))
 	return total
 
+static func tactical_reward_value(rewards: Array[Dictionary]) -> float:
+	var value := 0.0
+	for reward in rewards:
+		var reward_type := String(reward.get("type", ""))
+		var amount := int(reward.get("amount", 0))
+		var radius := int(reward.get("radius", 1))
+		match reward_type:
+			"xp":
+				value += float(amount) * 0.15
+			"recover_suppression":
+				value += float(amount) * 0.2
+			"repair_hp":
+				value += float(amount) * 0.18
+			"advance_reinforcements":
+				value += float(amount) * 0.35
+			"suppress_enemies":
+				value += float(amount) * (0.6 + 0.15 * float(max(0, radius)))
+			"strip_enemy_dig_in":
+				value += float(amount) * (0.7 + 0.2 * float(max(0, radius)))
+	return value
+
 static func reward_text(rewards: Array[Dictionary]) -> String:
 	var parts: Array[String] = []
 	for reward in rewards:

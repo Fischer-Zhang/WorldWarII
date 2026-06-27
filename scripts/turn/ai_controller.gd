@@ -28,6 +28,8 @@ const W_CAPTURE_OBJECTIVE := 1.8
 const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
+const W_SECONDARY_REWARD := 0.35
+const SECONDARY_REWARD_PULL_RADIUS := 4.0
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_FIRE_SUPPORT := 2.0
@@ -967,7 +969,11 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 			continue
 		var target_coord: Vector2i = target_coord_value
 		var distance := HexCoord.distance(pos, target_coord)
-		var score := -float(distance) * _secondary_objective_position_weight(objective)
+		var base_weight := _secondary_objective_position_weight(objective)
+		var reward_value := SecondaryObjectiveRules.tactical_reward_value(SecondaryObjectiveRules.rewards(objective))
+		var reward_proximity: float = max(0.0, SECONDARY_REWARD_PULL_RADIUS - float(distance))
+		var reward_pull := reward_proximity * reward_value * W_SECONDARY_REWARD
+		var score := -float(distance) * base_weight + reward_pull
 		var objective_type := SecondaryObjectiveRules.objective_type(objective)
 		if score > best:
 			best = score
@@ -978,7 +984,10 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 				"type": objective_type,
 				"target": target_coord,
 				"distance": distance,
-				"weight": _secondary_objective_position_weight(objective),
+				"base_weight": base_weight,
+				"reward_value": reward_value,
+				"reward_pull": reward_pull,
+				"weight": base_weight,
 			}
 	if best == -INF:
 		return {"score": 0.0}

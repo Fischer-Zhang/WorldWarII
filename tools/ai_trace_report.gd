@@ -355,10 +355,13 @@ func _objective_detail_text(value: Variant) -> String:
 		])
 	var secondary: Dictionary = detail.get("secondary_info", {})
 	if secondary.has("key"):
-		parts.append("secondary:%s %s d%d" % [
+		parts.append("secondary:%s %s d%d w%.2f rv%.2f rp%.2f" % [
 			String(secondary.get("key", "secondary")),
 			_coord_text(secondary.get("target", Vector2i.ZERO)),
 			int(secondary.get("distance", 0)),
+			float(secondary.get("weight", 0.0)),
+			float(secondary.get("reward_value", 0.0)),
+			float(secondary.get("reward_pull", 0.0)),
 		])
 	if parts.is_empty():
 		return "none"

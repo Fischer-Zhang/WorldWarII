@@ -92,12 +92,12 @@ Plan: `overwatch` to `0,0`, target `none`, score `3.00`.
 ## Secondary objective pull
 Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.
 
-Plan: `wait` to `3,0`, target `none`, score `-6.50`.
+Plan: `wait` to `3,0`, target `none`, score `-6.29`.
 
 | rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `3,0` | `none` | `none` | `none` | -6.50 | -6.50 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -0.00 | -5.40 | `primary:6,0 d3; secondary:forward_cache 3,0 d0` | 0.00 |
-| 2 | `4,-1` | `none` | `none` | `none` | -7.85 | -7.85 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.35 | -6.75 | `primary:6,0 d3; secondary:forward_cache 3,0 d1` | 0.00 |
-| 3 | `3,1` | `none` | `none` | `none` | -7.85 | -7.85 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.35 | -6.75 | `primary:6,0 d3; secondary:forward_cache 3,0 d1` | 0.00 |
-| 4 | `3,2` | `none` | `none` | `none` | -9.20 | -9.20 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.70 | -8.10 | `primary:6,0 d3; secondary:forward_cache 3,0 d2` | 0.00 |
-| 5 | `5,-2` | `none` | `none` | `none` | -9.20 | -9.20 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.70 | -8.10 | `primary:6,0 d3; secondary:forward_cache 3,0 d2` | 0.00 |
+| 1 | `3,0` | `none` | `none` | `none` | -6.29 | -6.29 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | 0.21 | -5.19 | `primary:6,0 d3; secondary:forward_cache 3,0 d0 w1.35 rv0.15 rp0.21` | 0.00 |
+| 2 | `4,-1` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
+| 3 | `3,1` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
+| 4 | `3,2` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |
+| 5 | `5,-2` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |

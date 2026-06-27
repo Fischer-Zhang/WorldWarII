@@ -122,6 +122,7 @@ Current role-shaping pass:
 - Capture factions bias movement toward their target hex.
 - Unfinished secondary objectives add a smaller movement bias toward their target hex.
 - Recon and destroy-unit secondary objectives bias movement toward their target hex or marked unit, and destroy targets get a direct attack-score bonus.
+- Secondary objective movement pull includes deterministic reward value, so tactical rewards such as local suppression or breach rewards can matter before raw distance ties.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 
 Likely follow-up:

@@ -67,6 +67,14 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: reward text should describe all secondary reward types, got %s" % combo_text)
 
+	var reward_value := SecondaryObjectiveRules.tactical_reward_value(combo_rewards)
+	var xp_only_value := SecondaryObjectiveRules.tactical_reward_value([{"type": "xp", "amount": 1}])
+	if reward_value > xp_only_value and xp_only_value > 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tactical reward value should rank combined tactical rewards above XP-only")
+
 	var target := StubUnit.new("ammo_truck", "Ammo Truck", "axis", Vector2i(2, 1))
 	if SecondaryObjectiveRules.target_matches_unit({"target_unit": "ammo_truck"}, target) \
 			and SecondaryObjectiveRules.target_matches_unit({"target_unit": "Ammo Truck"}, target) \

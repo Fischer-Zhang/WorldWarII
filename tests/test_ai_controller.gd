@@ -256,6 +256,40 @@ func _init() -> void:
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
+	# 6c) Tactical secondary rewards should increase objective pull without bypassing completion guards.
+	battle.scenario = {
+		"secondary_objectives": [{
+			"id": "xp_cache",
+			"type": "recon_hex",
+			"faction": "axis",
+			"target": [3, 0],
+			"rewards": [{"type": "xp", "amount": 1}],
+		}]
+	}
+	var xp_secondary: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(0, 0))
+	battle.scenario["secondary_objectives"] = [{
+		"id": "breach_cache",
+		"type": "recon_hex",
+		"faction": "axis",
+		"target": [3, 0],
+		"rewards": [
+			{"type": "xp", "amount": 1},
+			{"type": "strip_enemy_dig_in", "amount": 1, "radius": 2},
+		],
+	}]
+	var breach_secondary: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(0, 0))
+	if float(breach_secondary.get("score", 0.0)) > float(xp_secondary.get("score", 0.0)) \
+			and float(breach_secondary.get("reward_value", 0.0)) > float(xp_secondary.get("reward_value", 0.0)) \
+			and float(breach_secondary.get("reward_pull", 0.0)) > float(xp_secondary.get("reward_pull", 0.0)):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: tactical secondary reward should increase pull; xp=%s breach=%s" % [
+			str(xp_secondary), str(breach_secondary),
+		])
+	battle.scenario = {}
+	battle.captured_secondary_objectives.clear()
+
 	# 7) Destroy secondary objectives should bias attack choice toward the marked unit.
 	var destroy_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
 	destroy_target.scenario_unit_id = "ammo_truck"
@@ -611,6 +645,9 @@ func _init() -> void:
 			)) < 0.001 \
 			and primary_info.has("target") \
 			and secondary_info.get("key", "") == "trace_cache" \
+			and secondary_info.has("reward_value") \
+			and secondary_info.has("reward_pull") \
+			and secondary_info.has("weight") \
 			and abs(float(traced_plan.get("score", 0.0)) - ai._trace_sort_score(top)) < 0.001:
 		pass_count += 1
 	else:
