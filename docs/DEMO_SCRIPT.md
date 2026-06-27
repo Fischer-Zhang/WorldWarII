@@ -14,7 +14,7 @@ The viewer should understand:
 | Time | Shot | Content | Caption |
 |---|---|---|---|
 | 0:00-0:04 | Main menu | Show main menu with Single Battle / Campaign / Conquest / Lounge. | `Godot 4 tactical hex wargame` |
-| 0:04-0:10 | Scenario select | Click Single Battle, show category tabs and difficulty buttons. | `33 single-battle scenarios · category tabs · AI difficulty` |
+| 0:04-0:10 | Scenario select | Click Single Battle, show category tabs and difficulty buttons. | `34 single-battle scenarios · category tabs · AI difficulty` |
 | 0:10-0:16 | Briefing -> deployment | Open Sedan briefing, then deployment screen. Select a unit and show final stats/source breakdown. | `Deployment: generals, upgrades, final stats` |
 | 0:16-0:31 | Sedan 1940 | Move a Panzer toward objective. Show movement overlay, threat overlay, attack, popup, wreckage. | `Deterministic combat · terrain · capture objectives` |
 | 0:31-0:43 | Kiev / artillery | Show indirect artillery firing at a spotted target over blockers. | `Indirect fire uses spotted targets, not hidden information` |

@@ -41,6 +41,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | tut_05_airdrop_reinforcement_rocket | 教學 05: 空降、援軍與火箭濺射 | plain 90%, road 4%, forest 3%; def>=2 6%; move>=3 0% | allies: eng 0, art 0, rocket 1, mg 0; axis: eng 0, art 0, rocket 0, mg 1 | n/a | none | force power ratio above 1.35: check victory-clock compensation |
 | west_08_falaise_1944 | 法萊茲包圍圈 1944 | plain 72%, forest 12%, road 10%; def>=2 17%; move>=3 2% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->21,4 min 19 avg 22.4 | 封鎖撤退道路 [recon 22,11] (XP 1, enemy supp +1 R1) | no major static risks |
 | west_08_normandy_cobra_1944 | 諾曼第突破:眼鏡蛇行動 1944 | plain 73%, road 10%, forest 10%; def>=2 13%; move>=3 4% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->2,2 min 2 avg 8.6 | 清除 MG 42 [destroy MG 42@1,2] (XP 1); 反砲兵偵察 [recon 22,2] (XP 1) | no major static risks |
+| west_08_pegasus_bridge_1944 | 飛馬橋突擊 1944 | plain 64%, road 14%, forest 9%; def>=2 12%; move>=3 9% | allies: eng 1, art 0, rocket 0, mg 1; axis: eng 0, art 1, rocket 0, mg 1 | allies->8,4 min 5 avg 5.6 | 守住飛馬橋 [hold 2t 7,4] (XP 1, reinforce -2t); 摧毀橋北機槍 [destroy 橋北 MG 42@8,3] (XP 1, enemy supp +1 R2) | river crossings may dominate tempo |
 | west_09_aachen_1944 | 亞琛巷戰 1944 | plain 74%, road 11%, forest 9%; def>=2 12%; move>=3 3% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->5,11 min 2 avg 5.7 | 清除西側 PaK 40 [destroy PaK 40@6,4] (XP 1, enemy dig -1 R1) | no major static risks |
 | west_09_hurtgen_1944 | 赫特根森林 1944 | plain 70%, road 12%, forest 11%; def>=2 16%; move>=3 2% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->5,4 min 3 avg 7.7 | 控制森林林道 [hold 2t 4,4] (XP 1, supp -2) | no major static risks |
 | west_10_remagen_1945 | 雷馬根大橋 1945 | plain 72%, road 11%, forest 10%; def>=2 13%; move>=3 4% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | allies->17,4 min 15 avg 18.4 | 奪取橋西岸 [capture 12,0] (XP 1, repair 2) | no major static risks |
@@ -290,6 +291,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | allies | 美軍第 3 裝甲師 | player | 7 | 264.2 | anti_armor:2, armor:2, artillery:1, infantry:2 |
 | axis | 德軍諾曼第防線 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+
+## west_08_pegasus_bridge_1944
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 英軍第 6 空降師 | player | 7 | 204.8 | anti_armor:1, armor:1, engineer:1, infantry:3, support:1 |
+| axis | 德軍橋頭守備隊 | ai | 6 | 191.7 | anti_armor:1, armor:1, artillery:1, infantry:2, support:1 |
 
 ## west_09_aachen_1944
 

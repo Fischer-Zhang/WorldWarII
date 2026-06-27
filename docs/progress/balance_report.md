@@ -365,11 +365,12 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | tut_05_airdrop_reinforcement_rocket | 4 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 1 |
 | west_08_falaise_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_08_normandy_cobra_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
+| west_08_pegasus_bridge_1944 | 3 | 2 | 2 | 0 | 2 | 1 | 2 | 1 | 0 | 0 | 0 |
 | west_09_aachen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 156 | 43 | 64 | 22 | 94 | 62 | 6 | 8 | 28 | 9 | 8 |
+| TOTAL | 159 | 45 | 66 | 22 | 96 | 63 | 8 | 9 | 28 | 9 | 8 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -408,6 +409,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | tut_05_airdrop_reinforcement_rocket | 70 | plain 90%, road 4%, forest 3% |
 | west_08_falaise_1944 | 384 | plain 72%, forest 12%, road 10% |
 | west_08_normandy_cobra_1944 | 384 | plain 73%, road 10%, forest 10% |
+| west_08_pegasus_bridge_1944 | 160 | plain 64%, road 14%, forest 9% |
 | west_09_aachen_1944 | 384 | plain 74%, road 11%, forest 9% |
 | west_09_hurtgen_1944 | 384 | plain 70%, road 12%, forest 11% |
 | west_10_remagen_1945 | 384 | plain 72%, road 11%, forest 10% |

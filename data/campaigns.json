@@ -53,6 +53,7 @@
     "title": "西線反攻 1944-1945",
     "description": "從諾曼第突破到萊茵河橋頭堡,串起盟軍空降、裝甲突破、城市攻堅與德軍反擊。",
     "scenario_order": [
+      "west_08_pegasus_bridge_1944",
       "west_08_normandy_cobra_1944",
       "west_08_falaise_1944",
       "06_market_garden_1944",

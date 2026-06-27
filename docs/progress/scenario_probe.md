@@ -39,6 +39,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | tut_05_airdrop_reinforcement_rocket | axis mg_team:1 | allies 37/70 (53%) | none | allies: eng none, art 2/2, targets 2 | allies: eng turns none | allies: art move 2/2 | n/a | none | allies +77.6; T3 2 units |
 | west_08_falaise_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 21,4 own min 19 enemy min 0 | 封鎖撤退道路 22,11 recon min 19 XP 1, enemy supp +1 R1 | none |
 | west_08_normandy_cobra_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 2,2 own min 2 enemy min 0 | 清除 MG 42 1,2 destroy min 2 XP 1; 反砲兵偵察 22,2 recon min 21 XP 1 | none |
+| west_08_pegasus_bridge_1944 | allies mg_team:1; axis artillery:1, mg_team:1 | axis 32/160 (20%) | none | allies: eng min 5, art 0/3, targets 3 | allies: eng turns blocked | allies: art move none | allies target 8,4 own min 5 enemy min 0 | 守住飛馬橋 7,4 hold 2t min 4 XP 1, reinforce -2t; 摧毀橋北機槍 8,3 destroy min 5 XP 1, enemy supp +1 R2 | allies +77.6; T6 2 units |
 | west_09_aachen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,11 own min 2 enemy min 0 | 清除西側 PaK 40 6,4 destroy min 4 XP 1, enemy dig -1 R1 | none |
 | west_09_hurtgen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,4 own min 3 enemy min 0 | 控制森林林道 4,4 hold 2t min 2 XP 1, supp -2 | none |
 | west_10_remagen_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 17,4 own min 15 enemy min 0 | 奪取橋西岸 12,0 capture min 10 XP 1, repair 2 | none |
@@ -103,6 +104,8 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | west_08_falaise_1944 | 封鎖撤退道路 | recon 22,11 | allies | own 19 / enemy 0 | XP 1, enemy supp +1 R1 | enemy closer; tactical suppression reward R1 |
 | west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1 | enemy closer |
 | west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 | allies | own 21 / enemy 0 | XP 1 | enemy closer |
+| west_08_pegasus_bridge_1944 | 守住飛馬橋 | hold 2t 7,4 | allies | own 4 / enemy 1 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
+| west_08_pegasus_bridge_1944 | 摧毀橋北機槍 | destroy 8,3 | allies | own 5 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | west_09_aachen_1944 | 清除西側 PaK 40 | destroy 6,4 | allies | own 4 / enemy 0 | XP 1, enemy dig -1 R1 | enemy closer; breach reward R1 |
 | west_09_hurtgen_1944 | 控制森林林道 | hold 2t 4,4 | allies | own 2 / enemy 0 | XP 1, supp -2 | enemy closer; sustain reward |
 | west_10_remagen_1945 | 奪取橋西岸 | capture 12,0 | allies | own 10 / enemy 6 | XP 1, repair 2 | enemy closer; damage recovery |
@@ -149,6 +152,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | pacific_01_guadalcanal_1942 | 2 | 0 | 2 | covered |
 | west_08_falaise_1944 | 1 | 0 | 1 | covered |
 | west_08_normandy_cobra_1944 | 2 | 2 | 0 | xp-only |
+| west_08_pegasus_bridge_1944 | 2 | 0 | 2 | covered |
 | west_09_aachen_1944 | 1 | 0 | 1 | covered |
 | west_09_hurtgen_1944 | 1 | 0 | 1 | covered |
 | west_10_remagen_1945 | 1 | 0 | 1 | covered |
@@ -164,4 +168,4 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
 | north_africa | 1 | eliminate:1 | desert:1 | scout:1 | tracked |
 | pacific_front | 1 | eliminate:1 | jungle:1, sea:1 | scout:1, engineer:1 | tracked |
-| western_front | 8 | capture:7, survive:1 | river:1 | reinforcement:2, engineer:2, airdrop:2 | tracked |
+| western_front | 9 | capture:8, survive:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |
