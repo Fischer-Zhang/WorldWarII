@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+import glob
+import json
+from pathlib import Path
+
 import scenario_probe
 
 
@@ -13,6 +17,8 @@ def require(condition: bool, message: str) -> None:
 
 def main() -> None:
     report = scenario_probe.generate_report()
+    main_scenario_count = count_main_battle_scenarios()
+    campaign_count = count_non_tutorial_campaigns()
     require("breach path" in report, "scenario probe missing breach path column")
     require("breach tempo" in report, "scenario probe missing breach tempo column")
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
@@ -31,6 +37,11 @@ def main() -> None:
         "## Gameplay Depth Coverage" in report
         and "| scenario | secondary objectives | xp-only objectives | enriched objectives | check |" in report,
         "scenario probe missing gameplay depth coverage section",
+    )
+    require(
+        "## Scenario Expansion Coverage" in report
+        and "| campaign | scenarios | victory mix | special terrain | role hooks | check |" in report,
+        "scenario probe missing scenario expansion coverage section",
     )
     require(
         "03_stalingrad_1942" in report
@@ -127,14 +138,14 @@ def main() -> None:
         and "| conq_atlantic_convoy | 1 | 1 | -1 | covered |" in report,
         "Conquest secondary coverage should expose enemy-strength pressure amounts",
     )
-    depth_section = report.split("## Gameplay Depth Coverage", 1)[1]
+    depth_section = section_text(report, "## Gameplay Depth Coverage")
     depth_rows = [
         line for line in depth_section.splitlines()
         if line.startswith("| ")
         and not line.startswith("| ---")
         and not line.startswith("| scenario |")
     ]
-    require(len(depth_rows) == 19, "Gameplay depth coverage should include every main battle")
+    require(len(depth_rows) == main_scenario_count, "Gameplay depth coverage should include every main battle")
     require(
         not any("| missing secondary |" in line for line in depth_rows),
         "Every main battle should have secondary objective pressure",
@@ -149,7 +160,48 @@ def main() -> None:
         and "| east_10_berlin_1945 | 2 | 0 | 2 | covered |" in report,
         "Gameplay depth coverage should expose XP-only and enriched objective counts",
     )
+    expansion_section = section_text(report, "## Scenario Expansion Coverage")
+    expansion_rows = [
+        line for line in expansion_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| campaign |")
+    ]
+    require(
+        len(expansion_rows) == campaign_count,
+        "Scenario expansion coverage should include every non-tutorial campaign",
+    )
+    require(
+        any("| capture:" in line and "| " in line for line in expansion_rows)
+        and any("river:" in line or "town:" in line or "desert:" in line or "jungle:" in line for line in expansion_rows)
+        and any("reinforcement:" in line or "scout:" in line or "engineer:" in line or "airdrop:" in line for line in expansion_rows),
+        "Scenario expansion coverage should expose victory mix, terrain and role hooks",
+    )
     print("Scenario probe checks passed")
+
+
+def count_main_battle_scenarios() -> int:
+    total = 0
+    root = Path(__file__).resolve().parents[1]
+    for path in sorted(glob.glob(str(root / "data" / "scenarios" / "*.json"))):
+        with Path(path).open("r", encoding="utf-8") as fh:
+            scenario = json.load(fh)
+        scenario_id = str(scenario.get("id", ""))
+        if scenario_probe.is_main_battle_scenario(scenario_id):
+            total += 1
+    return total
+
+
+def section_text(report: str, heading: str) -> str:
+    section = report.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
+def count_non_tutorial_campaigns() -> int:
+    root = Path(__file__).resolve().parents[1]
+    with (root / "data" / "campaigns.json").open("r", encoding="utf-8") as fh:
+        campaigns = json.load(fh)
+    return sum(1 for campaign_id in campaigns if str(campaign_id) != "00_tutorial")
 
 
 if __name__ == "__main__":

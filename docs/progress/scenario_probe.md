@@ -141,3 +141,13 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | west_09_hurtgen_1944 | 1 | 0 | 1 | covered |
 | west_10_remagen_1945 | 1 | 0 | 1 | covered |
 | west_11_colmar_1945 | 1 | 0 | 1 | covered |
+
+## Scenario Expansion Coverage
+
+Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.
+
+| campaign | scenarios | victory mix | special terrain | role hooks | check |
+| --- | --- | --- | --- | --- | --- |
+| blitzkrieg_early_war | 5 | capture:3, eliminate:1, survive:1 | river:3 | scout:2 | tracked |
+| eastern_front | 6 | capture:5, survive:1 | river:1, town:3 | reinforcement:1, scout:2, engineer:1 | tracked |
+| western_front | 8 | capture:7, survive:1 | river:1 | reinforcement:2, engineer:2, airdrop:2 | tracked |

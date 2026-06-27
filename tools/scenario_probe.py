@@ -20,6 +20,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 UNITS_PATH = ROOT / "data" / "units.json"
 TERRAINS_PATH = ROOT / "data" / "terrains.json"
+CAMPAIGNS_PATH = ROOT / "data" / "campaigns.json"
 SCENARIOS_GLOB = str(ROOT / "data" / "scenarios" / "*.json")
 DEFAULT_OUTPUT = ROOT / "docs" / "progress" / "scenario_probe.md"
 
@@ -632,6 +633,103 @@ def gameplay_depth_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[A
     return rows
 
 
+def expansion_coverage_rows(scenarios: list[dict[str, Any]], campaigns: dict[str, Any]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for campaign_id, campaign in campaigns.items():
+        if campaign_id == "00_tutorial" or not isinstance(campaign, dict):
+            continue
+        scenario_ids = [str(scenario_id) for scenario_id in campaign.get("scenario_order", [])]
+        campaign_scenarios = [
+            scenario for scenario in scenarios
+            if str(scenario.get("id", "")) in scenario_ids
+        ]
+        rows.append([
+            campaign_id,
+            len(campaign_scenarios),
+            campaign_victory_text(campaign_scenarios),
+            campaign_special_terrain_text(campaign_scenarios),
+            campaign_role_coverage_text(campaign_scenarios),
+            expansion_check_text(campaign_id, campaign_scenarios),
+        ])
+    return rows
+
+
+def player_faction_id(scenario: dict[str, Any]) -> str:
+    for faction in scenario.get("factions", []):
+        if isinstance(faction, dict) and str(faction.get("controller", "")) == "player":
+            return str(faction.get("id", ""))
+    return ""
+
+
+def campaign_victory_text(scenarios: list[dict[str, Any]]) -> str:
+    counts: collections.Counter[str] = collections.Counter()
+    for scenario in scenarios:
+        player_faction = player_faction_id(scenario)
+        victory = scenario.get("victory", {}).get(player_faction, {})
+        counts[str(victory.get("type", "unknown"))] += 1
+    return ", ".join(f"{kind}:{count}" for kind, count in sorted(counts.items())) if counts else "none"
+
+
+def campaign_special_terrain_text(scenarios: list[dict[str, Any]]) -> str:
+    terrain_hits: dict[str, int] = {
+        "desert": 0,
+        "jungle": 0,
+        "sea": 0,
+        "river": 0,
+        "town": 0,
+    }
+    for scenario in scenarios:
+        counts: collections.Counter[str] = collections.Counter()
+        for row in scenario.get("map", {}).get("tiles", []):
+            counts.update(str(tile) for tile in row)
+        total = sum(counts.values()) or 1
+        for terrain in terrain_hits:
+            if counts.get(terrain, 0) / total >= 0.05:
+                terrain_hits[terrain] += 1
+    return ", ".join(f"{terrain}:{count}" for terrain, count in terrain_hits.items() if count > 0) or "none"
+
+
+def campaign_role_coverage_text(scenarios: list[dict[str, Any]]) -> str:
+    counts = {
+        "reinforcement": 0,
+        "scout": 0,
+        "engineer": 0,
+        "airdrop": 0,
+    }
+    for scenario in scenarios:
+        player_faction = player_faction_id(scenario)
+        player_units = [
+            unit for unit in scenario.get("units", [])
+            if isinstance(unit, dict) and str(unit.get("faction", "")) == player_faction
+        ]
+        if scenario.get("reinforcements", []):
+            counts["reinforcement"] += 1
+        if any(str(unit.get("type", "")) == "light_tank" for unit in player_units):
+            counts["scout"] += 1
+        if any(str(unit.get("type", "")) == "engineer" for unit in player_units):
+            counts["engineer"] += 1
+        if any(str(unit.get("type", "")) == "paratrooper" for unit in player_units):
+            counts["airdrop"] += 1
+    return ", ".join(f"{key}:{value}" for key, value in counts.items() if value > 0) or "none"
+
+
+def expansion_check_text(campaign_id: str, scenarios: list[dict[str, Any]]) -> str:
+    if not scenarios:
+        return "missing scenarios"
+    victory_text = campaign_victory_text(scenarios)
+    terrain_text = campaign_special_terrain_text(scenarios)
+    role_text = campaign_role_coverage_text(scenarios)
+    if campaign_id in {"north_africa", "pacific_front"} and "capture:" in victory_text and "eliminate:" not in victory_text:
+        return "needs non-capture pressure"
+    if campaign_id == "north_africa" and "desert:" not in terrain_text:
+        return "missing desert"
+    if campaign_id == "pacific_front" and "jungle:" not in terrain_text:
+        return "missing jungle"
+    if campaign_id == "western_front" and "airdrop:" not in role_text:
+        return "missing airdrop focus"
+    return "tracked"
+
+
 def is_main_battle_scenario(scenario_id: str) -> bool:
     return (
         scenario_id != "00_sandbox"
@@ -921,6 +1019,7 @@ def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
 def generate_report() -> str:
     units = load_json(UNITS_PATH)
     terrains = load_json(TERRAINS_PATH)
+    campaigns = load_json(CAMPAIGNS_PATH)
     scenarios = [load_json(Path(path)) for path in sorted(glob.glob(SCENARIOS_GLOB))]
 
     rows: list[list[Any]] = []
@@ -1010,6 +1109,19 @@ def generate_report() -> str:
                 "check",
             ],
             gameplay_depth_coverage_rows(scenarios),
+        ),
+        "## Scenario Expansion Coverage",
+        "Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.",
+        table(
+            [
+                "campaign",
+                "scenarios",
+                "victory mix",
+                "special terrain",
+                "role hooks",
+                "check",
+            ],
+            expansion_coverage_rows(scenarios, campaigns),
         ),
     ]
     return "\n\n".join(sections) + "\n"
