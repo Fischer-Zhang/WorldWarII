@@ -35,6 +35,7 @@ const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_FIRE_SUPPORT := 2.0
 const W_BREACH_SUPPORT := 2.0
+const W_SUPPRESSIVE_FIRE := 1.2
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
 const AT_ARMOR_TARGET_BONUS := 2.0
@@ -107,6 +108,7 @@ func plan_for_unit(unit) -> Dictionary:
 			"attack": null,
 			"fire_support_target": null,
 			"breach_support_target": null,
+			"suppressive_fire_target": null,
 			"action": "wait",
 			"score": 0.0,
 			"reachable": reachable,
@@ -123,10 +125,12 @@ func plan_for_unit(unit) -> Dictionary:
 	var best_target = null
 	var best_fire_support_target = null
 	var best_breach_support_target = null
-	var best_action := "wait"  # "attack", "overwatch", "rally", "fire_support_mark", "breach_support", or "wait"
+	var best_suppressive_fire_target = null
+	var best_action := "wait"  # "attack", "overwatch", "rally", support skills, or "wait"
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 	var fire_support_skill := _fire_support_skill(unit, atk_def)
 	var breach_support_skill := _breach_support_skill(unit, atk_def)
+	var suppressive_fire_skill := _suppressive_fire_skill(unit, atk_def)
 
 	for cand in candidates:
 		var coord: Vector2i = cand
@@ -154,6 +158,12 @@ func plan_for_unit(unit) -> Dictionary:
 		var breach_support_score := -INF
 		if breach_support.get("target", null) != null:
 			breach_support_score = base_score - attack_value + float(breach_support.get("score", 0.0))
+		var suppressive_fire := _best_suppressive_fire_from(
+			unit, coord, visible_enemies, suppressive_fire_skill, visible_hexes
+		)
+		var suppressive_fire_score := -INF
+		if suppressive_fire.get("target", null) != null:
+			suppressive_fire_score = base_score - attack_value + float(suppressive_fire.get("score", 0.0))
 
 		if base_score > best_score:
 			best_score = base_score
@@ -161,6 +171,7 @@ func plan_for_unit(unit) -> Dictionary:
 			best_target = target
 			best_fire_support_target = null
 			best_breach_support_target = null
+			best_suppressive_fire_target = null
 			best_action = "attack" if target != null else "wait"
 		if overwatch_score > best_score and not atk_def.get("indirect", false) \
 				and not CombatEffects.is_pinned(unit.suppression):
@@ -169,6 +180,7 @@ func plan_for_unit(unit) -> Dictionary:
 			best_target = null
 			best_fire_support_target = null
 			best_breach_support_target = null
+			best_suppressive_fire_target = null
 			best_action = "overwatch"
 		if fire_support_score > best_score:
 			best_score = fire_support_score
@@ -176,6 +188,7 @@ func plan_for_unit(unit) -> Dictionary:
 			best_target = null
 			best_fire_support_target = fire_support.get("target", null)
 			best_breach_support_target = null
+			best_suppressive_fire_target = null
 			best_action = "fire_support_mark"
 		if breach_support_score > best_score:
 			best_score = breach_support_score
@@ -183,13 +196,23 @@ func plan_for_unit(unit) -> Dictionary:
 			best_target = null
 			best_fire_support_target = null
 			best_breach_support_target = breach_support.get("target", null)
+			best_suppressive_fire_target = null
 			best_action = "breach_support"
+		if suppressive_fire_score > best_score:
+			best_score = suppressive_fire_score
+			best = coord
+			best_target = null
+			best_fire_support_target = null
+			best_breach_support_target = null
+			best_suppressive_fire_target = suppressive_fire.get("target", null)
+			best_action = "suppressive_fire"
 		if rally_score > best_score:
 			best_score = rally_score
 			best = coord
 			best_target = null
 			best_fire_support_target = null
 			best_breach_support_target = null
+			best_suppressive_fire_target = null
 			best_action = "rally"
 
 	return {
@@ -197,6 +220,7 @@ func plan_for_unit(unit) -> Dictionary:
 		"attack": best_target,
 		"fire_support_target": best_fire_support_target,
 		"breach_support_target": best_breach_support_target,
+		"suppressive_fire_target": best_suppressive_fire_target,
 		"action": best_action,
 		"score": best_score,
 		"reachable": reachable,
@@ -215,6 +239,7 @@ func plan_trace_for_unit(unit) -> Dictionary:
 	var visible_hexes: Dictionary = battle.visibility_by_faction.get(unit.faction_id, {})
 	var fire_support_skill := _fire_support_skill(unit, atk_def)
 	var breach_support_skill := _breach_support_skill(unit, atk_def)
+	var suppressive_fire_skill := _suppressive_fire_skill(unit, atk_def)
 	var candidates: Array = [unit.coord]
 	var reachable: Dictionary = plan.get("reachable", {})
 	for c in reachable.keys():
@@ -243,15 +268,23 @@ func plan_trace_for_unit(unit) -> Dictionary:
 		var breach_support_score := -INF
 		if breach_support.get("target", null) != null:
 			breach_support_score = float(breakdown.total) - attack_value + float(breach_support.get("score", 0.0))
+		var suppressive_fire := _best_suppressive_fire_from(
+			unit, coord, visible_enemies, suppressive_fire_skill, visible_hexes
+		)
+		var suppressive_fire_score := -INF
+		if suppressive_fire.get("target", null) != null:
+			suppressive_fire_score = float(breakdown.total) - attack_value + float(suppressive_fire.get("score", 0.0))
 		traces.append({
 			"coord": coord,
 			"target": target,
 			"fire_support_target": fire_support.get("target", null),
 			"breach_support_target": breach_support.get("target", null),
+			"suppressive_fire_target": suppressive_fire.get("target", null),
 			"base_score": float(breakdown.total),
 			"overwatch_score": float(breakdown.total) - attack_value + overwatch_value,
 			"fire_support_score": fire_support_score,
 			"breach_support_score": breach_support_score,
+			"suppressive_fire_score": suppressive_fire_score,
 			"rally_score": rally_value,
 			"components": breakdown,
 		})
@@ -360,7 +393,10 @@ func _trace_sort_score(trace: Dictionary) -> float:
 			float(trace.get("overwatch_score", -INF)),
 			max(
 				float(trace.get("fire_support_score", -INF)),
-				max(float(trace.get("breach_support_score", -INF)), float(trace.get("rally_score", -INF)))
+				max(
+					float(trace.get("breach_support_score", -INF)),
+					max(float(trace.get("suppressive_fire_score", -INF)), float(trace.get("rally_score", -INF)))
+				)
 			)
 		)
 	)
@@ -667,6 +703,66 @@ func _breach_support_followup_attack_score(ally, enemy, ally_def: Dictionary) ->
 	score += float(result.damage_to_defender) * 0.1
 	return score
 
+func _best_suppressive_fire_from(
+	unit,
+	pos: Vector2i,
+	visible_enemies: Array,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> Dictionary:
+	if skill.is_empty() or unit == null or unit.has_attacked:
+		return {"target": null, "score": -INF}
+	var skill_id := String(skill.get("id", ""))
+	if skill_id == "" or not _skill_ready(unit, skill_id):
+		return {"target": null, "score": -INF}
+	var best = null
+	var best_score := -INF
+	for e in visible_enemies:
+		var enemy = e
+		var score := _suppressive_fire_score(unit, pos, enemy, skill, visible_hexes)
+		if score > best_score:
+			best_score = score
+			best = enemy
+	if best == null:
+		return {"target": null, "score": -INF}
+	return {"target": best, "score": best_score}
+
+func _suppressive_fire_score(
+	unit,
+	pos: Vector2i,
+	enemy,
+	skill: Dictionary,
+	visible_hexes: Dictionary,
+) -> float:
+	if enemy == null or not enemy.is_alive() or enemy.faction_id == unit.faction_id:
+		return -INF
+	if int(enemy.suppression) >= CombatEffects.MAX_SUPPRESSION:
+		return -INF
+	if not visible_hexes.has(enemy.coord):
+		return -INF
+	if HexCoord.distance(pos, enemy.coord) > int(skill.get("suppressive_fire_range", 0)):
+		return -INF
+	if not Visibility.has_los(pos, enemy.coord, battle.hex_map):
+		return -INF
+	var amount: int = max(0, int(skill.get("suppressive_fire_amount", CombatEffects.SUPPRESSIVE_FIRE_AMOUNT)))
+	var before := int(enemy.suppression)
+	var after := CombatEffects.apply_suppression(before, amount)
+	var applied: int = max(0, after - before)
+	if applied <= 0:
+		return -INF
+	var defender_def: Dictionary = _get_unit_def(enemy.type_id)
+	var terrain_def: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(enemy.coord))
+	var score := float(applied) * W_SUPPRESSION * W_SUPPRESSIVE_FIRE
+	if not CombatEffects.is_pinned(before) and CombatEffects.is_pinned(after):
+		score += 1.0
+	score += float(CombatEffects.move_penalty(after) - CombatEffects.move_penalty(before)) * 1.5
+	score += float(CombatEffects.attack_penalty(after) - CombatEffects.attack_penalty(before))
+	score += float(defender_def.get("attack", 0)) * 0.25
+	score += min(1.0, float(max(0, int(terrain_def.get("defense", 0)))) * 0.25)
+	score += _target_focus_score(enemy, defender_def) * 0.2
+	score += _secondary_destroy_target_score(unit.faction_id, enemy) * 0.4
+	return score
+
 func _attack_candidate_score(
 	attacker,
 	pos: Vector2i,
@@ -737,6 +833,21 @@ func _breach_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
 			continue
 		var skill: Dictionary = value
 		if skill.has("breach_support_range"):
+			return skill
+	return {}
+
+func _suppressive_fire_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
+	var def := unit_def
+	if def.is_empty() and unit != null:
+		def = _get_unit_def(unit.type_id)
+	var primary: Dictionary = def.get("skill", {})
+	if primary.has("suppressive_fire_range"):
+		return primary
+	for value in def.get("skills", []):
+		if typeof(value) != TYPE_DICTIONARY:
+			continue
+		var skill: Dictionary = value
+		if skill.has("suppressive_fire_range"):
 			return skill
 	return {}
 

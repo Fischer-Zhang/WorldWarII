@@ -7,110 +7,123 @@ No visible enemies; the scout should move toward the last-known contact band ins
 
 Plan: `wait` to `3,0`, target `none`, score `-1.10`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `4,-1` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `3,0` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `3,1` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `5,-2` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `3,2` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `4,-1` | `none` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `3,0` | `none` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `3,1` | `none` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `5,-2` | `none` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `3,2` | `none` | `none` | `none` | `none` | -1.10 | -1.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Engineer urban breach setup
 Visible high-cover dig-in target should create breach movement pressure before contact.
 
 Plan: `overwatch` to `2,0`, target `none`, score `3.70`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `3,-1` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `2,1` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `2,0` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `1,0` | `none` | `none` | `none` | -0.20 | 1.30 | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 3.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `3,-2` | `none` | `none` | `none` | -0.20 | 1.30 | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 3.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `3,-1` | `none` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `2,1` | `none` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `2,0` | `none` | `none` | `none` | `none` | 2.20 | 3.70 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `1,0` | `none` | `none` | `none` | `none` | -0.20 | 1.30 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 3.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `3,-2` | `none` | `none` | `none` | `none` | -0.20 | 1.30 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 3.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Engineer breach support mark
 An engineer near an entrenched target should mark it when artillery can immediately exploit the breach.
 
 Plan: `breach_support` to `0,0`, target `infantry@2,0`, score `7.70`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `0,0` | `none` | `none` | `infantry@2,0` | 2.20 | 3.70 | -inf | 7.70 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `1,-1` | `none` | `none` | `infantry@2,0` | 2.20 | 3.70 | -inf | 7.70 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `1,2` | `none` | `none` | `infantry@2,0` | 2.20 | 3.70 | -inf | 7.70 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `0,1` | `none` | `none` | `infantry@2,0` | 2.20 | 3.70 | -inf | 7.70 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `2,-2` | `none` | `none` | `infantry@2,0` | 2.20 | 3.70 | -inf | 7.70 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0,0` | `none` | `none` | `infantry@2,0` | `none` | 2.20 | 3.70 | -inf | 7.70 | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `1,-1` | `none` | `none` | `infantry@2,0` | `none` | 2.20 | 3.70 | -inf | 7.70 | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `1,2` | `none` | `none` | `infantry@2,0` | `none` | 2.20 | 3.70 | -inf | 7.70 | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `0,1` | `none` | `none` | `infantry@2,0` | `none` | 2.20 | 3.70 | -inf | 7.70 | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `2,-2` | `none` | `none` | `infantry@2,0` | `none` | 2.20 | 3.70 | -inf | 7.70 | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 5.20 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Light tank fire-support mark
 A light tank with no clean assault lane should spend its action marking a visible target when friendly artillery can follow up.
 
 Plan: `fire_support_mark` to `0,0`, target `infantry@3,0`, score `-0.68`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `0,0` | `none` | `infantry@3,0` | `none` | -4.00 | -1.00 | -0.68 | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0,0` | `none` | `infantry@3,0` | `none` | `none` | -4.00 | -1.00 | -0.68 | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Hard lookahead exposure
 Hard AI should expose the one-ply retaliation penalty in candidate components.
 
 Plan: `attack` to `0,1`, target `medium_tank@0,2`, score `-0.60`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `-1,2` | `medium_tank@0,2` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
-| 2 | `0,1` | `medium_tank@0,2` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
-| 3 | `1,1` | `medium_tank@0,2` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
-| 4 | `0,-1` | `none` | `none` | `none` | -4.40 | -2.60 | -inf | -inf | -inf | -3.00 | 0.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -0.00 |
-| 5 | `0,-2` | `none` | `none` | `none` | -5.40 | -3.60 | -inf | -inf | -inf | -4.00 | 0.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `-1,2` | `medium_tank@0,2` | `none` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
+| 2 | `0,1` | `medium_tank@0,2` | `none` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
+| 3 | `1,1` | `medium_tank@0,2` | `none` | `none` | `none` | -0.60 | -4.80 | -inf | -inf | -inf | -inf | -1.00 | 6.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -6.00 |
+| 4 | `0,-1` | `none` | `none` | `none` | `none` | -4.40 | -2.60 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -0.00 |
+| 5 | `0,-2` | `none` | `none` | `none` | `none` | -5.40 | -3.60 | -inf | -inf | -inf | -inf | -4.00 | 0.00 | -1.40 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -0.00 |
 
 ## Suppressed rally choice
 Pinned unit in cover should show rally value competing with the attack plan.
 
 Plan: `rally` to `0,0`, target `none`, score `19.50`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `0,0` | `infantry@1,0` | `none` | `none` | 4.10 | 0.10 | -inf | -inf | 19.50 | -1.00 | 4.00 | -1.00 | 0.90 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `0,-1` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `-1,0` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `-1,1` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `1,-2` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0,0` | `infantry@1,0` | `none` | `none` | `none` | 4.10 | 0.10 | -inf | -inf | -inf | 19.50 | -1.00 | 4.00 | -1.00 | 0.90 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `0,-1` | `none` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `-1,0` | `none` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `-1,1` | `none` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `1,-2` | `none` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## MG overwatch lane
 MG reaction-fire profile should appear in overwatch candidate scores.
 
 Plan: `overwatch` to `0,0`, target `none`, score `3.00`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `0,0` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `1,-1` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `0,1` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `2,-2` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `0,2` | `none` | `none` | `none` | -3.00 | 3.00 | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0,0` | `none` | `none` | `none` | `infantry@2,0` | -3.00 | 3.00 | -inf | -inf | 1.88 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `1,-1` | `none` | `none` | `none` | `infantry@2,0` | -3.00 | 3.00 | -inf | -inf | 1.88 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `0,1` | `none` | `none` | `none` | `infantry@2,0` | -3.00 | 3.00 | -inf | -inf | 1.88 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `2,-2` | `none` | `none` | `none` | `infantry@2,0` | -3.00 | 3.00 | -inf | -inf | 1.88 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `0,2` | `none` | `none` | `none` | `infantry@2,0` | -3.00 | 3.00 | -inf | -inf | 1.88 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+
+## MG suppressive-fire choice
+A visible target outside direct attack range but inside the MG's suppressive-fire setup should produce an active control action.
+
+Plan: `suppressive_fire` to `2,0`, target `infantry@4,0`, score `4.27`.
+
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `2,0` | `none` | `none` | `none` | `infantry@4,0` | -3.00 | 3.00 | -inf | -inf | 4.27 | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `1,0` | `none` | `none` | `none` | `none` | -4.00 | 2.00 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `1,1` | `none` | `none` | `none` | `none` | -4.00 | 2.00 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `2,-1` | `none` | `none` | `none` | `none` | -4.00 | 2.00 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `0,2` | `none` | `none` | `none` | `none` | -5.00 | 1.00 | -inf | -inf | -inf | -inf | -4.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Tank destroyer standoff
 Tank destroyers should prefer the authored anti-armor standoff band over adjacent armor contact.
 
 Plan: `attack` to `1,0`, target `medium_tank@3,0`, score `32.20`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `1,0` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 2 | `1,2` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 3 | `3,-2` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 4 | `2,-1` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
-| 5 | `1,1` | `medium_tank@3,0` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `1,0` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 2 | `1,2` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 3 | `3,-2` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 4 | `2,-1` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
+| 5 | `1,1` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 |
 
 ## Secondary objective pull
 Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.
 
 Plan: `wait` to `3,0`, target `none`, score `-6.29`.
 
-| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `3,0` | `none` | `none` | `none` | -6.29 | -6.29 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | 0.21 | -5.19 | `primary:6,0 d3; secondary:forward_cache 3,0 d0 w1.35 rv0.15 rp0.21` | 0.00 |
-| 2 | `4,-1` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
-| 3 | `3,1` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
-| 4 | `3,2` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |
-| 5 | `5,-2` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `3,0` | `none` | `none` | `none` | `none` | -6.29 | -6.29 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | 0.21 | -5.19 | `primary:6,0 d3; secondary:forward_cache 3,0 d0 w1.35 rv0.15 rp0.21` | 0.00 |
+| 2 | `4,-1` | `none` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
+| 3 | `3,1` | `none` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 |
+| 4 | `3,2` | `none` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |
+| 5 | `5,-2` | `none` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 |

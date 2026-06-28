@@ -66,6 +66,18 @@ func _run() -> void:
 		printerr("FAIL: multi-skill resolution wrong: %s" % str(ids))
 		fail_count += 1
 
+	_reset(battle, subject)
+	subject.type_id = "mg_team"
+	resolved = battle._resolve_active_skills(subject)
+	ids.clear()
+	for s in resolved:
+		ids.append(String(s.get("id", "")))
+	if resolved.size() == 1 and "suppressive_fire" in ids:
+		pass_count += 1
+	else:
+		printerr("FAIL: MG should expose suppressive-fire skill, got: %s" % str(ids))
+		fail_count += 1
+
 	# ---- Task 1a: self-buff (Blitz) is a FREE action ----
 	_reset(battle, subject)
 	subject.type_id = "medium_tank"

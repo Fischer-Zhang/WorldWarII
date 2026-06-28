@@ -9,6 +9,7 @@ const RALLY_RECOVERY := 2
 const RALLY_COVER_BONUS := 1
 const SPOTTER_SUPPRESSION_BONUS := 1
 const FIRE_SUPPORT_SUPPRESSION_BONUS := 1
+const SUPPRESSIVE_FIRE_AMOUNT := 2
 const BREACH_SUPPORT_DIG_IN_BONUS := 1
 const SPLASH_DAMAGE_PCT := 50  # default falloff for splash targets when a unit omits splash_damage_pct
 const OVERWATCH_DAMAGE_PCT := 50  # default reaction-fire damage when a unit omits overwatch_damage_pct

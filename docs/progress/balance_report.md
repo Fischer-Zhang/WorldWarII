@@ -437,7 +437,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | indirect semantics | Resolved: indirect units cannot counter while defending, but close indirect attacks can still be countered. | Preserve this distinction in UI text and combat tests. |
 | ZoC path reconstruction | Resolved: movement range and path reconstruction share the same terrain + active-ZoC step cost; pinned units do not project ZoC. | Keep new pathfinding callsites passing occupied + mover_faction. |
 | Town + dig-in | Town defense 3 plus dig-in 3 still pushes many attacks to the 1-damage floor, but artillery strips one dig-in level and engineers strip up to two on damaging hits. | Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls. |
-| MG overwatch | MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, making MGs the premier lane-denial unit. | Keep AI overwatch scoring and help text aligned with unit-data reaction-fire percentages. |
+| MG control | MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, and suppressive fire lets them spend an action to pin a visible short-range target without damage. | Keep AI overwatch/suppressive-fire scoring and help text aligned with unit-data action profiles. |
 
 ## Recommended Next Pass
 

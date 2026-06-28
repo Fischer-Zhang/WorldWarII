@@ -35,6 +35,13 @@ const ENGINEER_DEF := {
 const MG_DEF := {
 	"id": "mg_team", "hp": 8, "attack": 6, "defense": 1, "range": 1, "move": 2,
 	"vision": 3, "vs_armor": 0, "armor": 0, "overwatch_damage_pct": 100,
+	"skill": {
+		"id": "suppressive_fire",
+		"cooldown": 2,
+		"duration": 0,
+		"suppressive_fire_range": 2,
+		"suppressive_fire_amount": 2,
+	},
 }
 const TANK_DESTROYER_DEF := {
 	"id": "tank_destroyer", "hp": 12, "attack": 5, "defense": 4, "range": 2, "move": 3,
@@ -627,7 +634,36 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: engineer should not mark breach while skill is on cooldown")
 
-	# 19) Plan trace should explain the same selected plan without changing the decision.
+	# 19) MG teams should use suppressive fire against visible targets just outside attack range.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var suppress_mg := make_unit("mg_team", "axis", Vector2i(0, 0), 8)
+	var suppress_enemy := make_unit("infantry", "allies", Vector2i(4, 0), 10)
+	suppress_enemy.suppression = 1
+	battle.hex_map.terrain_overrides[suppress_enemy.coord] = "town"
+	battle.units = [suppress_mg, suppress_enemy]
+	battle.hex_map.occupants[suppress_mg.coord] = suppress_mg
+	battle.hex_map.occupants[suppress_enemy.coord] = suppress_enemy
+	battle.visibility_by_faction = {"axis": {suppress_enemy.coord: true}}
+	var suppress_plan: Dictionary = ai.plan_for_unit(suppress_mg)
+	if String(suppress_plan.get("action", "")) == "suppressive_fire" \
+			and suppress_plan.get("suppressive_fire_target") == suppress_enemy:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: MG should use suppressive fire at range 2, got %s" % str(suppress_plan))
+	suppress_mg.skill_cooldowns["suppressive_fire"] = 99
+	var suppress_cooldown_plan: Dictionary = ai.plan_for_unit(suppress_mg)
+	if String(suppress_cooldown_plan.get("action", "")) != "suppressive_fire":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: MG should not use suppressive fire while skill is on cooldown")
+
+	# 20) Plan trace should explain the same selected plan without changing the decision.
 	battle.units = []
 	battle.visibility_by_faction = {}
 	battle.hex_map.terrain_overrides.clear()
@@ -663,6 +699,7 @@ func _init() -> void:
 			and traced_plan.get("attack") == direct_plan.get("attack") \
 			and traced_plan.get("fire_support_target") == direct_plan.get("fire_support_target") \
 			and traced_plan.get("breach_support_target") == direct_plan.get("breach_support_target") \
+			and traced_plan.get("suppressive_fire_target") == direct_plan.get("suppressive_fire_target") \
 			and not candidates.is_empty() \
 			and top.has("coord") \
 			and components.has("distance") \
@@ -672,6 +709,7 @@ func _init() -> void:
 			and components.has("total") \
 			and top.has("fire_support_score") \
 			and top.has("breach_support_score") \
+			and top.has("suppressive_fire_score") \
 			and abs(float(components.get("objective", 0.0)) - (
 				float(components.get("primary_objective", 0.0))
 				+ float(components.get("secondary_objective", 0.0))

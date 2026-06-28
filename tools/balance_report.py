@@ -597,9 +597,9 @@ def rule_risk_section() -> str:
             "Monitor scenario_probe.md breach paths plus playtests to confirm Stalingrad/Berlin create breach decisions instead of static 1-damage stalls.",
         ],
         [
-            "MG overwatch",
-            "MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, making MGs the premier lane-denial unit.",
-            "Keep AI overwatch scoring and help text aligned with unit-data reaction-fire percentages.",
+            "MG control",
+            "MG teams use overwatch_damage_pct 100 while default reaction fire remains 50, and suppressive fire lets them spend an action to pin a visible short-range target without damage.",
+            "Keep AI overwatch/suppressive-fire scoring and help text aligned with unit-data action profiles.",
         ],
     ]
     return table(["risk", "why it matters", "next action"], rows)

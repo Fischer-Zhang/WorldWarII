@@ -67,7 +67,7 @@ These semantics materially affect artillery, AT guns, overwatch, and fog-of-war 
 Target identities:
 
 - Infantry: durable terrain holder and ZoC anchor.
-- MG team: anti-infantry overwatch and static fire support; MG overwatch uses full reaction-fire damage while normal overwatch remains half damage.
+- MG team: anti-infantry lane denial and active suppression; MG overwatch uses full reaction-fire damage while normal overwatch remains half damage, and suppressive fire trades damage for short-range control.
 - AT gun: anti-armor specialist with weak soft-target pressure.
 - Tank destroyer: mobile anti-armor ambusher; it gets extra anti-armor only when firing from its authored standoff range.
 - Light tank: scouting, flanking, capture pressure, wounded-target cleanup.

@@ -35,7 +35,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 - Deterministic combat: same position, HP, terrain and modifiers always resolve the same way.
 - Shared attack legality for player and AI through `CombatRules`.
 - Fog of war, line of sight and AI last-known-position memory.
-- Zone of control, overwatch, dig-in, suppression, rally and optional secondary objectives layered into movement and action economy; pinned units stop projecting ZoC and MG overwatch uses full reaction-fire damage.
+- Zone of control, overwatch, dig-in, suppression, rally and optional secondary objectives layered into movement and action economy; pinned units stop projecting ZoC, MG overwatch uses full reaction-fire damage, and MGs can spend an action on short-range suppressive fire.
 - Historical generals, veteran XP, lounge upgrades and tech upgrades routed through a shared modifier pipeline.
 - Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles; conquest uses a free deployment zone for every recruited attacker before battle starts.
 - Conquest battles are real tactical battles, not a separate mini-simulator.

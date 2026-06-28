@@ -609,6 +609,97 @@ func _run() -> void:
 					fail_count += 1
 					printerr("FAIL: breach-support should consume without bonus when natural dig-in loss already clears the target")
 
+		# MG teams can spend their action on direct suppressive fire: no damage,
+		# no counter, but immediate suppression and cooldown.
+		var suppressor = player_unit
+		var suppress_target = null
+		for u in battle.units:
+			if u.faction_id != battle.player_faction_id:
+				suppress_target = u
+				break
+		if suppress_target == null:
+			fail_count += 1
+			printerr("FAIL: could not stage enemy for suppressive-fire test")
+		else:
+			suppressor.type_id = "mg_team"
+			suppressor.has_moved = false
+			suppressor.has_attacked = false
+			suppressor.skill_cooldowns.clear()
+			suppress_target.type_id = "infantry"
+			suppress_target.hp = suppress_target.max_hp
+			suppress_target.suppression = 0
+			suppress_target.dig_in_level = 0
+			var suppress_target_coord := Vector2i(-999, -999)
+			var suppressor_coord := Vector2i(-999, -999)
+			var suppress_staged := false
+			for c in battle.hex_map.tiles.keys():
+				var suppress_terrain: String = battle.hex_map.terrain_at(c)
+				if suppress_terrain == "" or battle.hex_map.terrain_impassable(suppress_terrain):
+					continue
+				if battle.hex_map.unit_at(c) != null and battle.hex_map.unit_at(c) != suppress_target:
+					continue
+				for nb in HexCoord.neighbors(c):
+					var terrain: String = battle.hex_map.terrain_at(nb)
+					if terrain != "" and not battle.hex_map.terrain_impassable(terrain) \
+							and battle.hex_map.unit_at(nb) == null:
+						suppress_target_coord = c
+						suppressor_coord = nb
+						suppress_staged = true
+						break
+				if suppress_staged:
+					break
+			if not suppress_staged:
+				fail_count += 1
+				printerr("FAIL: could not stage adjacent open hexes for suppressive-fire test")
+			else:
+				battle.hex_map.move_unit(suppress_target, suppress_target_coord, 0.0)
+				battle.hex_map.move_unit(suppressor, suppressor_coord, 0.0)
+				suppress_target.has_moved = false
+				suppressor.has_moved = false
+				battle._recompute_visibility()
+				var suppress_skill: Dictionary = battle._resolve_skill_by_id(suppressor, "suppressive_fire")
+				var suppress_targets: Array = battle._suppressive_fire_targets(suppressor, suppress_skill)
+				battle.selected_unit = suppressor
+				battle.phase = battle.Phase.UNIT_SELECTED
+				battle.suppressive_fire_return_phase = battle.Phase.UNIT_SELECTED
+				battle.suppressive_fire_targets = suppress_targets
+				battle._cancel_suppressive_fire()
+				if battle.phase == battle.Phase.UNIT_SELECTED \
+						and battle.selected_unit == suppressor \
+						and not battle.movement_range.is_empty():
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: cancelling suppressive fire from selection should restore movement phase")
+				suppress_targets = battle._suppressive_fire_targets(suppressor, suppress_skill)
+				var target_hp_before: int = suppress_target.hp
+				battle.suppressive_fire_skill = suppress_skill
+				battle._do_suppressive_fire(suppressor, suppress_target)
+				if suppress_target in suppress_targets \
+						and suppressor.has_attacked \
+						and suppressor.skill_cooldowns.has("suppressive_fire") \
+						and suppress_target.hp == target_hp_before \
+						and suppress_target.suppression == CombatEffects.SUPPRESSIVE_FIRE_AMOUNT:
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: suppressive fire should spend action, start cooldown, suppress without damage")
+				suppressor.type_id = "infantry"
+				suppressor.has_attacked = false
+				suppressor.suppression = 0
+				suppress_target.suppression = 0
+				var cleanup_slots: Array = []
+				for c in battle.hex_map.tiles.keys():
+					if cleanup_slots.size() >= 2:
+						break
+					if battle.hex_map.unit_at(c) == null:
+						var terrain: String = battle.hex_map.terrain_at(c)
+						if terrain != "" and not battle.hex_map.terrain_impassable(terrain):
+							cleanup_slots.append(c)
+				if cleanup_slots.size() >= 2:
+					battle.hex_map.move_unit(suppressor, cleanup_slots[0], 0.0)
+					battle.hex_map.move_unit(suppress_target, cleanup_slots[1], 0.0)
+
 		# Destroy-unit and recon secondary objectives complete from combat and visibility events.
 		var unit_script: Script = player_unit.get_script()
 		var destroy_target = unit_script.new()

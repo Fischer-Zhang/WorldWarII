@@ -208,6 +208,16 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"notes": "MG reaction-fire profile should appear in overwatch candidate scores.",
 		},
 		{
+			"id": "mg_suppressive_fire",
+			"title": "MG suppressive-fire choice",
+			"difficulty": "normal",
+			"attacker": _unit("mg_team", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _suppressed_unit("infantry", "allies", Vector2i(4, 0), 1, data_loader), "visible": true, "terrain": "town"},
+			],
+			"notes": "A visible target outside direct attack range but inside the MG's suppressive-fire setup should produce an active control action.",
+		},
+		{
 			"id": "tank_destroyer_standoff",
 			"title": "Tank destroyer standoff",
 			"difficulty": "normal",
@@ -279,23 +289,25 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | base | overwatch | mark | breach | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
 			_unit_text(row.get("fire_support_target", null)),
 			_unit_text(row.get("breach_support_target", null)),
+			_unit_text(row.get("suppressive_fire_target", null)),
 			_score(row.get("base_score", 0.0)),
 			_score(row.get("overwatch_score", 0.0)),
 			_score(row.get("fire_support_score", 0.0)),
 			_score(row.get("breach_support_score", 0.0)),
+			_score(row.get("suppressive_fire_score", 0.0)),
 			_score(row.get("rally_score", 0.0)),
 			_score(c.get("distance", 0.0)),
 			_score(c.get("attack", 0.0)),
@@ -344,6 +356,8 @@ func _plan_target(plan: Dictionary):
 		return plan.get("fire_support_target", null)
 	if String(plan.get("action", "")) == "breach_support":
 		return plan.get("breach_support_target", null)
+	if String(plan.get("action", "")) == "suppressive_fire":
+		return plan.get("suppressive_fire_target", null)
 	return plan.get("attack", null)
 
 func _score(value: Variant) -> String:

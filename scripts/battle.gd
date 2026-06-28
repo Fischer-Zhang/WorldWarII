@@ -34,8 +34,9 @@ const HelpContent := preload("res://scripts/ui/help_content.gd")
 const DEFAULT_SCENARIO_ID := "00_sandbox"
 const FIRE_SUPPORT_SKILL_ID := "fire_support_mark"
 const BREACH_SUPPORT_SKILL_ID := "breach_support"
+const SUPPRESSIVE_FIRE_SKILL_ID := "suppressive_fire"
 
-enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET, FIRE_SUPPORT_TARGET, BREACH_SUPPORT_TARGET }
+enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDGE_TARGET, FIRE_SUPPORT_TARGET, BREACH_SUPPORT_TARGET, SUPPRESSIVE_FIRE_TARGET }
 
 @onready var hex_map: HexMap = $HexMap
 @onready var camera: CameraController = $Camera
@@ -87,6 +88,9 @@ var breach_support_targets: Array = []  # visible entrenched enemies while phase
 var breach_support_skill: Dictionary = {}
 var breach_support_marks: Dictionary = {}  # target instance id -> {faction, engineer, target, turn}
 var breach_support_return_phase: Phase = Phase.ATTACK_PHASE
+var suppressive_fire_targets: Array = []  # visible enemies while phase == SUPPRESSIVE_FIRE_TARGET
+var suppressive_fire_skill: Dictionary = {}
+var suppressive_fire_return_phase: Phase = Phase.ATTACK_PHASE
 var skill_buttons: Array[Button] = []  # dynamically built skill buttons (one per active skill)
 var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
@@ -359,6 +363,19 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 						and breach_target in _breach_support_targets(u, breach_skill):
 					breach_support_skill = breach_skill
 					_do_breach_support(u, breach_target)
+					await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
+				else:
+					u.has_attacked = true
+					u.queue_redraw()
+			"suppressive_fire":
+				var suppressive_target: Unit = plan.get("suppressive_fire_target")
+				var suppressive_skill := _resolve_skill_by_id(u, SUPPRESSIVE_FIRE_SKILL_ID)
+				if suppressive_target != null and not suppressive_skill.is_empty() \
+						and suppressive_target.is_alive() \
+						and u.skill_ready(String(suppressive_skill.get("id", SUPPRESSIVE_FIRE_SKILL_ID)), turn_manager.turn_number) \
+						and suppressive_target in _suppressive_fire_targets(u, suppressive_skill):
+					suppressive_fire_skill = suppressive_skill
+					_do_suppressive_fire(u, suppressive_target)
 					await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
 				else:
 					u.has_attacked = true
@@ -702,6 +719,11 @@ func _on_hex_clicked(coord: Vector2i, terrain_id: String) -> void:
 				_do_breach_support(selected_unit, clicked_unit)
 			else:
 				_cancel_breach_support()
+		Phase.SUPPRESSIVE_FIRE_TARGET:
+			if clicked_unit != null and clicked_unit in suppressive_fire_targets:
+				_do_suppressive_fire(selected_unit, clicked_unit)
+			else:
+				_cancel_suppressive_fire()
 
 func _select_unit(unit: Unit) -> void:
 	if selected_unit != null and selected_unit != unit:
@@ -851,6 +873,8 @@ func _refresh_skill_buttons(unit: Unit) -> void:
 			continue
 		if skill.has("breach_support_range") and unit.has_attacked:
 			continue
+		if skill.has("suppressive_fire_range") and unit.has_attacked:
+			continue
 		var skill_id := String(skill.get("id", ""))
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(0, 40)
@@ -882,6 +906,9 @@ func _on_skill_pressed(skill: Dictionary) -> void:
 		return
 	if skill.has("breach_support_range"):
 		_begin_breach_support(selected_unit, skill)
+		return
+	if skill.has("suppressive_fire_range"):
+		_begin_suppressive_fire(selected_unit, skill)
 		return
 	# Special instant effects (e.g. engineer's Fortify) are applied
 	# immediately, in addition to recording the active_effect entry so the
@@ -1140,6 +1167,93 @@ func _cancel_breach_support() -> void:
 	breach_support_targets.clear()
 	breach_support_skill = {}
 	breach_support_return_phase = Phase.ATTACK_PHASE
+	if return_phase == Phase.UNIT_SELECTED and selected_unit != null \
+			and not selected_unit.has_moved and not selected_unit.has_attacked:
+		_present_unit_actions(selected_unit)
+	else:
+		_enter_attack_phase()
+
+func _begin_suppressive_fire(unit: Unit, skill: Dictionary) -> void:
+	if unit == null or unit.has_attacked:
+		return
+	suppressive_fire_targets = _suppressive_fire_targets(unit, skill)
+	if suppressive_fire_targets.is_empty():
+		_set_prompt("無可壓制", "%s 視野與視線內沒有可壓制敵軍" % unit.display_name)
+		return
+	suppressive_fire_skill = skill
+	suppressive_fire_return_phase = phase
+	phase = Phase.SUPPRESSIVE_FIRE_TARGET
+	overwatch_button.visible = false
+	rally_button.visible = false
+	_hide_skill_buttons()
+	bridge_button.visible = false
+	damage_preview_panel.visible = false
+	hex_map.show_attack_targets(suppressive_fire_targets.map(func(u): return u.coord))
+	hex_map.highlight_coord(unit.coord)
+	_set_prompt("選擇壓制", "點紅色敵軍壓制射擊;不造成傷害或反擊,或點別處取消")
+
+func _suppressive_fire_targets(unit: Unit, skill: Dictionary) -> Array:
+	if unit == null:
+		return []
+	var radius := int(skill.get("suppressive_fire_range", 2))
+	var visible: Dictionary = visibility_by_faction.get(unit.faction_id, {})
+	var out: Array = []
+	for u in units:
+		var target: Unit = u
+		if not target.is_alive() or target.faction_id == unit.faction_id:
+			continue
+		if target.suppression >= CombatEffects.MAX_SUPPRESSION:
+			continue
+		if not visible.has(target.coord):
+			continue
+		if HexCoord.distance(unit.coord, target.coord) > radius:
+			continue
+		if not Visibility.has_los(unit.coord, target.coord, hex_map):
+			continue
+		out.append(target)
+	return out
+
+func _do_suppressive_fire(unit: Unit, target: Unit) -> void:
+	if unit == null or target == null or not target.is_alive():
+		_cancel_suppressive_fire()
+		return
+	var skill := suppressive_fire_skill if not suppressive_fire_skill.is_empty() else _resolve_skill_by_id(unit, SUPPRESSIVE_FIRE_SKILL_ID)
+	if skill.is_empty() or unit.has_attacked or not (target in _suppressive_fire_targets(unit, skill)):
+		_cancel_suppressive_fire()
+		return
+	var skill_id := String(skill.get("id", SUPPRESSIVE_FIRE_SKILL_ID))
+	var cooldown: int = int(skill.get("cooldown", 0))
+	var amount: int = int(skill.get("suppressive_fire_amount", CombatEffects.SUPPRESSIVE_FIRE_AMOUNT))
+	var before := target.suppression
+	unit.skill_cooldowns[skill_id] = turn_manager.turn_number + cooldown
+	unit.skill_used.emit(skill_id)
+	unit.has_attacked = true
+	unit.queue_redraw()
+	unit.play_attack_animation(target.position)
+	target.add_suppression(amount)
+	action_log.record_skill(unit, skill_id, turn_manager.turn_number)
+	AudioBank.play("attack")
+	suppressive_fire_targets.clear()
+	suppressive_fire_skill = {}
+	hex_map.clear_movement_range()
+	var applied: int = max(0, target.suppression - before)
+	_set_prompt("壓制完成", "%s 壓制射擊 %s — 壓制 +%d" % [
+		unit.display_name, target.display_name, applied,
+	])
+	_update_info_panel_for_unit(target)
+	_deselect()
+	_update_status()
+
+func _cancel_suppressive_fire() -> void:
+	var return_phase := suppressive_fire_return_phase
+	suppressive_fire_targets.clear()
+	suppressive_fire_skill = {}
+	suppressive_fire_return_phase = Phase.ATTACK_PHASE
+	if selected_unit == null:
+		hex_map.clear_movement_range()
+		if phase != Phase.GAME_OVER:
+			phase = Phase.IDLE
+		return
 	if return_phase == Phase.UNIT_SELECTED and selected_unit != null \
 			and not selected_unit.has_moved and not selected_unit.has_attacked:
 		_present_unit_actions(selected_unit)
@@ -1561,6 +1675,9 @@ func _deselect() -> void:
 	breach_support_targets.clear()
 	breach_support_skill = {}
 	breach_support_return_phase = Phase.ATTACK_PHASE
+	suppressive_fire_targets.clear()
+	suppressive_fire_skill = {}
+	suppressive_fire_return_phase = Phase.ATTACK_PHASE
 	hex_map.clear_movement_range()
 	hex_map.clear_threat_range()
 	overwatch_button.visible = false
