@@ -40,6 +40,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | pacific_02_tarawa_1943 | 塔拉瓦灘頭 1943 | plain 64%, jungle 12%, sea 11%; def>=2 18%; move>=3 11% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.2 | 奪取棧橋補給 [capture 7,6] (XP 1, supp -2); 摧毀海堤機槍 [destroy 海堤機槍火點@10,4] (XP 1, enemy supp +1 R2) | no major static risks |
 | pacific_03_peleliu_1944 | 貝里琉機場 1944 | plain 61%, jungle 13%, road 9%; def>=2 21%; move>=3 12% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.0 | 摧毀洞窟機槍 [destroy 洞窟機槍火點@10,4] (XP 1, enemy supp +1 R2); 偵察北側山脊 [recon 12,2] (XP 1, enemy dig -1 R2) | no major static risks |
 | pacific_04_manila_1945 | 馬尼拉城區戰 1945 | plain 42%, town 28%, road 21%; def>=2 29%; move>=3 8% | allies: eng 1, art 1, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | n/a | 奪取醫院補給 [capture 8,5] (XP 1, supp -2); 標定城北砲位 [recon 12,2] (XP 1, enemy dig -1 R2, campaign +1p) | high town density: dig-in pacing risk; river crossings may dominate tempo; allies artillery-heavy: watch standoff dominance |
+| pacific_05_iwo_jima_1945 | 硫磺島折鉢山 1945 | plain 60%, road 13%, sea 11%; def>=2 16%; move>=3 14% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->13,4 min 10 avg 11.7 | 控制機場補給點 [hold 2t 6,4] (XP 1, reinforce -2t); 偵察北側洞窟 [recon 12,2] (XP 1, enemy dig -1 R2) | force power ratio above 1.35: check victory-clock compensation |
 | pacific_05_okinawa_1945 | 沖繩首里防線 1945 | plain 53%, road 18%, town 15%; def>=2 29%; move>=3 4% | allies: eng 1, art 1, rocket 2, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | n/a | 控制前進觀測所 [hold 2t 8,4] (XP 1, reinforce -2t); 摧毀首里機槍 [destroy 首里機槍火點@10,4] (XP 1, enemy supp +1 R2) | force power ratio above 1.35: check victory-clock compensation; allies artillery-heavy: watch standoff dominance |
 | tut_00_basic_turn | 教學 00: 移動、攻擊與佔領 | plain 88%, road 10%, town 2%; def>=2 2%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 0; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,2 min 5 avg 5.0 | none | force power ratio above 1.35: check victory-clock compensation |
 | tut_01_terrain_zoc_overwatch | 教學 01: 地形、管制區與警戒 | plain 81%, road 9%, forest 7%; def>=2 9%; move>=3 0% | allies: eng 0, art 0, rocket 0, mg 1; axis: eng 0, art 0, rocket 0, mg 0 | allies->6,0 min 4 avg 4.7 | 道路檢查點 [capture 4,0] (XP 1) | no major static risks |
@@ -292,6 +293,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | allies | 美軍第六軍 | player | 9 | 302.9 | anti_armor:1, armor:1, artillery:2, engineer:1, infantry:2, scout_armor:1, support:1 |
 | axis | 日軍馬尼拉守備隊 | ai | 8 | 242.0 | anti_armor:1, armor:1, artillery:1, infantry:3, support:2 |
+
+## pacific_05_iwo_jima_1945
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 美國陸戰隊 | player | 9 | 298.4 | armor:2, artillery:1, engineer:1, infantry:3, scout_armor:1, support:1 |
+| axis | 日軍硫磺島守備隊 | ai | 7 | 190.1 | anti_armor:1, artillery:1, infantry:3, support:2 |
 
 ## pacific_05_okinawa_1945
 

@@ -38,6 +38,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | pacific_02_tarawa_1943 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 25/160 (16%); axis 34/160 (21%) | allies 68/160 (42%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 奪取棧橋補給 7,6 capture min 4 XP 1, supp -2; 摧毀海堤機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2 | none |
 | pacific_03_peleliu_1944 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 摧毀洞窟機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2; 偵察北側山脊 12,2 recon min 11 XP 1, enemy dig -1 R2 | none |
 | pacific_04_manila_1945 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 8, art 0/7, targets 7 | allies: eng turns 4 | allies: art move 0/7 | n/a | 奪取醫院補給 8,5 capture min 6 XP 1, supp -2; 標定城北砲位 12,2 recon min 11 XP 1, enemy dig -1 R2, campaign +1p | none |
+| pacific_05_iwo_jima_1945 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 10, art 0/6, targets 6 | allies: eng turns 4 | allies: art move 0/6 | allies target 13,4 own min 10 enemy min 0 | 控制機場補給點 6,4 hold 2t min 3 XP 1, reinforce -2t; 偵察北側洞窟 12,2 recon min 10 XP 1, enemy dig -1 R2 | allies +77.6; T7 2 units |
 | pacific_05_okinawa_1945 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/5, targets 5 | allies: eng turns 4 | allies: art move 0/5 | n/a | 控制前進觀測所 8,4 hold 2t min 6 XP 1, reinforce -2t; 摧毀首里機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2 | allies +109.7; T6 3 units |
 | tut_00_basic_turn | none | none | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,2 own min 5 enemy min 0 | none | none |
 | tut_01_terrain_zoc_overwatch | allies mg_team:1 | none | axis 38/54 (70%), spots 3 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,0 own min 4 enemy min 2 | 道路檢查點 4,0 capture min 2 XP 1 | none |
@@ -122,6 +123,8 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | pacific_03_peleliu_1944 | 偵察北側山脊 | recon 12,2 | allies | own 11 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_04_manila_1945 | 奪取醫院補給 | capture 8,5 | allies | own 6 / enemy 2 | XP 1, supp -2 | enemy closer; sustain reward |
 | pacific_04_manila_1945 | 標定城北砲位 | recon 12,2 | allies | own 11 / enemy 2 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| pacific_05_iwo_jima_1945 | 控制機場補給點 | hold 2t 6,4 | allies | own 3 / enemy 6 | XP 1, reinforce -2t | reinforce best T7->T5 |
+| pacific_05_iwo_jima_1945 | 偵察北側洞窟 | recon 12,2 | allies | own 10 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_05_okinawa_1945 | 控制前進觀測所 | hold 2t 8,4 | allies | own 6 / enemy 2 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
 | pacific_05_okinawa_1945 | 摧毀首里機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
@@ -181,6 +184,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | pacific_02_tarawa_1943 | 2 | 0 | 2 | covered |
 | pacific_03_peleliu_1944 | 2 | 0 | 2 | covered |
 | pacific_04_manila_1945 | 2 | 0 | 2 | covered |
+| pacific_05_iwo_jima_1945 | 2 | 0 | 2 | covered |
 | pacific_05_okinawa_1945 | 2 | 0 | 2 | covered |
 | west_08_falaise_1944 | 1 | 0 | 1 | covered |
 | west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |
@@ -199,5 +203,5 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | blitzkrieg_early_war | 5 | capture:3, eliminate:1, survive:1 | river:3 | scout:2 | tracked |
 | eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
 | north_africa | 5 | capture:2, eliminate:2, survive:1 | desert:5, sea:1, town:1 | reinforcement:2, scout:5, engineer:2 | tracked |
-| pacific_front | 5 | capture:2, eliminate:3 | jungle:4, sea:3, river:1, town:3 | reinforcement:1, scout:5, engineer:5 | tracked |
+| pacific_front | 6 | capture:3, eliminate:3 | jungle:5, sea:4, river:1, town:3 | reinforcement:2, scout:6, engineer:6 | tracked |
 | western_front | 9 | capture:8, survive:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |

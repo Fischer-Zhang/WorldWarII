@@ -48,12 +48,13 @@
   },
   "pacific_front": {
     "title": "太平洋島嶼戰 1942-1945",
-    "description": "從瓜達康納爾叢林戰到塔拉瓦、貝里琉、馬尼拉與沖繩攻堅,以叢林、海岸與構工火點為主的太平洋正式戰役,強調偵察、火力準備與步兵攻堅。",
+    "description": "從瓜達康納爾叢林戰到塔拉瓦、貝里琉、馬尼拉、硫磺島與沖繩攻堅,以叢林、海岸與構工火點為主的太平洋正式戰役,強調偵察、火力準備與步兵攻堅。",
     "scenario_order": [
       "pacific_01_guadalcanal_1942",
       "pacific_02_tarawa_1943",
       "pacific_03_peleliu_1944",
       "pacific_04_manila_1945",
+      "pacific_05_iwo_jima_1945",
       "pacific_05_okinawa_1945"
     ]
   },

@@ -364,6 +364,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | pacific_02_tarawa_1943 | 5 | 3 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
 | pacific_03_peleliu_1944 | 5 | 3 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
 | pacific_04_manila_1945 | 5 | 3 | 1 | 1 | 2 | 2 | 0 | 1 | 1 | 0 | 1 |
+| pacific_05_iwo_jima_1945 | 6 | 3 | 1 | 1 | 2 | 1 | 0 | 1 | 0 | 0 | 1 |
 | pacific_05_okinawa_1945 | 6 | 3 | 1 | 1 | 3 | 2 | 0 | 1 | 1 | 0 | 2 |
 | tut_00_basic_turn | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | tut_01_terrain_zoc_overwatch | 3 | 1 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -378,7 +379,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 198 | 62 | 77 | 31 | 114 | 77 | 8 | 15 | 37 | 9 | 13 |
+| TOTAL | 204 | 65 | 78 | 32 | 116 | 78 | 8 | 16 | 37 | 9 | 14 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -416,6 +417,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | pacific_02_tarawa_1943 | 160 | plain 64%, jungle 12%, sea 11% |
 | pacific_03_peleliu_1944 | 160 | plain 61%, jungle 13%, road 9% |
 | pacific_04_manila_1945 | 160 | plain 42%, town 28%, road 21% |
+| pacific_05_iwo_jima_1945 | 160 | plain 60%, road 13%, sea 11% |
 | pacific_05_okinawa_1945 | 160 | plain 53%, road 18%, town 15% |
 | tut_00_basic_turn | 48 | plain 88%, road 10%, town 2% |
 | tut_01_terrain_zoc_overwatch | 54 | plain 81%, road 9%, forest 7% |
