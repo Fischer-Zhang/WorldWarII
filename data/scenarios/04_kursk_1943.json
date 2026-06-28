@@ -68,7 +68,7 @@
       "type": "destroy_unit",
       "faction": "axis",
       "target_unit": "SU-152",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     },
     {
       "id": "northern_ridge_recon",
@@ -76,7 +76,7 @@
       "type": "recon_hex",
       "faction": "axis",
       "target": [18, 2],
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {

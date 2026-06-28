@@ -62,7 +62,7 @@
       "type": "destroy_unit",
       "faction": "allies",
       "target_unit": "MG 42",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     },
     {
       "id": "counterbattery_105",
@@ -70,7 +70,7 @@
       "type": "recon_hex",
       "faction": "allies",
       "target": [22, 2],
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {

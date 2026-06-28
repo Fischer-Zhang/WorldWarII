@@ -69,7 +69,7 @@
       "faction": "allies",
       "target": [5, 12],
       "required_turns": 2,
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "advance_reinforcements", "amount": 2}]
     },
     {
       "id": "nijmegen_destroy_artillery",
@@ -77,7 +77,7 @@
       "label": "德軍遠程砲",
       "faction": "allies",
       "target_unit": "axis_150mm_sfh",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {

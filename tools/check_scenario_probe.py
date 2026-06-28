@@ -50,14 +50,14 @@ def main() -> None:
     )
     require(
         "01_sedan_1940" in report
-        and "中路渡口 13,5 recon min 9 XP 1" in report,
+        and "中路渡口 13,5 recon min 9 XP 1, enemy supp +1 R2" in report,
         "Sedan probe should show recon secondary objective pressure",
     )
     require(
         "03_stalingrad_1942" in report
         and "突擊工兵 13,10 destroy min 7 XP 1, enemy supp +1 R2" in report
         and "06_market_garden_1944" in report
-        and "德軍遠程砲 18,2 destroy min 12 XP 1" in report,
+        and "德軍遠程砲 18,2 destroy min 12 XP 1, enemy supp +1 R2" in report,
         "Destroy secondary objectives should be included in pressure probes",
     )
     require(
@@ -105,6 +105,12 @@ def main() -> None:
         "Reward audit should show Bagration reinforcement timing reward and pressure",
     )
     require(
+        "02_kiev_1941" in report
+        and "南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2"
+        in report,
+        "Reward audit should show Kiev recon breach reward pressure",
+    )
+    require(
         "blitz_02_dunkirk_1940" in report
         and "堅守撤退出口 | hold 2t 5,0 | allies | own 0 / enemy 18 | XP 1, supp -2 | starts held; sustain reward"
         in report,
@@ -150,15 +156,21 @@ def main() -> None:
         not any("| missing secondary |" in line for line in depth_rows),
         "Every main battle should have secondary objective pressure",
     )
+    xp_only_counts = []
+    for line in depth_rows:
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) >= 5:
+            xp_only_counts.append(int(parts[2]))
     require(
-        any("| xp-only |" in line for line in depth_rows)
+        xp_only_counts
+        and all(count == 0 for count in xp_only_counts)
         and any("| covered |" in line for line in depth_rows),
-        "Gameplay depth coverage should expose XP-only and enriched objective states",
+        "Every main battle secondary objective should be tactically enriched",
     )
     require(
-        "| west_08_normandy_cobra_1944 | 2 | 2 | 0 | xp-only |" in report
+        "| west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |" in report
         and "| east_10_berlin_1945 | 2 | 0 | 2 | covered |" in report,
-        "Gameplay depth coverage should expose XP-only and enriched objective counts",
+        "Gameplay depth coverage should expose enriched objective counts",
     )
     expansion_section = section_text(report, "## Scenario Expansion Coverage")
     expansion_rows = [

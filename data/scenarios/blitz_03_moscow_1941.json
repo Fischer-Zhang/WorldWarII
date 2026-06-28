@@ -62,7 +62,7 @@
       "type": "destroy_unit",
       "faction": "soviet",
       "target_unit": "MG 34",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     },
     {
       "id": "forward_observation",
@@ -70,7 +70,7 @@
       "type": "recon_hex",
       "faction": "soviet",
       "target": [18, 2],
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {

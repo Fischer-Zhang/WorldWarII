@@ -75,7 +75,7 @@
       "type": "destroy_unit",
       "faction": "soviet",
       "target_unit": "105 mm",
-      "rewards": [{"type": "xp", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],
   "reinforcements": [
