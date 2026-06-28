@@ -33,6 +33,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | north_01_el_alamein_1942 | allies artillery:1; axis artillery:1 | allies 23/160 (14%); axis 26/160 (16%) | allies 49/160 (31%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 奪取綠洲補給 8,5 capture min 6 XP 1, repair 2; 偵察北側山脊 10,2 recon min 9 XP 1, enemy supp +1 R2 | none |
 | north_02_kasserine_1943 | allies artillery:1, mg_team:1; axis artillery:1 | allies 29/160 (18%); axis 26/160 (16%) | allies 68/160 (42%), spots 0; axis 57/160 (36%), spots 0 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 0/3 | axis target 5,4 own min 7 enemy min 0 | 守住山口補給 5,4 hold 2t min 0 XP 1, reinforce -2t; 偵察南側山脊 10,6 recon min 5 XP 1, enemy supp +1 R2 | allies +122.8; T6 3 units |
 | north_03_tunis_1943 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 55/160 (34%), spots 0 | allies: eng min 8, art 0/4, targets 4 | allies: eng turns 3 | allies: art move 0/4 | n/a | 奪取山口補給站 8,5 capture min 6 XP 1, repair 2; 摧毀山地遠程砲 14,8 destroy min 11 XP 1, enemy supp +1 R2 | none |
+| north_04_bizerte_1943 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 13,4 own min 11 enemy min 0 | 奪取前進燃料站 9,4 capture min 7 XP 1, reinforce -2t; 摧毀港口遠程砲 14,8 destroy min 11 XP 1, enemy supp +1 R2 | allies +77.6; T7 2 units |
 | pacific_01_guadalcanal_1942 | allies mg_team:1; axis artillery:1, mg_team:1 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 9, art 0/4, targets 4 | allies: eng turns 4 | allies: art move 0/4 | n/a | 奪取補給村 8,4 capture min 6 XP 1, supp -2; 摧毀叢林機槍 12,6 destroy min 9 XP 1, enemy supp +1 R2 | none |
 | pacific_02_tarawa_1943 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 25/160 (16%); axis 34/160 (21%) | allies 68/160 (42%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 奪取棧橋補給 7,6 capture min 4 XP 1, supp -2; 摧毀海堤機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2 | none |
 | pacific_03_peleliu_1944 | allies mg_team:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 摧毀洞窟機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2; 偵察北側山脊 12,2 recon min 11 XP 1, enemy dig -1 R2 | none |
@@ -111,6 +112,8 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | north_02_kasserine_1943 | 偵察南側山脊 | recon 10,6 | allies | own 5 / enemy 1 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | north_03_tunis_1943 | 奪取山口補給站 | capture 8,5 | allies | own 6 / enemy 2 | XP 1, repair 2 | enemy closer; damage recovery |
 | north_03_tunis_1943 | 摧毀山地遠程砲 | destroy 14,8 | allies | own 11 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| north_04_bizerte_1943 | 奪取前進燃料站 | capture 9,4 | allies | own 7 / enemy 3 | XP 1, reinforce -2t | enemy closer; reinforce best T7->T5 |
+| north_04_bizerte_1943 | 摧毀港口遠程砲 | destroy 14,8 | allies | own 11 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_01_guadalcanal_1942 | 奪取補給村 | capture 8,4 | allies | own 6 / enemy 4 | XP 1, supp -2 | enemy closer; sustain reward |
 | pacific_01_guadalcanal_1942 | 摧毀叢林機槍 | destroy 12,6 | allies | own 9 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_02_tarawa_1943 | 奪取棧橋補給 | capture 7,6 | allies | own 4 / enemy 3 | XP 1, supp -2 | enemy closer; sustain reward |
@@ -173,6 +176,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | north_01_el_alamein_1942 | 2 | 0 | 2 | covered |
 | north_02_kasserine_1943 | 2 | 0 | 2 | covered |
 | north_03_tunis_1943 | 2 | 0 | 2 | covered |
+| north_04_bizerte_1943 | 2 | 0 | 2 | covered |
 | pacific_01_guadalcanal_1942 | 2 | 0 | 2 | covered |
 | pacific_02_tarawa_1943 | 2 | 0 | 2 | covered |
 | pacific_03_peleliu_1944 | 2 | 0 | 2 | covered |
@@ -194,6 +198,6 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | --- | --- | --- | --- | --- | --- |
 | blitzkrieg_early_war | 5 | capture:3, eliminate:1, survive:1 | river:3 | scout:2 | tracked |
 | eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
-| north_africa | 4 | capture:1, eliminate:2, survive:1 | desert:4 | reinforcement:1, scout:4, engineer:1 | tracked |
+| north_africa | 5 | capture:2, eliminate:2, survive:1 | desert:5, sea:1, town:1 | reinforcement:2, scout:5, engineer:2 | tracked |
 | pacific_front | 5 | capture:2, eliminate:3 | jungle:4, sea:3, river:1, town:3 | reinforcement:1, scout:5, engineer:5 | tracked |
 | western_front | 9 | capture:8, survive:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |

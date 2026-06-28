@@ -35,6 +35,7 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | north_01_el_alamein_1942 | 阿拉曼防線 1942 | desert 76%, road 14%, mountain 7%; def>=2 9%; move>=3 7% | allies: eng 0, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 0 | n/a | 奪取綠洲補給 [capture 8,5] (XP 1, repair 2); 偵察北側山脊 [recon 10,2] (XP 1, enemy supp +1 R2) | no major static risks |
 | north_02_kasserine_1943 | 凱塞林山口 1943 | desert 67%, road 21%, mountain 10%; def>=2 12%; move>=3 10% | allies: eng 0, art 1, rocket 0, mg 1; axis: eng 0, art 1, rocket 0, mg 0 | axis->5,4 min 7 avg 9.0 | 守住山口補給 [hold 2t 5,4] (XP 1, reinforce -2t); 偵察南側山脊 [recon 10,6] (XP 1, enemy supp +1 R2) | no major static risks |
 | north_03_tunis_1943 | 突尼斯山口 1943 | desert 71%, road 18%, mountain 8%; def>=2 11%; move>=3 8% | allies: eng 1, art 1, rocket 0, mg 0; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 奪取山口補給站 [capture 8,5] (XP 1, repair 2); 摧毀山地遠程砲 [destroy 山地遠程砲@14,8] (XP 1, enemy supp +1 R2) | no major static risks |
+| north_04_bizerte_1943 | 比塞大港口 1943 | desert 52%, road 25%, sea 11%; def>=2 12%; move>=3 18% | allies: eng 1, art 1, rocket 0, mg 1; axis: eng 0, art 1, rocket 0, mg 1 | allies->13,4 min 11 avg 12.4 | 奪取前進燃料站 [capture 9,4] (XP 1, reinforce -2t); 摧毀港口遠程砲 [destroy 港口遠程砲@14,8] (XP 1, enemy supp +1 R2) | no major static risks |
 | pacific_01_guadalcanal_1942 | 瓜達康納爾叢林戰 1942 | plain 67%, jungle 14%, sea 11%; def>=2 18%; move>=3 11% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 1 | n/a | 奪取補給村 [capture 8,4] (XP 1, supp -2); 摧毀叢林機槍 [destroy 叢林機槍火點@12,6] (XP 1, enemy supp +1 R2) | no major static risks |
 | pacific_02_tarawa_1943 | 塔拉瓦灘頭 1943 | plain 64%, jungle 12%, sea 11%; def>=2 18%; move>=3 11% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.2 | 奪取棧橋補給 [capture 7,6] (XP 1, supp -2); 摧毀海堤機槍 [destroy 海堤機槍火點@10,4] (XP 1, enemy supp +1 R2) | no major static risks |
 | pacific_03_peleliu_1944 | 貝里琉機場 1944 | plain 61%, jungle 13%, road 9%; def>=2 21%; move>=3 12% | allies: eng 1, art 0, rocket 1, mg 1; axis: eng 0, art 1, rocket 0, mg 2 | allies->11,4 min 9 avg 10.0 | 摧毀洞窟機槍 [destroy 洞窟機槍火點@10,4] (XP 1, enemy supp +1 R2); 偵察北側山脊 [recon 12,2] (XP 1, enemy dig -1 R2) | no major static risks |
@@ -256,6 +257,13 @@ Static diagnostics from scenario JSON. This report does not simulate turns; it h
 | --- | --- | --- | --- | --- | --- |
 | allies | 盟軍突尼斯遠征隊 | player | 8 | 273.1 | anti_armor:2, armor:1, artillery:1, engineer:1, infantry:2, scout_armor:1 |
 | axis | 軸心山口守軍 | ai | 7 | 236.9 | anti_armor:2, armor:1, artillery:1, infantry:2, support:1 |
+
+## north_04_bizerte_1943
+
+| faction | name | controller | units | power | roles |
+| --- | --- | --- | --- | --- | --- |
+| allies | 盟軍海岸追擊群 | player | 10 | 348.4 | anti_armor:1, armor:2, artillery:1, engineer:1, infantry:3, scout_armor:1, support:1 |
+| axis | 軸心港口後衛 | ai | 8 | 262.6 | anti_armor:2, armor:1, artillery:1, infantry:3, support:1 |
 
 ## pacific_01_guadalcanal_1942
 

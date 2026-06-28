@@ -359,6 +359,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | north_01_el_alamein_1942 | 3 | 0 | 2 | 1 | 4 | 2 | 0 | 0 | 2 | 0 | 0 |
 | north_02_kasserine_1943 | 5 | 1 | 2 | 2 | 4 | 2 | 0 | 0 | 2 | 0 | 0 |
 | north_03_tunis_1943 | 4 | 1 | 2 | 1 | 2 | 2 | 0 | 1 | 2 | 0 | 0 |
+| north_04_bizerte_1943 | 6 | 2 | 1 | 1 | 3 | 2 | 0 | 1 | 2 | 0 | 0 |
 | pacific_01_guadalcanal_1942 | 5 | 2 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
 | pacific_02_tarawa_1943 | 5 | 3 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
 | pacific_03_peleliu_1944 | 5 | 3 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 1 |
@@ -377,7 +378,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_09_hurtgen_1944 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_10_remagen_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
 | west_11_colmar_1945 | 4 | 1 | 2 | 0 | 3 | 2 | 0 | 0 | 2 | 0 | 0 |
-| TOTAL | 192 | 60 | 76 | 30 | 111 | 75 | 8 | 14 | 35 | 9 | 13 |
+| TOTAL | 198 | 62 | 77 | 31 | 114 | 77 | 8 | 15 | 37 | 9 | 13 |
 
 | scenario | tiles | dominant terrain |
 | --- | --- | --- |
@@ -410,6 +411,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | north_01_el_alamein_1942 | 160 | desert 76%, road 14%, mountain 7% |
 | north_02_kasserine_1943 | 160 | desert 67%, road 21%, mountain 10% |
 | north_03_tunis_1943 | 160 | desert 71%, road 18%, mountain 8% |
+| north_04_bizerte_1943 | 160 | desert 52%, road 25%, sea 11% |
 | pacific_01_guadalcanal_1942 | 160 | plain 67%, jungle 14%, sea 11% |
 | pacific_02_tarawa_1943 | 160 | plain 64%, jungle 12%, sea 11% |
 | pacific_03_peleliu_1944 | 160 | plain 61%, jungle 13%, road 9% |

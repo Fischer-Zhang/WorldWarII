@@ -37,12 +37,13 @@
   },
   "north_africa": {
     "title": "北非沙漠戰 1942-1943",
-    "description": "從加查拉側翼機動、阿拉曼突破到凱塞林山口防禦,再推進至突尼斯山口,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",
+    "description": "從加查拉側翼機動、阿拉曼突破到凱塞林山口防禦,再推進至突尼斯山口與比塞大港口,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",
     "scenario_order": [
       "north_00_gazala_1942",
       "north_01_el_alamein_1942",
       "north_02_kasserine_1943",
-      "north_03_tunis_1943"
+      "north_03_tunis_1943",
+      "north_04_bizerte_1943"
     ]
   },
   "pacific_front": {
