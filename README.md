@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-375%2F375-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-382%2F382-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ![Sedan 1940 — a Panzer IV selected, showing its movement range, full stat/general breakdown and capture objectives](docs/screenshots/03_sedan_battle.png)
 
@@ -21,7 +21,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 49 scenario JSON files: 43 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 6 campaigns, including tutorial campaign 0, and a 32-region conquest map with zoomable world view, supply, port, rail logistics, theater objectives and region development |
-| Tests | 375 headless GDScript checks plus static data/report validators |
+| Tests | 382 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
