@@ -86,7 +86,8 @@ Key settings in `project.godot`:
 | Window | `1280x720`, `canvas_items` stretch, `expand` aspect |
 | UI layout contract | Desktop-first at `1280x720` and `1366x768`; smaller windows are not currently guaranteed |
 | Renderer | `gl_compatibility` for desktop and mobile |
-| Autoloads | `DataLoader`, `GameState`, `AudioBank`, `ScreenshotHelper` |
+| Autoloads | `AppTheme`, `DataLoader`, `GameState`, `AudioBank`, `ScreenshotHelper` |
+| Fonts | Bundles Noto Sans CJK TC (`assets/fonts/`, SIL OFL 1.1) as the default theme font and `ThemeDB.fallback_font`, so Chinese text renders on every machine — including the Web build — without depending on host system fonts |
 | Camera input | WASD actions mapped as `ui_camera_pan_*` |
 | CI engine | GitHub Actions downloads Godot `4.2.2-stable` |
 
