@@ -191,9 +191,10 @@ Conquest is a strategic wrapper around the same tactical battle loop.
 
 Files:
 
-- `data/conquest_map.json`: countries, regions, owners, production, graph.
+- `data/conquest_map.json`: countries, regions, owners, production, graph, supply sources, ports and rail links.
 - `ConquestCatalog`: region -> scenario mapping and country -> side mapping.
 - `ConquestManager`: ownership, transfer, end-turn and battle-result resolution.
+- `ConquestSupply`: deterministic supply connectivity and reinforcement scaling.
 - `ConquestBattleSetup`: reuses a themed scenario's terrain while replacing factions, rosters and victory rules.
 
 Player-fought tactical flow:
@@ -207,7 +208,7 @@ Player-fought tactical flow:
 7. Result panel returns to conquest.
 8. `ConquestManager.resolve_battle_result` or `resolve_defense_result` updates region owner, strength and surviving garrisons.
 
-AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
+Strategic end-turn first computes supply from owned `supply_source` regions. Rail links and owned port-to-port links extend supply at lower cost than road-only neighbors; cut-off regions reinforce more slowly. AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
 
 ## Validation
 

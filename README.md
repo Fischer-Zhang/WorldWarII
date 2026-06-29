@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-354%2F354-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-358%2F358-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ## What It Is
 
@@ -16,10 +16,10 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|
 | Engine | Godot 4 project, validated locally and in CI with Godot 4.2.2 stable |
 | Language | GDScript for runtime/tests, Python 3 for validators/reports, Bash for validation entrypoints |
-| Content | 47 scenario JSON files: 41 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
+| Content | 49 scenario JSON files: 43 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
-| Strategic layer | 6 campaigns, including tutorial campaign 0, and a 19-region conquest map |
-| Tests | 343 headless GDScript checks plus static data/report validators |
+| Strategic layer | 6 campaigns, including tutorial campaign 0, and a 32-region conquest map with supply, port and rail logistics |
+| Tests | 358 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -206,7 +206,7 @@ tools/validate.sh
 - Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe and Godot AI trace report.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 343 headless GDScript checks through `bash tests/run_all.sh`.
+- 358 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts and conquest source/target selection.
 
@@ -242,7 +242,7 @@ Combat modifiers come from veteran rank, generals, general upgrades, tech upgrad
 
 Secondary objectives can grant one-time rewards such as XP, recovery, repair, faster reinforcements or local suppression of nearby enemies. AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. It also evaluates light-tank fire-support marks and engineer breach-support marks when a same-faction follow-up attacker can use the bonus. Wounded and veteran units feel a scale-based preservation pull toward safety when no profitable kill is on offer, so the AI stops trading away its leveled units; a clean kill still overrides it. Difficulty is shaped on four axes — trade aggression, retaliation foresight, unit preservation and a deterministic Easy positioning-error budget — so the tiers play distinctly: Hard runs an anti gang-up lookahead that sums concentrated player retaliation (not just the single worst attacker) and preserves veterans aggressively, while Easy never retreats and occasionally misplaces a unit. `tools/ai_trace_report.gd` regenerates `docs/progress/ai_trace_report.md` from the live `AIController.plan_trace_for_unit()` diagnostics, including primary/secondary objective score splits, support-mark scores and the preservation pull.
 
-Conquest region data is stored in `data/conquest_map.json`. Player attacks choose an existing tactical scenario through `ConquestCatalog`; `ConquestBattleSetup` reuses that battlefield's terrain while replacing factions, rosters and victory rules, then `ConquestManager` applies the fought result back to ownership, strength and surviving garrisons.
+Conquest region data is stored in `data/conquest_map.json`. Player attacks choose an existing tactical scenario through `ConquestCatalog`; `ConquestBattleSetup` reuses that battlefield's terrain while replacing factions, rosters and victory rules, then `ConquestManager` applies the fought result back to ownership, strength and surviving garrisons. The world layer also tracks supply sources, ports and rail links; supplied regions reinforce faster than cut-off regions during strategic end-turn resolution.
 
 ## Project Layout
 
