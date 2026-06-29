@@ -17,15 +17,15 @@
     },
     "usa": {
       "name_zh": "美國",
-      "color": "#3b65c7"
+      "color": "#7b4bb3"
     },
     "japan": {
       "name_zh": "日本",
-      "color": "#b44f5a"
+      "color": "#c12a6c"
     },
     "china": {
       "name_zh": "中國",
-      "color": "#c0a23a"
+      "color": "#d6b13f"
     },
     "neutral": {
       "name_zh": "中立勢力",

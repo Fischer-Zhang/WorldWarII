@@ -25,6 +25,11 @@ func _run() -> void:
 	else:
 		fail_count += 1
 
+	if _test_country_color_contrast(data_loader):
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	print("Conquest UI data tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
 
@@ -73,3 +78,37 @@ func _test_country_side_mapping(data_loader: Node) -> bool:
 			printerr("FAIL: conquest country %s has invalid side %s" % [cid, side])
 			ok = false
 	return ok
+
+func _test_country_color_contrast(data_loader: Node) -> bool:
+	var ok := true
+	var conquest_map: Dictionary = data_loader.get("conquest_map")
+	var countries: Dictionary = conquest_map.get("countries", {})
+	var ids := countries.keys()
+	ids.sort()
+	for i in range(ids.size()):
+		var a_id := String(ids[i])
+		if a_id == "neutral":
+			continue
+		var a: Dictionary = countries.get(a_id, {})
+		for j in range(i + 1, ids.size()):
+			var b_id := String(ids[j])
+			if b_id == "neutral":
+				continue
+			var b: Dictionary = countries.get(b_id, {})
+			var distance := _rgb_distance(Color(String(a.get("color", "#000000"))), Color(String(b.get("color", "#000000"))))
+			if distance < 0.28:
+				printerr("FAIL: conquest country colors too close: %s %s vs %s %s distance %.3f" % [
+					a_id,
+					String(a.get("color", "")),
+					b_id,
+					String(b.get("color", "")),
+					distance,
+				])
+				ok = false
+	return ok
+
+func _rgb_distance(a: Color, b: Color) -> float:
+	var dr := a.r - b.r
+	var dg := a.g - b.g
+	var db := a.b - b.b
+	return sqrt(dr * dr + dg * dg + db * db)
