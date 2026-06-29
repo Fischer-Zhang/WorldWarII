@@ -96,9 +96,9 @@ func _rebuild() -> void:
 			else:
 				var owner := String(region.get("owner", ""))
 				var owner_def: Dictionary = countries.get(owner, {})
-				btn.text = "%s\n%s\n兵:%d 產:%d" % [
-					String(region.get("short_name_zh", region.get("name_zh", ""))),
-					String(owner_def.get("name_zh", owner)),
+				var short_name := String(region.get("short_name_zh", region.get("name_zh", "")))
+				btn.text = "%s\n兵:%d 產:%d" % [
+					short_name,
 					int(region.get("strength", 0)),
 					int(region.get("production", 0)),
 				]
@@ -106,6 +106,12 @@ func _rebuild() -> void:
 				if gsize > 0:
 					btn.text += "\n守:%d" % gsize
 				btn.modulate = Color(String(owner_def.get("color", "#777777")))
+				btn.tooltip_text = "%s · %s · 兵力 %d · 產能 %d" % [
+					String(region.get("name_zh", short_name)),
+					String(owner_def.get("name_zh", owner)),
+					int(region.get("strength", 0)),
+					int(region.get("production", 0)),
+				]
 				var rid := String(region.get("id", ""))
 				if rid == selected_region_id:
 					btn.text = "▶ " + btn.text

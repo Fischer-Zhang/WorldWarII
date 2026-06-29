@@ -1,6 +1,6 @@
 {
   "start_country": "germany",
-  "map_width": 9,
+  "map_width": 11,
   "map_height": 5,
   "countries": {
     "germany": {
@@ -51,7 +51,7 @@
       "x": 1,
       "y": 1,
       "production": 2,
-      "neighbors": ["north_america", "britain", "west_europe", "north_africa"]
+      "neighbors": ["north_america", "britain", "northern_france", "southern_france", "maghreb"]
     },
     {
       "id": "britain",
@@ -61,17 +61,37 @@
       "x": 2,
       "y": 0,
       "production": 4,
-      "neighbors": ["atlantic", "west_europe", "north_sea"]
+      "neighbors": ["atlantic", "low_countries", "northern_france", "north_sea"]
     },
     {
-      "id": "west_europe",
-      "name_zh": "西歐",
-      "short_name_zh": "西歐",
+      "id": "low_countries",
+      "name_zh": "低地國",
+      "short_name_zh": "低地",
+      "owner": "germany",
+      "x": 3,
+      "y": 0,
+      "production": 3,
+      "neighbors": ["britain", "northern_france", "germany", "north_sea"]
+    },
+    {
+      "id": "northern_france",
+      "name_zh": "法國北部",
+      "short_name_zh": "北法",
       "owner": "germany",
       "x": 2,
       "y": 1,
-      "production": 5,
-      "neighbors": ["atlantic", "britain", "germany", "north_africa"]
+      "production": 3,
+      "neighbors": ["atlantic", "britain", "low_countries", "southern_france", "germany"]
+    },
+    {
+      "id": "southern_france",
+      "name_zh": "法國南部",
+      "short_name_zh": "南法",
+      "owner": "germany",
+      "x": 2,
+      "y": 2,
+      "production": 2,
+      "neighbors": ["atlantic", "northern_france", "germany", "italy", "maghreb"]
     },
     {
       "id": "germany",
@@ -81,27 +101,67 @@
       "x": 3,
       "y": 1,
       "production": 6,
-      "neighbors": ["west_europe", "north_sea", "east_europe", "mediterranean"]
+      "neighbors": ["low_countries", "northern_france", "southern_france", "north_sea", "poland", "ukraine", "italy"]
     },
     {
       "id": "north_sea",
       "name_zh": "北海",
       "short_name_zh": "北海",
       "owner": "germany",
-      "x": 3,
+      "x": 4,
       "y": 0,
       "production": 2,
-      "neighbors": ["britain", "germany", "east_europe"]
+      "neighbors": ["britain", "low_countries", "germany", "poland", "leningrad"]
     },
     {
-      "id": "east_europe",
-      "name_zh": "東歐",
-      "short_name_zh": "東歐",
-      "owner": "soviet",
+      "id": "poland",
+      "name_zh": "波蘭",
+      "short_name_zh": "波蘭",
+      "owner": "germany",
       "x": 4,
       "y": 1,
-      "production": 5,
-      "neighbors": ["north_sea", "germany", "moscow", "middle_east"]
+      "production": 3,
+      "neighbors": ["north_sea", "germany", "leningrad", "moscow", "ukraine"]
+    },
+    {
+      "id": "ukraine",
+      "name_zh": "烏克蘭",
+      "short_name_zh": "烏克蘭",
+      "owner": "soviet",
+      "x": 4,
+      "y": 2,
+      "production": 4,
+      "neighbors": ["germany", "poland", "moscow", "volga", "balkans", "middle_east"]
+    },
+    {
+      "id": "italy",
+      "name_zh": "義大利",
+      "short_name_zh": "義大利",
+      "owner": "germany",
+      "x": 3,
+      "y": 2,
+      "production": 3,
+      "neighbors": ["southern_france", "germany", "balkans", "mediterranean", "maghreb"]
+    },
+    {
+      "id": "balkans",
+      "name_zh": "巴爾幹",
+      "short_name_zh": "巴爾幹",
+      "owner": "germany",
+      "x": 4,
+      "y": 3,
+      "production": 2,
+      "neighbors": ["italy", "ukraine", "mediterranean", "middle_east"]
+    },
+    {
+      "id": "leningrad",
+      "name_zh": "列寧格勒",
+      "short_name_zh": "列寧",
+      "owner": "soviet",
+      "x": 5,
+      "y": 0,
+      "production": 3,
+      "neighbors": ["north_sea", "poland", "moscow", "siberia"]
     },
     {
       "id": "moscow",
@@ -111,7 +171,17 @@
       "x": 5,
       "y": 1,
       "production": 6,
-      "neighbors": ["east_europe", "siberia", "central_asia", "middle_east"]
+      "neighbors": ["poland", "ukraine", "leningrad", "volga", "siberia", "central_asia"]
+    },
+    {
+      "id": "volga",
+      "name_zh": "伏爾加",
+      "short_name_zh": "伏爾加",
+      "owner": "soviet",
+      "x": 5,
+      "y": 2,
+      "production": 4,
+      "neighbors": ["ukraine", "moscow", "central_asia", "middle_east"]
     },
     {
       "id": "siberia",
@@ -119,19 +189,29 @@
       "short_name_zh": "西伯利亞",
       "owner": "soviet",
       "x": 6,
-      "y": 1,
+      "y": 0,
       "production": 3,
-      "neighbors": ["moscow", "manchuria"]
+      "neighbors": ["leningrad", "moscow", "central_asia", "manchuria"]
     },
     {
-      "id": "north_africa",
-      "name_zh": "北非",
-      "short_name_zh": "北非",
-      "owner": "britain",
-      "x": 2,
+      "id": "central_asia",
+      "name_zh": "中亞",
+      "short_name_zh": "中亞",
+      "owner": "soviet",
+      "x": 6,
       "y": 2,
       "production": 3,
-      "neighbors": ["atlantic", "west_europe", "mediterranean", "middle_east"]
+      "neighbors": ["moscow", "volga", "siberia", "middle_east", "india", "north_china"]
+    },
+    {
+      "id": "maghreb",
+      "name_zh": "馬格里布",
+      "short_name_zh": "馬格里布",
+      "owner": "britain",
+      "x": 2,
+      "y": 3,
+      "production": 2,
+      "neighbors": ["atlantic", "southern_france", "italy", "mediterranean", "egypt"]
     },
     {
       "id": "mediterranean",
@@ -139,89 +219,139 @@
       "short_name_zh": "地中海",
       "owner": "germany",
       "x": 3,
-      "y": 2,
+      "y": 3,
       "production": 2,
-      "neighbors": ["germany", "north_africa", "middle_east"]
+      "neighbors": ["italy", "balkans", "maghreb", "egypt", "middle_east"]
+    },
+    {
+      "id": "egypt",
+      "name_zh": "埃及",
+      "short_name_zh": "埃及",
+      "owner": "britain",
+      "x": 3,
+      "y": 4,
+      "production": 3,
+      "neighbors": ["maghreb", "mediterranean", "middle_east", "india"]
     },
     {
       "id": "middle_east",
       "name_zh": "中東",
       "short_name_zh": "中東",
       "owner": "neutral",
-      "x": 4,
-      "y": 2,
-      "production": 4,
-      "neighbors": ["east_europe", "moscow", "north_africa", "mediterranean", "india"]
-    },
-    {
-      "id": "central_asia",
-      "name_zh": "中亞",
-      "short_name_zh": "中亞",
-      "owner": "soviet",
       "x": 5,
-      "y": 2,
-      "production": 3,
-      "neighbors": ["moscow", "india", "china"]
+      "y": 3,
+      "production": 4,
+      "neighbors": ["ukraine", "balkans", "volga", "central_asia", "mediterranean", "egypt", "india"]
     },
     {
       "id": "india",
       "name_zh": "印度",
       "short_name_zh": "印度",
       "owner": "britain",
-      "x": 5,
-      "y": 3,
-      "production": 4,
-      "neighbors": ["middle_east", "central_asia", "china", "southeast_asia"]
-    },
-    {
-      "id": "china",
-      "name_zh": "中國",
-      "short_name_zh": "中國",
-      "owner": "china",
       "x": 6,
       "y": 3,
-      "production": 5,
-      "neighbors": ["central_asia", "india", "manchuria", "southeast_asia"]
+      "production": 4,
+      "neighbors": ["central_asia", "middle_east", "egypt", "north_china", "south_china", "southeast_asia"]
+    },
+    {
+      "id": "north_china",
+      "name_zh": "華北",
+      "short_name_zh": "華北",
+      "owner": "china",
+      "x": 7,
+      "y": 2,
+      "production": 3,
+      "neighbors": ["central_asia", "india", "central_china", "manchuria"]
+    },
+    {
+      "id": "central_china",
+      "name_zh": "華中",
+      "short_name_zh": "華中",
+      "owner": "china",
+      "x": 7,
+      "y": 3,
+      "production": 3,
+      "neighbors": ["north_china", "south_china", "manchuria"]
+    },
+    {
+      "id": "south_china",
+      "name_zh": "華南",
+      "short_name_zh": "華南",
+      "owner": "china",
+      "x": 7,
+      "y": 4,
+      "production": 2,
+      "neighbors": ["india", "central_china", "southeast_asia"]
     },
     {
       "id": "manchuria",
       "name_zh": "滿洲",
       "short_name_zh": "滿洲",
       "owner": "japan",
-      "x": 7,
+      "x": 8,
       "y": 2,
       "production": 4,
-      "neighbors": ["siberia", "china", "japan_home"]
+      "neighbors": ["siberia", "north_china", "central_china", "japan_home"]
     },
     {
       "id": "japan_home",
       "name_zh": "日本本土",
       "short_name_zh": "日本",
       "owner": "japan",
-      "x": 8,
+      "x": 9,
       "y": 2,
       "production": 5,
-      "neighbors": ["manchuria", "southeast_asia", "pacific"]
+      "neighbors": ["manchuria", "southeast_asia", "central_pacific", "north_pacific"]
     },
     {
       "id": "southeast_asia",
       "name_zh": "東南亞",
       "short_name_zh": "東南亞",
       "owner": "japan",
-      "x": 7,
+      "x": 8,
       "y": 4,
       "production": 4,
-      "neighbors": ["india", "china", "japan_home", "pacific"]
+      "neighbors": ["india", "south_china", "japan_home", "central_pacific", "south_pacific"]
+    },
+    {
+      "id": "north_pacific",
+      "name_zh": "北太平洋",
+      "short_name_zh": "北太平",
+      "owner": "usa",
+      "x": 10,
+      "y": 1,
+      "production": 2,
+      "neighbors": ["japan_home", "central_pacific", "pacific"]
+    },
+    {
+      "id": "central_pacific",
+      "name_zh": "中太平洋",
+      "short_name_zh": "中太平",
+      "owner": "usa",
+      "x": 10,
+      "y": 3,
+      "production": 2,
+      "neighbors": ["japan_home", "southeast_asia", "north_pacific", "south_pacific", "pacific"]
+    },
+    {
+      "id": "south_pacific",
+      "name_zh": "南太平洋",
+      "short_name_zh": "南太平",
+      "owner": "usa",
+      "x": 9,
+      "y": 4,
+      "production": 2,
+      "neighbors": ["southeast_asia", "central_pacific"]
     },
     {
       "id": "pacific",
-      "name_zh": "太平洋",
+      "name_zh": "太平洋航線",
       "short_name_zh": "太平洋",
       "owner": "usa",
-      "x": 8,
-      "y": 4,
+      "x": 10,
+      "y": 2,
       "production": 2,
-      "neighbors": ["north_america", "japan_home", "southeast_asia"]
+      "neighbors": ["north_america", "north_pacific", "central_pacific"]
     }
   ]
 }
