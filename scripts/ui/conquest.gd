@@ -9,7 +9,12 @@ const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 @onready var title_label: Label = $Margin/VBox/Header/Title
 @onready var country_option: OptionButton = $Margin/VBox/Header/CountryOption
 @onready var turn_label: Label = $Margin/VBox/Header/TurnLabel
-@onready var map_grid: GridContainer = $Margin/VBox/Body/MapPanel/MapGrid
+@onready var map_scroll: ScrollContainer = $Margin/VBox/Body/MapPanel/MapScroll
+@onready var map_center: CenterContainer = $Margin/VBox/Body/MapPanel/MapScroll/MapCenter
+@onready var map_grid: GridContainer = $Margin/VBox/Body/MapPanel/MapScroll/MapCenter/MapGrid
+@onready var zoom_out_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomOutButton
+@onready var zoom_reset_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton
+@onready var zoom_in_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton
 @onready var detail_label: RichTextLabel = $Margin/VBox/Body/DetailPanel/Detail
 @onready var recruit_list: VBoxContainer = $Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList
 @onready var attack_button: Button = $Margin/VBox/Actions/AttackButton
@@ -26,12 +31,21 @@ var _recruit_expanded := false
 var _refreshing_country := false
 var _map_button_size := Vector2(116, 74)
 var _map_columns := 9
+var _map_rows := 5
+var _map_zoom := 1.0
+const MAP_ZOOM_MIN := 0.75
+const MAP_ZOOM_MAX := 1.65
+const MAP_ZOOM_STEP := 0.15
 
 func _ready() -> void:
 	state = CampaignManager.load_state()
 	ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	var return_message := _apply_pending_battle_result()
 	_build_country_options()
+	zoom_out_button.pressed.connect(_on_zoom_out_pressed)
+	zoom_reset_button.pressed.connect(_on_zoom_reset_pressed)
+	zoom_in_button.pressed.connect(_on_zoom_in_pressed)
+	map_scroll.gui_input.connect(_on_map_scroll_gui_input)
 	attack_button.pressed.connect(_on_attack_pressed)
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -83,15 +97,16 @@ func _rebuild() -> void:
 	var regions: Dictionary = conquest.get("regions", {})
 	var supply_status := ConquestSupply.status_by_region(regions)
 	_map_columns = _map_width(DataLoader.conquest_map, regions)
-	var map_rows := _map_height(DataLoader.conquest_map, regions)
+	_map_rows = _map_height(DataLoader.conquest_map, regions)
 	map_grid.columns = _map_columns
 	_update_map_button_size()
-	for y in range(map_rows):
+	for y in range(_map_rows):
 		for x in range(_map_columns):
 			var region := _region_at(regions, x, y)
 			var btn := Button.new()
 			btn.custom_minimum_size = _map_button_size
-			btn.add_theme_font_size_override("font_size", 12 if _map_button_size.x < 100.0 else 14)
+			var map_font_size := 10 if _map_button_size.x < 64.0 else (12 if _map_button_size.x < 100.0 else 14)
+			btn.add_theme_font_size_override("font_size", map_font_size)
 			if region.is_empty():
 				btn.text = ""
 				btn.disabled = true
@@ -123,6 +138,8 @@ func _rebuild() -> void:
 				btn.disabled = false
 				btn.pressed.connect(func(): _select_region(rid))
 			map_grid.add_child(btn)
+	_update_zoom_controls()
+	_center_map_deferred()
 	_update_detail()
 
 func _update_map_button_size() -> void:
@@ -132,7 +149,54 @@ func _update_map_button_size() -> void:
 	var grid_gap: float = 8.0
 	var available_width: float = body_width - detail_width - body_sep - grid_gap * float(max(0, _map_columns - 1))
 	var cell_width: float = clamp(floor(available_width / float(max(1, _map_columns))), 58.0, 116.0)
-	_map_button_size = Vector2(cell_width, clamp(floor(cell_width * 0.64), 48.0, 74.0))
+	var zoomed_width: float = floor(cell_width * _map_zoom)
+	_map_button_size = Vector2(zoomed_width, clamp(floor(zoomed_width * 0.64), 44.0, 122.0))
+	var grid_width: float = _map_button_size.x * float(_map_columns) + grid_gap * float(max(0, _map_columns - 1))
+	var grid_height: float = _map_button_size.y * float(_map_rows) + grid_gap * float(max(0, _map_rows - 1))
+	map_center.custom_minimum_size = Vector2(grid_width, grid_height)
+
+func _set_map_zoom(value: float) -> void:
+	var old_zoom := _map_zoom
+	_map_zoom = clampf(snappedf(value, 0.01), MAP_ZOOM_MIN, MAP_ZOOM_MAX)
+	if absf(_map_zoom - old_zoom) < 0.001:
+		return
+	_rebuild()
+
+func _on_zoom_out_pressed() -> void:
+	_set_map_zoom(_map_zoom - MAP_ZOOM_STEP)
+
+func _on_zoom_reset_pressed() -> void:
+	_set_map_zoom(1.0)
+
+func _on_zoom_in_pressed() -> void:
+	_set_map_zoom(_map_zoom + MAP_ZOOM_STEP)
+
+func _on_map_scroll_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and bool(event.pressed):
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_set_map_zoom(_map_zoom + MAP_ZOOM_STEP)
+			map_scroll.accept_event()
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_set_map_zoom(_map_zoom - MAP_ZOOM_STEP)
+			map_scroll.accept_event()
+
+func _update_zoom_controls() -> void:
+	var pct := int(round(_map_zoom * 100.0))
+	zoom_reset_button.text = "%d%%" % pct
+	zoom_out_button.disabled = _map_zoom <= MAP_ZOOM_MIN + 0.001
+	zoom_in_button.disabled = _map_zoom >= MAP_ZOOM_MAX - 0.001
+	zoom_out_button.tooltip_text = "縮小世界地圖。"
+	zoom_reset_button.tooltip_text = "重設世界地圖縮放。"
+	zoom_in_button.tooltip_text = "放大世界地圖。"
+
+func _center_map_deferred() -> void:
+	call_deferred("_center_map_scroll")
+
+func _center_map_scroll() -> void:
+	await get_tree().process_frame
+	map_scroll.scroll_horizontal = int(max(0.0, (map_center.size.x - map_scroll.size.x) * 0.5))
+	map_scroll.scroll_vertical = int(max(0.0, (map_center.size.y - map_scroll.size.y) * 0.5))
 
 func _clear_map() -> void:
 	for child in map_grid.get_children():

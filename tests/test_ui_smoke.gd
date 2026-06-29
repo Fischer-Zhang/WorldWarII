@@ -93,7 +93,14 @@ const SCENE_CASES := [
 		"scenario_id": "",
 		"campaign_mode": false,
 		"conquest_mode": true,
-		"required": ["Margin/VBox/Body/MapPanel/MapGrid", "Margin/VBox/Actions/AttackButton", "Margin/VBox/Actions/EndTurnButton"],
+		"required": [
+			"Margin/VBox/Body/MapPanel/MapToolbar/ZoomOutButton",
+			"Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton",
+			"Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton",
+			"Margin/VBox/Body/MapPanel/MapScroll/MapCenter/MapGrid",
+			"Margin/VBox/Actions/AttackButton",
+			"Margin/VBox/Actions/EndTurnButton",
+		],
 	},
 ]
 

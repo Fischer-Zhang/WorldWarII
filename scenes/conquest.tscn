@@ -50,8 +50,40 @@ theme_override_constants/separation = 18
 
 [node name="MapPanel" type="VBoxContainer" parent="Margin/VBox/Body"]
 size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
-[node name="MapGrid" type="GridContainer" parent="Margin/VBox/Body/MapPanel"]
+[node name="MapToolbar" type="HBoxContainer" parent="Margin/VBox/Body/MapPanel"]
+theme_override_constants/separation = 8
+
+[node name="MapTitle" type="Label" parent="Margin/VBox/Body/MapPanel/MapToolbar"]
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "世界戰場"
+vertical_alignment = 1
+
+[node name="ZoomOutButton" type="Button" parent="Margin/VBox/Body/MapPanel/MapToolbar"]
+custom_minimum_size = Vector2(40, 32)
+text = "-"
+
+[node name="ZoomResetButton" type="Button" parent="Margin/VBox/Body/MapPanel/MapToolbar"]
+custom_minimum_size = Vector2(64, 32)
+text = "100%"
+
+[node name="ZoomInButton" type="Button" parent="Margin/VBox/Body/MapPanel/MapToolbar"]
+custom_minimum_size = Vector2(40, 32)
+text = "+"
+
+[node name="MapScroll" type="ScrollContainer" parent="Margin/VBox/Body/MapPanel"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 1
+
+[node name="MapCenter" type="CenterContainer" parent="Margin/VBox/Body/MapPanel/MapScroll"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapGrid" type="GridContainer" parent="Margin/VBox/Body/MapPanel/MapScroll/MapCenter"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/h_separation = 8

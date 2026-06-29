@@ -562,5 +562,21 @@ func _check_conquest() -> void:
 	_expect("conquest order-independent selection", scene.selected_region_id == own_id and scene.target_region_id == enemy_id)
 	_expect("conquest tactical preview", detail.contains("戰術作戰") or detail.contains("出擊地沒有駐軍"))
 	_expect("conquest attack tooltip", String(scene.get_node("Margin/VBox/Actions/AttackButton").tooltip_text) != "")
+	var zoom_in: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton")
+	var zoom_reset: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton")
+	var before_size: Vector2 = scene._map_button_size
+	zoom_in.pressed.emit()
+	await process_frame
+	await process_frame
+	_expect("conquest map zoom in grows cells", scene._map_button_size.x > before_size.x)
+	zoom_reset.pressed.emit()
+	await process_frame
+	await process_frame
+	_expect("conquest map zoom reset label", String(zoom_reset.text) == "100%")
+	var map_scroll: ScrollContainer = scene.get_node("Margin/VBox/Body/MapPanel/MapScroll")
+	var map_center: CenterContainer = scene.get_node("Margin/VBox/Body/MapPanel/MapScroll/MapCenter")
+	var can_scroll_x: bool = map_center.size.x > map_scroll.size.x
+	var centered_x: bool = not can_scroll_x or scene._map_zoom > 1.0 or map_scroll.scroll_horizontal > 0
+	_expect("conquest map has centered scroll area", centered_x)
 	await _free_scene(scene)
 	_restore_campaign_save(save_snapshot)
