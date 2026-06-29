@@ -3,6 +3,7 @@ extends RefCounted
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
+const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 const AI_MIN_ATTACK_STRENGTH := 3
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
@@ -191,9 +192,11 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var player_country := String(conquest.get("player_country", ""))
 	var countries: Dictionary = map_data.get("countries", {})
 	if not bool(conquest.get("ai_phase", false)):
+		var supply_status := ConquestSupply.status_by_region(regions)
 		for region_id in regions.keys():
 			var region: Dictionary = regions[region_id]
-			region["strength"] = int(region.get("strength", 0)) + maxi(1, int(region.get("production", 0)) / 2)
+			var supplied := bool(supply_status.get(String(region_id), true))
+			region["strength"] = int(region.get("strength", 0)) + ConquestSupply.reinforcement_for_region(region, supplied)
 			regions[region_id] = region
 		_ai_consolidate(regions, player_country)
 		conquest["ai_actions_left"] = _ai_action_budget(regions, player_country)
@@ -376,6 +379,9 @@ static func _region_from_map_def(region: Dictionary) -> Dictionary:
 		"x": int(region.get("x", 0)),
 		"y": int(region.get("y", 0)),
 		"production": int(region.get("production", 1)),
+		"supply_source": bool(region.get("supply_source", false)),
+		"port": bool(region.get("port", false)),
+		"rail_neighbors": region.get("rail_neighbors", []),
 		"strength": int(region.get("production", 1)) + 2,
 		"garrison": [],
 		"neighbors": region.get("neighbors", []),

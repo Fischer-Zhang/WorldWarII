@@ -4,6 +4,7 @@ const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
 const ConquestCatalog := preload("res://scripts/scenario/conquest_catalog.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
+const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 
 @onready var title_label: Label = $Margin/VBox/Header/Title
 @onready var country_option: OptionButton = $Margin/VBox/Header/CountryOption
@@ -80,6 +81,7 @@ func _rebuild() -> void:
 		ConquestManager.owned_region_count(state, DataLoader.conquest_map, player_country),
 	]
 	var regions: Dictionary = conquest.get("regions", {})
+	var supply_status := ConquestSupply.status_by_region(regions)
 	_map_columns = _map_width(DataLoader.conquest_map, regions)
 	var map_rows := _map_height(DataLoader.conquest_map, regions)
 	map_grid.columns = _map_columns
@@ -112,6 +114,7 @@ func _rebuild() -> void:
 					int(region.get("strength", 0)),
 					int(region.get("production", 0)),
 				]
+				btn.tooltip_text += " · %s" % ConquestSupply.status_text(bool(supply_status.get(String(region.get("id", "")), true)))
 				var rid := String(region.get("id", ""))
 				if rid == selected_region_id:
 					btn.text = "▶ " + btn.text
@@ -363,11 +366,22 @@ func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 		return "未選取"
 	var owner := String(region.get("owner", ""))
 	var neighbors: Array = region.get("neighbors", [])
-	return "%s · %s · 兵力 %d · 產能 %d\n相鄰: %s" % [
+	var regions: Dictionary = ConquestManager.conquest_state(state, DataLoader.conquest_map).get("regions", {})
+	var supplied := ConquestSupply.is_supplied(regions, String(region.get("id", "")))
+	var logistics: Array[String] = [ConquestSupply.status_text(supplied)]
+	if bool(region.get("supply_source", false)):
+		logistics.append("補給源")
+	if bool(region.get("port", false)):
+		logistics.append("港口")
+	var rail_neighbors: Array = region.get("rail_neighbors", [])
+	if not rail_neighbors.is_empty():
+		logistics.append("鐵路: %s" % ", ".join(rail_neighbors))
+	return "%s · %s · 兵力 %d · 產能 %d\n後勤: %s\n相鄰: %s" % [
 		String(region.get("name_zh", "")),
 		String(countries.get(owner, {}).get("name_zh", owner)),
 		int(region.get("strength", 0)),
 		int(region.get("production", 0)),
+		" · ".join(logistics),
 		", ".join(neighbors),
 	]
 

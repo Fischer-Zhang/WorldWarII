@@ -687,6 +687,7 @@ def validate_conquest(errors: list[str]) -> None:
     region_ids: set[str] = set()
     region_by_id: dict[str, Any] = {}
     coords: dict[tuple[int, int], str] = {}
+    supply_source_owners: set[str] = set()
     for region in regions if isinstance(regions, list) else []:
         if not isinstance(region, dict):
             fail(errors, path, "region entries must be objects")
@@ -709,6 +710,8 @@ def validate_conquest(errors: list[str]) -> None:
             fail(errors, path, f"region {region_id!r} short_name_zh should fit map buttons")
         if str(region.get("owner", "")) not in countries:
             fail(errors, path, f"region {region_id!r} owner is unknown")
+        elif bool(region.get("supply_source", False)) and str(region.get("owner", "")) != "neutral":
+            supply_source_owners.add(str(region.get("owner", "")))
         if int(region.get("production", 0)) <= 0:
             fail(errors, path, f"region {region_id!r} production must be positive")
         try:
@@ -725,6 +728,7 @@ def validate_conquest(errors: list[str]) -> None:
         if not isinstance(region, dict):
             continue
         region_id = str(region.get("id", ""))
+        neighbors = [str(n) for n in region.get("neighbors", [])]
         for neighbor in region.get("neighbors", []):
             neighbor_id = str(neighbor)
             if neighbor_id not in region_ids:
@@ -733,6 +737,24 @@ def validate_conquest(errors: list[str]) -> None:
             neighbor_region = region_by_id.get(neighbor_id, {})
             if isinstance(neighbor_region, dict) and region_id not in [str(n) for n in neighbor_region.get("neighbors", [])]:
                 fail(errors, path, f"region {region_id!r} neighbor {neighbor_id!r} must be reciprocal")
+        for rail_neighbor in region.get("rail_neighbors", []):
+            rail_id = str(rail_neighbor)
+            if rail_id not in region_ids:
+                fail(errors, path, f"region {region_id!r} references unknown rail neighbor {rail_id!r}")
+                continue
+            if rail_id not in neighbors:
+                fail(errors, path, f"region {region_id!r} rail neighbor {rail_id!r} must also be a neighbor")
+                continue
+            rail_region = region_by_id.get(rail_id, {})
+            if isinstance(rail_region, dict) and region_id not in [str(n) for n in rail_region.get("rail_neighbors", [])]:
+                fail(errors, path, f"region {region_id!r} rail neighbor {rail_id!r} must be reciprocal")
+    starting_owners = {
+        str(region.get("owner", ""))
+        for region in regions if isinstance(region, dict)
+        and str(region.get("owner", "")) not in {"", "neutral"}
+    }
+    for country_id in sorted(starting_owners - supply_source_owners):
+        fail(errors, path, f"country {country_id!r} needs at least one starting supply_source region")
 
 
 def main() -> int:
