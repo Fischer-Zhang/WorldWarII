@@ -1,7 +1,7 @@
 {
   "id": "west_08_falaise_1944",
   "title": "法萊茲包圍圈 1944",
-  "briefing": "1944 年 8 月。諾曼第德軍主力向東撤退,盟軍試圖在法萊茲至阿爾讓唐間合攏包圍圈。少數道路與村鎮成為德軍逃出生天的關鍵。\n\n你的任務:作為盟軍封鎖部隊,在 12 個回合內奪取並守住東側出口村鎮。德軍若拖到時限,大量部隊將逃出包圍圈。\n\n戰術提示:德軍裝甲仍危險,但隊形分散。用 AT 和 MG 卡住道路,讓 Sherman 從側翼切斷退路。",
+  "briefing": "1944 年 8 月。諾曼第德軍主力向東撤退,盟軍試圖在法萊茲至阿爾讓唐間合攏包圍圈。少數道路與村鎮成為德軍逃出生天的關鍵。\n\n你的任務:作為盟軍封鎖部隊,在 12 個回合內奪取並守住東側出口村鎮。德軍若拖到時限,大量部隊將逃出包圍圈。\n\n次要目標:先封鎖撤退道路,再摧毀護送撤退縱隊的 StuG,可削弱德軍脫逃火力。\n\n戰術提示:德軍裝甲仍危險,但隊形分散。用 AT 和 MG 卡住道路,讓 Sherman 從側翼切斷退路。",
   "map": {
     "width": 24,
     "height": 16,
@@ -63,6 +63,15 @@
       "faction": "allies",
       "target": [22, 11],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 1}]
+    },
+    {
+      "id": "destroy_stug_screen",
+      "label": "摧毀 StuG 掩護",
+      "type": "destroy_unit",
+      "faction": "allies",
+      "target_unit": "StuG III",
+      "requires": ["seal_escape_road"],
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     }
   ],
   "victory": {

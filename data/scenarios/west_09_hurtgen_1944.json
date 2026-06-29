@@ -1,7 +1,7 @@
 {
   "id": "west_09_hurtgen_1944",
   "title": "赫特根森林 1944",
-  "briefing": "1944 年秋冬。美軍在德國邊境的赫特根森林中陷入漫長消耗戰。密林、砲兵與機槍讓每一條林道都變成殺傷區。\n\n你的任務:作為美軍步兵指揮官,在 13 個回合內奪取森林道路交會點。德軍只要守住,盟軍推進將繼續被森林吞噬。\n\n戰術提示:森林阻擋視線又提高防禦。步兵慢慢推進,用砲兵壓制 MG;裝甲在森林中不是主角。",
+  "briefing": "1944 年秋冬。美軍在德國邊境的赫特根森林中陷入漫長消耗戰。密林、砲兵與機槍讓每一條林道都變成殺傷區。\n\n你的任務:作為美軍步兵指揮官,在 13 個回合內奪取森林道路交會點。德軍只要守住,盟軍推進將繼續被森林吞噬。\n\n次要目標:先摧毀 MG 42 火點降低林道壓制力,再控制森林林道整隊推進。\n\n戰術提示:森林阻擋視線又提高防禦。步兵慢慢推進,用砲兵壓制 MG;裝甲在森林中不是主角。",
   "map": {
     "width": 24,
     "height": 16,
@@ -57,12 +57,21 @@
   ],
   "secondary_objectives": [
     {
+      "id": "silence_forest_mg",
+      "label": "林道 MG 42",
+      "type": "destroy_unit",
+      "faction": "allies",
+      "target_unit": "MG 42",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
+    },
+    {
       "id": "secure_forest_track",
       "label": "控制森林林道",
       "type": "hold_turns",
       "faction": "allies",
       "target": [4, 4],
       "required_turns": 2,
+      "requires": ["silence_forest_mg"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "recover_suppression", "amount": 2}]
     }
   ],

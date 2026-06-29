@@ -9,7 +9,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 南翼掃蕩 3,13 recon min 18 XP 1, enemy dig -1 R2; 壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2 | none |
 | 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 標定突擊路線 13,10 recon min 7 XP 1, enemy dig -1 R2; 突擊工兵 13,10 destroy after stalingrad_spot_engineers min 7 XP 1, enemy supp +1 R2 | none |
 | 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 5,2 own min 17 enemy min 0 | 壓制 SU-152 4,0 destroy min 18 XP 1, repair 2; 北側高地偵察 18,2 recon min 4 XP 1, enemy dig -1 R2 | none |
-| 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0 | 鎮心補給 6,4 hold 2t min 0 XP 1, supp -2, reinforce -2t | allies +129.5; T7 3 units |
+| 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0 | 鎮心補給 6,4 hold 2t min 0 XP 1, supp -2, reinforce -2t; 南側遠程砲 22,11 destroy after bastogne_supply_hold min 16 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
 | 06_market_garden_1944 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 55/384 (14%); axis 50/384 (13%) | none | allies: eng min 2, art 5/6, targets 6 | allies: eng turns 2 | allies: art move 5/6 | allies target 5,11 own min 7 enemy min 9 | 南岸橋頭 5,12 hold 2t min 8 XP 1, reinforce -2t; 德軍遠程砲 18,2 destroy after nijmegen_south_bridgehead min 12 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
 | 07_bagration_1944 | axis artillery:1, mg_team:1; soviet artillery:1, mg_team:1 | axis 34/384 (9%); soviet 61/384 (16%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 2,4 own min 20 enemy min 1 | 奪取路口 3,4 capture min 19 XP 1, reinforce -2t; 壓制德軍砲位 1,2 destroy min 21 XP 1, enemy supp +1 R2 | soviet +77.6; T6 2 units |
 | blitz_00_poland_1939 | allies artillery:1, mg_team:1; axis artillery:1 | allies 27/384 (7%); axis 37/384 (10%) | axis 51/384 (13%), spots 0 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 1,1 own min 23 enemy min 0 | 摧毀 37mm 反戰車砲 3,3 destroy min 20 XP 1, repair 2; 偵察砲兵陣地 0,2 recon min 24 XP 1, enemy supp +1 R2 | none |
@@ -46,13 +46,13 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | tut_03_suppression_digin_engineer | allies artillery:1; axis mg_team:1 | allies 43/70 (61%) | none | allies: eng min 1, art 2/2, targets 2 | allies: eng turns 0 | allies: art move 2/2 | allies target 7,3 own min 3 enemy min 0 | none | none |
 | tut_04_armor_at_veteran_general | none | none | none | n/a | n/a | n/a | n/a | none | none |
 | tut_05_airdrop_reinforcement_rocket | axis mg_team:1 | allies 37/70 (53%) | none | allies: eng none, art 2/2, targets 2 | allies: eng turns none | allies: art move 2/2 | n/a | none | allies +77.6; T3 2 units |
-| west_08_falaise_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 21,4 own min 19 enemy min 0 | 封鎖撤退道路 22,11 recon min 19 XP 1, enemy supp +1 R1 | none |
+| west_08_falaise_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 21,4 own min 19 enemy min 0 | 封鎖撤退道路 22,11 recon min 19 XP 1, enemy supp +1 R1; 摧毀 StuG 掩護 22,0 destroy after seal_escape_road min 20 XP 1, repair 2 | none |
 | west_08_normandy_cobra_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 2,2 own min 2 enemy min 0 | 清除 MG 42 1,2 destroy min 2 XP 1, enemy supp +1 R2; 反砲兵偵察 22,2 recon min 21 XP 1, enemy dig -1 R2 | none |
 | west_08_pegasus_bridge_1944 | allies mg_team:1; axis artillery:1, mg_team:1 | axis 32/160 (20%) | none | allies: eng min 5, art 0/3, targets 3 | allies: eng turns blocked | allies: art move none | allies target 8,4 own min 5 enemy min 0 | 守住飛馬橋 7,4 hold 2t min 4 XP 1, reinforce -2t; 摧毀橋北機槍 8,3 destroy min 5 XP 1, enemy supp +1 R2 | allies +77.6; T6 2 units |
-| west_09_aachen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,11 own min 2 enemy min 0 | 清除西側 PaK 40 6,4 destroy min 4 XP 1, enemy dig -1 R1 | none |
-| west_09_hurtgen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,4 own min 3 enemy min 0 | 控制森林林道 4,4 hold 2t min 2 XP 1, supp -2 | none |
-| west_10_remagen_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 17,4 own min 15 enemy min 0 | 奪取橋西岸 12,0 capture min 10 XP 1, repair 2 | none |
-| west_11_colmar_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 19,11 own min 16 enemy min 0 | 壓制口袋機槍 18,11 destroy min 15 XP 1, enemy supp +1 R2 | none |
+| west_09_aachen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,11 own min 2 enemy min 0 | 清除西側 PaK 40 6,4 destroy min 4 XP 1, enemy dig -1 R1; 市政廳側翼 5,11 recon after clear_western_at min 2 XP 1, enemy dig -1 R2 | none |
+| west_09_hurtgen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,4 own min 3 enemy min 0 | 林道 MG 42 4,4 destroy min 2 XP 1, enemy supp +1 R2; 控制森林林道 4,4 hold 2t after silence_forest_mg min 2 XP 1, supp -2 | none |
+| west_10_remagen_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 17,4 own min 15 enemy min 0 | 奪取橋西岸 12,0 capture min 10 XP 1, repair 2; 偵察東岸橋頭 17,4 recon after secure_bridge_west_bank min 15 XP 1, enemy dig -1 R2 | none |
+| west_11_colmar_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 19,11 own min 16 enemy min 0 | 壓制口袋機槍 18,11 destroy min 15 XP 1, enemy supp +1 R2; 側翼村道 19,11 recon after suppress_colmar_mg min 16 XP 1, enemy dig -1 R2 | none |
 
 ## Urban Breach Focus
 
@@ -78,6 +78,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 | axis | own 18 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
 | 04_kursk_1943 | 北側高地偵察 | recon 18,2 | axis | own 4 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | 05_bastogne_1944 | 鎮心補給 | hold 2t 6,4 | allies | own 0 / enemy 3 | XP 1, supp -2, reinforce -2t | starts held; sustain reward; reinforce best T7->T5 |
+| 05_bastogne_1944 | 南側遠程砲 | destroy 22,11 after bastogne_supply_hold | allies | own 16 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 06_market_garden_1944 | 南岸橋頭 | hold 2t 5,12 | allies | own 8 / enemy 10 | XP 1, reinforce -2t | reinforce best T7->T5 |
 | 06_market_garden_1944 | 德軍遠程砲 | destroy 18,2 after nijmegen_south_bridgehead | allies | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 07_bagration_1944 | 奪取路口 | capture 3,4 | soviet | own 19 / enemy 0 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
@@ -130,14 +131,19 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | pacific_05_okinawa_1945 | 摧毀首里機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
 | west_08_falaise_1944 | 封鎖撤退道路 | recon 22,11 | allies | own 19 / enemy 0 | XP 1, enemy supp +1 R1 | enemy closer; tactical suppression reward R1 |
+| west_08_falaise_1944 | 摧毀 StuG 掩護 | destroy 22,0 after seal_escape_road | allies | own 20 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
 | west_08_normandy_cobra_1944 | 清除 MG 42 | destroy 1,2 | allies | own 2 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 | allies | own 21 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | west_08_pegasus_bridge_1944 | 守住飛馬橋 | hold 2t 7,4 | allies | own 4 / enemy 1 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
 | west_08_pegasus_bridge_1944 | 摧毀橋北機槍 | destroy 8,3 | allies | own 5 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | west_09_aachen_1944 | 清除西側 PaK 40 | destroy 6,4 | allies | own 4 / enemy 0 | XP 1, enemy dig -1 R1 | enemy closer; breach reward R1 |
-| west_09_hurtgen_1944 | 控制森林林道 | hold 2t 4,4 | allies | own 2 / enemy 0 | XP 1, supp -2 | enemy closer; sustain reward |
+| west_09_aachen_1944 | 市政廳側翼 | recon 5,11 after clear_western_at | allies | own 2 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
+| west_09_hurtgen_1944 | 林道 MG 42 | destroy 4,4 | allies | own 2 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| west_09_hurtgen_1944 | 控制森林林道 | hold 2t 4,4 after silence_forest_mg | allies | own 2 / enemy 0 | XP 1, supp -2 | enemy closer; sustain reward |
 | west_10_remagen_1945 | 奪取橋西岸 | capture 12,0 | allies | own 10 / enemy 6 | XP 1, repair 2 | enemy closer; damage recovery |
+| west_10_remagen_1945 | 偵察東岸橋頭 | recon 17,4 after secure_bridge_west_bank | allies | own 15 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | west_11_colmar_1945 | 壓制口袋機槍 | destroy 18,11 | allies | own 15 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| west_11_colmar_1945 | 側翼村道 | recon 19,11 after suppress_colmar_mg | allies | own 16 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 
 ## Conquest Secondary Coverage
 
@@ -166,7 +172,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | 02_kiev_1941 | 2 | 0 | 2 | covered |
 | 03_stalingrad_1942 | 2 | 0 | 2 | covered |
 | 04_kursk_1943 | 2 | 0 | 2 | covered |
-| 05_bastogne_1944 | 1 | 0 | 1 | covered |
+| 05_bastogne_1944 | 2 | 0 | 2 | covered |
 | 06_market_garden_1944 | 2 | 0 | 2 | covered |
 | 07_bagration_1944 | 2 | 0 | 2 | covered |
 | blitz_00_poland_1939 | 2 | 0 | 2 | covered |
@@ -187,13 +193,13 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | pacific_04_manila_1945 | 2 | 0 | 2 | covered |
 | pacific_05_iwo_jima_1945 | 2 | 0 | 2 | covered |
 | pacific_05_okinawa_1945 | 2 | 0 | 2 | covered |
-| west_08_falaise_1944 | 1 | 0 | 1 | covered |
+| west_08_falaise_1944 | 2 | 0 | 2 | covered |
 | west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |
 | west_08_pegasus_bridge_1944 | 2 | 0 | 2 | covered |
-| west_09_aachen_1944 | 1 | 0 | 1 | covered |
-| west_09_hurtgen_1944 | 1 | 0 | 1 | covered |
-| west_10_remagen_1945 | 1 | 0 | 1 | covered |
-| west_11_colmar_1945 | 1 | 0 | 1 | covered |
+| west_09_aachen_1944 | 2 | 0 | 2 | covered |
+| west_09_hurtgen_1944 | 2 | 0 | 2 | covered |
+| west_10_remagen_1945 | 2 | 0 | 2 | covered |
+| west_11_colmar_1945 | 2 | 0 | 2 | covered |
 
 ## Scenario Expansion Coverage
 

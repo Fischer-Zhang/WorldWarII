@@ -158,15 +158,25 @@ def main() -> None:
         "Every main battle should have secondary objective pressure",
     )
     xp_only_counts = []
+    secondary_counts = []
+    enriched_counts = []
     for line in depth_rows:
         parts = [part.strip() for part in line.strip("|").split("|")]
         if len(parts) >= 5:
+            secondary_counts.append(int(parts[1]))
             xp_only_counts.append(int(parts[2]))
+            enriched_counts.append(int(parts[3]))
     require(
         xp_only_counts
         and all(count == 0 for count in xp_only_counts)
         and any("| covered |" in line for line in depth_rows),
         "Every main battle secondary objective should be tactically enriched",
+    )
+    require(
+        secondary_counts
+        and all(count >= 2 for count in secondary_counts)
+        and all(count >= 2 for count in enriched_counts),
+        "Every main battle should have at least two enriched secondary objectives",
     )
     require(
         "| west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |" in report
