@@ -62,6 +62,16 @@
       "target": [11, 4],
       "rewards": [{"type": "xp", "amount": 1}],
       "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}]
+    },
+    {
+      "id": "north_sea_radar_post",
+      "type": "recon_hex",
+      "label": "偵察海岸雷達站",
+      "faction": "allies",
+      "target": [17, 11],
+      "rewards": [{"type": "suppress_enemies", "amount": 1, "radius": 2}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+      "requires": "north_sea_harbor_cache"
     }
   ],
   "victory": {

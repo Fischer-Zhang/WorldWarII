@@ -141,8 +141,8 @@ def main() -> None:
     ]
     require(len(conquest_rows) == 10, "Every conquest template should have covered strategic secondary pressure")
     require(
-        "| conq_cbi_jungle | 1 | 1 | -2 | covered |" in report
-        and "| conq_atlantic_convoy | 1 | 1 | -1 | covered |" in report,
+        "| conq_cbi_jungle | 2 | 2 | -3 | covered |" in report
+        and "| conq_atlantic_convoy | 2 | 2 | -2 | covered |" in report,
         "Conquest secondary coverage should expose enemy-strength pressure amounts",
     )
     depth_section = section_text(report, "## Gameplay Depth Coverage")

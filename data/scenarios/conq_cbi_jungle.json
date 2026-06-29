@@ -62,6 +62,16 @@
       "target": [9, 5],
       "rewards": [{"type": "xp", "amount": 1}],
       "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 2}]
+    },
+    {
+      "id": "cbi_river_ford_scout",
+      "type": "recon_hex",
+      "label": "偵察叢林渡口",
+      "faction": "allies",
+      "target": [12, 12],
+      "rewards": [{"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+      "requires": "cbi_jungle_supply"
     }
   ],
   "victory": {

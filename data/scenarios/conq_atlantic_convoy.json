@@ -62,6 +62,16 @@
       "target": [16, 9],
       "rewards": [{"type": "xp", "amount": 1}],
       "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}]
+    },
+    {
+      "id": "atlantic_signal_station",
+      "type": "recon_hex",
+      "label": "偵察海岸信號站",
+      "faction": "allies",
+      "target": [17, 2],
+      "rewards": [{"type": "suppress_enemies", "amount": 1, "radius": 2}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+      "requires": "atlantic_port_sabotage"
     }
   ],
   "victory": {
