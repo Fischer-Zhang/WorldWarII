@@ -582,10 +582,14 @@ func _check_conquest() -> void:
 	var zoom_in: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton")
 	var zoom_reset: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton")
 	var before_size: Vector2 = scene._map_button_size
+	var before_ratio := before_size.y / before_size.x
 	zoom_in.pressed.emit()
 	await process_frame
 	await process_frame
-	_expect("conquest map zoom in grows cells", scene._map_button_size.x > before_size.x)
+	var zoomed_size: Vector2 = scene._map_button_size
+	var zoomed_ratio := zoomed_size.y / zoomed_size.x
+	_expect("conquest map zoom in grows cells", zoomed_size.x > before_size.x and zoomed_size.y > before_size.y)
+	_expect("conquest map zoom is proportional", absf(zoomed_ratio - before_ratio) < 0.01)
 	zoom_reset.pressed.emit()
 	await process_frame
 	await process_frame
@@ -595,5 +599,25 @@ func _check_conquest() -> void:
 	var can_scroll_x: bool = map_center.size.x > map_scroll.size.x
 	var centered_x: bool = not can_scroll_x or scene._map_zoom > 1.0 or map_scroll.scroll_horizontal > 0
 	_expect("conquest map has centered scroll area", centered_x)
+	scene._set_map_zoom(1.65)
+	await process_frame
+	await process_frame
+	can_scroll_x = map_center.size.x > map_scroll.size.x
+	map_scroll.scroll_horizontal = 0
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.global_position = Vector2(500, 300)
+	scene._on_map_scroll_gui_input(press)
+	var motion := InputEventMouseMotion.new()
+	motion.global_position = Vector2(320, 300)
+	scene._on_map_scroll_gui_input(motion)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.global_position = Vector2(320, 300)
+	scene._on_map_scroll_gui_input(release)
+	await process_frame
+	_expect("conquest map drag pans horizontally", can_scroll_x and map_scroll.scroll_horizontal > 0)
 	await _free_scene(scene)
 	_restore_campaign_save(save_snapshot)

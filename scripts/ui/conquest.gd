@@ -33,6 +33,13 @@ var _map_button_size := Vector2(116, 74)
 var _map_columns := 9
 var _map_rows := 5
 var _map_zoom := 1.0
+var _map_dragging := false
+var _map_drag_start := Vector2.ZERO
+var _map_drag_scroll_start := Vector2.ZERO
+var _map_drag_moved := false
+var _map_suppress_next_region_click := false
+const MAP_CELL_ASPECT := 0.64
+const MAP_DRAG_THRESHOLD := 5.0
 const MAP_ZOOM_MIN := 0.75
 const MAP_ZOOM_MAX := 1.65
 const MAP_ZOOM_STEP := 0.15
@@ -46,6 +53,8 @@ func _ready() -> void:
 	zoom_reset_button.pressed.connect(_on_zoom_reset_pressed)
 	zoom_in_button.pressed.connect(_on_zoom_in_pressed)
 	map_scroll.gui_input.connect(_on_map_scroll_gui_input)
+	map_center.gui_input.connect(_on_map_scroll_gui_input)
+	map_grid.gui_input.connect(_on_map_scroll_gui_input)
 	attack_button.pressed.connect(_on_attack_pressed)
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -136,7 +145,8 @@ func _rebuild() -> void:
 				elif rid == target_region_id:
 					btn.text = "◎ " + btn.text
 				btn.disabled = false
-				btn.pressed.connect(func(): _select_region(rid))
+				btn.gui_input.connect(_on_map_scroll_gui_input)
+				btn.pressed.connect(func(): _on_region_button_pressed(rid))
 			map_grid.add_child(btn)
 	_update_zoom_controls()
 	_center_map_deferred()
@@ -149,8 +159,8 @@ func _update_map_button_size() -> void:
 	var grid_gap: float = 8.0
 	var available_width: float = body_width - detail_width - body_sep - grid_gap * float(max(0, _map_columns - 1))
 	var cell_width: float = clamp(floor(available_width / float(max(1, _map_columns))), 58.0, 116.0)
-	var zoomed_width: float = floor(cell_width * _map_zoom)
-	_map_button_size = Vector2(zoomed_width, clamp(floor(zoomed_width * 0.64), 44.0, 122.0))
+	var zoomed_width: float = clamp(floor(cell_width * _map_zoom), 52.0, 192.0)
+	_map_button_size = Vector2(zoomed_width, floor(zoomed_width * MAP_CELL_ASPECT))
 	var grid_width: float = _map_button_size.x * float(_map_columns) + grid_gap * float(max(0, _map_columns - 1))
 	var grid_height: float = _map_button_size.y * float(_map_rows) + grid_gap * float(max(0, _map_rows - 1))
 	map_center.custom_minimum_size = Vector2(grid_width, grid_height)
@@ -172,14 +182,45 @@ func _on_zoom_in_pressed() -> void:
 	_set_map_zoom(_map_zoom + MAP_ZOOM_STEP)
 
 func _on_map_scroll_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and bool(event.pressed):
+	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_set_map_zoom(_map_zoom + MAP_ZOOM_STEP)
+		if bool(mb.pressed):
+			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				_set_map_zoom(_map_zoom + MAP_ZOOM_STEP)
+				map_scroll.accept_event()
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_set_map_zoom(_map_zoom - MAP_ZOOM_STEP)
+				map_scroll.accept_event()
+			elif mb.button_index == MOUSE_BUTTON_LEFT:
+				_map_dragging = true
+				_map_drag_start = mb.global_position
+				_map_drag_scroll_start = Vector2(map_scroll.scroll_horizontal, map_scroll.scroll_vertical)
+				_map_drag_moved = false
+				_map_suppress_next_region_click = false
+		elif mb.button_index == MOUSE_BUTTON_LEFT:
+			if _map_dragging and _map_drag_moved:
+				map_scroll.accept_event()
+				call_deferred("_clear_map_drag_click_suppression")
+			_map_dragging = false
+	elif event is InputEventMouseMotion and _map_dragging:
+		var motion := event as InputEventMouseMotion
+		var delta := motion.global_position - _map_drag_start
+		if not _map_drag_moved and delta.length() >= MAP_DRAG_THRESHOLD:
+			_map_drag_moved = true
+			_map_suppress_next_region_click = true
+		if _map_drag_moved:
+			map_scroll.scroll_horizontal = int(max(0.0, _map_drag_scroll_start.x - delta.x))
+			map_scroll.scroll_vertical = int(max(0.0, _map_drag_scroll_start.y - delta.y))
 			map_scroll.accept_event()
-		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_set_map_zoom(_map_zoom - MAP_ZOOM_STEP)
-			map_scroll.accept_event()
+
+func _clear_map_drag_click_suppression() -> void:
+	_map_suppress_next_region_click = false
+
+func _on_region_button_pressed(region_id: String) -> void:
+	if _map_suppress_next_region_click:
+		call_deferred("_clear_map_drag_click_suppression")
+		return
+	_select_region(region_id)
 
 func _update_zoom_controls() -> void:
 	var pct := int(round(_map_zoom * 100.0))
