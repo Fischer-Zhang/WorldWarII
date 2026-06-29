@@ -205,4 +205,4 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | eastern_front | 7 | capture:6, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
 | north_africa | 5 | capture:2, eliminate:2, survive:1 | desert:5, sea:1, town:1 | reinforcement:2, scout:5, engineer:2 | tracked |
 | pacific_front | 6 | capture:3, eliminate:3 | jungle:5, sea:4, river:1, town:3 | reinforcement:2, scout:6, engineer:6 | tracked |
-| western_front | 9 | capture:8, survive:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |
+| western_front | 9 | capture:8, hold_hex_turns:1 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |

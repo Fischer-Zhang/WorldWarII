@@ -96,6 +96,7 @@ var ai_running: bool = false
 var spawned_reinforcements: Dictionary = {}  # reinforcement index -> true
 var captured_secondary_objectives: Dictionary = {}  # objective id/index -> true
 var secondary_objective_progress: Dictionary = {}  # objective id/index -> consecutive held turns
+var victory_hold_progress: Dictionary = {}  # faction_id -> consecutive own-turns its hold_hex_turns target is held
 var player_faction_id: String = ""
 # Per-faction visibility + memory (symmetric fog model)
 var visibility_by_faction: Dictionary = {}   # faction_id -> Dictionary[Vector2i, true]
@@ -395,7 +396,8 @@ func _on_end_turn_pressed() -> void:
 	AudioBank.play("end_turn")
 	_update_dig_in_for_current_faction()
 	var secondary_messages := _check_secondary_objective_hold_turns(turn_manager.current_faction())
-	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	_update_victory_hold_progress(turn_manager.current_faction())
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number, victory_hold_progress)
 	if winner != "":
 		_handle_game_over(winner)
 		return
@@ -1006,7 +1008,7 @@ func _do_airdrop(unit: Unit, dest: Vector2i) -> void:
 	_recompute_visibility()
 	_deselect()
 	_update_status()
-	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number, victory_hold_progress)
 	if winner != "":
 		_handle_game_over(winner)
 
@@ -1456,7 +1458,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	_deselect()
 	_update_status()
 
-	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number)
+	var winner := VictoryChecker.evaluate(scenario, factions, units, turn_manager.turn_number, victory_hold_progress)
 	if winner != "":
 		_handle_game_over(winner)
 
@@ -2063,6 +2065,18 @@ func _advance_reinforcements(faction_id: String, turns: int) -> void:
 		entry["at_turn"] = max(turn_manager.turn_number + 1, current_turn - turns)
 		reinforcements[i] = entry
 	scenario["reinforcements"] = reinforcements
+
+func _update_victory_hold_progress(faction_id: String) -> void:
+	# Track consecutive own-turns a faction holds its hold_hex_turns victory hex.
+	# Runs at this faction's turn end; resets the moment the hex is not held.
+	var cond: Dictionary = scenario.get("victory", {}).get(faction_id, {})
+	if String(cond.get("type", "")) != "hold_hex_turns":
+		return
+	var target := VictoryChecker.coord_from_array(cond.get("target", [0, 0]))
+	if _unit_holding_coord(faction_id, target) == null:
+		victory_hold_progress[faction_id] = 0
+	else:
+		victory_hold_progress[faction_id] = int(victory_hold_progress.get(faction_id, 0)) + 1
 
 func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
 	for u in units:

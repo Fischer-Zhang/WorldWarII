@@ -263,12 +263,32 @@ def validate_scenario(
                 fail(errors, path, f"victory {faction_id!r} must be an object")
                 continue
             objective_type = str(objective.get("type", ""))
-            if objective_type not in {"capture", "survive", "eliminate"}:
+            if objective_type not in {"capture", "survive", "eliminate", "control_count", "hold_hex_turns"}:
                 fail(errors, path, f"victory {faction_id!r} has unknown type {objective_type!r}")
-            if objective_type == "capture":
+            if objective_type in {"capture", "hold_hex_turns"}:
                 target = objective.get("target", [])
                 if not in_bounds(target, width, height):
-                    fail(errors, path, f"victory {faction_id!r} capture target out of bounds: {target!r}")
+                    fail(errors, path, f"victory {faction_id!r} {objective_type} target out of bounds: {target!r}")
+            if objective_type == "hold_hex_turns":
+                try:
+                    if int(objective.get("required_turns", 0)) <= 0:
+                        fail(errors, path, f"victory {faction_id!r} hold_hex_turns required_turns must be positive")
+                except (TypeError, ValueError):
+                    fail(errors, path, f"victory {faction_id!r} hold_hex_turns required_turns must be an integer")
+            if objective_type == "control_count":
+                targets = objective.get("targets", [])
+                if not isinstance(targets, list) or not targets:
+                    fail(errors, path, f"victory {faction_id!r} control_count needs a non-empty targets list")
+                else:
+                    for t in targets:
+                        if not in_bounds(t, width, height):
+                            fail(errors, path, f"victory {faction_id!r} control_count target out of bounds: {t!r}")
+                    try:
+                        required = int(objective.get("required", len(targets)))
+                        if required <= 0 or required > len(targets):
+                            fail(errors, path, f"victory {faction_id!r} control_count required must be 1..{len(targets)}")
+                    except (TypeError, ValueError):
+                        fail(errors, path, f"victory {faction_id!r} control_count required must be an integer")
 
     secondary_objectives = scenario.get("secondary_objectives", [])
     if "secondary_objectives" in scenario and not isinstance(secondary_objectives, list):
