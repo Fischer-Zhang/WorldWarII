@@ -2,6 +2,7 @@ extends SceneTree
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
+const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 
 func _init() -> void:
 	var pass_count := 0
@@ -205,6 +206,7 @@ func _test_conquest_region_migration_tracks_map_data() -> bool:
 					"port": true,
 					"fort_level": 2,
 					"logistics_level": 1,
+					"training_level": 2,
 					"garrison": [{"id": 1, "type": "infantry"}],
 				},
 				"stale": {"owner": "a", "strength": 99, "garrison": []},
@@ -228,6 +230,7 @@ func _test_conquest_region_migration_tracks_map_data() -> bool:
 			and bool(alpha.get("port", false)) \
 			and int(alpha.get("fort_level", 0)) == 2 \
 			and int(alpha.get("logistics_level", 0)) == 1 \
+			and int(alpha.get("training_level", 0)) == 2 \
 			and (alpha.get("garrison", []) as Array).size() == 1 \
 			and String(bravo.get("owner", "")) == "b":
 		return true
@@ -241,7 +244,7 @@ func _test_development_actions() -> bool:
 	conquest["regions"]["alpha"]["strength"] = 30
 
 	var actions := ConquestManager.development_actions_for_region(state, map_data, "alpha")
-	if actions.size() != 3:
+	if actions.size() != 4:
 		printerr("FAIL: player region should expose all development actions")
 		return false
 	if not ConquestManager.development_actions_for_region(state, map_data, "bravo").is_empty():
@@ -298,6 +301,48 @@ func _test_development_actions() -> bool:
 	var logistics_3 := ConquestManager.develop_region(state, map_data, "alpha", "logistics")
 	if bool(logistics_3.get("ok", false)):
 		printerr("FAIL: completed logistics chain should reject more logistics upgrades")
+		return false
+
+	alpha["strength"] = 20
+	var training_1 := ConquestManager.develop_region(state, map_data, "alpha", "training")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(training_1.get("ok", false)) \
+			or int(alpha.get("training_level", 0)) != 1 \
+			or int(alpha.get("strength", 0)) != 16:
+		printerr("FAIL: first training upgrade should spend strength and set training level 1")
+		return false
+	var recruit_region := {"strength": 10, "training_level": 1, "garrison": []}
+	var recruit_catalog := {"infantry": {"cost": 2, "name_zh": "步兵"}}
+	var recruit_result := ConquestRecruit.recruit(recruit_region, recruit_catalog, "infantry", 1)
+	ConquestManager.apply_recruit_training(recruit_region, recruit_result)
+	var trained_garrison: Array = recruit_region.get("garrison", [])
+	var trained_record: Dictionary = trained_garrison[0] if trained_garrison.size() == 1 else {}
+	if int(trained_record.get("xp", 0)) != 1 or int(trained_record.get("rank", 0)) != 0:
+		printerr("FAIL: training level 1 should add XP without granting rank")
+		return false
+
+	alpha["strength"] = 20
+	var training_2 := ConquestManager.develop_region(state, map_data, "alpha", "training")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(training_2.get("ok", false)) \
+			or int(alpha.get("training_level", 0)) != 2 \
+			or int(alpha.get("strength", 0)) != 15:
+		printerr("FAIL: second training upgrade should cost more and set level 2")
+		return false
+	recruit_region = {"strength": 10, "training_level": 2, "garrison": []}
+	recruit_result = ConquestRecruit.recruit(recruit_region, recruit_catalog, "infantry", 2)
+	ConquestManager.apply_recruit_training(recruit_region, recruit_result)
+	trained_garrison = recruit_region.get("garrison", [])
+	trained_record = trained_garrison[0] if trained_garrison.size() == 1 else {}
+	if int(trained_record.get("xp", 0)) != 2 \
+			or int(trained_record.get("rank", 0)) != 1 \
+			or not String(recruit_result.get("message", "")).contains("軍校訓練 +2 XP"):
+		printerr("FAIL: training level 2 should add enough XP for veteran rank 1")
+		return false
+	alpha["strength"] = 20
+	var training_3 := ConquestManager.develop_region(state, map_data, "alpha", "training")
+	if bool(training_3.get("ok", false)):
+		printerr("FAIL: completed training chain should reject more training upgrades")
 		return false
 
 	var unknown := ConquestManager.develop_region(state, map_data, "alpha", "unknown")

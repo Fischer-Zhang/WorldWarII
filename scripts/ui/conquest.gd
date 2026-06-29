@@ -488,6 +488,7 @@ func _on_recruit_pressed(type_id: String) -> void:
 	var tech_levels: Dictionary = state.get("lounge", {}).get("tech_levels", {})
 	var result := ConquestRecruit.recruit(region, DataLoader.units, type_id, next_id, tech_levels)
 	if bool(result.get("ok", false)):
+		ConquestManager.apply_recruit_training(region, result)
 		conquest["next_unit_id"] = next_id + 1
 		CampaignManager.save_state(state)
 		_rebuild()
@@ -525,12 +526,13 @@ func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	var rail_neighbors: Array = region.get("rail_neighbors", [])
 	if not rail_neighbors.is_empty():
 		logistics.append("鐵路: %s" % ", ".join(rail_neighbors))
-	return "%s · %s · 兵力 %d · 產能 %d · 防備 %d\n後勤: %s\n相鄰: %s" % [
+	return "%s · %s · 兵力 %d · 產能 %d · 防備 %d · 訓練 %d\n後勤: %s\n相鄰: %s" % [
 		String(region.get("name_zh", "")),
 		String(countries.get(owner, {}).get("name_zh", owner)),
 		int(region.get("strength", 0)),
 		int(region.get("production", 0)),
 		int(region.get("fort_level", 0)),
+		int(region.get("training_level", 0)),
 		" · ".join(logistics),
 		", ".join(neighbors),
 	]

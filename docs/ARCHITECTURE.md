@@ -214,9 +214,10 @@ scoring.
 
 Owned regions can spend local strength on deterministic development actions through
 `ConquestManager.develop_region`: industry raises production, fortification raises
-strategic and generated tactical defense strength, and logistics upgrades ports or
-supply sources. The conquest scene lists the available actions but does not
-duplicate their cost, ownership or cap rules.
+strategic and generated tactical defense strength, logistics upgrades ports or
+supply sources, and training academies raise starting XP for newly recruited
+garrison units. The conquest scene lists the available actions but does not
+duplicate their cost, ownership, training or cap rules.
 
 Theater objectives in `data/conquest_map.json` group several regions into
 strategic goals. `ConquestManager.theater_objective_status` evaluates them from

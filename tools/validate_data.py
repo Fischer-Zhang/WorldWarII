@@ -715,6 +715,13 @@ def validate_conquest(errors: list[str]) -> None:
             supply_source_owners.add(str(region.get("owner", "")))
         if int(region.get("production", 0)) <= 0:
             fail(errors, path, f"region {region_id!r} production must be positive")
+        if "training_level" in region:
+            try:
+                training_level = int(region.get("training_level", 0))
+                if not 0 <= training_level <= 2:
+                    fail(errors, path, f"region {region_id!r} training_level must be between 0 and 2")
+            except (TypeError, ValueError):
+                fail(errors, path, f"region {region_id!r} training_level must be an integer")
         try:
             coord = (int(region.get("x", -1)), int(region.get("y", -1)))
         except (TypeError, ValueError):

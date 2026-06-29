@@ -2,13 +2,16 @@ class_name ConquestManager
 extends RefCounted
 
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
+const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 const AI_MIN_ATTACK_STRENGTH := 3
+const TRAINING_MAX_LEVEL := 2
 const DEVELOPMENT_ACTIONS := {
 	"industry": {"label": "擴建產能", "cost": 4},
 	"fortify": {"label": "築防整備", "cost": 3},
 	"logistics": {"label": "整修後勤", "cost": 3},
+	"training": {"label": "軍校訓練", "cost": 4},
 }
 const THEATER_REINFORCEMENT_REWARD := "theater_reinforcement"
 
@@ -135,7 +138,7 @@ static func development_actions_for_region(state: Dictionary, map_data: Dictiona
 	if region.is_empty() or String(region.get("owner", "")) != String(conquest.get("player_country", "")):
 		return []
 	var out: Array = []
-	for action_id in ["industry", "fortify", "logistics"]:
+	for action_id in ["industry", "fortify", "logistics", "training"]:
 		var def: Dictionary = DEVELOPMENT_ACTIONS.get(action_id, {})
 		var cost := development_cost(region, action_id)
 		out.append({
@@ -152,6 +155,8 @@ static func development_cost(region: Dictionary, action_id: String) -> int:
 	var base_cost := int(def.get("cost", 999))
 	if action_id == "industry":
 		return base_cost + int(region.get("production", 0))
+	if action_id == "training":
+		return base_cost + int(region.get("training_level", 0))
 	return base_cost
 
 static func develop_region(state: Dictionary, map_data: Dictionary, region_id: String, action_id: String) -> Dictionary:
@@ -185,6 +190,9 @@ static func develop_region(state: Dictionary, map_data: Dictionary, region_id: S
 			else:
 				region["supply_source"] = true
 				message = "%s 建立前進補給源,後勤等級 %d。" % [_region_name(region), int(region.get("logistics_level", 0))]
+		"training":
+			region["training_level"] = int(region.get("training_level", 0)) + 1
+			message = "%s 建立軍校訓練,訓練等級 %d。" % [_region_name(region), int(region.get("training_level", 0))]
 		_:
 			return {"ok": false, "message": "未知的地區行動。"}
 	regions[region_id] = region
@@ -192,6 +200,20 @@ static func develop_region(state: Dictionary, map_data: Dictionary, region_id: S
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
 	return {"ok": true, "message": message}
+
+static func apply_recruit_training(region: Dictionary, recruit_result: Dictionary) -> void:
+	if not bool(recruit_result.get("ok", false)):
+		return
+	var training_level := clampi(int(region.get("training_level", 0)), 0, TRAINING_MAX_LEVEL)
+	if training_level <= 0:
+		return
+	var record: Dictionary = recruit_result.get("record", {})
+	if record.is_empty():
+		return
+	var xp := int(record.get("xp", 0)) + training_level
+	record["xp"] = xp
+	record["rank"] = maxi(int(record.get("rank", 0)), CombatModifiers.rank_for_xp(xp))
+	recruit_result["message"] = "%s軍校訓練 +%d XP。" % [String(recruit_result.get("message", "")), training_level]
 
 static func resolve_battle_result(
 	state: Dictionary,
@@ -485,6 +507,7 @@ static func _migrate_regions(conquest: Dictionary, map_data: Dictionary) -> void
 			fresh["port"] = bool(fresh.get("port", false)) or bool(saved.get("port", false))
 			fresh["fort_level"] = int(saved.get("fort_level", fresh.get("fort_level", 0)))
 			fresh["logistics_level"] = int(saved.get("logistics_level", fresh.get("logistics_level", 0)))
+			fresh["training_level"] = clampi(int(saved.get("training_level", fresh.get("training_level", 0))), 0, TRAINING_MAX_LEVEL)
 			fresh["strength"] = int(saved.get("strength", fresh.get("strength", 1)))
 			fresh["garrison"] = (saved.get("garrison", []) as Array).duplicate(true)
 		migrated[id] = fresh
@@ -506,6 +529,7 @@ static func _region_from_map_def(region: Dictionary) -> Dictionary:
 		"rail_neighbors": region.get("rail_neighbors", []),
 		"fort_level": int(region.get("fort_level", 0)),
 		"logistics_level": int(region.get("logistics_level", 0)),
+		"training_level": clampi(int(region.get("training_level", 0)), 0, TRAINING_MAX_LEVEL),
 		"strength": int(region.get("production", 1)) + 2,
 		"garrison": [],
 		"neighbors": region.get("neighbors", []),
@@ -563,6 +587,8 @@ static func _can_develop_region(region: Dictionary, action_id: String, cost: int
 			return int(region.get("fort_level", 0)) < 3
 		"logistics":
 			return int(region.get("logistics_level", 0)) < 2 and not bool(region.get("supply_source", false))
+		"training":
+			return int(region.get("training_level", 0)) < TRAINING_MAX_LEVEL
 		_:
 			return false
 
@@ -576,6 +602,8 @@ static func _development_blocked_reason(region: Dictionary, action_id: String, c
 			return "防備已達上限。"
 		"logistics":
 			return "後勤已達上限。"
+		"training":
+			return "軍校訓練已達上限。"
 		_:
 			return "未知的地區行動。"
 
@@ -589,6 +617,8 @@ static func _development_description(region: Dictionary, action_id: String) -> S
 			if bool(region.get("port", false)):
 				return "既有港口升為前進補給源。"
 			return "建立港口/補給站,改善補給鏈。"
+		"training":
+			return "新徵召部隊初始 XP +訓練等級,最多 2 級。"
 		_:
 			return ""
 

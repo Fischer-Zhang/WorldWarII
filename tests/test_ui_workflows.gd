@@ -579,7 +579,7 @@ func _check_conquest() -> void:
 	for child in recruit_list.get_children():
 		if child is Label or child is Button:
 			recruit_text += " %s" % String(child.text)
-	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備"))
+	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備") and recruit_text.contains("軍校訓練"))
 	var zoom_in: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton")
 	var zoom_reset: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton")
 	var before_size: Vector2 = scene._map_button_size
