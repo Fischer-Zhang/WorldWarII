@@ -673,6 +673,17 @@ def validate_conquest(errors: list[str]) -> None:
         countries = {}
     if str(conquest.get("start_country", "")) not in countries:
         fail(errors, path, "start_country must reference countries")
+    try:
+        map_width = int(conquest.get("map_width", 0))
+        map_height = int(conquest.get("map_height", 0))
+    except (TypeError, ValueError):
+        fail(errors, path, "map_width/map_height must be integers")
+        map_width = 0
+        map_height = 0
+    if map_width <= 0:
+        fail(errors, path, "map_width must be positive")
+    if map_height <= 0:
+        fail(errors, path, "map_height must be positive")
     region_ids: set[str] = set()
     region_by_id: dict[str, Any] = {}
     coords: dict[tuple[int, int], str] = {}
@@ -688,6 +699,14 @@ def validate_conquest(errors: list[str]) -> None:
             fail(errors, path, f"duplicate region id {region_id!r}")
         region_ids.add(region_id)
         region_by_id[region_id] = region
+        name = str(region.get("name_zh", ""))
+        short_name = str(region.get("short_name_zh", ""))
+        if not name:
+            fail(errors, path, f"region {region_id!r} missing name_zh")
+        if not short_name:
+            fail(errors, path, f"region {region_id!r} missing short_name_zh")
+        elif len(short_name) > 6:
+            fail(errors, path, f"region {region_id!r} short_name_zh should fit map buttons")
         if str(region.get("owner", "")) not in countries:
             fail(errors, path, f"region {region_id!r} owner is unknown")
         if int(region.get("production", 0)) <= 0:
@@ -697,6 +716,8 @@ def validate_conquest(errors: list[str]) -> None:
         except (TypeError, ValueError):
             fail(errors, path, f"region {region_id!r} x/y must be integers")
             continue
+        if map_width > 0 and map_height > 0 and not (0 <= coord[0] < map_width and 0 <= coord[1] < map_height):
+            fail(errors, path, f"region {region_id!r} coordinate {coord!r} outside map bounds {map_width}x{map_height}")
         if coord in coords:
             fail(errors, path, f"region {region_id!r} overlaps {coords[coord]!r} at {coord!r}")
         coords[coord] = region_id

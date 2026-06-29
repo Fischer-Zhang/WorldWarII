@@ -24,6 +24,7 @@ var _selected_units: Dictionary = {}
 var _recruit_expanded := false
 var _refreshing_country := false
 var _map_button_size := Vector2(116, 74)
+var _map_columns := 9
 
 func _ready() -> void:
 	state = CampaignManager.load_state()
@@ -79,10 +80,12 @@ func _rebuild() -> void:
 		ConquestManager.owned_region_count(state, DataLoader.conquest_map, player_country),
 	]
 	var regions: Dictionary = conquest.get("regions", {})
-	map_grid.columns = 9
+	_map_columns = _map_width(DataLoader.conquest_map, regions)
+	var map_rows := _map_height(DataLoader.conquest_map, regions)
+	map_grid.columns = _map_columns
 	_update_map_button_size()
-	for y in range(5):
-		for x in range(9):
+	for y in range(map_rows):
+		for x in range(_map_columns):
 			var region := _region_at(regions, x, y)
 			var btn := Button.new()
 			btn.custom_minimum_size = _map_button_size
@@ -93,8 +96,8 @@ func _rebuild() -> void:
 			else:
 				var owner := String(region.get("owner", ""))
 				var owner_def: Dictionary = countries.get(owner, {})
-				btn.text = "%s\n%s 兵:%d 產:%d" % [
-					String(region.get("name_zh", "")),
+				btn.text = "%s\n%s\n兵:%d 產:%d" % [
+					String(region.get("short_name_zh", region.get("name_zh", ""))),
 					String(owner_def.get("name_zh", owner)),
 					int(region.get("strength", 0)),
 					int(region.get("production", 0)),
@@ -118,8 +121,8 @@ func _update_map_button_size() -> void:
 	var detail_width: float = 330.0
 	var body_sep: float = 18.0
 	var grid_gap: float = 8.0
-	var available_width: float = body_width - detail_width - body_sep - grid_gap * 8.0
-	var cell_width: float = clamp(floor(available_width / 9.0), 72.0, 116.0)
+	var available_width: float = body_width - detail_width - body_sep - grid_gap * float(max(0, _map_columns - 1))
+	var cell_width: float = clamp(floor(available_width / float(max(1, _map_columns))), 58.0, 116.0)
 	_map_button_size = Vector2(cell_width, clamp(floor(cell_width * 0.64), 48.0, 74.0))
 
 func _clear_map() -> void:
@@ -131,6 +134,18 @@ func _region_at(regions: Dictionary, x: int, y: int) -> Dictionary:
 		if int(region.get("x", -1)) == x and int(region.get("y", -1)) == y:
 			return region
 	return {}
+
+func _map_width(map_data: Dictionary, regions: Dictionary) -> int:
+	var width := int(map_data.get("map_width", 0))
+	for region in regions.values():
+		width = max(width, int(region.get("x", -1)) + 1)
+	return max(1, width)
+
+func _map_height(map_data: Dictionary, regions: Dictionary) -> int:
+	var height := int(map_data.get("map_height", 0))
+	for region in regions.values():
+		height = max(height, int(region.get("y", -1)) + 1)
+	return max(1, height)
 
 func _select_region(region_id: String) -> void:
 	# Order-independent selection. Tap a region to set the source (出擊地);

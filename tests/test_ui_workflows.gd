@@ -531,6 +531,8 @@ func _check_lounge() -> void:
 	await _free_scene(scene)
 
 func _check_conquest() -> void:
+	var save_snapshot := _snapshot_campaign_save()
+	CampaignManager.reset()
 	var scene := await _instantiate_scene("res://scenes/conquest.tscn", {"conquest_mode": true})
 	var conquest: Dictionary = scene.state.get("conquest", {})
 	var player := String(conquest.get("player_country", ""))
@@ -552,6 +554,7 @@ func _check_conquest() -> void:
 	if own_id == "" or enemy_id == "":
 		_fail("conquest adjacent setup", "no own/enemy neighbor found")
 		await _free_scene(scene)
+		_restore_campaign_save(save_snapshot)
 		return
 	scene._select_region(enemy_id)
 	scene._select_region(own_id)
@@ -560,3 +563,4 @@ func _check_conquest() -> void:
 	_expect("conquest tactical preview", detail.contains("戰術作戰") or detail.contains("出擊地沒有駐軍"))
 	_expect("conquest attack tooltip", String(scene.get_node("Margin/VBox/Actions/AttackButton").tooltip_text) != "")
 	await _free_scene(scene)
+	_restore_campaign_save(save_snapshot)

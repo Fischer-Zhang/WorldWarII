@@ -15,11 +15,7 @@ static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionar
 		conquest["regions"] = _initial_regions(map_data)
 	if not conquest.has("next_unit_id"):
 		conquest["next_unit_id"] = 1
-	# Lazy-migrate saves that predate per-region garrisons.
-	for rid in conquest.get("regions", {}).keys():
-		var region: Dictionary = conquest["regions"][rid]
-		if not region.has("garrison"):
-			region["garrison"] = []
+	_migrate_regions(conquest, map_data)
 	state["conquest"] = conquest
 	return conquest
 
@@ -351,18 +347,39 @@ static func _initial_regions(map_data: Dictionary) -> Dictionary:
 	for item in map_data.get("regions", []):
 		var region: Dictionary = item
 		var id := String(region.get("id", ""))
-		out[id] = {
-			"id": id,
-			"name_zh": String(region.get("name_zh", id)),
-			"owner": String(region.get("owner", "neutral")),
-			"x": int(region.get("x", 0)),
-			"y": int(region.get("y", 0)),
-			"production": int(region.get("production", 1)),
-			"strength": int(region.get("production", 1)) + 2,
-			"garrison": [],
-			"neighbors": region.get("neighbors", []),
-		}
+		out[id] = _region_from_map_def(region)
 	return out
+
+static func _migrate_regions(conquest: Dictionary, map_data: Dictionary) -> void:
+	var map_regions: Dictionary = _initial_regions(map_data)
+	var saved_regions: Dictionary = conquest.get("regions", {})
+	var migrated := {}
+	for rid in map_regions.keys():
+		var id := String(rid)
+		var fresh: Dictionary = map_regions[id]
+		var saved: Dictionary = saved_regions.get(id, {})
+		if not saved.is_empty():
+			fresh["owner"] = String(saved.get("owner", fresh.get("owner", "neutral")))
+			fresh["strength"] = int(saved.get("strength", fresh.get("strength", 1)))
+			fresh["garrison"] = (saved.get("garrison", []) as Array).duplicate(true)
+		migrated[id] = fresh
+	conquest["regions"] = migrated
+
+static func _region_from_map_def(region: Dictionary) -> Dictionary:
+	var id := String(region.get("id", ""))
+	var name := String(region.get("name_zh", id))
+	return {
+		"id": id,
+		"name_zh": name,
+		"short_name_zh": String(region.get("short_name_zh", name)),
+		"owner": String(region.get("owner", "neutral")),
+		"x": int(region.get("x", 0)),
+		"y": int(region.get("y", 0)),
+		"production": int(region.get("production", 1)),
+		"strength": int(region.get("production", 1)) + 2,
+		"garrison": [],
+		"neighbors": region.get("neighbors", []),
+	}
 
 static func _best_ai_attack_global(regions: Dictionary, player_country: String) -> Dictionary:
 	# Best AI attack across all enemy countries. AI-vs-AI attacks are returned

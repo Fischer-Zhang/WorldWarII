@@ -1,5 +1,7 @@
 {
   "start_country": "germany",
+  "map_width": 9,
+  "map_height": 5,
   "countries": {
     "germany": {
       "name_zh": "德國",
@@ -34,6 +36,7 @@
     {
       "id": "north_america",
       "name_zh": "北美",
+      "short_name_zh": "北美",
       "owner": "usa",
       "x": 0,
       "y": 1,
@@ -43,6 +46,7 @@
     {
       "id": "atlantic",
       "name_zh": "大西洋",
+      "short_name_zh": "大西洋",
       "owner": "britain",
       "x": 1,
       "y": 1,
@@ -52,6 +56,7 @@
     {
       "id": "britain",
       "name_zh": "不列顛",
+      "short_name_zh": "不列顛",
       "owner": "britain",
       "x": 2,
       "y": 0,
@@ -61,6 +66,7 @@
     {
       "id": "west_europe",
       "name_zh": "西歐",
+      "short_name_zh": "西歐",
       "owner": "germany",
       "x": 2,
       "y": 1,
@@ -70,6 +76,7 @@
     {
       "id": "germany",
       "name_zh": "德國本土",
+      "short_name_zh": "德國",
       "owner": "germany",
       "x": 3,
       "y": 1,
@@ -79,6 +86,7 @@
     {
       "id": "north_sea",
       "name_zh": "北海",
+      "short_name_zh": "北海",
       "owner": "germany",
       "x": 3,
       "y": 0,
@@ -88,6 +96,7 @@
     {
       "id": "east_europe",
       "name_zh": "東歐",
+      "short_name_zh": "東歐",
       "owner": "soviet",
       "x": 4,
       "y": 1,
@@ -97,6 +106,7 @@
     {
       "id": "moscow",
       "name_zh": "莫斯科",
+      "short_name_zh": "莫斯科",
       "owner": "soviet",
       "x": 5,
       "y": 1,
@@ -106,6 +116,7 @@
     {
       "id": "siberia",
       "name_zh": "西伯利亞",
+      "short_name_zh": "西伯利亞",
       "owner": "soviet",
       "x": 6,
       "y": 1,
@@ -115,6 +126,7 @@
     {
       "id": "north_africa",
       "name_zh": "北非",
+      "short_name_zh": "北非",
       "owner": "britain",
       "x": 2,
       "y": 2,
@@ -124,6 +136,7 @@
     {
       "id": "mediterranean",
       "name_zh": "地中海",
+      "short_name_zh": "地中海",
       "owner": "germany",
       "x": 3,
       "y": 2,
@@ -133,6 +146,7 @@
     {
       "id": "middle_east",
       "name_zh": "中東",
+      "short_name_zh": "中東",
       "owner": "neutral",
       "x": 4,
       "y": 2,
@@ -142,6 +156,7 @@
     {
       "id": "central_asia",
       "name_zh": "中亞",
+      "short_name_zh": "中亞",
       "owner": "soviet",
       "x": 5,
       "y": 2,
@@ -151,6 +166,7 @@
     {
       "id": "india",
       "name_zh": "印度",
+      "short_name_zh": "印度",
       "owner": "britain",
       "x": 5,
       "y": 3,
@@ -160,6 +176,7 @@
     {
       "id": "china",
       "name_zh": "中國",
+      "short_name_zh": "中國",
       "owner": "china",
       "x": 6,
       "y": 3,
@@ -169,6 +186,7 @@
     {
       "id": "manchuria",
       "name_zh": "滿洲",
+      "short_name_zh": "滿洲",
       "owner": "japan",
       "x": 7,
       "y": 2,
@@ -178,6 +196,7 @@
     {
       "id": "japan_home",
       "name_zh": "日本本土",
+      "short_name_zh": "日本",
       "owner": "japan",
       "x": 8,
       "y": 2,
@@ -187,6 +206,7 @@
     {
       "id": "southeast_asia",
       "name_zh": "東南亞",
+      "short_name_zh": "東南亞",
       "owner": "japan",
       "x": 7,
       "y": 4,
@@ -196,6 +216,7 @@
     {
       "id": "pacific",
       "name_zh": "太平洋",
+      "short_name_zh": "太平洋",
       "owner": "usa",
       "x": 8,
       "y": 4,

@@ -27,6 +27,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_conquest_region_migration_tracks_map_data():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_resolve_real_battle_result():
 		pass_count += 1
 	else:
@@ -162,6 +167,36 @@ func _test_conquest_state_survives_campaign_normalise() -> bool:
 			and String(conquest.get("regions", {}).get("alpha", {}).get("owner", "")) == "b":
 		return true
 	printerr("FAIL: conquest state should survive campaign normalise")
+	return false
+
+func _test_conquest_region_migration_tracks_map_data() -> bool:
+	var state := {
+		"version": 2,
+		"campaigns": {},
+		"conquest": {
+			"turn": 3,
+			"player_country": "a",
+			"regions": {
+				"alpha": {"owner": "a", "strength": 9, "garrison": [{"id": 1, "type": "infantry"}]},
+				"stale": {"owner": "a", "strength": 99, "garrison": []},
+			},
+		},
+	}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var alpha: Dictionary = regions.get("alpha", {})
+	var bravo: Dictionary = regions.get("bravo", {})
+	if regions.has("stale"):
+		printerr("FAIL: stale conquest region should be dropped during migration")
+		return false
+	if String(alpha.get("short_name_zh", "")) != "A" or String(bravo.get("short_name_zh", "")) != "B":
+		printerr("FAIL: migrated regions should inherit short labels from map data")
+		return false
+	if int(alpha.get("strength", 0)) == 9 and (alpha.get("garrison", []) as Array).size() == 1 \
+			and String(bravo.get("owner", "")) == "b":
+		return true
+	printerr("FAIL: migration should preserve saved region state and add new map regions")
 	return false
 
 func _test_resolve_real_battle_result() -> bool:
@@ -308,6 +343,8 @@ func _test_ai_consolidate() -> bool:
 func _test_map() -> Dictionary:
 	return {
 		"start_country": "a",
+		"map_width": 2,
+		"map_height": 1,
 		"countries": {
 			"a": {"name_zh": "A", "color": "#ff0000"},
 			"b": {"name_zh": "B", "color": "#0000ff"},
@@ -316,6 +353,7 @@ func _test_map() -> Dictionary:
 			{
 				"id": "alpha",
 				"name_zh": "Alpha",
+				"short_name_zh": "A",
 				"owner": "a",
 				"x": 0,
 				"y": 0,
@@ -325,6 +363,7 @@ func _test_map() -> Dictionary:
 			{
 				"id": "bravo",
 				"name_zh": "Bravo",
+				"short_name_zh": "B",
 				"owner": "b",
 				"x": 1,
 				"y": 0,
