@@ -193,7 +193,7 @@ Files:
 
 - `data/conquest_map.json`: countries, regions, owners, production, graph, supply sources, ports and rail links.
 - `ConquestCatalog`: region -> scenario mapping and country -> side mapping.
-- `ConquestManager`: ownership, transfer, end-turn and battle-result resolution.
+- `ConquestManager`: ownership, transfer, region development, end-turn and battle-result resolution.
 - `ConquestSupply`: deterministic supply connectivity and reinforcement scaling.
 - `ConquestBattleSetup`: reuses a themed scenario's terrain while replacing factions, rosters and victory rules.
 
@@ -207,6 +207,12 @@ Player-fought tactical flow:
 6. Battle applies the same `ConquestBattleSetup` before building units, then deployment overrides move the placed player units to their chosen hexes.
 7. Result panel returns to conquest.
 8. `ConquestManager.resolve_battle_result` or `resolve_defense_result` updates region owner, strength and surviving garrisons.
+
+Owned regions can spend local strength on deterministic development actions through
+`ConquestManager.develop_region`: industry raises production, fortification raises
+strategic and generated tactical defense strength, and logistics upgrades ports or
+supply sources. The conquest scene lists the available actions but does not
+duplicate their cost, ownership or cap rules.
 
 Strategic end-turn first computes supply from owned `supply_source` regions. Rail links and owned port-to-port links extend supply at lower cost than road-only neighbors; cut-off regions reinforce more slowly. AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
 
@@ -265,8 +271,8 @@ readable zoom on small tutorial maps.
 
 `tests/test_ui_workflows.gd` drives representative UI paths headlessly: scenario
 filtering, briefing, deployment selection, battle action prompting, campaign
-selection, lounge upgrade list rendering and order-independent conquest region
-selection.
+selection, lounge upgrade list rendering, order-independent conquest region
+selection, conquest map zoom and conquest region development controls.
 
 ## Adding A Feature
 

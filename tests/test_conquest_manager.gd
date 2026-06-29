@@ -32,6 +32,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_development_actions():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_resolve_real_battle_result():
 		pass_count += 1
 	else:
@@ -177,7 +182,16 @@ func _test_conquest_region_migration_tracks_map_data() -> bool:
 			"turn": 3,
 			"player_country": "a",
 			"regions": {
-				"alpha": {"owner": "a", "strength": 9, "garrison": [{"id": 1, "type": "infantry"}]},
+				"alpha": {
+					"owner": "a",
+					"strength": 9,
+					"production": 7,
+					"supply_source": true,
+					"port": true,
+					"fort_level": 2,
+					"logistics_level": 1,
+					"garrison": [{"id": 1, "type": "infantry"}],
+				},
 				"stale": {"owner": "a", "strength": 99, "garrison": []},
 			},
 		},
@@ -193,11 +207,89 @@ func _test_conquest_region_migration_tracks_map_data() -> bool:
 	if String(alpha.get("short_name_zh", "")) != "A" or String(bravo.get("short_name_zh", "")) != "B":
 		printerr("FAIL: migrated regions should inherit short labels from map data")
 		return false
-	if int(alpha.get("strength", 0)) == 9 and (alpha.get("garrison", []) as Array).size() == 1 \
+	if int(alpha.get("strength", 0)) == 9 \
+			and int(alpha.get("production", 0)) == 7 \
+			and bool(alpha.get("supply_source", false)) \
+			and bool(alpha.get("port", false)) \
+			and int(alpha.get("fort_level", 0)) == 2 \
+			and int(alpha.get("logistics_level", 0)) == 1 \
+			and (alpha.get("garrison", []) as Array).size() == 1 \
 			and String(bravo.get("owner", "")) == "b":
 		return true
 	printerr("FAIL: migration should preserve saved region state and add new map regions")
 	return false
+
+func _test_development_actions() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 30
+
+	var actions := ConquestManager.development_actions_for_region(state, map_data, "alpha")
+	if actions.size() != 3:
+		printerr("FAIL: player region should expose all development actions")
+		return false
+	if not ConquestManager.development_actions_for_region(state, map_data, "bravo").is_empty():
+		printerr("FAIL: enemy region should not expose development actions")
+		return false
+	var enemy_result := ConquestManager.develop_region(state, map_data, "bravo", "industry")
+	if bool(enemy_result.get("ok", false)):
+		printerr("FAIL: enemy region should reject development")
+		return false
+
+	var alpha: Dictionary = conquest["regions"]["alpha"]
+	var before_production := int(alpha.get("production", 0))
+	var before_strength := int(alpha.get("strength", 0))
+	var industry_cost := ConquestManager.development_cost(alpha, "industry")
+	var industry := ConquestManager.develop_region(state, map_data, "alpha", "industry")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(industry.get("ok", false)) \
+			or int(alpha.get("production", 0)) != before_production + 1 \
+			or int(alpha.get("strength", 0)) != before_strength - industry_cost:
+		printerr("FAIL: industry development should spend strength and raise production")
+		return false
+
+	alpha["strength"] = 20
+	var fortify := ConquestManager.develop_region(state, map_data, "alpha", "fortify")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(fortify.get("ok", false)) \
+			or int(alpha.get("fort_level", 0)) != 1 \
+			or int(alpha.get("strength", 0)) != 18 \
+			or ConquestManager.defense_strength(alpha) != 20 \
+			or ConquestManager.fortification_support_types(alpha) != ["infantry"]:
+		printerr("FAIL: fortify should create defense strength beyond local strength")
+		return false
+
+	alpha["strength"] = 20
+	var logistics_1 := ConquestManager.develop_region(state, map_data, "alpha", "logistics")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(logistics_1.get("ok", false)) \
+			or not bool(alpha.get("port", false)) \
+			or bool(alpha.get("supply_source", false)) \
+			or int(alpha.get("logistics_level", 0)) != 1:
+		printerr("FAIL: first logistics upgrade should establish local port/depot")
+		return false
+
+	alpha["strength"] = 20
+	var logistics_2 := ConquestManager.develop_region(state, map_data, "alpha", "logistics")
+	alpha = ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(logistics_2.get("ok", false)) \
+			or not bool(alpha.get("supply_source", false)) \
+			or int(alpha.get("logistics_level", 0)) != 2:
+		printerr("FAIL: second logistics upgrade should establish supply source")
+		return false
+
+	alpha["strength"] = 20
+	var logistics_3 := ConquestManager.develop_region(state, map_data, "alpha", "logistics")
+	if bool(logistics_3.get("ok", false)):
+		printerr("FAIL: completed logistics chain should reject more logistics upgrades")
+		return false
+
+	var unknown := ConquestManager.develop_region(state, map_data, "alpha", "unknown")
+	if bool(unknown.get("ok", false)):
+		printerr("FAIL: unknown development action should fail")
+		return false
+	return true
 
 func _test_resolve_real_battle_result() -> bool:
 	var state := {"version": 2, "campaigns": {}}

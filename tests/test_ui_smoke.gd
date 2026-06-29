@@ -156,6 +156,9 @@ func _game_state() -> Node:
 
 func _validate_scene(scene: Node, scene_case: Dictionary) -> bool:
 	var name := String(scene_case.get("name", "scene"))
+	if bool(scene_case.get("requires_script", true)) and scene.get_script() == null:
+		printerr("FAIL: %s script did not load" % name)
+		return false
 	for path in scene_case.get("required", []):
 		if scene.get_node_or_null(String(path)) == null:
 			printerr("FAIL: %s missing node %s" % [name, path])

@@ -272,7 +272,7 @@ func _update_detail(message: String = "") -> void:
 			var src := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
 			var tgt := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
 			var my_force: int = (src.get("garrison", []) as Array).size()
-			var enemy_force: int = ConquestRecruit.generate_force(int(tgt.get("strength", 0))).size()
+			var enemy_force: int = ConquestRecruit.generate_force(ConquestManager.defense_strength(tgt)).size()
 			lines.append("我軍 %d 部隊 vs 敵軍約 %d 部隊" % [my_force, enemy_force])
 			if my_force == 0:
 				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
@@ -389,6 +389,26 @@ func _rebuild_recruit_panel() -> void:
 		tip.text = "勾選後選相鄰己方目標,按「調動」送選取(未勾=全部)"
 		tip.add_theme_font_size_override("font_size", 11)
 		recruit_list.add_child(tip)
+	_add_development_panel()
+
+func _add_development_panel() -> void:
+	var actions: Array = ConquestManager.development_actions_for_region(state, DataLoader.conquest_map, selected_region_id)
+	if actions.is_empty():
+		return
+	var header := Label.new()
+	header.text = "地區經營"
+	header.add_theme_font_size_override("font_size", 14)
+	recruit_list.add_child(header)
+	for item in actions:
+		var action: Dictionary = item
+		var btn := Button.new()
+		var cost := int(action.get("cost", 0))
+		btn.text = "%s (%d)" % [String(action.get("label", "")), cost]
+		btn.tooltip_text = String(action.get("description", ""))
+		btn.disabled = not bool(action.get("enabled", false))
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.pressed.connect(_on_develop_pressed.bind(String(action.get("id", ""))))
+		recruit_list.add_child(btn)
 
 func _add_recruit_hint(text: String) -> void:
 	var hint := Label.new()
@@ -425,6 +445,12 @@ func _on_disband_pressed(unit_id: int) -> void:
 		_rebuild()
 	_update_detail(String(result.get("message", "")))
 
+func _on_develop_pressed(action_id: String) -> void:
+	var result := ConquestManager.develop_region(state, DataLoader.conquest_map, selected_region_id, action_id)
+	if bool(result.get("ok", false)):
+		_rebuild()
+	_update_detail(String(result.get("message", "")))
+
 func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	if region.is_empty():
 		return "未選取"
@@ -440,11 +466,12 @@ func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	var rail_neighbors: Array = region.get("rail_neighbors", [])
 	if not rail_neighbors.is_empty():
 		logistics.append("鐵路: %s" % ", ".join(rail_neighbors))
-	return "%s · %s · 兵力 %d · 產能 %d\n後勤: %s\n相鄰: %s" % [
+	return "%s · %s · 兵力 %d · 產能 %d · 防備 %d\n後勤: %s\n相鄰: %s" % [
 		String(region.get("name_zh", "")),
 		String(countries.get(owner, {}).get("name_zh", owner)),
 		int(region.get("strength", 0)),
 		int(region.get("production", 0)),
+		int(region.get("fort_level", 0)),
 		" · ".join(logistics),
 		", ".join(neighbors),
 	]
@@ -474,7 +501,7 @@ func _on_attack_pressed() -> void:
 		"enemy_name": String(countries.get(enemy_country, {}).get("name_zh", enemy_country)),
 		"battle_location": String(target.get("name_zh", "")),
 		"attacker_garrison": attacker_garrison,
-		"defender_types": ConquestRecruit.generate_force(int(target.get("strength", 0))),
+		"defender_types": ConquestRecruit.generate_force(ConquestManager.defense_strength(target)),
 		"role": "attack",
 	}
 	CampaignManager.save_state(state)
@@ -535,8 +562,11 @@ func _launch_defense_battle(step: Dictionary) -> void:
 	# Defend with the region's garrison; if it has none, a militia turns out.
 	var defenders: Array = (def_region.get("garrison", []) as Array).duplicate(true)
 	if defenders.is_empty():
-		for t in ConquestRecruit.generate_force(int(def_region.get("strength", 0))):
+		for t in ConquestRecruit.generate_force(ConquestManager.defense_strength(def_region)):
 			defenders.append({"id": -1, "type": String(t), "xp": 0, "rank": 0, "name": "民兵"})
+	else:
+		for t in ConquestManager.fortification_support_types(def_region):
+			defenders.append({"id": -1, "type": String(t), "xp": 0, "rank": 0, "name": "築防支援"})
 	var context := {
 		"player_faction": player_country,
 		"enemy_faction": attacker_country,

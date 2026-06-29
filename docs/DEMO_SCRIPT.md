@@ -21,8 +21,8 @@ The viewer should understand:
 | 0:43-0:55 | Stalingrad / defense | Soviet infantry in town survives, counter-attacks, suppression/dig-in visible. | `Urban defense · suppression · rally decisions` |
 | 0:55-1:07 | Kursk / armor | Tank duel with AT gun or Panther/T-34 exchange. Show compact info panel. | `Armor vs anti-armor · live HP affects damage` |
 | 1:07-1:17 | Campaign/lounge | Open campaign map, then lounge. Show resource points and upgrade buttons. | `Campaign progress unlocks general and tech upgrades` |
-| 1:17-1:27 | Conquest -> battle | Open conquest, select source/target. Show the conquest briefing, then deployment with enemies already on-map and player units waiting to be placed. | `Conquest attacks launch real hex battles` |
-| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `358 headless checks · report probes · UI smoke` |
+| 1:17-1:27 | Conquest -> battle | Open conquest, zoom the world map, select a source/target and show region development controls. Show the conquest briefing, then deployment with enemies already on-map and player units waiting to be placed. | `Conquest attacks launch real hex battles` |
+| 1:27-1:30 | Validation end card | Terminal or editor shot with validation command/log. | `363 headless checks · report probes · UI smoke` |
 
 ## Capturing
 
@@ -54,7 +54,7 @@ Suggested README screenshots:
 - Let each mechanic appear once; do not explain every rule.
 - Prefer captions over narration.
 - Keep movement/attack animations short; cut once the viewer understands the action.
-- The conquest section should explicitly show the selected regions and the tactical battle launch so it reads as connected, not a separate menu.
+- The conquest section should explicitly show map zoom, selected regions, region development controls and the tactical battle launch so it reads as connected, not a separate menu.
 - End on validation because this is a code portfolio piece.
 
 ## Caption Pool

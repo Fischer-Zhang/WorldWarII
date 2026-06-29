@@ -44,6 +44,8 @@ func _instantiate_scene(path: String, setup: Dictionary = {}) -> Node:
 	await process_frame
 	await process_frame
 	await process_frame
+	if scene.get_script() == null:
+		_fail("scene script loaded", path)
 	return scene
 
 func _free_scene(scene: Node) -> void:
@@ -534,6 +536,10 @@ func _check_conquest() -> void:
 	var save_snapshot := _snapshot_campaign_save()
 	CampaignManager.reset()
 	var scene := await _instantiate_scene("res://scenes/conquest.tscn", {"conquest_mode": true})
+	if scene == null or scene.get_script() == null:
+		await _free_scene(scene)
+		_restore_campaign_save(save_snapshot)
+		return
 	var conquest: Dictionary = scene.state.get("conquest", {})
 	var player := String(conquest.get("player_country", ""))
 	var regions: Dictionary = conquest.get("regions", {})
@@ -562,6 +568,17 @@ func _check_conquest() -> void:
 	_expect("conquest order-independent selection", scene.selected_region_id == own_id and scene.target_region_id == enemy_id)
 	_expect("conquest tactical preview", detail.contains("戰術作戰") or detail.contains("出擊地沒有駐軍"))
 	_expect("conquest attack tooltip", String(scene.get_node("Margin/VBox/Actions/AttackButton").tooltip_text) != "")
+	var recruit_list: VBoxContainer = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList")
+	if recruit_list == null:
+		_fail("conquest region development controls", "missing recruit list")
+		await _free_scene(scene)
+		_restore_campaign_save(save_snapshot)
+		return
+	var recruit_text := ""
+	for child in recruit_list.get_children():
+		if child is Label or child is Button:
+			recruit_text += " %s" % String(child.text)
+	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備"))
 	var zoom_in: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton")
 	var zoom_reset: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton")
 	var before_size: Vector2 = scene._map_button_size

@@ -5,6 +5,11 @@ const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 const AI_MIN_ATTACK_STRENGTH := 3
+const DEVELOPMENT_ACTIONS := {
+	"industry": {"label": "擴建產能", "cost": 4},
+	"fortify": {"label": "築防整備", "cost": 3},
+	"logistics": {"label": "整修後勤", "cost": 3},
+}
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var conquest: Dictionary = state.get("conquest", {})
@@ -72,6 +77,20 @@ static func can_transfer(state: Dictionary, map_data: Dictionary, from_id: Strin
 	var neighbors: Array = source.get("neighbors", [])
 	return neighbors.has(to_id)
 
+static func defense_strength(region: Dictionary) -> int:
+	return int(region.get("strength", 0)) + int(region.get("fort_level", 0)) * 2
+
+static func fortification_support_types(region: Dictionary) -> Array:
+	var level := clampi(int(region.get("fort_level", 0)), 0, 3)
+	var support: Array = []
+	if level >= 1:
+		support.append("infantry")
+	if level >= 2:
+		support.append("mg_team")
+	if level >= 3:
+		support.append("at_gun")
+	return support
+
 static func transfer_units(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String, ids: Array = []) -> Dictionary:
 	# Relocate recruited army units between adjacent owned regions. `ids` selects
 	# which garrison units move; an empty `ids` moves the whole garrison. Strength
@@ -107,6 +126,71 @@ static func transfer_units(state: Dictionary, map_data: Dictionary, from_id: Str
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
 	return {"ok": true, "message": "已將 %d 支部隊從 %s 調往 %s。" % [moved, _region_name(source), _region_name(target)]}
+
+static func development_actions_for_region(state: Dictionary, map_data: Dictionary, region_id: String) -> Array:
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var region: Dictionary = regions.get(region_id, {})
+	if region.is_empty() or String(region.get("owner", "")) != String(conquest.get("player_country", "")):
+		return []
+	var out: Array = []
+	for action_id in ["industry", "fortify", "logistics"]:
+		var def: Dictionary = DEVELOPMENT_ACTIONS.get(action_id, {})
+		var cost := development_cost(region, action_id)
+		out.append({
+			"id": action_id,
+			"label": String(def.get("label", action_id)),
+			"cost": cost,
+			"enabled": _can_develop_region(region, action_id, cost),
+			"description": _development_description(region, action_id),
+		})
+	return out
+
+static func development_cost(region: Dictionary, action_id: String) -> int:
+	var def: Dictionary = DEVELOPMENT_ACTIONS.get(action_id, {})
+	var base_cost := int(def.get("cost", 999))
+	if action_id == "industry":
+		return base_cost + int(region.get("production", 0))
+	return base_cost
+
+static func develop_region(state: Dictionary, map_data: Dictionary, region_id: String, action_id: String) -> Dictionary:
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var region: Dictionary = regions.get(region_id, {})
+	if region.is_empty():
+		return {"ok": false, "message": "找不到地區。"}
+	if String(region.get("owner", "")) != String(conquest.get("player_country", "")):
+		return {"ok": false, "message": "只能經營己方地區。"}
+	if not DEVELOPMENT_ACTIONS.has(action_id):
+		return {"ok": false, "message": "未知的地區行動。"}
+	var cost := development_cost(region, action_id)
+	if not _can_develop_region(region, action_id, cost):
+		return {"ok": false, "message": _development_blocked_reason(region, action_id, cost)}
+	region["strength"] = int(region.get("strength", 0)) - cost
+	var message := ""
+	match action_id:
+		"industry":
+			region["production"] = int(region.get("production", 0)) + 1
+			message = "%s 產能提升至 %d。" % [_region_name(region), int(region.get("production", 0))]
+		"fortify":
+			region["fort_level"] = int(region.get("fort_level", 0)) + 1
+			region["strength"] = int(region.get("strength", 0)) + 1
+			message = "%s 完成築防,防備等級 %d。" % [_region_name(region), int(region.get("fort_level", 0))]
+		"logistics":
+			region["logistics_level"] = int(region.get("logistics_level", 0)) + 1
+			if not bool(region.get("port", false)):
+				region["port"] = true
+				message = "%s 整修港口與補給站,後勤等級 %d。" % [_region_name(region), int(region.get("logistics_level", 0))]
+			else:
+				region["supply_source"] = true
+				message = "%s 建立前進補給源,後勤等級 %d。" % [_region_name(region), int(region.get("logistics_level", 0))]
+		_:
+			return {"ok": false, "message": "未知的地區行動。"}
+	regions[region_id] = region
+	conquest["regions"] = regions
+	state["conquest"] = conquest
+	CampaignManager.save_state(state)
+	return {"ok": true, "message": message}
 
 static func resolve_battle_result(
 	state: Dictionary,
@@ -219,9 +303,10 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 			state["conquest"] = conquest
 			CampaignManager.save_state(state)
 			return {"status": "defend", "from": from_id, "to": to_id, "attacker_country": cid, "messages": messages.duplicate()}
+		var target_defense := defense_strength(target)
 		source["strength"] = maxi(1, int(source.get("strength", 0)) - 1)
 		target["owner"] = cid
-		target["strength"] = maxi(1, int(source.get("strength", 0)) - int(target.get("strength", 0)) + 1)
+		target["strength"] = maxi(1, int(source.get("strength", 0)) - target_defense + 1)
 		target["garrison"] = []
 		messages.append("%s 佔領 %s。" % [String(countries.get(cid, {}).get("name_zh", cid)), _region_name(target)])
 		regions[from_id] = source
@@ -363,6 +448,11 @@ static func _migrate_regions(conquest: Dictionary, map_data: Dictionary) -> void
 		var saved: Dictionary = saved_regions.get(id, {})
 		if not saved.is_empty():
 			fresh["owner"] = String(saved.get("owner", fresh.get("owner", "neutral")))
+			fresh["production"] = maxi(int(fresh.get("production", 1)), int(saved.get("production", fresh.get("production", 1))))
+			fresh["supply_source"] = bool(fresh.get("supply_source", false)) or bool(saved.get("supply_source", false))
+			fresh["port"] = bool(fresh.get("port", false)) or bool(saved.get("port", false))
+			fresh["fort_level"] = int(saved.get("fort_level", fresh.get("fort_level", 0)))
+			fresh["logistics_level"] = int(saved.get("logistics_level", fresh.get("logistics_level", 0)))
 			fresh["strength"] = int(saved.get("strength", fresh.get("strength", 1)))
 			fresh["garrison"] = (saved.get("garrison", []) as Array).duplicate(true)
 		migrated[id] = fresh
@@ -382,10 +472,51 @@ static func _region_from_map_def(region: Dictionary) -> Dictionary:
 		"supply_source": bool(region.get("supply_source", false)),
 		"port": bool(region.get("port", false)),
 		"rail_neighbors": region.get("rail_neighbors", []),
+		"fort_level": int(region.get("fort_level", 0)),
+		"logistics_level": int(region.get("logistics_level", 0)),
 		"strength": int(region.get("production", 1)) + 2,
 		"garrison": [],
 		"neighbors": region.get("neighbors", []),
 	}
+
+static func _can_develop_region(region: Dictionary, action_id: String, cost: int) -> bool:
+	if int(region.get("strength", 0)) < cost:
+		return false
+	match action_id:
+		"industry":
+			return int(region.get("production", 0)) < 8
+		"fortify":
+			return int(region.get("fort_level", 0)) < 3
+		"logistics":
+			return int(region.get("logistics_level", 0)) < 2 and not bool(region.get("supply_source", false))
+		_:
+			return false
+
+static func _development_blocked_reason(region: Dictionary, action_id: String, cost: int) -> String:
+	if int(region.get("strength", 0)) < cost:
+		return "兵力不足,需要 %d。" % cost
+	match action_id:
+		"industry":
+			return "產能已達上限。"
+		"fortify":
+			return "防備已達上限。"
+		"logistics":
+			return "後勤已達上限。"
+		_:
+			return "未知的地區行動。"
+
+static func _development_description(region: Dictionary, action_id: String) -> String:
+	match action_id:
+		"industry":
+			return "永久產能 +1,之後整補與徵兵更快。"
+		"fortify":
+			return "防備等級 +1 並補充 1 兵力,最多 3 級。"
+		"logistics":
+			if bool(region.get("port", false)):
+				return "既有港口升為前進補給源。"
+			return "建立港口/補給站,改善補給鏈。"
+		_:
+			return ""
 
 static func _best_ai_attack_global(regions: Dictionary, player_country: String) -> Dictionary:
 	# Best AI attack across all enemy countries. AI-vs-AI attacks are returned
@@ -407,7 +538,7 @@ static func _best_ai_attack_global(regions: Dictionary, player_country: String) 
 			var target: Dictionary = regions.get(to_id, {})
 			if target.is_empty() or String(target.get("owner", "")) == owner:
 				continue
-			var defense_power := int(target.get("strength", 0)) + int(target.get("production", 0))
+			var defense_power := defense_strength(target) + int(target.get("production", 0))
 			var is_player := String(target.get("owner", "")) == player_country
 			if not is_player and attack_power <= defense_power:
 				continue
