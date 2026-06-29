@@ -39,6 +39,7 @@ Use `tools/validate.sh` for the full standard validation sequence:
 
 - Everything in `tools/validate_fast.sh`.
 - Regeneration of the Godot AI trace report.
+- AI trace report smoke checks for exposed objective-chain diagnostics.
 - `bash tests/run_all.sh`.
 
 Use `tools/install_hooks.sh` to install a local git `pre-commit` hook that runs
@@ -124,5 +125,6 @@ Current role-shaping pass:
 - Unfinished secondary objectives add a smaller movement bias toward their target hex.
 - Recon and destroy-unit secondary objectives bias movement toward their target hex or marked unit, and destroy targets get a direct attack-score bonus.
 - Secondary objective movement pull includes deterministic reward value, so tactical rewards such as local suppression or breach rewards can matter before raw distance ties.
+- Secondary objective movement pull includes immediately unlocked follow-up value, so prerequisite objectives can surface the next tactical or strategic payoff without scoring locked chains too early.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 - Overwatch scoring uses unit-data reaction-fire percentages, so MG lane denial reflects its full-damage reaction profile.

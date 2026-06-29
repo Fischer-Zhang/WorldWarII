@@ -22,6 +22,7 @@ python3 -m json.tool data/units.json >/tmp/worldwar2_units_check.json
 python3 -m json.tool docs/progress/baselines/units_pre_balance_patch.json >/tmp/worldwar2_units_baseline_check.json
 python3 -m py_compile \
   tools/balance_report.py \
+  tools/check_ai_trace_report.py \
   tools/check_scenario_balance_report.py \
   tools/check_scenario_probe.py \
   tools/scenario_balance_report.py \

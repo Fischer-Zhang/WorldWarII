@@ -129,14 +129,14 @@ Plan: `attack` to `1,0`, target `medium_tank@3,0`, score `32.20`.
 | 5 | `1,1` | `medium_tank@3,0` | `none` | `none` | `none` | 32.20 | 14.20 | -inf | -inf | -inf | -inf | -2.00 | 25.50 | -1.75 | 0.00 | 2.80 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 |
 
 ## Secondary objective pull
-Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.
+Primary, secondary and locked follow-up objective pressure should be split so reviewers can see which target shaped the move.
 
-Plan: `wait` to `3,0`, target `none`, score `-6.29`.
+Plan: `wait` to `3,0`, target `none`, score `-5.39`.
 
 | rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead | preservation |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `3,0` | `none` | `none` | `none` | `none` | -6.29 | -6.29 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | 0.21 | -5.19 | `primary:6,0 d3; secondary:forward_cache 3,0 d0 w1.35 rv0.15 rp0.21` | 0.00 | 0.00 |
-| 2 | `4,-1` | `none` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 | 0.00 |
-| 3 | `3,1` | `none` | `none` | `none` | `none` | -7.69 | -7.69 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -1.19 | -6.59 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16` | 0.00 | 0.00 |
-| 4 | `3,2` | `none` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 | 0.00 |
-| 5 | `5,-2` | `none` | `none` | `none` | `none` | -9.10 | -9.10 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.60 | -8.00 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10` | 0.00 | 0.00 |
+| 1 | `3,0` | `none` | `none` | `none` | `none` | -5.39 | -5.39 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | 1.11 | -4.29 | `primary:6,0 d3; secondary:forward_cache 3,0 d0 w1.35 rv0.15 rp0.21 fv0.90 fp0.90` | 0.00 | 0.00 |
+| 2 | `4,-1` | `none` | `none` | `none` | `none` | -7.02 | -7.02 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -0.52 | -5.92 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16 fv0.90 fp0.67` | 0.00 | 0.00 |
+| 3 | `3,1` | `none` | `none` | `none` | `none` | -7.02 | -7.02 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -0.52 | -5.92 | `primary:6,0 d3; secondary:forward_cache 3,0 d1 w1.35 rv0.15 rp0.16 fv0.90 fp0.67` | 0.00 | 0.00 |
+| 4 | `3,2` | `none` | `none` | `none` | `none` | -8.65 | -8.65 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.15 | -7.55 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10 fv0.90 fp0.45` | 0.00 | 0.00 |
+| 5 | `5,-2` | `none` | `none` | `none` | `none` | -8.65 | -8.65 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -0.00 | 0.00 | 0.90 | -5.40 | -2.15 | -7.55 | `primary:6,0 d3; secondary:forward_cache 3,0 d2 w1.35 rv0.15 rp0.10 fv0.90 fp0.45` | 0.00 | 0.00 |

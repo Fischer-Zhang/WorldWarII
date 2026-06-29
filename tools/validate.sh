@@ -29,5 +29,6 @@ fi
 godot --headless --path "$ROOT" --import
 
 XDG_DATA_HOME="$AI_TRACE_USER_DATA" godot --headless --path "$ROOT" --script "res://tools/ai_trace_report.gd"
+python3 "$ROOT/tools/check_ai_trace_report.py"
 git diff --check
 bash tests/run_all.sh

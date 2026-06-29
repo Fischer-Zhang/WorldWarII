@@ -247,16 +247,28 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			],
 			"scenario": {
 				"victory": {"axis": {"type": "capture", "target": [6, 0]}},
-				"secondary_objectives": [{
-					"id": "forward_cache",
-					"label": "Forward Cache",
-					"type": "recon_hex",
-					"faction": "axis",
-					"target": [3, 0],
-					"rewards": [{"type": "xp", "amount": 1}],
-				}],
+				"secondary_objectives": [
+					{
+						"id": "forward_cache",
+						"label": "Forward Cache",
+						"type": "recon_hex",
+						"faction": "axis",
+						"target": [3, 0],
+						"rewards": [{"type": "xp", "amount": 1}],
+					},
+					{
+						"id": "forward_battery",
+						"label": "Forward Battery",
+						"type": "hold_turns",
+						"faction": "axis",
+						"target": [5, 0],
+						"required_turns": 2,
+						"rewards": [{"type": "suppress_enemies", "amount": 1, "radius": 2}],
+						"requires": ["forward_cache"],
+					},
+				],
 			},
-			"notes": "Primary and secondary objective pressure should be split so reviewers can see which target shaped the move.",
+			"notes": "Primary, secondary and locked follow-up objective pressure should be split so reviewers can see which target shaped the move.",
 		},
 	]
 
@@ -396,13 +408,15 @@ func _objective_detail_text(value: Variant) -> String:
 		])
 	var secondary: Dictionary = detail.get("secondary_info", {})
 	if secondary.has("key"):
-		parts.append("secondary:%s %s d%d w%.2f rv%.2f rp%.2f" % [
+		parts.append("secondary:%s %s d%d w%.2f rv%.2f rp%.2f fv%.2f fp%.2f" % [
 			String(secondary.get("key", "secondary")),
 			_coord_text(secondary.get("target", Vector2i.ZERO)),
 			int(secondary.get("distance", 0)),
 			float(secondary.get("weight", 0.0)),
 			float(secondary.get("reward_value", 0.0)),
 			float(secondary.get("reward_pull", 0.0)),
+			float(secondary.get("future_value", 0.0)),
+			float(secondary.get("future_pull", 0.0)),
 		])
 	if parts.is_empty():
 		return "none"
