@@ -214,6 +214,12 @@ strategic and generated tactical defense strength, and logistics upgrades ports 
 supply sources. The conquest scene lists the available actions but does not
 duplicate their cost, ownership or cap rules.
 
+Theater objectives in `data/conquest_map.json` group several regions into
+strategic goals. `ConquestManager.theater_objective_status` evaluates them from
+current ownership, and completed theater objectives add deterministic
+reinforcement to their controlled supplied regions during strategic end-turn
+resolution.
+
 Strategic end-turn first computes supply from owned `supply_source` regions. Rail links and owned port-to-port links extend supply at lower cost than road-only neighbors; cut-off regions reinforce more slowly. AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
 
 ## Validation

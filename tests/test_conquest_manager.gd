@@ -37,6 +37,16 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_theater_objective_status():
+		pass_count += 1
+	else:
+		fail_count += 1
+
+	if _test_theater_objective_reinforcement_bonus():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_resolve_real_battle_result():
 		pass_count += 1
 	else:
@@ -290,6 +300,70 @@ func _test_development_actions() -> bool:
 		printerr("FAIL: unknown development action should fail")
 		return false
 	return true
+
+func _test_theater_objective_status() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	map_data["theater_objectives"] = [{
+		"id": "alpha_bravo_line",
+		"name_zh": "AB 戰線",
+		"regions": ["alpha", "bravo"],
+		"reward": {"type": "theater_reinforcement", "amount": 2},
+	}]
+	var status: Array = ConquestManager.theater_objective_status(state, map_data)
+	if status.size() != 1:
+		printerr("FAIL: theater objective status should list authored objectives")
+		return false
+	var objective: Dictionary = status[0]
+	if bool(objective.get("completed", true)) \
+			or int(objective.get("controlled", 0)) != 1 \
+			or int(objective.get("required", 0)) != 2 \
+			or String(objective.get("reward_text", "")).find("+2") == -1:
+		printerr("FAIL: incomplete theater objective should report progress and reward text")
+		return false
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["bravo"]["owner"] = "a"
+	status = ConquestManager.theater_objective_status(state, map_data)
+	objective = status[0]
+	if bool(objective.get("completed", false)) and int(objective.get("controlled", 0)) == 2:
+		return true
+	printerr("FAIL: theater objective should complete when all required regions are owned")
+	return false
+
+func _test_theater_objective_reinforcement_bonus() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := {
+		"start_country": "a",
+		"map_width": 1,
+		"map_height": 1,
+		"countries": {"a": {"name_zh": "A", "color": "#ff0000"}},
+		"theater_objectives": [{
+			"id": "home_front",
+			"name_zh": "本土戰區",
+			"regions": ["alpha"],
+			"reward": {"type": "theater_reinforcement", "amount": 2},
+		}],
+		"regions": [{
+			"id": "alpha",
+			"name_zh": "Alpha",
+			"short_name_zh": "A",
+			"owner": "a",
+			"x": 0,
+			"y": 0,
+			"production": 4,
+			"supply_source": true,
+			"neighbors": [],
+		}],
+	}
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 10
+	var before := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
+	var step := ConquestManager.end_turn(state, map_data)
+	var after := int(ConquestManager.region_state(state, map_data, "alpha").get("strength", 0))
+	if String(step.get("status", "")) == "done" and after - before == 4:
+		return true
+	printerr("FAIL: completed theater objective should add reinforcement bonus, got %d" % (after - before))
+	return false
 
 func _test_resolve_real_battle_result() -> bool:
 	var state := {"version": 2, "campaigns": {}}

@@ -10,6 +10,7 @@ const DEVELOPMENT_ACTIONS := {
 	"fortify": {"label": "築防整備", "cost": 3},
 	"logistics": {"label": "整修後勤", "cost": 3},
 }
+const THEATER_REINFORCEMENT_REWARD := "theater_reinforcement"
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var conquest: Dictionary = state.get("conquest", {})
@@ -277,10 +278,14 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var countries: Dictionary = map_data.get("countries", {})
 	if not bool(conquest.get("ai_phase", false)):
 		var supply_status := ConquestSupply.status_by_region(regions)
+		var completed_objectives := _completed_theater_objective_ids_for_regions(regions, player_country, map_data)
 		for region_id in regions.keys():
 			var region: Dictionary = regions[region_id]
 			var supplied := bool(supply_status.get(String(region_id), true))
-			region["strength"] = int(region.get("strength", 0)) + ConquestSupply.reinforcement_for_region(region, supplied)
+			var gain := ConquestSupply.reinforcement_for_region(region, supplied)
+			if supplied and String(region.get("owner", "")) == player_country:
+				gain += _theater_reinforcement_bonus(map_data, String(region_id), completed_objectives)
+			region["strength"] = int(region.get("strength", 0)) + gain
 			regions[region_id] = region
 		_ai_consolidate(regions, player_country)
 		conquest["ai_actions_left"] = _ai_action_budget(regions, player_country)
@@ -430,6 +435,33 @@ static func owned_region_count(state: Dictionary, map_data: Dictionary, country_
 			count += 1
 	return count
 
+static func theater_objective_status(state: Dictionary, map_data: Dictionary) -> Array:
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var player_country := String(conquest.get("player_country", ""))
+	var out: Array = []
+	for objective in map_data.get("theater_objectives", []):
+		if typeof(objective) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = objective
+		var required: Array = item.get("regions", [])
+		var controlled := 0
+		for rid in required:
+			var region: Dictionary = regions.get(String(rid), {})
+			if String(region.get("owner", "")) == player_country:
+				controlled += 1
+		var reward: Dictionary = item.get("reward", {})
+		out.append({
+			"id": String(item.get("id", "")),
+			"name_zh": String(item.get("name_zh", item.get("id", ""))),
+			"description_zh": String(item.get("description_zh", "")),
+			"controlled": controlled,
+			"required": required.size(),
+			"completed": controlled == required.size() and required.size() > 0,
+			"reward_text": _theater_reward_text(reward),
+		})
+	return out
+
 static func _initial_regions(map_data: Dictionary) -> Dictionary:
 	var out := {}
 	for item in map_data.get("regions", []):
@@ -478,6 +510,48 @@ static func _region_from_map_def(region: Dictionary) -> Dictionary:
 		"garrison": [],
 		"neighbors": region.get("neighbors", []),
 	}
+
+static func _completed_theater_objective_ids_for_regions(regions: Dictionary, player_country: String, map_data: Dictionary) -> Dictionary:
+	var completed := {}
+	for objective in map_data.get("theater_objectives", []):
+		if typeof(objective) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = objective
+		var required: Array = item.get("regions", [])
+		if required.is_empty():
+			continue
+		var ok := true
+		for rid in required:
+			var region: Dictionary = regions.get(String(rid), {})
+			if String(region.get("owner", "")) != player_country:
+				ok = false
+				break
+		if ok:
+			completed[String(item.get("id", ""))] = true
+	return completed
+
+static func _theater_reinforcement_bonus(map_data: Dictionary, region_id: String, completed_objectives: Dictionary) -> int:
+	var bonus := 0
+	for objective in map_data.get("theater_objectives", []):
+		if typeof(objective) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = objective
+		if not completed_objectives.has(String(item.get("id", ""))):
+			continue
+		var required: Array = item.get("regions", [])
+		if not required.has(region_id):
+			continue
+		var reward: Dictionary = item.get("reward", {})
+		if String(reward.get("type", "")) == THEATER_REINFORCEMENT_REWARD:
+			bonus += int(reward.get("amount", 0))
+	return bonus
+
+static func _theater_reward_text(reward: Dictionary) -> String:
+	match String(reward.get("type", "")):
+		THEATER_REINFORCEMENT_REWARD:
+			return "戰區內補給穩定地區每回合整補 +%d" % int(reward.get("amount", 0))
+		_:
+			return "未知獎勵"
 
 static func _can_develop_region(region: Dictionary, action_id: String, cost: int) -> bool:
 	if int(region.get("strength", 0)) < cost:

@@ -32,6 +32,36 @@
       "color": "#6f7882"
     }
   },
+  "theater_objectives": [
+    {
+      "id": "atlantic_lifeline",
+      "name_zh": "大西洋生命線",
+      "description_zh": "控制北美、大西洋與不列顛,確保跨洋增援線。",
+      "regions": ["north_america", "atlantic", "britain"],
+      "reward": {"type": "theater_reinforcement", "amount": 1}
+    },
+    {
+      "id": "eastern_industry",
+      "name_zh": "東線工業帶",
+      "description_zh": "控制德國、波蘭、烏克蘭與莫斯科,掌握歐陸工業核心。",
+      "regions": ["germany", "poland", "ukraine", "moscow"],
+      "reward": {"type": "theater_reinforcement", "amount": 1}
+    },
+    {
+      "id": "north_africa_oil",
+      "name_zh": "北非油路",
+      "description_zh": "控制馬格里布、埃及與中東,打通地中海燃料線。",
+      "regions": ["maghreb", "egypt", "middle_east"],
+      "reward": {"type": "theater_reinforcement", "amount": 1}
+    },
+    {
+      "id": "pacific_perimeter",
+      "name_zh": "太平洋外環",
+      "description_zh": "控制太平洋航線與日本本土,建立遠洋跳島支點。",
+      "regions": ["north_pacific", "pacific", "central_pacific", "japan_home"],
+      "reward": {"type": "theater_reinforcement", "amount": 1}
+    }
+  ],
   "regions": [
     {
       "id": "north_america",

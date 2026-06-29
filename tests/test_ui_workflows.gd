@@ -567,6 +567,7 @@ func _check_conquest() -> void:
 	var detail := String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
 	_expect("conquest order-independent selection", scene.selected_region_id == own_id and scene.target_region_id == enemy_id)
 	_expect("conquest tactical preview", detail.contains("戰術作戰") or detail.contains("出擊地沒有駐軍"))
+	_expect("conquest theater objectives visible", detail.contains("戰區目標"))
 	_expect("conquest attack tooltip", String(scene.get_node("Margin/VBox/Actions/AttackButton").tooltip_text) != "")
 	var recruit_list: VBoxContainer = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList")
 	if recruit_list == null:

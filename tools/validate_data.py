@@ -27,6 +27,7 @@ ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
     "campaign_bonus_points",
     "conquest_reduce_enemy_strength",
 }
+ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES = {"theater_reinforcement"}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
@@ -755,6 +756,45 @@ def validate_conquest(errors: list[str]) -> None:
     }
     for country_id in sorted(starting_owners - supply_source_owners):
         fail(errors, path, f"country {country_id!r} needs at least one starting supply_source region")
+
+    theater_objectives = conquest.get("theater_objectives", [])
+    if "theater_objectives" in conquest and not isinstance(theater_objectives, list):
+        fail(errors, path, "theater_objectives must be a list when present")
+    elif isinstance(theater_objectives, list):
+        seen_objectives: set[str] = set()
+        for index, objective in enumerate(theater_objectives):
+            if not isinstance(objective, dict):
+                fail(errors, path, f"theater_objectives[{index}] must be an object")
+                continue
+            objective_id = str(objective.get("id", ""))
+            if not objective_id:
+                fail(errors, path, f"theater_objectives[{index}] missing id")
+            elif objective_id in seen_objectives:
+                fail(errors, path, f"theater_objectives[{index}] duplicate id {objective_id!r}")
+            seen_objectives.add(objective_id)
+            if not str(objective.get("name_zh", "")):
+                fail(errors, path, f"theater_objectives[{index}] missing name_zh")
+            required = objective.get("regions", [])
+            if not isinstance(required, list) or not required:
+                fail(errors, path, f"theater_objectives[{index}] regions must be a non-empty list")
+            elif len({str(region_id) for region_id in required}) != len(required):
+                fail(errors, path, f"theater_objectives[{index}] regions must not contain duplicates")
+            else:
+                for region_id in required:
+                    if str(region_id) not in region_ids:
+                        fail(errors, path, f"theater_objectives[{index}] references unknown region {region_id!r}")
+            reward = objective.get("reward", {})
+            if not isinstance(reward, dict):
+                fail(errors, path, f"theater_objectives[{index}] reward must be an object")
+                continue
+            reward_type = str(reward.get("type", ""))
+            if reward_type not in ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES:
+                fail(errors, path, f"theater_objectives[{index}] reward unknown type {reward_type!r}")
+            try:
+                if int(reward.get("amount", 0)) <= 0:
+                    fail(errors, path, f"theater_objectives[{index}] reward amount must be positive")
+            except (TypeError, ValueError):
+                fail(errors, path, f"theater_objectives[{index}] reward amount must be an integer")
 
 
 def main() -> int:

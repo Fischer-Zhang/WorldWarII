@@ -297,6 +297,10 @@ func _update_detail(message: String = "") -> void:
 		lines.append("[b]%s[/b]" % status)
 	if message != "":
 		lines.append(message)
+	var theater_lines := _theater_objective_lines()
+	if not theater_lines.is_empty():
+		lines.append("[b]戰區目標[/b]")
+		lines.append_array(theater_lines)
 	if selected_region_id == "":
 		lines.append("選擇己方地區作為出擊點。")
 	else:
@@ -341,6 +345,20 @@ func _update_detail(message: String = "") -> void:
 			lines.append("[color=#d88]%s[/color]" % unavailable)
 	detail_label.text = "\n".join(lines)
 	_rebuild_recruit_panel()
+
+func _theater_objective_lines() -> Array[String]:
+	var out: Array[String] = []
+	for item in ConquestManager.theater_objective_status(state, DataLoader.conquest_map):
+		var objective: Dictionary = item
+		var marker := "✓" if bool(objective.get("completed", false)) else "□"
+		out.append("%s %s %d/%d — %s" % [
+			marker,
+			String(objective.get("name_zh", "")),
+			int(objective.get("controlled", 0)),
+			int(objective.get("required", 0)),
+			String(objective.get("reward_text", "")),
+		])
+	return out
 
 func _unavailable_reason() -> String:
 	var player_country := String(ConquestManager.conquest_state(state, DataLoader.conquest_map).get("player_country", ""))
