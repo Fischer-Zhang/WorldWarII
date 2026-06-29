@@ -125,7 +125,4 @@ Current role-shaping pass:
 - Recon and destroy-unit secondary objectives bias movement toward their target hex or marked unit, and destroy targets get a direct attack-score bonus.
 - Secondary objective movement pull includes deterministic reward value, so tactical rewards such as local suppression or breach rewards can matter before raw distance ties.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
-
-Likely follow-up:
-
-- Keep overwatch scoring aligned with unit-data reaction-fire percentages so AI values MG lane denial correctly.
+- Overwatch scoring uses unit-data reaction-fire percentages, so MG lane denial reflects its full-damage reaction profile.

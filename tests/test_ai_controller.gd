@@ -4,6 +4,7 @@ extends SceneTree
 # Run with: godot --headless --script res://tests/test_ai_controller.gd
 
 const AIController := preload("res://scripts/turn/ai_controller.gd")
+const CombatEffects := preload("res://scripts/combat/combat_effects.gd")
 const AT_DEF := {
 	"hp": 6, "attack": 5, "defense": 1, "range": 1, "move": 1,
 	"vision": 2, "vs_armor": 6, "armor": 0,
@@ -530,13 +531,24 @@ func _init() -> void:
 		overwatch_mg, overwatch_mg.coord, [overwatch_enemy],
 		battle.hex_map, MG_DEF, 1
 	)
-	if mg_ow_score > infantry_ow_score:
+	var default_mg_def := MG_DEF.duplicate(true)
+	default_mg_def.erase("overwatch_damage_pct")
+	var default_mg_ow_score: float = ai._overwatch_score(
+		overwatch_mg, overwatch_mg.coord, [overwatch_enemy],
+		battle.hex_map, default_mg_def, 1
+	)
+	var expected_default_mg_score: float = float(CombatEffects.overwatch_damage(4, default_mg_def)) * ai._attack_w * 0.6
+	var expected_full_mg_score: float = float(CombatEffects.overwatch_damage(4, MG_DEF)) * ai._attack_w * 0.6
+	if mg_ow_score > infantry_ow_score \
+			and mg_ow_score > default_mg_ow_score \
+			and abs(default_mg_ow_score - expected_default_mg_score) < 0.001 \
+			and abs(mg_ow_score - expected_full_mg_score) < 0.001:
 		pass_count += 1
 	else:
 		fail_count += 1
 		printerr(
-			"FAIL: MG overwatch score should beat infantry overwatch, mg %.2f infantry %.2f"
-			% [mg_ow_score, infantry_ow_score]
+			"FAIL: overwatch score should follow unit reaction-fire percent, mg %.2f default %.2f infantry %.2f expected %.2f/%.2f"
+			% [mg_ow_score, default_mg_ow_score, infantry_ow_score, expected_full_mg_score, expected_default_mg_score]
 		)
 
 	# 16) Engineers should approach entrenched urban defenders before they are in attack range.
