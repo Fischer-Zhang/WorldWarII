@@ -4,6 +4,8 @@ Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
 [![Tests](https://img.shields.io/badge/tests-375%2F375-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
+![Sedan 1940 — a Panzer IV selected, showing its movement range, full stat/general breakdown and capture objectives](docs/screenshots/03_sedan_battle.png)
+
 ## What It Is
 
 WorldWarII is a compact tactical wargame inspired by *Panzer General* and *Advance Wars*. It focuses on deterministic hex combat, terrain pressure, visibility, suppression, deployment decisions, campaign carryover and a strategic conquest wrapper that launches real tactical battles.
@@ -40,6 +42,12 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 - Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles; conquest uses a free deployment zone for every recruited attacker before battle starts.
 - Conquest battles are real tactical battles, not a separate mini-simulator; fortified regions also field stronger strategic and tactical defenses.
 - Static balance reports and UI smoke coverage are part of normal validation.
+
+## Screenshots
+
+| Main menu | Scenario select | Lounge upgrades |
+|---|---|---|
+| ![Main menu](docs/screenshots/01_main_menu.png) | ![Scenario select with theater tabs and AI difficulty](docs/screenshots/02_scenario_select.png) | ![Lounge generals and tech tree](docs/screenshots/06_lounge.png) |
 
 ## Environment
 
