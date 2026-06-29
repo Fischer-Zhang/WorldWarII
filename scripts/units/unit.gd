@@ -6,19 +6,10 @@ extends Node2D
 const RADIUS := 22.0
 const HP_BAR_WIDTH := 36.0
 const HP_BAR_HEIGHT := 4.0
-const SHORT_LABELS := {
-	"infantry": "步",
-	"mg_team": "MG",
-	"at_gun": "反",
-	"light_tank": "輕",
-	"medium_tank": "中",
-	"artillery": "砲",
-	"paratrooper": "傘",
-	"engineer": "工",
-	"tank_destroyer": "殲",
-	"heavy_tank": "重",
-	"rocket_artillery": "箭",
-}
+# Unit type is drawn as a NATO-style military symbol built from primitives
+# (language-neutral, no sprite assets). See _draw_unit_icon().
+const ICON_EXTENT := 9.0
+const ICON_WIDTH := 2.6
 
 const MAX_DIG_IN := 3
 const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
@@ -263,13 +254,11 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, RADIUS, fill_color)
 	draw_arc(Vector2.ZERO, RADIUS, 0, TAU, 32, Color(0, 0, 0, 0.7), 2.0)
 
-	# Unit-type short label
-	var label := String(SHORT_LABELS.get(type_id, "?"))
-	var font := ThemeDB.fallback_font
-	var font_size := 18
-	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-	draw_string(font, Vector2(-text_size.x / 2.0, text_size.y / 3.0), label,
-		HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(1, 1, 1))
+	# Unit-type NATO-style symbol (primitives only — language-neutral, no assets).
+	# Pick a light or dark icon so it stays legible on any faction colour.
+	var icon_color := Color(1, 1, 1, 0.97) if fill_color.get_luminance() < 0.55 \
+		else Color(0.08, 0.08, 0.1, 0.95)
+	_draw_unit_icon(icon_color)
 
 	# HP bar (only if damaged)
 	if hp < max_hp:
@@ -322,6 +311,66 @@ func _draw() -> void:
 				Color(0.0, 0.0, 0.0, 0.7),
 				false, 0.8
 			)
+
+func _draw_unit_icon(col: Color) -> void:
+	# NATO APP-6-flavoured icons, drawn inside the faction circle from primitives.
+	# Infantry = crossed X, armour = horizontal oval, artillery = filled dot,
+	# anti-armour = open wedge, engineer = gate, airborne = wing, rocket = arrow.
+	var s := ICON_EXTENT
+	match type_id:
+		"infantry":
+			_icon_infantry(s, col)
+		"mg_team":
+			_icon_infantry(s, col)
+			draw_line(Vector2(-s, 0), Vector2(s, 0), col, ICON_WIDTH)  # heavy-weapons bar
+		"paratrooper":
+			_icon_infantry(s, col)
+			draw_arc(Vector2(0, -s * 0.2), s, PI, TAU, 16, col, ICON_WIDTH)  # airborne wing
+		"light_tank":
+			_icon_armor(s, col, false)
+		"medium_tank":
+			_icon_armor(s, col, false)
+			draw_line(Vector2(-s * 0.7, 0), Vector2(s * 0.7, 0), col, ICON_WIDTH)
+		"heavy_tank":
+			_icon_armor(s, col, true)
+		"tank_destroyer":
+			_icon_armor(s, col, false)
+			_icon_wedge(s * 0.6, col)
+		"at_gun":
+			_icon_wedge(s, col)
+		"artillery":
+			draw_circle(Vector2.ZERO, s * 0.5, col)
+		"rocket_artillery":
+			draw_circle(Vector2.ZERO, s * 0.42, col)
+			draw_line(Vector2(0, -s * 0.2), Vector2(0, -s - 2.0), col, ICON_WIDTH)
+			draw_line(Vector2(0, -s - 2.0), Vector2(-3.0, -s + 1.5), col, ICON_WIDTH)
+			draw_line(Vector2(0, -s - 2.0), Vector2(3.0, -s + 1.5), col, ICON_WIDTH)
+		"engineer":
+			draw_line(Vector2(-s, s * 0.55), Vector2(-s, -s * 0.45), col, ICON_WIDTH)
+			draw_line(Vector2(-s, -s * 0.45), Vector2(s, -s * 0.45), col, ICON_WIDTH)
+			draw_line(Vector2(s, -s * 0.45), Vector2(s, s * 0.55), col, ICON_WIDTH)
+		_:
+			draw_circle(Vector2.ZERO, 3.0, col)
+
+func _icon_infantry(s: float, col: Color) -> void:
+	draw_line(Vector2(-s, -s * 0.85), Vector2(s, s * 0.85), col, ICON_WIDTH)
+	draw_line(Vector2(-s, s * 0.85), Vector2(s, -s * 0.85), col, ICON_WIDTH)
+
+func _icon_armor(s: float, col: Color, filled: bool) -> void:
+	var pts := PackedVector2Array()
+	var n := 24
+	for i in range(n + 1):
+		var a := TAU * float(i) / float(n)
+		pts.append(Vector2(cos(a) * s, sin(a) * s * 0.6))
+	if filled:
+		draw_colored_polygon(pts, col)
+	else:
+		draw_polyline(pts, col, ICON_WIDTH)
+
+func _icon_wedge(s: float, col: Color) -> void:
+	# Open chevron pointing up — anti-armour.
+	draw_line(Vector2(-s, s * 0.5), Vector2(0, -s * 0.6), col, ICON_WIDTH)
+	draw_line(Vector2(0, -s * 0.6), Vector2(s, s * 0.5), col, ICON_WIDTH)
 
 func _hp_color(pct: float) -> Color:
 	if pct > 0.6:
