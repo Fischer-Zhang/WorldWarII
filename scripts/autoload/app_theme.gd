@@ -11,7 +11,14 @@ extends Node
 # cannot reach the host's system fonts — rendered every Chinese character as a
 # tofu box. See assets/fonts/README.md.
 
-const CJK_FONT := preload("res://assets/fonts/NotoSansCJKtc-Regular.otf")
+const CJK_FONT_PATH := "res://assets/fonts/NotoSansCJKtc-Regular.otf"
 
 func _ready() -> void:
-	ThemeDB.fallback_font = CJK_FONT
+	# Runtime load (not preload) so this script always compiles even on a fresh
+	# checkout where the font has not been imported yet — a preload would be a
+	# parse error that the headless test runner flags as a failure.
+	var font := load(CJK_FONT_PATH)
+	if font is Font:
+		ThemeDB.fallback_font = font
+	else:
+		push_warning("AppTheme: bundled CJK font not loadable (not imported?)")
