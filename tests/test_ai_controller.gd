@@ -267,6 +267,18 @@ func _init() -> void:
 		printerr("FAIL: unfinished secondary objective should score near, completed should stop; near %.2f far %.2f completed %.2f" % [
 			secondary_near, secondary_far, completed_score,
 		])
+	battle.scenario["secondary_objectives"][0]["requires"] = ["recon_cache"]
+	battle.captured_secondary_objectives.clear()
+	var locked_secondary_score: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	battle.captured_secondary_objectives["recon_cache"] = true
+	var unlocked_secondary_score: float = ai._secondary_objective_position_score("axis", Vector2i(4, 0))
+	if locked_secondary_score == 0.0 and unlocked_secondary_score == secondary_near:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: locked secondary objective should not score until prerequisite completes; locked %.2f unlocked %.2f expected %.2f" % [
+			locked_secondary_score, unlocked_secondary_score, secondary_near,
+		])
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
@@ -339,6 +351,18 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: completed destroy secondary objective should stop attack bonus, got %.2f" % completed_destroy_score)
+	battle.scenario["secondary_objectives"][0]["requires"] = ["spot_ammo"]
+	battle.captured_secondary_objectives.clear()
+	var locked_destroy_score: float = ai._secondary_destroy_target_score("axis", destroy_target)
+	battle.captured_secondary_objectives["spot_ammo"] = true
+	var unlocked_destroy_score: float = ai._secondary_destroy_target_score("axis", destroy_target)
+	if locked_destroy_score == 0.0 and unlocked_destroy_score == AIController.SECONDARY_DESTROY_TARGET_BONUS:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: locked destroy objective should not bias target score; locked %.2f unlocked %.2f" % [
+			locked_destroy_score, unlocked_destroy_score,
+		])
 
 	# 8) Recon secondary objectives should bias movement toward the recon hex.
 	battle.scenario = {

@@ -275,6 +275,7 @@ def validate_scenario(
         fail(errors, path, "secondary_objectives must be a list when present")
     elif isinstance(secondary_objectives, list):
         seen_secondary_ids: set[str] = set()
+        objective_entries: list[tuple[int, dict[str, Any], str]] = []
         for index, objective in enumerate(secondary_objectives):
             if not isinstance(objective, dict):
                 fail(errors, path, f"secondary_objectives[{index}] must be an object")
@@ -283,6 +284,7 @@ def validate_scenario(
             if objective_id in seen_secondary_ids:
                 fail(errors, path, f"secondary_objectives[{index}] duplicate id {objective_id!r}")
             seen_secondary_ids.add(objective_id)
+            objective_entries.append((index, objective, objective_id))
             objective_type = str(objective.get("type", "capture"))
             if objective_type not in ALLOWED_SECONDARY_OBJECTIVE_TYPES:
                 fail(errors, path, f"secondary_objectives[{index}] unknown type {objective_type!r}")
@@ -348,8 +350,59 @@ def validate_scenario(
                             fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] amount must be positive")
                     except (TypeError, ValueError):
                         fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] amount must be an integer")
+        prerequisite_graph: dict[str, list[str]] = {}
+        prerequisite_indices: dict[str, int] = {}
+        for index, objective, objective_id in objective_entries:
+            requires = objective.get("requires", [])
+            if "requires" in objective and not isinstance(requires, (list, str)):
+                fail(errors, path, f"secondary_objectives[{index}] requires must be a string or list")
+                continue
+            required_ids = [requires] if isinstance(requires, str) else requires
+            prerequisite_graph[objective_id] = []
+            prerequisite_indices[objective_id] = index
+            for required_id in required_ids:
+                if not isinstance(required_id, str):
+                    fail(errors, path, f"secondary_objectives[{index}] requires entries must be strings")
+                    continue
+                required_id = str(required_id)
+                if required_id == "":
+                    fail(errors, path, f"secondary_objectives[{index}] requires must not contain empty ids")
+                elif required_id == objective_id:
+                    fail(errors, path, f"secondary_objectives[{index}] cannot require itself")
+                elif required_id not in seen_secondary_ids:
+                    fail(errors, path, f"secondary_objectives[{index}] requires unknown objective {required_id!r}")
+                else:
+                    prerequisite_graph[objective_id].append(required_id)
+        for objective_id in prerequisite_graph:
+            if secondary_prerequisite_has_cycle(objective_id, prerequisite_graph):
+                index = prerequisite_indices.get(objective_id, 0)
+                fail(errors, path, f"secondary_objectives[{index}] requires creates a cycle")
+                break
 
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
+
+
+def secondary_prerequisite_has_cycle(
+    start_id: str,
+    prerequisite_graph: dict[str, list[str]],
+) -> bool:
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(objective_id: str) -> bool:
+        if objective_id in visiting:
+            return True
+        if objective_id in visited:
+            return False
+        visiting.add(objective_id)
+        for required_id in prerequisite_graph.get(objective_id, []):
+            if visit(required_id):
+                return True
+        visiting.remove(objective_id)
+        visited.add(objective_id)
+        return False
+
+    return visit(start_id)
 
 
 def validate_unit_entry(

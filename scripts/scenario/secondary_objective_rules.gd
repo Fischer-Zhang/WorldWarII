@@ -7,6 +7,24 @@ extends RefCounted
 static func key(objective: Dictionary, index: int) -> String:
 	return String(objective.get("id", "secondary_%d" % index))
 
+static func required_keys(objective: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	var raw_requires: Variant = objective.get("requires", [])
+	if typeof(raw_requires) == TYPE_STRING:
+		out.append(String(raw_requires))
+	elif typeof(raw_requires) == TYPE_ARRAY:
+		for value in raw_requires:
+			var required_key := String(value)
+			if required_key != "":
+				out.append(required_key)
+	return out
+
+static func is_unlocked(objective: Dictionary, completed: Dictionary) -> bool:
+	for required_key in required_keys(objective):
+		if not completed.has(required_key):
+			return false
+	return true
+
 static func objective_type(objective: Dictionary) -> String:
 	return String(objective.get("type", "capture"))
 

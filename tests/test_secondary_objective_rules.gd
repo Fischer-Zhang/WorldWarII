@@ -116,5 +116,15 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: faction applicability should honor defaults, explicit all, and mismatches")
 
+	var chained_objective := {"requires": ["spot_cache", "clear_mg"]}
+	if SecondaryObjectiveRules.required_keys({"requires": "spot_cache"}) == ["spot_cache"] \
+			and SecondaryObjectiveRules.required_keys(chained_objective) == ["spot_cache", "clear_mg"] \
+			and not SecondaryObjectiveRules.is_unlocked(chained_objective, {"spot_cache": true}) \
+			and SecondaryObjectiveRules.is_unlocked(chained_objective, {"spot_cache": true, "clear_mg": true}):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: objective prerequisites should parse and gate unlock state")
+
 	print("SecondaryObjectiveRules tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

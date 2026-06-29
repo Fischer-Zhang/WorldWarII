@@ -187,7 +187,60 @@ func _run() -> void:
 				printerr("FAIL: secondary objective should grant XP once and clear overlay; xp %d->%d events=%d overlays=%d" % [
 					before_xp, int(player_unit.xp), secondary_events, battle.hex_map.objective_overlays.size(),
 				])
+
+			var chained_coord := Vector2i(-999, -999)
+			for c in battle.hex_map.tiles.keys():
+				if battle.hex_map.unit_at(c) == null and c != secondary_coord:
+					chained_coord = c
+					break
+			if chained_coord == Vector2i(-999, -999):
+				fail_count += 1
+				printerr("FAIL: could not stage an empty chained secondary objective hex")
+			else:
+				var chained_offset := _axial_to_offset(chained_coord)
+				battle.scenario["secondary_objectives"] = [
+					{
+						"id": "chain_recon",
+						"type": "recon_hex",
+						"label": "偵察補給線",
+						"faction": battle.player_faction_id,
+						"target": [secondary_offset.x, secondary_offset.y],
+						"rewards": [{"type": "xp", "amount": 1}],
+					},
+					{
+						"id": "chain_cache",
+						"label": "後續補給",
+						"faction": battle.player_faction_id,
+						"target": [chained_offset.x, chained_offset.y],
+						"requires": ["chain_recon"],
+						"rewards": [{"type": "xp", "amount": 1}],
+					},
+				]
+				battle.captured_secondary_objectives.clear()
+				battle._apply_player_objective_pulse()
+				var locked_overlay_count: int = battle.hex_map.objective_overlays.size()
+				var chain_before_xp := int(player_unit.xp)
+				battle.hex_map.move_unit(player_unit, chained_coord, 0.0)
+				player_unit.has_moved = false
+				var locked_text: String = battle._check_secondary_objective_capture(player_unit)
+				battle.captured_secondary_objectives["chain_recon"] = true
+				battle._apply_player_objective_pulse()
+				var unlocked_overlay_count: int = battle.hex_map.objective_overlays.size()
+				var unlocked_text: String = battle._check_secondary_objective_capture(player_unit)
+				if locked_overlay_count == 2 \
+						and unlocked_overlay_count == 2 \
+						and locked_text == "" \
+						and unlocked_text.find("後續補給") != -1 \
+						and int(player_unit.xp) == chain_before_xp + 1:
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: chained secondary objective should stay hidden and locked until prerequisite completes; overlays %d/%d text %s/%s xp %d->%d" % [
+						locked_overlay_count, unlocked_overlay_count, locked_text, unlocked_text,
+						chain_before_xp, int(player_unit.xp),
+					])
 			battle.scenario = original_scenario
+			battle.captured_secondary_objectives.clear()
 
 		# Hold-turn secondary objectives progress at faction end-turn, reset when
 		# the point is empty, and pay out only once when the required hold is met.

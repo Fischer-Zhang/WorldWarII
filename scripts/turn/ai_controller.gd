@@ -1168,6 +1168,8 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
+		if not SecondaryObjectiveRules.is_unlocked(objective, captured):
+			continue
 		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
 		var target_coord_value: Variant = SecondaryObjectiveRules.target_coord(objective, battle.units)
@@ -1224,6 +1226,8 @@ func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
 		var objective: Dictionary = objectives[i]
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
+			continue
+		if not SecondaryObjectiveRules.is_unlocked(objective, captured):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "destroy_unit":
 			continue
