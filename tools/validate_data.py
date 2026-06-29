@@ -757,6 +757,24 @@ def validate_conquest(errors: list[str]) -> None:
     for country_id in sorted(starting_owners - supply_source_owners):
         fail(errors, path, f"country {country_id!r} needs at least one starting supply_source region")
 
+    for country_id, country in countries.items():
+        if not isinstance(country, dict):
+            continue
+        agenda = country.get("agenda_targets", {})
+        if "agenda_targets" in country and not isinstance(agenda, dict):
+            fail(errors, path, f"country {country_id!r} agenda_targets must be an object")
+            continue
+        if isinstance(agenda, dict):
+            for target_id, score in agenda.items():
+                if str(target_id) not in region_ids:
+                    fail(errors, path, f"country {country_id!r} agenda target {target_id!r} is unknown")
+                    continue
+                try:
+                    if int(score) <= 0:
+                        fail(errors, path, f"country {country_id!r} agenda target {target_id!r} score must be positive")
+                except (TypeError, ValueError):
+                    fail(errors, path, f"country {country_id!r} agenda target {target_id!r} score must be an integer")
+
     theater_objectives = conquest.get("theater_objectives", [])
     if "theater_objectives" in conquest and not isinstance(theater_objectives, list):
         fail(errors, path, "theater_objectives must be a list when present")

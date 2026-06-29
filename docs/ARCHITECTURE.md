@@ -208,6 +208,10 @@ Player-fought tactical flow:
 7. Result panel returns to conquest.
 8. `ConquestManager.resolve_battle_result` or `resolve_defense_result` updates region owner, strength and surviving garrisons.
 
+Country `agenda_targets` in `data/conquest_map.json` add deterministic strategic
+AI pressure toward authored priority regions without changing tactical AI
+scoring.
+
 Owned regions can spend local strength on deterministic development actions through
 `ConquestManager.develop_region`: industry raises production, fortification raises
 strategic and generated tactical defense strength, and logistics upgrades ports or
@@ -217,8 +221,8 @@ duplicate their cost, ownership or cap rules.
 Theater objectives in `data/conquest_map.json` group several regions into
 strategic goals. `ConquestManager.theater_objective_status` evaluates them from
 current ownership, and completed theater objectives add deterministic
-reinforcement to their controlled supplied regions during strategic end-turn
-resolution.
+reinforcement to their player-controlled supplied regions during strategic
+end-turn resolution.
 
 Strategic end-turn first computes supply from owned `supply_source` regions. Rail links and owned port-to-port links extend supply at lower cost than road-only neighbors; cut-off regions reinforce more slowly. AI-vs-AI conquest moves still use deterministic strategic resolution during `end_turn`.
 

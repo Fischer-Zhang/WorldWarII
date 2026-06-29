@@ -5,27 +5,69 @@
   "countries": {
     "germany": {
       "name_zh": "德國",
-      "color": "#a86632"
+      "color": "#a86632",
+      "agenda_targets": {
+        "britain": 4,
+        "moscow": 5,
+        "ukraine": 3,
+        "poland": 2,
+        "north_sea": 2,
+        "middle_east": 2
+      }
     },
     "soviet": {
       "name_zh": "蘇聯",
-      "color": "#3f7f4a"
+      "color": "#3f7f4a",
+      "agenda_targets": {
+        "poland": 4,
+        "germany": 5,
+        "ukraine": 3,
+        "leningrad": 3
+      }
     },
     "britain": {
       "name_zh": "英國",
-      "color": "#2f6fb0"
+      "color": "#2f6fb0",
+      "agenda_targets": {
+        "atlantic": 4,
+        "maghreb": 3,
+        "egypt": 4,
+        "middle_east": 3,
+        "india": 3
+      }
     },
     "usa": {
       "name_zh": "美國",
-      "color": "#7b4bb3"
+      "color": "#7b4bb3",
+      "agenda_targets": {
+        "pacific": 4,
+        "north_pacific": 3,
+        "central_pacific": 4,
+        "japan_home": 5,
+        "atlantic": 3
+      }
     },
     "japan": {
       "name_zh": "日本",
-      "color": "#c12a6c"
+      "color": "#c12a6c",
+      "agenda_targets": {
+        "north_china": 4,
+        "central_china": 4,
+        "south_china": 3,
+        "southeast_asia": 4,
+        "central_pacific": 3,
+        "india": 2
+      }
     },
     "china": {
       "name_zh": "中國",
-      "color": "#d6b13f"
+      "color": "#d6b13f",
+      "agenda_targets": {
+        "manchuria": 5,
+        "north_china": 4,
+        "central_china": 3,
+        "south_china": 3
+      }
     },
     "neutral": {
       "name_zh": "中立勢力",

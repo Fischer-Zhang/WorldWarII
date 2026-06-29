@@ -294,7 +294,7 @@ static func end_turn(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var actions_left := int(conquest.get("ai_actions_left", 0))
 	var messages: Array = conquest.get("ai_messages", [])
 	while actions_left > 0:
-		var attack := _best_ai_attack_global(regions, player_country)
+		var attack := _best_ai_attack_global(regions, player_country, map_data)
 		if attack.is_empty():
 			break
 		var from_id := String(attack["from"])
@@ -592,7 +592,7 @@ static func _development_description(region: Dictionary, action_id: String) -> S
 		_:
 			return ""
 
-static func _best_ai_attack_global(regions: Dictionary, player_country: String) -> Dictionary:
+static func _best_ai_attack_global(regions: Dictionary, player_country: String, map_data: Dictionary = {}) -> Dictionary:
 	# Best AI attack across all enemy countries. AI-vs-AI attacks are returned
 	# only when the attacker would win the abstract resolution; attacks on a
 	# player region are returned when the attacker fields a real force — the hex
@@ -617,12 +617,19 @@ static func _best_ai_attack_global(regions: Dictionary, player_country: String) 
 			if not is_player and attack_power <= defense_power:
 				continue
 			var score := (attack_power - defense_power) + int(target.get("production", 0))
+			score += _country_agenda_score(map_data, owner, to_id)
 			if is_player:
 				score += 2
 			if score > best_score:
 				best_score = score
 				best = {"from": region_id, "to": to_id, "country": owner}
 	return best
+
+static func _country_agenda_score(map_data: Dictionary, country_id: String, target_region_id: String) -> int:
+	var countries: Dictionary = map_data.get("countries", {})
+	var country: Dictionary = countries.get(country_id, {})
+	var agenda: Dictionary = country.get("agenda_targets", {})
+	return int(agenda.get(target_region_id, 0))
 
 static func _region_name(region: Dictionary) -> String:
 	return String(region.get("name_zh", region.get("id", "")))

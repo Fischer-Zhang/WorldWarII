@@ -62,6 +62,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_ai_country_agenda_breaks_ties():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_ai_consolidate():
 		pass_count += 1
 	else:
@@ -490,6 +495,26 @@ func _test_ai_multi_attack_favorable() -> bool:
 			and String(citadel.get("owner", "")) == "neutral":
 		return true
 	printerr("FAIL: strong AI should take both weak neighbours and skip the too-strong citadel")
+	return false
+
+func _test_ai_country_agenda_breaks_ties() -> bool:
+	var map_data := {
+		"countries": {
+			"germany": {"agenda_targets": {"moscow": 5}},
+			"soviet": {},
+			"usa": {},
+			"neutral": {},
+		},
+	}
+	var regions := {
+		"berlin": {"id": "berlin", "owner": "germany", "strength": 8, "production": 2, "neighbors": ["ordinary", "moscow"]},
+		"ordinary": {"id": "ordinary", "owner": "neutral", "strength": 2, "production": 3, "neighbors": ["berlin"]},
+		"moscow": {"id": "moscow", "owner": "soviet", "strength": 2, "production": 3, "neighbors": ["berlin"]},
+	}
+	var attack := ConquestManager._best_ai_attack_global(regions, "usa", map_data)
+	if String(attack.get("to", "")) == "moscow" and String(attack.get("country", "")) == "germany":
+		return true
+	printerr("FAIL: country agenda should prefer Germany's Moscow target over an equal ordinary target: %s" % str(attack))
 	return false
 
 func _test_ai_consolidate() -> bool:
