@@ -30,6 +30,7 @@ const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
 const W_SECONDARY_REWARD := 0.35
+const W_SECONDARY_CHAIN_FUTURE := 0.25
 const SECONDARY_REWARD_PULL_RADIUS := 4.0
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
@@ -1181,7 +1182,9 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 		var reward_value := SecondaryObjectiveRules.tactical_reward_value(SecondaryObjectiveRules.rewards(objective))
 		var reward_proximity: float = max(0.0, SECONDARY_REWARD_PULL_RADIUS - float(distance))
 		var reward_pull := reward_proximity * reward_value * W_SECONDARY_REWARD
-		var score := -float(distance) * base_weight + reward_pull
+		var future_value := _secondary_objective_future_value(objectives, key, faction_id, captured)
+		var future_pull := reward_proximity * future_value * W_SECONDARY_CHAIN_FUTURE
+		var score := -float(distance) * base_weight + reward_pull + future_pull
 		var objective_type := SecondaryObjectiveRules.objective_type(objective)
 		if score > best:
 			best = score
@@ -1195,11 +1198,61 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 				"base_weight": base_weight,
 				"reward_value": reward_value,
 				"reward_pull": reward_pull,
+				"future_value": future_value,
+				"future_pull": future_pull,
 				"weight": base_weight,
 			}
 	if best == -INF:
 		return {"score": 0.0}
 	return best_info
+
+func _secondary_objective_future_value(
+	objectives: Array,
+	prerequisite_key: String,
+	faction_id: String,
+	captured: Dictionary
+) -> float:
+	var best := 0.0
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var objective: Dictionary = objectives[i]
+		var key := SecondaryObjectiveRules.key(objective, i)
+		if captured.has(key):
+			continue
+		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
+			continue
+		var required_keys := SecondaryObjectiveRules.required_keys(objective)
+		if not required_keys.has(prerequisite_key):
+			continue
+		if not _secondary_objective_would_unlock(required_keys, prerequisite_key, captured):
+			continue
+		var value := SecondaryObjectiveRules.tactical_reward_value(SecondaryObjectiveRules.rewards(objective))
+		value += _secondary_objective_future_strategic_value(objective)
+		best = max(best, value)
+	return best
+
+func _secondary_objective_would_unlock(
+	required_keys: Array[String],
+	prerequisite_key: String,
+	captured: Dictionary
+) -> bool:
+	for required_key in required_keys:
+		if required_key == prerequisite_key:
+			continue
+		if not captured.has(required_key):
+			return false
+	return true
+
+func _secondary_objective_future_strategic_value(objective: Dictionary) -> float:
+	var value := 0.0
+	for effect in SecondaryObjectiveRules.strategic_effects(objective):
+		match String(effect.get("type", "")):
+			"campaign_bonus_points":
+				value += float(effect.get("amount", 0)) * 0.6
+			"conquest_reduce_enemy_strength":
+				value += float(effect.get("amount", 0)) * 0.45
+	return value
 
 func _secondary_objective_position_weight(objective: Dictionary) -> float:
 	match SecondaryObjectiveRules.objective_type(objective):

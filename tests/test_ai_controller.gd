@@ -282,7 +282,59 @@ func _init() -> void:
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
-	# 6c) Tactical secondary rewards should increase objective pull without bypassing completion guards.
+	# 6c) Prerequisite objectives should inherit a small future pull from valuable locked follow-ups.
+	battle.scenario = {
+		"secondary_objectives": [
+			{
+				"id": "spot_battery",
+				"type": "recon_hex",
+				"faction": "axis",
+				"target": [3, 0],
+				"rewards": [{"type": "xp", "amount": 1}],
+			},
+			{
+				"id": "silence_battery",
+				"type": "hold_turns",
+				"faction": "axis",
+				"target": [5, 0],
+				"required_turns": 2,
+				"rewards": [{"type": "suppress_enemies", "amount": 1, "radius": 2}],
+				"requires": ["spot_battery"],
+			},
+		]
+	}
+	battle.captured_secondary_objectives.clear()
+	var chain_prereq: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(3, 0))
+	battle.scenario["secondary_objectives"][1]["requires"] = ["other_objective"]
+	var plain_prereq: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(3, 0))
+	battle.scenario["secondary_objectives"][1]["requires"] = ["spot_battery", "other_objective"]
+	var blocked_multi_prereq: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(3, 0))
+	battle.captured_secondary_objectives["other_objective"] = true
+	var ready_multi_prereq: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(3, 0))
+	battle.captured_secondary_objectives.clear()
+	battle.scenario["secondary_objectives"][1]["requires"] = ["spot_battery"]
+	battle.captured_secondary_objectives["spot_battery"] = true
+	var unlocked_followup: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(5, 0))
+	battle.captured_secondary_objectives["silence_battery"] = true
+	var completed_chain: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(5, 0))
+	if String(chain_prereq.get("key", "")) == "spot_battery" \
+			and float(chain_prereq.get("future_value", 0.0)) > 0.0 \
+			and float(chain_prereq.get("future_pull", 0.0)) > 0.0 \
+			and float(chain_prereq.get("score", 0.0)) > float(plain_prereq.get("score", 0.0)) \
+			and float(blocked_multi_prereq.get("future_pull", 0.0)) == 0.0 \
+			and float(ready_multi_prereq.get("future_pull", 0.0)) > 0.0 \
+			and String(unlocked_followup.get("key", "")) == "silence_battery" \
+			and float(completed_chain.get("score", 0.0)) == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: prerequisite secondary should score locked follow-up future value; chain=%s plain=%s blocked=%s ready=%s unlocked=%s completed=%s" % [
+			str(chain_prereq), str(plain_prereq), str(blocked_multi_prereq), str(ready_multi_prereq), str(unlocked_followup), str(completed_chain),
+		])
+	battle.scenario = {}
+	battle.captured_secondary_objectives.clear()
+
+	# 6d) Tactical secondary rewards should increase objective pull without bypassing completion guards.
 	battle.scenario = {
 		"secondary_objectives": [{
 			"id": "xp_cache",
