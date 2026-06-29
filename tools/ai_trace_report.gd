@@ -185,6 +185,16 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"notes": "Hard AI should expose the one-ply retaliation penalty in candidate components.",
 		},
 		{
+			"id": "wounded_veteran_withdraw",
+			"title": "Wounded veteran withdrawal",
+			"difficulty": "hard",
+			"attacker": _veteran_unit("medium_tank", "axis", Vector2i(0, 0), 3, 2, data_loader),
+			"enemies": [
+				{"unit": _unit("medium_tank", "allies", Vector2i(4, 0), data_loader), "visible": true},
+			],
+			"notes": "A low-HP veteran with no kill on offer should show a positive preservation pull toward safer hexes instead of trading itself away.",
+		},
+		{
 			"id": "rally_vs_action",
 			"title": "Suppressed rally choice",
 			"difficulty": "normal",
@@ -289,14 +299,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead | preservation |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -319,6 +329,7 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("objective", 0.0)),
 			_objective_detail_text(c.get("objective_detail", {})),
 			_score(c.get("lookahead", 0.0)),
+			_score(c.get("preservation", 0.0)),
 		])
 	return "\n".join(lines)
 
@@ -329,6 +340,12 @@ func _unit(type_id: String, faction: String, coord: Vector2i, data_loader) -> St
 func _unit_with_hp(type_id: String, faction: String, coord: Vector2i, hp: int, data_loader) -> StubUnit:
 	var unit := _unit(type_id, faction, coord, data_loader)
 	unit.hp = hp
+	return unit
+
+func _veteran_unit(type_id: String, faction: String, coord: Vector2i, hp: int, rank: int, data_loader) -> StubUnit:
+	var unit := _unit(type_id, faction, coord, data_loader)
+	unit.hp = hp
+	unit.rank = rank
 	return unit
 
 func _dug_in_unit(type_id: String, faction: String, coord: Vector2i, dig_in: int, data_loader) -> StubUnit:

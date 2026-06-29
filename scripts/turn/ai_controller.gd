@@ -46,10 +46,24 @@ const ENGINEER_BREACH_SETUP_BONUS := 1.4
 const BREACH_SETUP_BAND := 3
 const ARMOR_STANDOFF_SETUP_BAND := 2
 
+# Unit-preservation / withdrawal shaping.
+const W_PRESERVATION := 1.0
+const PRESERVE_HP_THRESHOLD := 0.5  # below half HP the safety pull starts to rise
+const PRESERVE_RANK_WEIGHT := 0.35  # each veteran rank amplifies how hard we pull back
+# Anti gang-up lookahead: concentrated fire is summed but discounted geometrically.
+const GANG_UP_FALLOFF := 0.5
+# Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
+const MISTAKE_JITTER_SCALE := 0.6
+
+# Difficulty is shaped on four axes, not just attack weighting:
+#   - attack_w / kill_bonus / exposure_w: how aggressively it values trades
+#   - lookahead: whether it foresees (summed, anti gang-up) player retaliation
+#   - preservation_w: how hard it pulls wounded/veteran units to safety
+#   - mistake_rate: deterministic positioning jitter so Easy reads as fallible
 const DIFFICULTY_PROFILE := {
-	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false},
-	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead": false},
-	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead": true},
+	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false, "preservation_w": 0.0, "mistake_rate": 2},
+	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead": false, "preservation_w": 0.5, "mistake_rate": 0},
+	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead": true,  "preservation_w": 1.0, "mistake_rate": 0},
 }
 
 var personality: String = "aggressive"
@@ -61,6 +75,8 @@ var _attack_w: float = 2.5
 var _kill_bonus: float = 5.0
 var _exposure_w: float = 0.5
 var _use_lookahead: bool = false
+var _preservation_w: float = 0.5
+var _mistake_rate: int = 0
 var _data_loader = null
 
 # Per-turn cache: player_unit -> Dictionary[Vector2i, int] (reachable hexes)
@@ -75,6 +91,8 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 	_kill_bonus = float(p["kill_bonus"])
 	_exposure_w = float(p["exposure_w"])
 	_use_lookahead = bool(p["lookahead"])
+	_preservation_w = float(p.get("preservation_w", 0.0))
+	_mistake_rate = int(p.get("mistake_rate", 0))
 
 func plan_for_unit(unit) -> Dictionary:
 	# Returns: { "move_to": Vector2i, "attack": Unit | null, "action": String, "score": float, "reachable": Dictionary }
@@ -362,14 +380,32 @@ func _score_position_breakdown(
 	var secondary_objective_term: float = float(objective_breakdown.get("secondary", 0.0))
 	var objective_term: float = primary_objective_term + secondary_objective_term
 
-	# 1-ply lookahead: discount by worst counter the player could deliver
-	# *after* we land on this hex. Only enabled on Hard difficulty.
+	# 1-ply lookahead: discount by the (anti gang-up) counter the player could
+	# deliver *after* we land on this hex. Only enabled on Hard difficulty.
 	var lookahead_term := 0.0
 	if _use_lookahead and not visible_enemies.is_empty():
 		var counter_dmg: int = _lookahead_counter_damage(unit, pos, visible_enemies, hex_map, atk_def)
 		lookahead_term = -float(counter_dmg) * W_LOOKAHEAD
 
-	var raw_total: float = dist_term + attack_term + exposure_term + terrain_term + role_term + objective_term + lookahead_term
+	# Unit preservation: pull wounded (and especially veteran) units toward
+	# safety — distance from threats and cover — but only when no profitable
+	# kill is on offer here. Scale-based, not a hard "never fight below X HP"
+	# cap, so a clean kill still overrides the urge to retreat.
+	var preservation_term := 0.0
+	if _preservation_w > 0.0 and not visible_enemies.is_empty():
+		var need: float = _preservation_need(unit, atk_def)
+		if need > 0.0 and attack_term < _kill_bonus * _attack_w:
+			var safety: float = float(nearest) + float(terr_def.get("defense", 0)) * 0.5 - exposure * 0.5
+			preservation_term = need * _preservation_w * safety * W_PRESERVATION
+
+	# Easy AI makes deterministic positioning errors: a seed-free perturbation of
+	# (candidate hex + acting unit + turn) nudges the argmax off the optimum on
+	# close calls, so Easy reads as fallible without any RNG (determinism stays
+	# intact). Always 0 for Normal/Hard, leaving their scores bit-identical.
+	var mistake_term: float = _mistake_jitter(unit, pos)
+
+	var raw_total: float = dist_term + attack_term + exposure_term + terrain_term \
+		+ role_term + objective_term + lookahead_term + preservation_term + mistake_term
 	var total := _apply_personality(raw_total, attack_term, exposure_term)
 	return {
 		"distance": dist_term,
@@ -382,6 +418,8 @@ func _score_position_breakdown(
 		"objective": objective_term,
 		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
+		"preservation": preservation_term,
+		"mistake": mistake_term,
 		"raw_total": raw_total,
 		"total": total,
 	}
@@ -426,6 +464,33 @@ func _apply_personality(total: float, attack_term: float, exposure_term: float) 
 			return total - 0.5
 		_:
 			return total
+
+func _preservation_need(unit, atk_def: Dictionary) -> float:
+	# 0 while healthy; rises as HP drops below PRESERVE_HP_THRESHOLD and is
+	# amplified by veteran rank so leveled units are pulled back harder. Healthy
+	# units return 0, so preservation never makes a full-strength army passive.
+	var unit_max_hp: int = int(unit.max_hp) if int(unit.max_hp) > 0 else int(atk_def.get("hp", 1))
+	if unit_max_hp <= 0:
+		return 0.0
+	var hp_ratio: float = float(unit.hp) / float(unit_max_hp)
+	if hp_ratio >= PRESERVE_HP_THRESHOLD:
+		return 0.0
+	var low_hp: float = (PRESERVE_HP_THRESHOLD - hp_ratio) / PRESERVE_HP_THRESHOLD
+	var invest: float = min(1.0, float(unit.rank) * PRESERVE_RANK_WEIGHT)
+	return low_hp * (1.0 + invest)
+
+func _mistake_jitter(unit, pos: Vector2i) -> float:
+	# Deterministic positioning noise for Easy AI. Pure function of the candidate
+	# hex, the acting unit and the turn number — no RNG, no clock — so traces and
+	# replays stay reproducible. Magnitude is small enough to only flip near-ties.
+	if _mistake_rate <= 0:
+		return 0.0
+	var turn: int = _current_turn_number()
+	var seed_val: int = (int(pos.x) * 73856093) ^ (int(pos.y) * 19349663) \
+		^ (turn * 83492791) ^ (int(unit.coord.x) * 50331653) ^ (int(unit.coord.y) * 12582917) \
+		^ hash(String(unit.type_id))
+	var norm: float = float(seed_val & 0xffff) / 65535.0
+	return (norm * 2.0 - 1.0) * float(_mistake_rate) * MISTAKE_JITTER_SCALE
 
 func _best_attack_value(
 	unit, pos: Vector2i, visible_enemies: Array, hex_map,
@@ -1192,12 +1257,16 @@ func _lookahead_counter_damage(
 	hex_map,
 	ai_def: Dictionary,
 ) -> int:
-	# Worst damage any visible player unit could deliver to `ai_unit` if it
-	# were standing on `candidate`. Approximates the player's next-turn
-	# best response with a single-unit attack.
+	# Threat any visible player could bring to `ai_unit` on `candidate` next turn.
+	# Unlike a single-attacker max, this sums EVERY player that can reach attack
+	# range — sorted high-to-low and discounted geometrically (GANG_UP_FALLOFF) —
+	# so concentrated fire reads as dangerous (the AI stops walking a lone unit
+	# into a cluster) without the raw sum causing total paralysis. If the combined
+	# fire could destroy the unit, its remaining HP is added so the AI refuses to
+	# step a wounded unit into an outright kill-zone.
 	_ensure_player_reach_cached(visible_players, hex_map)
 	var ai_terrain_def: Dictionary = _get_terrain_def(hex_map.terrain_at(candidate))
-	var worst := 0
+	var threats: Array[int] = []
 	for p in visible_players:
 		var player = p
 		var pdef: Dictionary = _get_unit_def(player.type_id)
@@ -1223,9 +1292,22 @@ func _lookahead_counter_damage(
 			plain, ai_terrain_def, 1,
 			ai_unit.dig_in_level, p_mods, ai_mods,
 		)
-		if result.damage_to_defender > worst:
-			worst = result.damage_to_defender
-	return worst
+		if result.damage_to_defender > 0:
+			threats.append(int(result.damage_to_defender))
+	if threats.is_empty():
+		return 0
+	threats.sort()
+	threats.reverse()  # highest-damage attacker counts fully, the rest discounted
+	var aggregate := 0.0
+	var falloff := 1.0
+	var true_sum := 0
+	for d in threats:
+		aggregate += float(d) * falloff
+		falloff *= GANG_UP_FALLOFF
+		true_sum += d
+	if true_sum >= int(ai_unit.hp):
+		aggregate += float(ai_unit.hp)
+	return int(round(aggregate))
 
 func _get_unit_def(type_id: String) -> Dictionary:
 	if _data_loader != null:

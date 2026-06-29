@@ -69,6 +69,12 @@ expectations include:
 - engineers value entrenched urban/high-cover breach targets
 - attack value includes suppression and dig-in break
 - suppressed units can Rally when recovery is worth more than other actions
+- wounded/veteran units get a scale-based preservation pull toward safety when no
+  profitable kill is available, but a clean kill still overrides retreat
+- Hard's lookahead sums concentrated player retaliation (anti gang-up), not just
+  the single worst attacker, and adds a kill-zone penalty when the sum is lethal
+- difficulty shapes four axes (trade aggression, lookahead, preservation, Easy
+  deterministic mistake budget); keep any Easy "mistakes" seed-free and reproducible
 
 For balance or scenario work:
 

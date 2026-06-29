@@ -727,5 +727,127 @@ func _init() -> void:
 			str(trace), str(direct_plan),
 		])
 
+	# 21) Hard lookahead should treat concentrated fire as worse than one attacker (anti gang-up).
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var gang_ai := AIController.new(battle, "aggressive", "hard")
+	gang_ai._data_loader = ai._data_loader
+	var lone_tank := make_unit("medium_tank", "axis", Vector2i(0, 0), 16)
+	var gang_p1 := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	var gang_p2 := make_unit("infantry", "allies", Vector2i(-1, 0), 10)
+	var gang_p3 := make_unit("infantry", "allies", Vector2i(0, 1), 10)
+	var lone_def: Dictionary = gang_ai._get_unit_def("medium_tank")
+	var single_threat: int = gang_ai._lookahead_counter_damage(
+		lone_tank, Vector2i(0, 0), [gang_p1], battle.hex_map, lone_def
+	)
+	var triple_threat: int = gang_ai._lookahead_counter_damage(
+		lone_tank, Vector2i(0, 0), [gang_p1, gang_p2, gang_p3], battle.hex_map, lone_def
+	)
+	if triple_threat > single_threat:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: gang-up lookahead should exceed single attacker, single %d triple %d" % [single_threat, triple_threat])
+
+	# 22) Preservation need is 0 for healthy units and rises (amplified by rank) for wounded ones.
+	var healthy_vet := make_unit("medium_tank", "axis", Vector2i(0, 0), 16)
+	healthy_vet.rank = 3
+	var hurt_green := make_unit("medium_tank", "axis", Vector2i(0, 0), 3)
+	hurt_green.max_hp = 16
+	var hurt_vet := make_unit("medium_tank", "axis", Vector2i(0, 0), 3)
+	hurt_vet.max_hp = 16
+	hurt_vet.rank = 2
+	if gang_ai._preservation_need(healthy_vet, lone_def) == 0.0 \
+			and gang_ai._preservation_need(hurt_vet, lone_def) > gang_ai._preservation_need(hurt_green, lone_def) \
+			and gang_ai._preservation_need(hurt_green, lone_def) > 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: preservation need expected 0 healthy, vet>green>0 wounded; healthy %.2f green %.2f vet %.2f" % [
+			gang_ai._preservation_need(healthy_vet, lone_def),
+			gang_ai._preservation_need(hurt_green, lone_def),
+			gang_ai._preservation_need(hurt_vet, lone_def),
+		])
+
+	# 22b) A wounded veteran on Hard with no kill available should prefer a safe hex over advancing.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var withdraw_vet := make_unit("medium_tank", "axis", Vector2i(0, 0), 3)
+	withdraw_vet.max_hp = 16
+	withdraw_vet.rank = 2
+	var standoff_threat := make_unit("medium_tank", "allies", Vector2i(6, 0), 16)
+	var withdraw_known := [{"coord": standoff_threat.coord, "visible": true, "unit": standoff_threat}]
+	var withdraw_visible := [standoff_threat]
+	var advance_score: float = gang_ai._score_position(
+		withdraw_vet, Vector2i(4, 0), withdraw_known, withdraw_visible, battle.hex_map, lone_def, {standoff_threat.coord: true}
+	)
+	var safe_score: float = gang_ai._score_position(
+		withdraw_vet, Vector2i(0, 0), withdraw_known, withdraw_visible, battle.hex_map, lone_def, {standoff_threat.coord: true}
+	)
+	# Same situation, full HP: preservation should NOT fire, so the inward pull dominates.
+	var healthy_mover := make_unit("medium_tank", "axis", Vector2i(0, 0), 16)
+	var healthy_advance: float = gang_ai._score_position(
+		healthy_mover, Vector2i(4, 0), withdraw_known, withdraw_visible, battle.hex_map, lone_def, {standoff_threat.coord: true}
+	)
+	var healthy_safe: float = gang_ai._score_position(
+		healthy_mover, Vector2i(0, 0), withdraw_known, withdraw_visible, battle.hex_map, lone_def, {standoff_threat.coord: true}
+	)
+	# Preservation should make the wounded vet favor safety much more strongly than a
+	# healthy unit in the identical spot (Hard's lookahead already nudges both back).
+	if safe_score > advance_score \
+			and (safe_score - advance_score) > (healthy_safe - healthy_advance):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: preservation should widen the wounded vet's safety preference; wounded gap %.2f (safe %.2f adv %.2f) healthy gap %.2f (safe %.2f adv %.2f)" % [
+			safe_score - advance_score, safe_score, advance_score,
+			healthy_safe - healthy_advance, healthy_safe, healthy_advance,
+		])
+
+	# 23) A clean kill must override preservation — no cowardly retreat from a free kill.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var wounded_killer := make_unit("medium_tank", "axis", Vector2i(0, 0), 3)
+	wounded_killer.max_hp = 16
+	wounded_killer.rank = 2
+	var killable_prey := make_unit("infantry", "allies", Vector2i(1, 0), 1)
+	battle.units = [wounded_killer, killable_prey]
+	battle.hex_map.occupants[wounded_killer.coord] = wounded_killer
+	battle.hex_map.occupants[killable_prey.coord] = killable_prey
+	battle.visibility_by_faction = {"axis": {killable_prey.coord: true}}
+	var kill_plan: Dictionary = gang_ai.plan_for_unit(wounded_killer)
+	if String(kill_plan.get("action", "")) == "attack" and kill_plan.get("attack") == killable_prey:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: wounded unit should still take a free kill over retreating, got %s" % str(kill_plan))
+
+	# 24) Difficulty ladder: Easy gets deterministic jitter + no preservation; Normal/Hard don't blunder.
+	var easy_ai := AIController.new(battle, "aggressive", "easy")
+	easy_ai._data_loader = ai._data_loader
+	var jitter_unit := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var j1: float = easy_ai._mistake_jitter(jitter_unit, Vector2i(2, 1))
+	var j1_again: float = easy_ai._mistake_jitter(jitter_unit, Vector2i(2, 1))
+	var j2: float = easy_ai._mistake_jitter(jitter_unit, Vector2i(40, 37))
+	var normal_jitter: float = ai._mistake_jitter(jitter_unit, Vector2i(2, 1))
+	if j1 == j1_again and j1 != j2 and normal_jitter == 0.0 \
+			and easy_ai._preservation_w == 0.0 and easy_ai._mistake_rate > 0 \
+			and ai._mistake_rate == 0 and gang_ai._preservation_w > ai._preservation_w:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: difficulty ladder expected easy jitter deterministic+varied, normal none; j1 %.3f again %.3f j2 %.3f normal %.3f" % [
+			j1, j1_again, j2, normal_jitter,
+		])
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
