@@ -19,6 +19,7 @@ def main() -> None:
     report = scenario_probe.generate_report()
     main_scenario_count = count_main_battle_scenarios()
     campaign_count = count_non_tutorial_campaigns()
+    conquest_count = count_conquest_scenarios()
     require("breach path" in report, "scenario probe missing breach path column")
     require("breach tempo" in report, "scenario probe missing breach tempo column")
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
@@ -135,11 +136,30 @@ def main() -> None:
         in report,
         "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
     )
+    conquest_section = section_text(report, "## Conquest Secondary Coverage")
     conquest_rows = [
-        line for line in report.splitlines()
+        line for line in conquest_section.splitlines()
         if line.startswith("| conq_") and line.endswith("| covered |")
     ]
-    require(len(conquest_rows) == 10, "Every conquest template should have covered strategic secondary pressure")
+    require(
+        len(conquest_rows) == conquest_count,
+        "Every conquest template should have covered strategic secondary pressure",
+    )
+    for line in conquest_rows:
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        require(len(parts) >= 5, "Conquest secondary coverage rows should expose all columns")
+        scenario_id = parts[0]
+        secondary_count = int(parts[1])
+        strategic_count = int(parts[2])
+        pressure = int(parts[3])
+        require(
+            secondary_count >= 2 and strategic_count >= 2,
+            f"{scenario_id} should have at least two conquest secondary objectives",
+        )
+        require(
+            strategic_count == secondary_count and pressure < 0,
+            f"{scenario_id} should make every conquest secondary objective apply enemy-strength pressure",
+        )
     require(
         "| conq_cbi_jungle | 2 | 2 | -3 | covered |" in report
         and "| conq_atlantic_convoy | 2 | 2 | -2 | covered |" in report,
@@ -211,6 +231,18 @@ def count_main_battle_scenarios() -> int:
             scenario = json.load(fh)
         scenario_id = str(scenario.get("id", ""))
         if scenario_probe.is_main_battle_scenario(scenario_id):
+            total += 1
+    return total
+
+
+def count_conquest_scenarios() -> int:
+    total = 0
+    root = Path(__file__).resolve().parents[1]
+    for path in sorted(glob.glob(str(root / "data" / "scenarios" / "conq_*.json"))):
+        with Path(path).open("r", encoding="utf-8") as fh:
+            scenario = json.load(fh)
+        scenario_id = str(scenario.get("id", ""))
+        if scenario_id.startswith("conq_"):
             total += 1
     return total
 
