@@ -29,8 +29,9 @@ def main() -> None:
         "Sedan should show the recon secondary objective with its target",
     )
     require(
-        "突擊工兵 [destroy 突擊工兵@13,10]" in report
-        and "德軍遠程砲 [destroy 150 mm sFH@18,2]" in report,
+        "突擊工兵 [destroy 突擊工兵@13,10 after stalingrad_spot_engineers]" in report
+        and "德軍遠程砲 [destroy 150 mm sFH@18,2 after nijmegen_south_bridgehead]" in report
+        and "壓制馬克沁火點 [destroy Maxim@4,4 after southern_sweep]" in report,
         "Destroy secondary objectives should show their marked unit targets",
     )
     require("east_10_berlin_1945" in report, "scenario report missing Berlin row")

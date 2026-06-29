@@ -6,11 +6,11 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00_sandbox | allies mg_team:1; axis artillery:1 | allies 24/384 (6%); axis 54/384 (14%) | axis 43/384 (11%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | none | none |
 | 01_sedan_1940 | allies mg_team:2; axis artillery:1 | axis 33/384 (9%) | axis 64/384 (17%), spots 1 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 1/3 | axis target 20,14 own min 2 enemy min 0 | 橋頭補給 15,5 capture min 7 XP 1, repair 2; 中路渡口 13,5 recon min 9 XP 1, enemy supp +1 R2 | none |
-| 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 壓制馬克沁火點 4,4 destroy min 19 XP 1, enemy supp +1 R2; 南翼掃蕩 3,13 recon min 18 XP 1, enemy dig -1 R2 | none |
-| 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 突擊工兵 13,10 destroy min 7 XP 1, enemy supp +1 R2 | none |
+| 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 南翼掃蕩 3,13 recon min 18 XP 1, enemy dig -1 R2; 壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2 | none |
+| 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 標定突擊路線 13,10 recon min 7 XP 1, enemy dig -1 R2; 突擊工兵 13,10 destroy after stalingrad_spot_engineers min 7 XP 1, enemy supp +1 R2 | none |
 | 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 5,2 own min 17 enemy min 0 | 壓制 SU-152 4,0 destroy min 18 XP 1, repair 2; 北側高地偵察 18,2 recon min 4 XP 1, enemy dig -1 R2 | none |
 | 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0 | 鎮心補給 6,4 hold 2t min 0 XP 1, supp -2, reinforce -2t | allies +129.5; T7 3 units |
-| 06_market_garden_1944 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 55/384 (14%); axis 50/384 (13%) | none | allies: eng min 2, art 5/6, targets 6 | allies: eng turns 2 | allies: art move 5/6 | allies target 5,11 own min 7 enemy min 9 | 南岸橋頭 5,12 hold 2t min 8 XP 1, reinforce -2t; 德軍遠程砲 18,2 destroy min 12 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
+| 06_market_garden_1944 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 55/384 (14%); axis 50/384 (13%) | none | allies: eng min 2, art 5/6, targets 6 | allies: eng turns 2 | allies: art move 5/6 | allies target 5,11 own min 7 enemy min 9 | 南岸橋頭 5,12 hold 2t min 8 XP 1, reinforce -2t; 德軍遠程砲 18,2 destroy after nijmegen_south_bridgehead min 12 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
 | 07_bagration_1944 | axis artillery:1, mg_team:1; soviet artillery:1, mg_team:1 | axis 34/384 (9%); soviet 61/384 (16%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 2,4 own min 20 enemy min 1 | 奪取路口 3,4 capture min 19 XP 1, reinforce -2t; 壓制德軍砲位 1,2 destroy min 21 XP 1, enemy supp +1 R2 | soviet +77.6; T6 2 units |
 | blitz_00_poland_1939 | allies artillery:1, mg_team:1; axis artillery:1 | allies 27/384 (7%); axis 37/384 (10%) | axis 51/384 (13%), spots 0 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 1,1 own min 23 enemy min 0 | 摧毀 37mm 反戰車砲 3,3 destroy min 20 XP 1, repair 2; 偵察砲兵陣地 0,2 recon min 24 XP 1, enemy supp +1 R2 | none |
 | blitz_02_dunkirk_1940 | allies artillery:1, mg_team:1; axis artillery:1 | allies 38/384 (10%); axis 23/384 (6%) | axis 43/384 (11%), spots 0 | axis: eng none, art 0/4, targets 4 | axis: eng turns none | axis: art move 0/4 | axis target 5,0 own min 18 enemy min 0 | 堅守撤退出口 5,0 hold 2t min 0 XP 1, supp -2; 偵察裝甲縱隊 22,2 recon min 18 XP 1, enemy supp +1 R2 | none |
@@ -71,14 +71,15 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | --- | --- | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 橋頭補給 | capture 15,5 | axis | own 7 / enemy 9 | XP 1, repair 2 | damage recovery |
 | 01_sedan_1940 | 中路渡口 | recon 13,5 | axis | own 9 / enemy 11 | XP 1, enemy supp +1 R2 | tactical suppression reward R2 |
-| 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 | axis | own 19 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 02_kiev_1941 | 南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
-| 03_stalingrad_1942 | 突擊工兵 | destroy 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 after southern_sweep | axis | own 19 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 03_stalingrad_1942 | 標定突擊路線 | recon 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
+| 03_stalingrad_1942 | 突擊工兵 | destroy 13,10 after stalingrad_spot_engineers | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 | axis | own 18 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
 | 04_kursk_1943 | 北側高地偵察 | recon 18,2 | axis | own 4 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | 05_bastogne_1944 | 鎮心補給 | hold 2t 6,4 | allies | own 0 / enemy 3 | XP 1, supp -2, reinforce -2t | starts held; sustain reward; reinforce best T7->T5 |
 | 06_market_garden_1944 | 南岸橋頭 | hold 2t 5,12 | allies | own 8 / enemy 10 | XP 1, reinforce -2t | reinforce best T7->T5 |
-| 06_market_garden_1944 | 德軍遠程砲 | destroy 18,2 | allies | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 06_market_garden_1944 | 德軍遠程砲 | destroy 18,2 after nijmegen_south_bridgehead | allies | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 07_bagration_1944 | 奪取路口 | capture 3,4 | soviet | own 19 / enemy 0 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
 | 07_bagration_1944 | 壓制德軍砲位 | destroy 1,2 | soviet | own 21 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | blitz_00_poland_1939 | 摧毀 37mm 反戰車砲 | destroy 3,3 | axis | own 20 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
@@ -163,7 +164,7 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 2 | 0 | 2 | covered |
 | 02_kiev_1941 | 2 | 0 | 2 | covered |
-| 03_stalingrad_1942 | 1 | 0 | 1 | covered |
+| 03_stalingrad_1942 | 2 | 0 | 2 | covered |
 | 04_kursk_1943 | 2 | 0 | 2 | covered |
 | 05_bastogne_1944 | 1 | 0 | 1 | covered |
 | 06_market_garden_1944 | 2 | 0 | 2 | covered |

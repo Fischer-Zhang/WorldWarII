@@ -59,20 +59,21 @@
   ],
   "secondary_objectives": [
     {
-      "id": "silence_maxim",
-      "label": "壓制馬克沁火點",
-      "type": "destroy_unit",
-      "faction": "axis",
-      "target_unit": "Maxim",
-      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
-    },
-    {
       "id": "southern_sweep",
       "label": "南翼掃蕩",
       "type": "recon_hex",
       "faction": "axis",
       "target": [3, 13],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
+    },
+    {
+      "id": "silence_maxim",
+      "label": "壓制馬克沁火點",
+      "type": "destroy_unit",
+      "faction": "axis",
+      "target_unit": "Maxim",
+      "requires": ["southern_sweep"],
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {

@@ -58,7 +58,7 @@ Current rules established before large number changes:
 - Engineers can spend their action to mark a nearby visible entrenched LOS target; the next same-faction active attack against that target consumes the mark and adds +1 dig-in loss through `CombatEffects` on damaging hits.
 - Pinned units cannot overwatch or build dig-in and do not project ZoC; heavier suppression reduces movement/attack, indirect fire strips one dig-in level on damaging hits, and engineers strip up to two dig-in levels on damaging attacks.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
-- Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that grant one-time data-authored rewards such as XP, suppression recovery, repair, reinforcement timing or local enemy suppression but do not alter victory resolution.
+- Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that can require earlier secondary completions, grant one-time data-authored rewards such as XP, suppression recovery, repair, reinforcement timing or local enemy suppression, and do not alter victory resolution.
 
 These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.
 

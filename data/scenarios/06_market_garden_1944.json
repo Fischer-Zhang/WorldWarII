@@ -77,6 +77,7 @@
       "label": "德軍遠程砲",
       "faction": "allies",
       "target_unit": "axis_150mm_sfh",
+      "requires": ["nijmegen_south_bridgehead"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

@@ -295,8 +295,9 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
         own_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own]
         label = str(objective.get("label", objective.get("id", "secondary")))
         if own_dist:
+            prerequisite_text = secondary_objective_prerequisite_text(objective)
             parts.append(
-                f"{label} {target[0]},{target[1]} {secondary_objective_type_text(objective)} "
+                f"{label} {target[0]},{target[1]} {secondary_objective_type_text(objective)}{prerequisite_text} "
                 f"min {min(own_dist)} {secondary_reward_text(objective)}"
             )
     return "; ".join(parts) if parts else "none"
@@ -348,6 +349,17 @@ def secondary_objective_type_text(objective: dict[str, Any]) -> str:
     if objective_type == "destroy_unit":
         return "destroy"
     return "capture"
+
+
+def secondary_objective_prerequisite_text(objective: dict[str, Any]) -> str:
+    requires = objective.get("requires", [])
+    if isinstance(requires, str):
+        return f" after {requires}" if requires else ""
+    if isinstance(requires, list):
+        required_ids = [item for item in requires if isinstance(item, str) and item]
+        if required_ids:
+            return f" after {','.join(required_ids)}"
+    return ""
 
 
 def secondary_reward_text(objective: dict[str, Any]) -> str:
@@ -418,9 +430,10 @@ def secondary_objective_focus_rows(scenarios: list[dict[str, Any]]) -> list[list
 
 def secondary_objective_focus_target_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
     target = secondary_objective_target_offset(scenario, objective)
+    prerequisite_text = secondary_objective_prerequisite_text(objective)
     if target is None:
-        return f"{secondary_objective_type_text(objective)} n/a"
-    return f"{secondary_objective_type_text(objective)} {target[0]},{target[1]}"
+        return f"{secondary_objective_type_text(objective)} n/a{prerequisite_text}"
+    return f"{secondary_objective_type_text(objective)} {target[0]},{target[1]}{prerequisite_text}"
 
 
 def secondary_objective_factions(scenario: dict[str, Any], objective: dict[str, Any]) -> list[str]:

@@ -55,9 +55,10 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 13,10 destroy min 7 XP 1, enemy supp +1 R2" in report
+        and "突擊工兵 13,10 destroy after stalingrad_spot_engineers min 7 XP 1, enemy supp +1 R2" in report
         and "06_market_garden_1944" in report
-        and "德軍遠程砲 18,2 destroy min 12 XP 1, enemy supp +1 R2" in report,
+        and "德軍遠程砲 18,2 destroy after nijmegen_south_bridgehead min 12 XP 1, enemy supp +1 R2" in report
+        and "壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2" in report,
         "Destroy secondary objectives should be included in pressure probes",
     )
     require(
@@ -124,7 +125,7 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 | destroy 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
+        and "突擊工兵 | destroy 13,10 after stalingrad_spot_engineers | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
         in report,
         "Reward audit should show Stalingrad local suppression counter-assault reward",
     )

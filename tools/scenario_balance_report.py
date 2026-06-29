@@ -170,8 +170,23 @@ def secondary_objective_summary(scenario: dict[str, Any]) -> str:
         label = str(objective.get("label", objective.get("id", "secondary")))
         target = secondary_objective_target_text(scenario, objective)
         target_text = f" {target}" if target else ""
-        parts.append(f"{label} [{secondary_objective_type_text(objective)}{target_text}] ({secondary_reward_text(objective)})")
+        prerequisite_text = secondary_objective_prerequisite_text(objective)
+        parts.append(
+            f"{label} [{secondary_objective_type_text(objective)}{target_text}{prerequisite_text}] "
+            f"({secondary_reward_text(objective)})"
+        )
     return "; ".join(parts) if parts else "none"
+
+
+def secondary_objective_prerequisite_text(objective: dict[str, Any]) -> str:
+    requires = objective.get("requires", [])
+    if isinstance(requires, str):
+        return f" after {requires}" if requires else ""
+    if isinstance(requires, list):
+        required_ids = [item for item in requires if isinstance(item, str) and item]
+        if required_ids:
+            return f" after {','.join(required_ids)}"
+    return ""
 
 
 def secondary_objective_type_text(objective: dict[str, Any]) -> str:
