@@ -67,6 +67,7 @@ static func recruit(region: Dictionary, units_catalog: Dictionary, type_id: Stri
 		"xp": 0,
 		"rank": 0,
 		"name": "%s #%d" % [label, next_id],
+		"general_id": "",
 	}
 	region["strength"] = int(region.get("strength", 0)) - cost
 	var garrison: Array = region.get("garrison", [])
@@ -93,6 +94,98 @@ static func garrison_types(region: Dictionary) -> Array:
 	for rec in garrison_of(region):
 		out.append(String(rec.get("type", "")))
 	return out
+
+# --- General command (player-side, costs region strength) ---
+#
+# Assigning a general to a garrison unit ties up region strength (the same
+# currency that buys units), so commanders trade off against army size — the
+# player-side limit on the advantage. The general's bonuses + lounge upgrades
+# then apply in the battle. AI defenders get commanders for free elsewhere
+# (ConquestBattleSetup), scaled by force size, so every power fields generals.
+
+const GENERAL_COST_BY_QUALITY := {"gold": 3, "silver": 2, "bronze": 1}
+
+static func general_cost(generals_catalog: Dictionary, general_id: String) -> int:
+	var quality := String(generals_catalog.get(general_id, {}).get("quality", ""))
+	return int(GENERAL_COST_BY_QUALITY.get(quality, 2))
+
+static func generals_for_country(generals_catalog: Dictionary, country: String) -> Array:
+	# Ids of generals whose nationality matches `country`, sorted for determinism.
+	var out: Array = []
+	for gid in generals_catalog.keys():
+		if String(generals_catalog[gid].get("country", "")) == country:
+			out.append(String(gid))
+	out.sort()
+	return out
+
+static func _garrison_record(region: Dictionary, unit_id: int):
+	for rec in garrison_of(region):
+		if int((rec as Dictionary).get("id", -1)) == unit_id:
+			return rec
+	return null
+
+static func general_assigned_in_region(region: Dictionary, general_id: String) -> bool:
+	for rec in garrison_of(region):
+		if String((rec as Dictionary).get("general_id", "")) == general_id:
+			return true
+	return false
+
+static func can_assign_general(region: Dictionary, generals_catalog: Dictionary, unit_id: int, general_id: String, country: String) -> Dictionary:
+	var gdef: Dictionary = generals_catalog.get(general_id, {})
+	if gdef.is_empty():
+		return {"ok": false, "message": "找不到該將領。"}
+	if String(gdef.get("country", "")) != country:
+		return {"ok": false, "message": "該將領不屬於此勢力。"}
+	var rec = _garrison_record(region, unit_id)
+	if rec == null:
+		return {"ok": false, "message": "找不到該部隊。"}
+	var record: Dictionary = rec
+	if not (String(record.get("type", "")) in gdef.get("applies_to", [])):
+		return {"ok": false, "message": "該將領不指揮此兵種。"}
+	if String(record.get("general_id", "")) == general_id:
+		return {"ok": false, "message": "已由該將領指揮。"}
+	if general_assigned_in_region(region, general_id):
+		return {"ok": false, "message": "該將領已在本區指揮其他部隊。"}
+	# Cost is net of any general currently on this unit (it would be refunded).
+	var net_cost := general_cost(generals_catalog, general_id) - _assigned_cost(region, generals_catalog, record)
+	if int(region.get("strength", 0)) < net_cost:
+		return {"ok": false, "message": "兵力不足以延攬此將領。"}
+	return {"ok": true, "message": ""}
+
+static func assign_general(region: Dictionary, generals_catalog: Dictionary, unit_id: int, general_id: String, country: String) -> Dictionary:
+	var check := can_assign_general(region, generals_catalog, unit_id, general_id, country)
+	if not bool(check.get("ok", false)):
+		return check
+	var record: Dictionary = _garrison_record(region, unit_id)
+	_refund_general(region, generals_catalog, record)  # free the previous commander, if any
+	var cost := general_cost(generals_catalog, general_id)
+	region["strength"] = int(region.get("strength", 0)) - cost
+	record["general_id"] = general_id
+	var gname := String(generals_catalog.get(general_id, {}).get("name_zh", general_id))
+	return {"ok": true, "message": "%s 由 %s 指揮 (-%d 兵力)。" % [String(record.get("name", "")), gname, cost]}
+
+static func unassign_general(region: Dictionary, generals_catalog: Dictionary, unit_id: int) -> Dictionary:
+	var rec = _garrison_record(region, unit_id)
+	if rec == null:
+		return {"ok": false, "message": "找不到該部隊。"}
+	var record: Dictionary = rec
+	if String(record.get("general_id", "")) == "":
+		return {"ok": false, "message": "該部隊未指派將領。"}
+	var refunded := _refund_general(region, generals_catalog, record)
+	return {"ok": true, "message": "已解除將領 (返還 %d 兵力)。" % refunded}
+
+static func _assigned_cost(region: Dictionary, generals_catalog: Dictionary, record: Dictionary) -> int:
+	var gid := String(record.get("general_id", ""))
+	return general_cost(generals_catalog, gid) if gid != "" else 0
+
+static func _refund_general(region: Dictionary, generals_catalog: Dictionary, record: Dictionary) -> int:
+	var gid := String(record.get("general_id", ""))
+	if gid == "":
+		return 0
+	var cost := general_cost(generals_catalog, gid)
+	region["strength"] = int(region.get("strength", 0)) + cost
+	record["general_id"] = ""
+	return cost
 
 static func generate_force(strength: int) -> Array:
 	# Strength -> an AI/militia roster (array of type ids). Tiered and capped so

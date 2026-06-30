@@ -123,13 +123,10 @@ func _ready() -> void:
 	# Conquest battles run on the themed map but replace factions/units/victory
 	# so the player fights its recruited army — must happen before build.
 	if GameState.conquest_mode and not GameState.pending_conquest_battle.is_empty():
-		# Hand the player's lounge general investment to the setup so invested
-		# generals take command of the recruited army (and their upgrades apply).
-		var conquest_general_levels: Dictionary = LoungeManager.lounge_state(
-			CampaignManager.load_state()
-		).get("general_levels", {})
+		# Player commanders ride in on each garrison record's general_id (assigned
+		# and paid for in the conquest UI); AI defenders get free national ones.
 		ConquestBattleSetup.apply(
-			scenario, GameState.pending_conquest_battle, conquest_general_levels, DataLoader.generals
+			scenario, GameState.pending_conquest_battle, DataLoader.generals
 		)
 
 	var built := UnitFactory.build(scenario, hex_map)

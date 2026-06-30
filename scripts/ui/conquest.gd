@@ -437,6 +437,34 @@ func _rebuild_recruit_panel() -> void:
 		name_lbl.add_theme_font_size_override("font_size", 12)
 		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(name_lbl)
+		# Commander picker: "無將領" + this nation's generals that can lead this
+		# unit type (each tagged with its strength cost). Selecting one assigns and
+		# pays; "無將領" frees the commander and refunds the strength.
+		var owner_country := String(region.get("owner", ""))
+		var unit_type := String(record.get("type", ""))
+		var cur_gid := String(record.get("general_id", ""))
+		var gen_opt := OptionButton.new()
+		gen_opt.add_theme_font_size_override("font_size", 11)
+		gen_opt.add_item("無將領")
+		gen_opt.set_item_metadata(0, "")
+		var sel_index := 0
+		var opt_idx := 1
+		for gid in ConquestRecruit.generals_for_country(DataLoader.generals, owner_country):
+			var gdef: Dictionary = DataLoader.generals.get(gid, {})
+			if not (unit_type in gdef.get("applies_to", [])):
+				continue
+			gen_opt.add_item("%s (-%d)" % [
+				String(gdef.get("name_zh", gid)),
+				ConquestRecruit.general_cost(DataLoader.generals, String(gid)),
+			])
+			gen_opt.set_item_metadata(opt_idx, String(gid))
+			if String(gid) == cur_gid:
+				sel_index = opt_idx
+			opt_idx += 1
+		gen_opt.select(sel_index)
+		gen_opt.disabled = gen_opt.item_count <= 1
+		gen_opt.item_selected.connect(_on_general_selected.bind(uid, gen_opt))
+		row.add_child(gen_opt)
 		var dis_btn := Button.new()
 		dis_btn.text = "解散"
 		dis_btn.add_theme_font_size_override("font_size", 11)
@@ -504,6 +532,25 @@ func _on_disband_pressed(unit_id: int) -> void:
 		CampaignManager.save_state(state)
 		_rebuild()
 	_update_detail(String(result.get("message", "")))
+
+func _on_general_selected(index: int, unit_id: int, opt: OptionButton) -> void:
+	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
+	var region: Dictionary = conquest.get("regions", {}).get(selected_region_id, {})
+	if region.is_empty():
+		return
+	var gid := String(opt.get_item_metadata(index))
+	var result: Dictionary
+	if gid == "":
+		result = ConquestRecruit.unassign_general(region, DataLoader.generals, unit_id)
+	else:
+		result = ConquestRecruit.assign_general(
+			region, DataLoader.generals, unit_id, gid, String(region.get("owner", ""))
+		)
+	if bool(result.get("ok", false)):
+		CampaignManager.save_state(state)
+		_rebuild()
+	else:
+		_update_detail(String(result.get("message", "")))
 
 func _on_develop_pressed(action_id: String) -> void:
 	var result := ConquestManager.develop_region(state, DataLoader.conquest_map, selected_region_id, action_id)

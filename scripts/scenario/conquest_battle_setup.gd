@@ -15,15 +15,14 @@ extends RefCounted
 const DEFENDER_SURVIVE_TURNS := 12
 const DEPLOYMENT_ANCHORS_KEY := "conquest_deployment_anchors"
 
-# `general_levels` is the player's lounge general-investment map {general_id: level};
-# `generals_catalog` is DataLoader.generals. When supplied, the generals the player
-# has invested in take command of matching garrison units (see _assign_generals),
-# so lounge general upgrades finally reach Conquest battles. Both default empty so
-# callers/tests that don't care about generals keep the old behavior.
+# `generals_catalog` is DataLoader.generals. The player's commanders ride in on
+# each garrison record's `general_id` (assigned + paid for in the conquest UI);
+# AI defenders are given free commanders from their own country's pool, scaled by
+# force size (see _assign_ai_generals), so every power fields generals. Empty
+# catalog keeps the old no-generals behavior for callers/tests that don't care.
 static func apply(
 	scenario: Dictionary,
 	pending: Dictionary,
-	general_levels: Dictionary = {},
 	generals_catalog: Dictionary = {},
 ) -> void:
 	var player_faction := String(pending.get("player_faction", ""))
@@ -49,10 +48,11 @@ static func apply(
 	var player_entries := _roster_entries(
 		pending.get("attacker_garrison", []), player_faction, player_pool, occupied, map_bounds
 	)
-	_assign_generals(player_entries, general_levels, generals_catalog)
 	var enemy_entries := _type_entries(
 		pending.get("defender_types", []), enemy_faction, enemy_pool, occupied, map_bounds
 	)
+	# AI defenders get free commanders from their own nation, scaled by force size.
+	_assign_ai_generals(enemy_entries, enemy_faction, generals_catalog)
 
 	scenario["factions"] = [
 		{
@@ -168,50 +168,51 @@ static func _roster_entries(
 			"name": name,
 			"at": _slot_or_free(slots, i, occupied, map_bounds),
 			"roster_id": int(record.get("id", -1)),
+			"general": String(record.get("general_id", "")),
 		}
 		entries.append(entry)
 	return entries
 
-static func _assign_generals(entries: Array, general_levels: Dictionary, generals_catalog: Dictionary) -> void:
-	# Put the player's lounge-invested generals in command of matching garrison
-	# units: strongest general first (invested level, then quality, then id for
-	# determinism), each general leads at most one unit, and only units whose type
-	# is in the general's applies_to list. A general already authored onto an entry
-	# is left untouched. Without any investment, nothing is assigned.
-	if general_levels.is_empty() or generals_catalog.is_empty() or entries.is_empty():
+static func _assign_ai_generals(entries: Array, country: String, generals_catalog: Dictionary) -> void:
+	# Give the AI's force free commanders from its OWN nation's pool, scaled by
+	# force size (~1 per 3 units, capped at 2). Best quality first, each general
+	# leads at most one unit, type must match applies_to. This keeps every power
+	# fielding generals without the player-side strength cost.
+	if generals_catalog.is_empty() or entries.is_empty() or country == "":
 		return
-	var candidates: Array = []
-	for gid in general_levels.keys():
-		var level := int(general_levels[gid])
-		if level <= 0:
+	var pool: Array = []
+	for gid in generals_catalog.keys():
+		var gdef: Dictionary = generals_catalog[gid]
+		if String(gdef.get("country", "")) != country:
 			continue
-		var gdef: Dictionary = generals_catalog.get(String(gid), {})
-		if gdef.is_empty():
-			continue
-		candidates.append({
+		pool.append({
 			"id": String(gid),
-			"level": level,
 			"quality": _quality_rank(String(gdef.get("quality", ""))),
 			"applies": gdef.get("applies_to", []),
 		})
-	candidates.sort_custom(func(a, b):
-		if int(a["level"]) != int(b["level"]):
-			return int(a["level"]) > int(b["level"])
+	if pool.is_empty():
+		return
+	pool.sort_custom(func(a, b):
 		if int(a["quality"]) != int(b["quality"]):
 			return int(a["quality"]) > int(b["quality"])
 		return String(a["id"]) < String(b["id"])
 	)
+	var budget: int = clampi(int((entries.size() + 2) / 3), 0, 2)
 	var assigned := {}
+	var used := 0
 	for entry in entries:
+		if used >= budget:
+			break
 		if String(entry.get("general", "")) != "":
 			continue
 		var type_id := String(entry.get("type", ""))
-		for cand in candidates:
+		for cand in pool:
 			if assigned.has(cand["id"]):
 				continue
 			if type_id in cand["applies"]:
 				entry["general"] = String(cand["id"])
 				assigned[cand["id"]] = true
+				used += 1
 				break
 
 static func _quality_rank(quality: String) -> int:

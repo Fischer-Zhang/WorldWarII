@@ -29,6 +29,9 @@ ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
 }
 ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES = {"theater_reinforcement"}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
+# Conquest powers a general may belong to (drives which country can field them);
+# "france" has no conquest country but is used by campaign scenarios.
+GENERAL_COUNTRIES = {"germany", "soviet", "usa", "britain", "japan", "china", "france"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
     "attack",
@@ -161,6 +164,10 @@ def validate_catalogs(errors: list[str]) -> tuple[dict[str, Any], dict[str, Any]
         for type_id in applies_to:
             if str(type_id) not in units:
                 fail(errors, path, f"general {general_id!r} references unknown unit type {type_id!r}")
+        # Nationality drives which conquest power may field the general.
+        country = str(general.get("country", ""))
+        if country not in GENERAL_COUNTRIES:
+            fail(errors, path, f"general {general_id!r} has missing/unknown country {country!r}")
 
     return units, terrains, generals, campaigns
 

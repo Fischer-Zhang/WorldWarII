@@ -12,6 +12,12 @@ const CATALOG := {
 	"heavy_tank": {"name_zh": "重戰車", "cost": 4, "requires_tech": {"id": "armored_logistics", "level": 3}},
 }
 
+const GENERALS := {
+	"panzer_g": {"name_zh": "裝甲將", "country": "germany", "quality": "gold", "applies_to": ["medium_tank", "light_tank"]},
+	"foot_g": {"name_zh": "步兵將", "country": "germany", "quality": "silver", "applies_to": ["infantry"]},
+	"other_g": {"name_zh": "外國將", "country": "usa", "quality": "gold", "applies_to": ["medium_tank"]},
+}
+
 func _init() -> void:
 	var pass_count := 0
 	var fail_count := 0
@@ -29,8 +35,61 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_tech_gating(): pass_count += 1
 	else: fail_count += 1
+	if _test_general_assign_costs_strength(): pass_count += 1
+	else: fail_count += 1
+	if _test_general_assign_rejections(): pass_count += 1
+	else: fail_count += 1
 	print("ConquestRecruit tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+func _test_general_assign_costs_strength() -> bool:
+	var region := {"strength": 5, "owner": "germany", "garrison": [
+		{"id": 7, "type": "medium_tank", "xp": 0, "rank": 0, "name": "T", "general_id": ""},
+	]}
+	var r := ConquestRecruit.assign_general(region, GENERALS, 7, "panzer_g", "germany")
+	if not bool(r.get("ok", false)):
+		printerr("FAIL: assign should succeed with enough strength")
+		return false
+	if int(region.get("strength", -1)) != 2:
+		printerr("FAIL: assign should deduct gold cost 3 (5-3=2), got %d" % int(region.get("strength", -1)))
+		return false
+	if String((region["garrison"][0] as Dictionary).get("general_id", "")) != "panzer_g":
+		printerr("FAIL: record should store the assigned general")
+		return false
+	var u := ConquestRecruit.unassign_general(region, GENERALS, 7)
+	if not bool(u.get("ok", false)) or int(region.get("strength", -1)) != 5:
+		printerr("FAIL: unassign should refund to 5, got %d" % int(region.get("strength", -1)))
+		return false
+	if String((region["garrison"][0] as Dictionary).get("general_id", "")) != "":
+		printerr("FAIL: unassign should clear general_id")
+		return false
+	return true
+
+func _test_general_assign_rejections() -> bool:
+	var region := {"strength": 9, "owner": "germany", "garrison": [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "I", "general_id": ""},
+		{"id": 2, "type": "medium_tank", "xp": 0, "rank": 0, "name": "T", "general_id": ""},
+		{"id": 3, "type": "medium_tank", "xp": 0, "rank": 0, "name": "T2", "general_id": ""},
+	]}
+	# Wrong unit type for the general.
+	if bool(ConquestRecruit.can_assign_general(region, GENERALS, 1, "panzer_g", "germany").get("ok", false)):
+		printerr("FAIL: should reject a general that does not lead this unit type")
+		return false
+	# General from another nation.
+	if bool(ConquestRecruit.can_assign_general(region, GENERALS, 2, "other_g", "germany").get("ok", false)):
+		printerr("FAIL: should reject a general from another nation")
+		return false
+	# A general already commanding in this region cannot lead a second unit.
+	ConquestRecruit.assign_general(region, GENERALS, 2, "panzer_g", "germany")
+	if bool(ConquestRecruit.can_assign_general(region, GENERALS, 3, "panzer_g", "germany").get("ok", false)):
+		printerr("FAIL: should reject a general already commanding elsewhere in the region")
+		return false
+	# Not enough strength to pay the cost.
+	region["strength"] = 1
+	if bool(ConquestRecruit.can_assign_general(region, GENERALS, 1, "foot_g", "germany").get("ok", false)):
+		printerr("FAIL: should reject when strength is below the general's cost")
+		return false
+	return true
 
 func _test_cost_lookup() -> bool:
 	if ConquestRecruit.unit_cost(CATALOG, "medium_tank") != 3:
