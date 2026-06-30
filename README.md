@@ -2,7 +2,7 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-382%2F382-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-384%2F384-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ![Sedan 1940 — a Panzer IV selected, showing its movement range, full stat/general breakdown and capture objectives](docs/screenshots/03_sedan_battle.png)
 
@@ -21,7 +21,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 49 scenario JSON files: 43 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 10 generals, 3 tech upgrades |
 | Strategic layer | 6 campaigns, including tutorial campaign 0, and a 32-region conquest map with zoomable world view, supply, port, rail logistics, theater objectives and region development |
-| Tests | 382 headless GDScript checks plus static data/report validators |
+| Tests | 384 headless GDScript checks plus static data/report validators |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
@@ -215,7 +215,7 @@ tools/validate.sh
 - Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe and Godot AI trace report.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 382 headless GDScript checks through `bash tests/run_all.sh`.
+- 384 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts, conquest source/target selection, map zoom and region development controls.
 

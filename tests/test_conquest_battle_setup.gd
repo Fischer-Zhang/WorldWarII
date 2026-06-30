@@ -21,8 +21,63 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_secondary_objectives_remap_to_conquest_player(): pass_count += 1
 	else: fail_count += 1
+	if _test_invested_generals_assigned(): pass_count += 1
+	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+func _test_invested_generals_assigned() -> bool:
+	# Lounge-invested generals should take command of matching garrison units —
+	# strongest first, unique, type-matched; uninvested generals stay benched.
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"player_name": "德國",
+		"enemy_name": "蘇聯",
+		"attacker_garrison": [
+			{"id": 1, "type": "medium_tank", "xp": 0, "rank": 0, "name": "T1"},
+			{"id": 2, "type": "medium_tank", "xp": 0, "rank": 0, "name": "T2"},
+			{"id": 3, "type": "infantry", "xp": 0, "rank": 0, "name": "I1"},
+		],
+		"defender_types": ["infantry"],
+		"role": "attack",
+	}
+	var generals := {
+		"gen_armor": {"applies_to": ["medium_tank"], "quality": "gold"},
+		"gen_inf": {"applies_to": ["infantry"], "quality": "silver"},
+		"gen_armor2": {"applies_to": ["medium_tank", "light_tank"], "quality": "silver"},
+		"gen_unused": {"applies_to": ["artillery"], "quality": "gold"},
+	}
+	var levels := {"gen_armor": 1, "gen_inf": 2, "gen_armor2": 3, "gen_unused": 0}
+	var scenario := _themed()
+	ConquestBattleSetup.apply(scenario, pending, levels, generals)
+	var by_name := {}
+	for u in scenario["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) == "germany":
+			by_name[String(unit.get("name", ""))] = String(unit.get("general", ""))
+	if String(by_name.get("T1", "")) != "gen_armor2":
+		printerr("FAIL: first tank should get the highest-invested armor general, got %s" % by_name.get("T1", ""))
+		return false
+	if String(by_name.get("T2", "")) != "gen_armor":
+		printerr("FAIL: second tank should get the remaining armor general, got %s" % by_name.get("T2", ""))
+		return false
+	if String(by_name.get("I1", "")) != "gen_inf":
+		printerr("FAIL: infantry should get the infantry general, got %s" % by_name.get("I1", ""))
+		return false
+	for v in by_name.values():
+		if String(v) == "gen_unused":
+			printerr("FAIL: an uninvested (level 0) general was assigned")
+			return false
+	# No investment / no catalog -> no generals assigned (backward compatible).
+	var scenario2 := _themed()
+	ConquestBattleSetup.apply(scenario2, pending)
+	for u in scenario2["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) == "germany" and String(unit.get("general", "")) != "":
+			printerr("FAIL: no general should be assigned without lounge investment")
+			return false
+	return true
 
 func _themed() -> Dictionary:
 	return {

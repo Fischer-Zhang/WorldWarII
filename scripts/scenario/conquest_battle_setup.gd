@@ -15,7 +15,17 @@ extends RefCounted
 const DEFENDER_SURVIVE_TURNS := 12
 const DEPLOYMENT_ANCHORS_KEY := "conquest_deployment_anchors"
 
-static func apply(scenario: Dictionary, pending: Dictionary) -> void:
+# `general_levels` is the player's lounge general-investment map {general_id: level};
+# `generals_catalog` is DataLoader.generals. When supplied, the generals the player
+# has invested in take command of matching garrison units (see _assign_generals),
+# so lounge general upgrades finally reach Conquest battles. Both default empty so
+# callers/tests that don't care about generals keep the old behavior.
+static func apply(
+	scenario: Dictionary,
+	pending: Dictionary,
+	general_levels: Dictionary = {},
+	generals_catalog: Dictionary = {},
+) -> void:
 	var player_faction := String(pending.get("player_faction", ""))
 	var enemy_faction := String(pending.get("enemy_faction", ""))
 	if player_faction == "" or enemy_faction == "" or player_faction == enemy_faction:
@@ -39,6 +49,7 @@ static func apply(scenario: Dictionary, pending: Dictionary) -> void:
 	var player_entries := _roster_entries(
 		pending.get("attacker_garrison", []), player_faction, player_pool, occupied, map_bounds
 	)
+	_assign_generals(player_entries, general_levels, generals_catalog)
 	var enemy_entries := _type_entries(
 		pending.get("defender_types", []), enemy_faction, enemy_pool, occupied, map_bounds
 	)
@@ -160,6 +171,59 @@ static func _roster_entries(
 		}
 		entries.append(entry)
 	return entries
+
+static func _assign_generals(entries: Array, general_levels: Dictionary, generals_catalog: Dictionary) -> void:
+	# Put the player's lounge-invested generals in command of matching garrison
+	# units: strongest general first (invested level, then quality, then id for
+	# determinism), each general leads at most one unit, and only units whose type
+	# is in the general's applies_to list. A general already authored onto an entry
+	# is left untouched. Without any investment, nothing is assigned.
+	if general_levels.is_empty() or generals_catalog.is_empty() or entries.is_empty():
+		return
+	var candidates: Array = []
+	for gid in general_levels.keys():
+		var level := int(general_levels[gid])
+		if level <= 0:
+			continue
+		var gdef: Dictionary = generals_catalog.get(String(gid), {})
+		if gdef.is_empty():
+			continue
+		candidates.append({
+			"id": String(gid),
+			"level": level,
+			"quality": _quality_rank(String(gdef.get("quality", ""))),
+			"applies": gdef.get("applies_to", []),
+		})
+	candidates.sort_custom(func(a, b):
+		if int(a["level"]) != int(b["level"]):
+			return int(a["level"]) > int(b["level"])
+		if int(a["quality"]) != int(b["quality"]):
+			return int(a["quality"]) > int(b["quality"])
+		return String(a["id"]) < String(b["id"])
+	)
+	var assigned := {}
+	for entry in entries:
+		if String(entry.get("general", "")) != "":
+			continue
+		var type_id := String(entry.get("type", ""))
+		for cand in candidates:
+			if assigned.has(cand["id"]):
+				continue
+			if type_id in cand["applies"]:
+				entry["general"] = String(cand["id"])
+				assigned[cand["id"]] = true
+				break
+
+static func _quality_rank(quality: String) -> int:
+	match quality:
+		"gold":
+			return 3
+		"silver":
+			return 2
+		"bronze":
+			return 1
+		_:
+			return 0
 
 static func _unique_roster_name(raw_name: String, type_id: String, idx: int, used_names: Dictionary) -> String:
 	var base := raw_name if raw_name != "" else "%s #%d" % [type_id, idx + 1]
