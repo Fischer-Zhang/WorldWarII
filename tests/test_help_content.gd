@@ -26,7 +26,7 @@ func _run() -> void:
 	var units: Dictionary = data_loader.units if data_loader else {}
 	var full := HelpContent.full_bbcode(terrains, units)
 	# Mechanics glossary + generated catalog tables must all be present.
-	for term in ["壓制", "壓制射擊", "警戒", "管制區", "構工", "突破準備", "整隊", "老兵", "伏擊反裝甲", "敵戰力", "城鎮", "步兵"]:
+	for term in ["壓制", "壓制射擊", "警戒", "管制區", "構工", "突破準備", "整隊", "老兵", "伏擊反裝甲", "敵戰力", "城鎮", "步兵", "征服", "指派將領"]:
 		if full.find(term) == -1:
 			printerr("FAIL: full help missing term %s" % term)
 			fail_count += 1
