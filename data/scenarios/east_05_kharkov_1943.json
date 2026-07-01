@@ -1,7 +1,7 @@
 {
   "id": "east_05_kharkov_1943",
   "title": "第三次哈爾科夫 1943",
-  "briefing": "1943 年 3 月。史達林格勒後,蘇軍一路向西推進,但鋒線被拉長。曼施坦因集結裝甲部隊反擊,企圖在哈爾科夫周邊切斷蘇軍先鋒並重奪城市。\n\n你的任務:作為德軍指揮官,在 12 個回合內奪回哈爾科夫城區。蘇軍若撐住,就能保住冬季攻勢成果。\n\n戰術提示:這是裝甲反擊關。用 Panther/Pz.IV 打開側翼,步兵跟上進城;不要讓反戰車砲在森林邊緣白白吃掉你的戰車。",
+  "briefing": "1943 年 3 月。史達林格勒後,蘇軍一路向西推進,但鋒線被拉長。曼施坦因集結裝甲部隊反擊,企圖在哈爾科夫周邊切斷蘇軍先鋒並重奪城市。\n\n你的任務:作為德軍指揮官,在 12 個回合內奪回哈爾科夫城區。蘇軍若撐住,就能保住冬季攻勢成果。\n\n次要目標:突破 Maxim 火點後,可選偵察南側警戒線削弱城區構工,或奪取野戰修理所維持裝甲衝擊力。\n\n戰術提示:這是裝甲反擊關。用 Panther/Pz.IV 打開側翼,步兵跟上進城;不要讓反戰車砲在森林邊緣白白吃掉你的戰車。",
   "map": {
     "width": 24,
     "height": 16,
@@ -73,7 +73,18 @@
       "faction": "axis",
       "target": [5, 4],
       "requires": ["break_maxim_nest"],
+      "exclusive_group": "kharkov_city_choice",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
+    },
+    {
+      "id": "kharkov_field_workshop",
+      "label": "奪取野戰修理所",
+      "type": "capture",
+      "faction": "axis",
+      "target": [6, 2],
+      "requires": ["break_maxim_nest"],
+      "exclusive_group": "kharkov_city_choice",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     }
   ],
   "victory": {

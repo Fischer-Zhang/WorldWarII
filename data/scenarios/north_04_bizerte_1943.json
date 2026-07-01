@@ -1,7 +1,7 @@
 {
   "id": "north_04_bizerte_1943",
   "title": "比塞大港口 1943",
-  "briefing": "1943 年 5 月。突尼斯防線崩潰後,盟軍沿海岸推向比塞大港。軸心後衛依託港鎮、山脊和碼頭火點,試圖拖住追擊部隊並掩護撤離。\n\n你的任務:在 12 個回合內奪取比塞大港區。軸心軍若能守住港口到時限,就能拖延盟軍收束北非戰役。\n\n次要目標:奪取中線燃料站可提前調入預備隊;摧毀港口遠程砲可壓制碼頭守軍。\n\n戰術提示:海岸線會限制包抄空間,先用 Stuart 與工兵靠道路推進,再用機槍壓制射擊和砲兵拆掉構工火點。M10 應保持射距處理 Pz.IV,不要讓步兵單獨貼近 MG 42。",
+  "briefing": "1943 年 5 月。突尼斯防線崩潰後,盟軍沿海岸推向比塞大港。軸心後衛依託港鎮、山脊和碼頭火點,試圖拖住追擊部隊並掩護撤離。\n\n你的任務:在 12 個回合內奪取比塞大港區。軸心軍若能守住港口到時限,就能拖延盟軍收束北非戰役。\n\n次要目標:奪取中線燃料站可提前調入預備隊,之後可選摧毀港口遠程砲壓制碼頭守軍,或標定碼頭構工協助工兵突入。\n\n戰術提示:海岸線會限制包抄空間,先用 Stuart 與工兵靠道路推進,再用機槍壓制射擊和砲兵拆掉構工火點。M10 應保持射距處理 Pz.IV,不要讓步兵單獨貼近 MG 42。",
   "map": {
     "width": 16,
     "height": 10,
@@ -71,7 +71,18 @@
       "faction": "allies",
       "target_unit": "axis_bizerte_artillery",
       "requires": ["bizerte_forward_fuel"],
+      "exclusive_group": "bizerte_harbor_choice",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
+    },
+    {
+      "id": "bizerte_dock_works",
+      "type": "recon_hex",
+      "label": "標定碼頭構工",
+      "faction": "allies",
+      "target": [12, 4],
+      "requires": ["bizerte_forward_fuel"],
+      "exclusive_group": "bizerte_harbor_choice",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],
   "victory": {
