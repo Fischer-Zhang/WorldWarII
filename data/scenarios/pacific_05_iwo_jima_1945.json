@@ -71,7 +71,8 @@
       "target": [12, 2],
       "requires": ["iwo_airfield_supply"],
       "exclusive_group": "iwo_airfield_choice",
-      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}],
+      "strategic_effects": [{"type": "campaign_bonus_points", "amount": 1}]
     },
     {
       "id": "iwo_mountain_guns",
