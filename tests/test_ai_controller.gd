@@ -113,6 +113,8 @@ class StubUnit:
 	var general_id: String = ""
 	var dig_in_level: int = 0
 	var suppression: int = 0
+	var morale: int = 10
+	var morale_max: int = 10
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
@@ -936,6 +938,20 @@ func _init() -> void:
 		printerr("FAIL: difficulty ladder expected easy jitter deterministic+varied, normal none; j1 %.3f again %.3f j2 %.3f normal %.3f" % [
 			j1, j1_again, j2, normal_jitter,
 		])
+
+	# 25) AI values rallying a shaky (low-morale) unit even without suppression,
+	# but not a full-morale one — and the pull is modest (below a real attack).
+	var shaky := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	shaky.morale_max = 10
+	shaky.morale = 3  # below the reform threshold
+	var steady := make_unit("infantry", "axis", Vector2i(0, 0), 10)  # full morale, no suppression
+	var shaky_rally: float = ai._rally_score(shaky, shaky.coord, battle.hex_map, ai._get_unit_def("infantry"))
+	var steady_rally: float = ai._rally_score(steady, steady.coord, battle.hex_map, ai._get_unit_def("infantry"))
+	if shaky_rally > 0.0 and steady_rally == -INF:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: AI should rally a shaky unit (got %.2f) but not a steady one (got %.2f)" % [shaky_rally, steady_rally])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

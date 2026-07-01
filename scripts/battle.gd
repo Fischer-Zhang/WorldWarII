@@ -347,7 +347,9 @@ func _retreat_routed_units(faction_id: String) -> void:
 			var path := Pathfinding.reconstruct_path(
 				unit.coord, best, reachable, hex_map, hex_map.occupants, unit.faction_id, unit.type_id
 			)
-			hex_map.move_unit_along_path(unit, path)
+			# Fleeing past enemy overwatch draws fire (resolved synchronously).
+			if not _move_with_overwatch(unit, path):
+				continue  # cut down while routing — already unregistered
 		unit.has_moved = true
 		unit.has_attacked = true  # spent while routed
 		unit.queue_redraw()
@@ -2319,10 +2321,15 @@ func _move_with_overwatch(mover: Unit, path: Array) -> bool:
 	# Returns true if the mover survived to its destination.
 	if path.size() < 2:
 		return mover.is_alive()
+	var supp_before := mover.suppression
 	var death_idx := _trigger_overwatch_along_path(mover, path)
 	var effective_path: Array = path if death_idx < 0 else path.slice(0, death_idx + 1)
 	hex_map.move_unit_along_path(mover, effective_path)
 	AudioBank.play("move")
+	if death_idx < 0:
+		# Reaction fire also shakes morale (drain by the suppression it added),
+		# evaluated at the destination hex.
+		_apply_morale_pressure(mover, mover.suppression - supp_before)
 	if death_idx >= 0:
 		# Defensive bounds: _trigger_overwatch_along_path may return an index
 		# past the last hex if the watcher loop drifts. Clamp to the truncated path.

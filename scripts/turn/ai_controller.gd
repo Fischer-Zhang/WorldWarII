@@ -34,6 +34,7 @@ const W_SECONDARY_CHAIN_FUTURE := 0.25
 const SECONDARY_REWARD_PULL_RADIUS := 4.0
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
+const W_RALLY_MORALE := 0.5  # small, so steadying morale stays below taking a real attack
 const W_FIRE_SUPPORT := 2.0
 const W_BREACH_SUPPORT := 2.0
 const W_SUPPRESSIVE_FIRE := 1.2
@@ -441,8 +442,13 @@ func _trace_sort_score(trace: Dictionary) -> float:
 	)
 
 func _rally_score(unit, pos: Vector2i, hex_map, atk_def: Dictionary) -> float:
-	if unit.suppression <= 0 or pos != unit.coord:
+	if pos != unit.coord:
 		return -INF
+	var morale_var: Variant = unit.get("morale")
+	var morale_max_var: Variant = unit.get("morale_max")
+	var has_morale_gap := morale_var != null and morale_max_var != null and int(morale_var) < int(morale_max_var)
+	if unit.suppression <= 0 and not has_morale_gap:
+		return -INF  # nothing to shake off and morale is full
 	var terrain_def: Dictionary = _get_terrain_def(hex_map.terrain_at(unit.coord))
 	var recovery: int = CombatEffects.rally_recovery_for_terrain(terrain_def)
 	var after: int = max(0, unit.suppression - recovery)
@@ -453,6 +459,15 @@ func _rally_score(unit, pos: Vector2i, hex_map, atk_def: Dictionary) -> float:
 	score += float(CombatEffects.attack_penalty(unit.suppression) - CombatEffects.attack_penalty(after)) * 2.0
 	if not atk_def.get("indirect", false):
 		score += 0.5
+	# Steadying a shaky unit: valued modestly (stays below a real attack), with a
+	# little more urgency once it is near breaking.
+	if has_morale_gap:
+		var mv := int(morale_var)
+		var mv_max := int(morale_max_var)
+		var gained: int = min(mv_max, mv + CombatEffects.RALLY_MORALE) - mv
+		score += float(gained) * W_RALLY_MORALE
+		if mv <= CombatEffects.reform_threshold(mv_max):
+			score += W_RALLY_MORALE
 	return score
 
 func _apply_personality(total: float, attack_term: float, exposure_term: float) -> float:
