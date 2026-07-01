@@ -50,6 +50,11 @@ def main() -> None:
         "scenario probe missing gameplay depth coverage section",
     )
     require(
+        "## Operation Chain Coverage" in report
+        and "| scenario | chain links | longest chain | operation path | reward ladder | check |" in report,
+        "scenario probe missing operation chain coverage section",
+    )
+    require(
         "## Scenario Expansion Coverage" in report
         and "| campaign | scenarios | victory mix | special terrain | role hooks | check |" in report,
         "scenario probe missing scenario expansion coverage section",
@@ -142,7 +147,7 @@ def main() -> None:
     )
     require(
         "east_10_berlin_1945" in report
-        and "標定重砲陣地 | recon 22,2 | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
+        and "標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
         in report,
         "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
     )
@@ -260,6 +265,30 @@ def main() -> None:
         "| west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |" in report
         and "| east_10_berlin_1945 | 2 | 0 | 2 | covered |" in report,
         "Gameplay depth coverage should expose enriched objective counts",
+    )
+    operation_section = section_text(report, "## Operation Chain Coverage")
+    operation_rows = [
+        line for line in operation_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| scenario |")
+    ]
+    require(
+        len(operation_rows) == main_scenario_count,
+        "Operation chain coverage should include every main battle",
+    )
+    require(
+        not any("| missing chain |" in line or "| broken chain |" in line for line in operation_rows),
+        "Every main battle should have at least one secondary objective operation chain",
+    )
+    require(
+        all("| covered |" in line for line in operation_rows),
+        "Every operation chain row should be covered",
+    )
+    require(
+        "| 03_stalingrad_1942 | 1 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |" in report
+        and "| west_10_remagen_1945 | 1 | 2 | 奪取橋西岸 -> 偵察東岸橋頭 | repair -> breach | covered |" in report,
+        "Operation chain coverage should expose staged breach and bridgehead examples",
     )
     expansion_section = section_text(report, "## Scenario Expansion Coverage")
     expansion_rows = [

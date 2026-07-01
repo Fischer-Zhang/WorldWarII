@@ -63,6 +63,7 @@
       "label": "摧毀海堤機槍",
       "faction": "allies",
       "target_unit": "axis_tarawa_mg",
+      "requires": ["tarawa_pier_supply"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

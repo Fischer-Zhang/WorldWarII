@@ -932,6 +932,144 @@ def gameplay_depth_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[A
     return rows
 
 
+def operation_chain_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not is_main_battle_scenario(scenario_id):
+            continue
+        objectives = [
+            objective
+            for objective in scenario.get("secondary_objectives", [])
+            if isinstance(objective, dict)
+        ]
+        best_chain = longest_secondary_objective_chain(objectives)
+        chain_links = sum(1 for objective in objectives if secondary_objective_required_ids(objective))
+        rows.append([
+            scenario_id,
+            chain_links,
+            len(best_chain),
+            operation_chain_path_text(best_chain),
+            operation_chain_reward_text(best_chain),
+            operation_chain_check_text(chain_links, len(best_chain)),
+        ])
+    return rows
+
+
+def longest_secondary_objective_chain(objectives: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_id = {
+        secondary_objective_id(objective, index): objective
+        for index, objective in enumerate(objectives)
+    }
+    memo: dict[str, list[dict[str, Any]]] = {}
+
+    def best_path_to(objective_id: str, visiting: set[str] | None = None) -> list[dict[str, Any]]:
+        if objective_id in memo:
+            return memo[objective_id]
+        if objective_id not in by_id:
+            return []
+        visiting = set() if visiting is None else set(visiting)
+        if objective_id in visiting:
+            return []
+        visiting.add(objective_id)
+        objective = by_id[objective_id]
+        required_ids = [
+            required_id for required_id in secondary_objective_required_ids(objective)
+            if required_id in by_id
+        ]
+        if not required_ids:
+            path = [objective]
+        else:
+            prefix = max(
+                (best_path_to(required_id, visiting) for required_id in required_ids),
+                key=len,
+                default=[],
+            )
+            path = prefix + [objective]
+        memo[objective_id] = path
+        return path
+
+    best: list[dict[str, Any]] = []
+    for objective_id in by_id:
+        path = best_path_to(objective_id)
+        if len(path) > len(best):
+            best = path
+    return best
+
+
+def secondary_objective_id(objective: dict[str, Any], index: int) -> str:
+    return str(objective.get("id", f"secondary_{index}"))
+
+
+def secondary_objective_required_ids(objective: dict[str, Any]) -> list[str]:
+    requires = objective.get("requires", [])
+    if isinstance(requires, str):
+        return [requires] if requires else []
+    if isinstance(requires, list):
+        return [item for item in requires if isinstance(item, str) and item]
+    return []
+
+
+def operation_chain_path_text(chain: list[dict[str, Any]]) -> str:
+    if len(chain) < 2:
+        return "none"
+    return " -> ".join(str(objective.get("label", objective.get("id", "secondary"))) for objective in chain)
+
+
+def operation_chain_reward_text(chain: list[dict[str, Any]]) -> str:
+    if len(chain) < 2:
+        return "none"
+    parts = [operation_reward_family(objective) for objective in chain]
+    return " -> ".join(parts)
+
+
+def operation_reward_family(objective: dict[str, Any]) -> str:
+    families: list[str] = []
+    rewards = objective.get("rewards", [])
+    if isinstance(rewards, list):
+        for reward in rewards:
+            if not isinstance(reward, dict):
+                continue
+            reward_type = str(reward.get("type", ""))
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            if reward_type == "strip_enemy_dig_in":
+                families.append("breach")
+            elif reward_type == "suppress_enemies":
+                families.append("suppression")
+            elif reward_type == "advance_reinforcements":
+                families.append("reinforcement")
+            elif reward_type == "recover_suppression":
+                families.append("sustain")
+            elif reward_type == "repair_hp":
+                families.append("repair")
+    strategic_effects = objective.get("strategic_effects", [])
+    if isinstance(strategic_effects, list):
+        for effect in strategic_effects:
+            if not isinstance(effect, dict):
+                continue
+            effect_type = str(effect.get("type", ""))
+            amount = int(effect.get("amount", 0))
+            if amount <= 0:
+                continue
+            if effect_type == "campaign_bonus_points":
+                families.append("campaign")
+            elif effect_type == "conquest_reduce_enemy_strength":
+                families.append("conquest")
+    if not families:
+        return "xp"
+    return "+".join(dict.fromkeys(families))
+
+
+def operation_chain_check_text(chain_links: int, longest_chain: int) -> str:
+    if chain_links <= 0:
+        return "missing chain"
+    if longest_chain < 2:
+        return "broken chain"
+    return "covered"
+
+
 def expansion_coverage_rows(scenarios: list[dict[str, Any]], campaigns: dict[str, Any]) -> list[list[Any]]:
     rows: list[list[Any]] = []
     for campaign_id, campaign in campaigns.items():
@@ -1432,6 +1570,19 @@ def generate_report() -> str:
                 "check",
             ],
             gameplay_depth_coverage_rows(scenarios),
+        ),
+        "## Operation Chain Coverage",
+        "Focused gate for main battles: secondary objectives should form at least one explicit operation chain so optional goals create staged tactical tempo.",
+        table(
+            [
+                "scenario",
+                "chain links",
+                "longest chain",
+                "operation path",
+                "reward ladder",
+                "check",
+            ],
+            operation_chain_coverage_rows(scenarios),
         ),
         "## Scenario Expansion Coverage",
         "Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.",

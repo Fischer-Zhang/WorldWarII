@@ -70,6 +70,7 @@
       "label": "摧毀港口遠程砲",
       "faction": "allies",
       "target_unit": "axis_bizerte_artillery",
+      "requires": ["bizerte_forward_fuel"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

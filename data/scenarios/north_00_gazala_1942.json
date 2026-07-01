@@ -64,6 +64,7 @@
       "label": "摧毀 6-pdr 反戰車砲",
       "faction": "axis",
       "target_unit": "allies_gazala_at",
+      "requires": ["gazala_ridge_recon"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     }
   ],

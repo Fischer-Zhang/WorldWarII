@@ -70,6 +70,7 @@
       "type": "recon_hex",
       "faction": "allies",
       "target": [22, 2],
+      "requires": ["clear_mg42"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],

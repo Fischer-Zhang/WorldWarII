@@ -72,6 +72,7 @@
       "type": "recon_hex",
       "faction": "axis",
       "target": [5, 4],
+      "requires": ["break_maxim_nest"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],

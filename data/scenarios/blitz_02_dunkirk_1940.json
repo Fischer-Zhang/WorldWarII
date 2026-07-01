@@ -69,6 +69,7 @@
       "type": "recon_hex",
       "faction": "allies",
       "target": [22, 2],
+      "requires": ["hold_dunkirk_exit"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

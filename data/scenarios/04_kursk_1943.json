@@ -68,6 +68,7 @@
       "type": "destroy_unit",
       "faction": "axis",
       "target_unit": "SU-152",
+      "requires": ["northern_ridge_recon"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     },
     {

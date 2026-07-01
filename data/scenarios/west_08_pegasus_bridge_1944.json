@@ -66,6 +66,7 @@
       "label": "摧毀橋北機槍",
       "faction": "allies",
       "target_unit": "axis_bridge_mg",
+      "requires": ["pegasus_hold_bridge"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

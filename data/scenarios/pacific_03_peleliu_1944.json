@@ -63,6 +63,7 @@
       "label": "偵察北側山脊",
       "faction": "allies",
       "target": [12, 2],
+      "requires": ["peleliu_cave_mg"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],

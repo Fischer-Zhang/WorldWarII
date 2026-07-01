@@ -67,6 +67,7 @@
       "label": "偵察西岸觀測點",
       "faction": "soviet",
       "target": [12, 4],
+      "requires": ["dnieper_east_crossing"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],

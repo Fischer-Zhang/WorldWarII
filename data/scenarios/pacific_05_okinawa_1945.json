@@ -73,6 +73,7 @@
       "label": "摧毀首里機槍",
       "faction": "allies",
       "target_unit": "axis_okinawa_mg",
+      "requires": ["okinawa_forward_observer"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
     }
   ],

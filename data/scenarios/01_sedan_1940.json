@@ -61,6 +61,7 @@
       "label": "橋頭補給",
       "faction": "axis",
       "target": [15, 5],
+      "requires": ["sedan_crossing_recon"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     },
     {

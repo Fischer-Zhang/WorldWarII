@@ -70,6 +70,7 @@
       "type": "recon_hex",
       "faction": "soviet",
       "target": [18, 2],
+      "requires": ["silence_mg34"],
       "rewards": [{"type": "xp", "amount": 1}, {"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}]
     }
   ],
