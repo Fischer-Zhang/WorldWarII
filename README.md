@@ -49,6 +49,10 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 |---|---|---|
 | ![Main menu](docs/screenshots/01_main_menu.png) | ![Scenario select with theater tabs and AI difficulty](docs/screenshots/02_scenario_select.png) | ![Lounge generals and tech tree](docs/screenshots/06_lounge.png) |
 
+Conquest world map — each garrison unit is led by a commander (from that power's roster) hired with region strength:
+
+![Conquest region panel with per-unit commander pickers](docs/screenshots/07_conquest_generals.png)
+
 ## Environment
 
 This repository is currently validated in the following environment:

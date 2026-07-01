@@ -5,6 +5,8 @@ WW2 power, grow and defend a network of regions on a world map, and every attack
 or defense launches a **real tactical battle** on that region's terrain — the
 same deterministic hex engine used everywhere else, not a separate simulator.
 
+![Conquest world map with a region's garrison, each unit led by a commander (隆美爾 / 古德林 / 曼施坦因) at a strength cost](screenshots/07_conquest_generals.png)
+
 All state lives under `state["conquest"]` in the campaign save and is driven by
 `scripts/scenario/conquest_manager.gd`, `conquest_recruit.gd`,
 `conquest_supply.gd`, `conquest_battle_setup.gd`, and `data/conquest_map.json`.
