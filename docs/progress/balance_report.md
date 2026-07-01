@@ -430,7 +430,7 @@ Baseline deltas compare current `data/units.json` against the provided `--baseli
 | west_08_pegasus_bridge_1944 | 160 | plain 64%, road 14%, forest 9% |
 | west_09_aachen_1944 | 384 | plain 74%, road 11%, forest 9% |
 | west_09_hurtgen_1944 | 384 | plain 70%, road 12%, forest 11% |
-| west_10_remagen_1945 | 384 | plain 72%, road 11%, forest 10% |
+| west_10_remagen_1945 | 384 | plain 70%, road 11%, forest 10% |
 | west_11_colmar_1945 | 384 | plain 71%, road 12%, forest 10% |
 
 ## Rule Risks

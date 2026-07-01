@@ -29,6 +29,16 @@ SUBHEX = 2
 ZOC_PENALTY = 2
 IMPASSABLE = 1 << 20
 SUPPRESSION_PIN_THRESHOLD = 2
+IDENTITY_TERRAINS = ("desert", "jungle", "town", "river", "sea", "mountain", "forest")
+IDENTITY_THRESHOLDS = {
+    "desert": 0.20,
+    "jungle": 0.08,
+    "town": 0.12,
+    "river": 0.05,
+    "sea": 0.08,
+    "mountain": 0.06,
+    "forest": 0.10,
+}
 
 SUPPRESSION_BY_TYPE = {
     "infantry": 1,
@@ -736,6 +746,169 @@ def valid_offset_target(target: Any) -> bool:
     return isinstance(target, list) and len(target) >= 2
 
 
+def terrain_identity_rows(scenarios: list[dict[str, Any]], units: dict[str, Any]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not is_theater_identity_scenario(scenario_id):
+            continue
+        profile = terrain_identity_profile(scenario)
+        objective_hooks = terrain_objective_identity_text(scenario)
+        role_hooks = terrain_role_identity_text(scenario, units)
+        rows.append([
+            scenario_id,
+            terrain_identity_theme_text(profile),
+            terrain_identity_signal_text(profile),
+            objective_hooks,
+            role_hooks,
+            terrain_identity_check_text(profile, objective_hooks, role_hooks),
+        ])
+    return rows
+
+
+def is_theater_identity_scenario(scenario_id: str) -> bool:
+    return scenario_id != "00_sandbox" and not scenario_id.startswith("tut_")
+
+
+def terrain_identity_profile(scenario: dict[str, Any]) -> dict[str, Any]:
+    counts: collections.Counter[str] = collections.Counter()
+    for row in scenario.get("map", {}).get("tiles", []):
+        counts.update(str(tile) for tile in row)
+    total = sum(counts.values()) or 1
+    ratios = {terrain: counts.get(terrain, 0) / total for terrain in IDENTITY_TERRAINS}
+    themes = [
+        terrain for terrain in IDENTITY_TERRAINS
+        if ratios.get(terrain, 0.0) >= IDENTITY_THRESHOLDS[terrain]
+    ]
+    if not themes:
+        themes = ["open"]
+    return {"counts": counts, "ratios": ratios, "themes": themes, "total": total}
+
+
+def terrain_identity_theme_text(profile: dict[str, Any]) -> str:
+    themes: list[str] = profile.get("themes", [])
+    return ", ".join(themes) if themes else "open"
+
+
+def terrain_identity_signal_text(profile: dict[str, Any]) -> str:
+    ratios: dict[str, float] = profile.get("ratios", {})
+    items = [
+        (terrain, ratio) for terrain, ratio in ratios.items()
+        if ratio >= 0.05
+    ]
+    items.sort(key=lambda item: (-item[1], item[0]))
+    return ", ".join(f"{terrain}:{ratio:.0%}" for terrain, ratio in items[:4]) if items else "plain/open"
+
+
+def terrain_objective_identity_text(scenario: dict[str, Any]) -> str:
+    target_terrains: collections.Counter[str] = collections.Counter()
+    objective_types: collections.Counter[str] = collections.Counter()
+    for objective in formal_identity_objectives(scenario):
+        objective_type = str(objective.get("type", ""))
+        if objective_type:
+            objective_types[objective_type] += 1
+        for target in primary_objective_targets(objective):
+            terrain = terrain_at_offset(scenario, target)
+            if terrain:
+                target_terrains[terrain] += 1
+    objectives = scenario.get("secondary_objectives", [])
+    if isinstance(objectives, list):
+        for objective in objectives:
+            if not isinstance(objective, dict):
+                continue
+            objective_type = str(objective.get("type", "capture"))
+            objective_types[objective_type] += 1
+            target = secondary_objective_target_offset(scenario, objective)
+            if target is None:
+                continue
+            terrain = terrain_at_offset(scenario, target)
+            if terrain:
+                target_terrains[terrain] += 1
+    parts: list[str] = []
+    if objective_types:
+        parts.append(", ".join(f"{kind}:{count}" for kind, count in sorted(objective_types.items())))
+    terrain_parts = [
+        f"{terrain}:{count}" for terrain, count in sorted(target_terrains.items())
+        if terrain in IDENTITY_TERRAINS
+    ]
+    if terrain_parts:
+        parts.append("targets " + ", ".join(terrain_parts))
+    return "; ".join(parts) if parts else "none"
+
+
+def formal_identity_objectives(scenario: dict[str, Any]) -> list[dict[str, Any]]:
+    scenario_id = str(scenario.get("id", ""))
+    if scenario_id.startswith("conq_"):
+        objective = scenario.get("conquest_victory", {})
+        return [objective] if isinstance(objective, dict) and objective else []
+    player_faction = player_faction_id(scenario)
+    objective = scenario.get("victory", {}).get(player_faction, {})
+    return [objective] if isinstance(objective, dict) and objective else []
+
+
+def terrain_at_offset(scenario: dict[str, Any], target: Any) -> str:
+    if not valid_offset_target(target):
+        return ""
+    col = int(target[0])
+    row = int(target[1])
+    tiles = scenario.get("map", {}).get("tiles", [])
+    if 0 <= row < len(tiles) and isinstance(tiles[row], list) and 0 <= col < len(tiles[row]):
+        return str(tiles[row][col])
+    return ""
+
+
+def terrain_role_identity_text(scenario: dict[str, Any], units: dict[str, Any]) -> str:
+    player_faction = player_faction_id(scenario)
+    player_units = [
+        unit for unit in initial_units(scenario)
+        if str(unit.get("faction", "")) == player_faction
+    ]
+    role_counts: collections.Counter[str] = collections.Counter()
+    for unit in player_units:
+        unit_type = str(unit.get("type", ""))
+        unit_def = units.get(unit_type, {})
+        if unit_type == "light_tank":
+            role_counts["scout"] += 1
+        if unit_type == "engineer":
+            role_counts["engineer"] += 1
+        if unit_type == "paratrooper":
+            role_counts["airdrop"] += 1
+        if unit_type in {"light_tank", "medium_tank", "tank_destroyer"}:
+            role_counts["armor"] += 1
+        if unit_type == "mg_team":
+            role_counts["mg"] += 1
+        if bool(unit_def.get("indirect", False)):
+            role_counts["artillery"] += 1
+    for objective in scenario.get("secondary_objectives", []):
+        if not isinstance(objective, dict):
+            continue
+        if str(objective.get("type", "")) == "recon_hex":
+            role_counts["recon"] += 1
+        for reward in objective.get("rewards", []):
+            if not isinstance(reward, dict):
+                continue
+            if str(reward.get("type", "")) == "strip_enemy_dig_in":
+                role_counts["breach"] += 1
+            elif str(reward.get("type", "")) == "suppress_enemies":
+                role_counts["suppression"] += 1
+    return ", ".join(f"{role}:{count}" for role, count in sorted(role_counts.items())) if role_counts else "none"
+
+
+def terrain_identity_check_text(
+    profile: dict[str, Any],
+    objective_hooks: str,
+    role_hooks: str,
+) -> str:
+    themes: list[str] = profile.get("themes", [])
+    if not themes or themes == ["open"]:
+        return "tracked"
+    if objective_hooks == "none" and role_hooks == "none":
+        return "needs terrain hook"
+    if objective_hooks == "none" or role_hooks == "none":
+        return "partial"
+    return "covered"
+
+
 def gameplay_depth_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
     rows: list[list[Any]] = []
     for scenario in scenarios:
@@ -1234,6 +1407,19 @@ def generate_report() -> str:
                 "check",
             ],
             conquest_primary_variety_rows(scenarios),
+        ),
+        "## Terrain Identity Coverage",
+        "Focused gate for terrain/theater identity: each non-tutorial battle should expose its dominant terrain signals, objective hooks, and player-side role hooks.",
+        table(
+            [
+                "scenario",
+                "terrain theme",
+                "terrain signals",
+                "objective hooks",
+                "role hooks",
+                "check",
+            ],
+            terrain_identity_rows(scenarios, units),
         ),
         "## Gameplay Depth Coverage",
         "Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.",

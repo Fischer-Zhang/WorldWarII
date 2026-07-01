@@ -40,6 +40,11 @@ def main() -> None:
         "scenario probe missing conquest primary variety section",
     )
     require(
+        "## Terrain Identity Coverage" in report
+        and "| scenario | terrain theme | terrain signals | objective hooks | role hooks | check |" in report,
+        "scenario probe missing terrain identity coverage section",
+    )
+    require(
         "## Gameplay Depth Coverage" in report
         and "| scenario | secondary objectives | xp-only objectives | enriched objectives | check |" in report,
         "scenario probe missing gameplay depth coverage section",
@@ -190,6 +195,33 @@ def main() -> None:
     require(
         {"capture", "control", "hold"}.issubset(primary_objective_mix),
         "Conquest primary variety should include capture, control_count and hold objectives",
+    )
+    terrain_section = section_text(report, "## Terrain Identity Coverage")
+    terrain_rows = [
+        line for line in terrain_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| scenario |")
+    ]
+    require(
+        len(terrain_rows) == main_scenario_count + conquest_count,
+        "Terrain identity coverage should include every non-tutorial battle and conquest template",
+    )
+    require(
+        not any("| needs terrain hook |" in line or "| partial |" in line for line in terrain_rows),
+        "Terrain identity coverage should not contain missing or partial terrain hooks",
+    )
+    require(
+        "| conq_desert_north_africa | desert, mountain | desert:82%, mountain:7% |" in report
+        and "| conq_cbi_jungle | jungle | jungle:88% |" in report
+        and "| east_10_berlin_1945 | town | town:60% |" in report
+        and "| west_10_remagen_1945 | river | forest:10%, river:5% |" in report,
+        "Terrain identity coverage should expose desert, jungle, city and bridge/river representatives",
+    )
+    require(
+        "| pacific_02_tarawa_1943 | jungle, sea | jungle:12%, sea:11%, town:6% |" in report
+        and "targets town:3 | armor:1, artillery:1, engineer:1, mg:1, scout:1, suppression:1 | covered |" in report,
+        "Terrain identity coverage should expose Pacific island assault hooks",
     )
     depth_section = section_text(report, "## Gameplay Depth Coverage")
     depth_rows = [

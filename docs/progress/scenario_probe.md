@@ -189,6 +189,55 @@ Focused gate for conquest templates: attack battles should vary their formal obj
 | conq_pacific_carrier | hold 14,4 2t by T12 | own min 12 enemy min 8 | varied |
 | conq_pacific_island | control 2/3 by T13 | own min 9 enemy min 9 | varied |
 
+## Terrain Identity Coverage
+
+Focused gate for terrain/theater identity: each non-tutorial battle should expose its dominant terrain signals, objective hooks, and player-side role hooks.
+
+| scenario | terrain theme | terrain signals | objective hooks | role hooks | check |
+| --- | --- | --- | --- | --- | --- |
+| 01_sedan_1940 | forest | forest:21% | capture:2, recon_hex:1; targets town:1 | armor:4, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| 02_kiev_1941 | river | forest:7%, river:7% | destroy_unit:1, eliminate:1, recon_hex:1 | armor:4, artillery:2, breach:1, recon:1, suppression:1 | covered |
+| 03_stalingrad_1942 | town, river | town:42%, river:6% | destroy_unit:1, recon_hex:1, survive:1; targets town:2 | artillery:1, breach:1, mg:2, recon:1, suppression:1 | covered |
+| 04_kursk_1943 | open | forest:7% | control_count:1, destroy_unit:1, recon_hex:1; targets town:3 | armor:6, artillery:1, breach:1, recon:1, scout:1 | tracked |
+| 05_bastogne_1944 | forest | forest:18% | destroy_unit:1, hold_hex_turns:1, hold_turns:1; targets town:2 | airdrop:2, armor:1, artillery:1, engineer:1, mg:1, suppression:1 | covered |
+| 06_market_garden_1944 | river | river:11%, forest:7% | capture:1, destroy_unit:1, hold_turns:1; targets town:1 | airdrop:3, artillery:1, engineer:1, mg:1, suppression:1 | covered |
+| 07_bagration_1944 | open | forest:6% | capture:2, destroy_unit:1; targets town:1 | armor:3, artillery:2, mg:1, suppression:1 | tracked |
+| blitz_00_poland_1939 | river | forest:8%, river:7% | capture:1, destroy_unit:1, recon_hex:1; targets town:1 | armor:3, artillery:1, recon:1, scout:2, suppression:1 | covered |
+| blitz_02_dunkirk_1940 | river | river:7%, forest:7% | hold_turns:1, recon_hex:1, survive:1; targets town:1 | artillery:1, mg:1, recon:1, suppression:1 | covered |
+| blitz_03_moscow_1941 | forest | forest:13% | capture:1, destroy_unit:1, recon_hex:1; targets town:1 | armor:2, artillery:2, breach:1, recon:1, suppression:1 | covered |
+| conq_atlantic_convoy | sea, forest | forest:11%, sea:9% | capture:1, control_count:1, recon_hex:1; targets town:5 | armor:2, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| conq_cbi_jungle | jungle | jungle:88% | capture:1, hold_hex_turns:1, recon_hex:1; targets town:3 | breach:1, engineer:1, mg:1, recon:1 | covered |
+| conq_china_plains | open | forest:9% | capture:1, control_count:1, hold_turns:1; targets town:3 | armor:2, artillery:1, scout:1 | tracked |
+| conq_desert_north_africa | desert, mountain | desert:82%, mountain:7% | capture:1, control_count:1, recon_hex:1; targets town:5 | armor:2, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| conq_home_islands | mountain | mountain:12%, forest:10% | capture:2, recon_hex:1; targets town:3 | armor:2, artillery:1, breach:1, recon:1, scout:1 | covered |
+| conq_mediterranean_coast | open | sea:7% | capture:1, hold_hex_turns:1, hold_turns:1; targets town:2 | armor:1, artillery:1, suppression:1 | tracked |
+| conq_middle_east_oilfields | desert | desert:79% | capture:2, control_count:1; targets town:5 | armor:2, artillery:1, scout:1 | covered |
+| conq_north_sea_raid | sea | sea:12%, town:7% | capture:2, recon_hex:1; targets town:3 | armor:2, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| conq_pacific_carrier | sea | sea:17%, town:6% | capture:1, hold_hex_turns:1, hold_turns:1; targets town:3 | armor:2, artillery:1, scout:1 | covered |
+| conq_pacific_island | jungle, sea | sea:10%, jungle:8% | capture:1, control_count:1, recon_hex:1; targets town:5 | armor:1, breach:1, mg:1, recon:1, scout:1 | covered |
+| east_05_kharkov_1943 | open | forest:7%, town:5% | capture:1, destroy_unit:1, recon_hex:1; targets town:3 | armor:5, artillery:1, breach:1, recon:1, scout:1, suppression:1 | tracked |
+| east_06_dnieper_1943 | river, forest | forest:11%, river:9% | capture:1, hold_turns:1, recon_hex:1; targets town:1 | armor:2, artillery:1, breach:1, engineer:1, recon:1, scout:1 | covered |
+| east_09_seelow_1945 | mountain | mountain:7%, forest:6% | capture:1, destroy_unit:1, recon_hex:1; targets forest:1, town:1 | armor:2, artillery:2, breach:1, recon:1, suppression:1 | covered |
+| east_10_berlin_1945 | town | town:60% | capture:1, destroy_unit:1, recon_hex:1; targets town:1 | armor:1, artillery:1, breach:1, engineer:1, recon:1, suppression:1 | covered |
+| north_00_gazala_1942 | desert, mountain | desert:74%, mountain:8% | capture:1, destroy_unit:1, recon_hex:1; targets desert:1, town:1 | armor:4, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| north_01_el_alamein_1942 | desert, mountain | desert:76%, mountain:7% | capture:1, eliminate:1, recon_hex:1; targets desert:1, town:1 | armor:4, artillery:1, recon:1, scout:1, suppression:1 | covered |
+| north_02_kasserine_1943 | desert, mountain | desert:67%, mountain:10% | hold_turns:1, recon_hex:1, survive:1; targets desert:1, town:1 | armor:2, artillery:1, mg:1, recon:1, scout:1, suppression:1 | covered |
+| north_03_tunis_1943 | desert, mountain | desert:71%, mountain:8% | capture:1, destroy_unit:1, eliminate:1; targets desert:1, town:1 | armor:3, artillery:1, engineer:1, scout:1, suppression:1 | covered |
+| north_04_bizerte_1943 | desert, sea, mountain | desert:52%, sea:11%, mountain:7%, town:6% | capture:2, destroy_unit:1; targets desert:1, town:2 | armor:3, artillery:1, engineer:1, mg:1, scout:1, suppression:1 | covered |
+| pacific_01_guadalcanal_1942 | jungle, sea | jungle:14%, sea:11% | capture:1, destroy_unit:1, eliminate:1; targets town:2 | armor:1, artillery:1, engineer:1, mg:1, scout:1, suppression:1 | covered |
+| pacific_02_tarawa_1943 | jungle, sea | jungle:12%, sea:11%, town:6% | capture:2, destroy_unit:1; targets town:3 | armor:1, artillery:1, engineer:1, mg:1, scout:1, suppression:1 | covered |
+| pacific_03_peleliu_1944 | jungle, sea | jungle:13%, sea:9% | capture:1, destroy_unit:1, recon_hex:1; targets town:1 | armor:1, artillery:1, breach:1, engineer:1, mg:1, recon:1, scout:1, suppression:1 | covered |
+| pacific_04_manila_1945 | town, river | town:28%, river:8% | capture:1, control_count:1, recon_hex:1; targets town:6 | armor:3, artillery:2, breach:1, engineer:1, mg:1, recon:1, scout:1 | covered |
+| pacific_05_iwo_jima_1945 | jungle, sea | sea:11%, jungle:9% | capture:1, hold_turns:1, recon_hex:1; targets mountain:2, town:1 | armor:2, artillery:1, breach:1, engineer:1, mg:1, recon:1, scout:1 | covered |
+| pacific_05_okinawa_1945 | jungle, town | town:15%, jungle:10% | destroy_unit:1, eliminate:1, hold_turns:1; targets town:2 | armor:3, artillery:2, engineer:1, mg:1, scout:1, suppression:1 | covered |
+| west_08_falaise_1944 | forest | forest:12% | capture:1, destroy_unit:1, recon_hex:1 | armor:3, artillery:1, recon:1, suppression:1 | covered |
+| west_08_normandy_cobra_1944 | open | forest:10% | capture:1, destroy_unit:1, recon_hex:1 | armor:3, artillery:1, breach:1, recon:1, suppression:1 | tracked |
+| west_08_pegasus_bridge_1944 | river | forest:9%, river:9% | destroy_unit:1, hold_hex_turns:1, hold_turns:1; targets town:2 | airdrop:2, engineer:1, mg:1, suppression:1 | covered |
+| west_09_aachen_1944 | open | forest:9% | capture:1, destroy_unit:1, recon_hex:1 | armor:3, artillery:1, breach:2, recon:1 | tracked |
+| west_09_hurtgen_1944 | forest | forest:11% | destroy_unit:1, hold_hex_turns:1, hold_turns:1 | armor:3, artillery:1, suppression:1 | covered |
+| west_10_remagen_1945 | river | forest:10%, river:5% | capture:2, recon_hex:1; targets town:1 | armor:3, artillery:1, breach:1, recon:1 | covered |
+| west_11_colmar_1945 | forest | forest:10% | capture:1, destroy_unit:1, recon_hex:1; targets town:2 | armor:3, artillery:1, breach:1, recon:1, suppression:1 | covered |
+
 ## Gameplay Depth Coverage
 
 Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.
@@ -238,4 +287,4 @@ Dynamic coverage gate for formal campaign expansion: reports campaign size, vict
 | eastern_front | 7 | capture:5, control_count:1, survive:1 | river:2, town:3 | reinforcement:2, scout:3, engineer:2 | tracked |
 | north_africa | 5 | capture:2, eliminate:2, survive:1 | desert:5, sea:1, town:1 | reinforcement:2, scout:5, engineer:2 | tracked |
 | pacific_front | 6 | capture:3, control_count:1, eliminate:2 | jungle:5, sea:4, river:1, town:3 | reinforcement:2, scout:6, engineer:6 | tracked |
-| western_front | 9 | capture:6, hold_hex_turns:3 | river:2 | reinforcement:3, engineer:3, airdrop:3 | tracked |
+| western_front | 9 | capture:6, hold_hex_turns:3 | river:3 | reinforcement:3, engineer:3, airdrop:3 | tracked |
