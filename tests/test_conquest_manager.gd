@@ -38,6 +38,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_attack_preparations():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_theater_objective_status():
 		pass_count += 1
 	else:
@@ -353,6 +358,67 @@ func _test_development_actions() -> bool:
 	var unknown := ConquestManager.develop_region(state, map_data, "alpha", "unknown")
 	if bool(unknown.get("ok", false)):
 		printerr("FAIL: unknown development action should fail")
+		return false
+	return true
+
+func _test_attack_preparations() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 8
+	if not ConquestManager.attack_preparation_actions_for_region(state, map_data, "alpha", "bravo").is_empty():
+		printerr("FAIL: empty garrison should not expose attack preparations")
+		return false
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 1, "rank": 0, "name": "a1"},
+	]
+	var actions := ConquestManager.attack_preparation_actions_for_region(state, map_data, "alpha", "bravo")
+	if actions.size() != 3:
+		printerr("FAIL: valid attack should expose three preparation actions")
+		return false
+	var recon := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "recon")
+	var duplicate := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "recon")
+	var barrage := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "barrage")
+	var supply := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "supply")
+	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(recon.get("ok", false)) \
+			or bool(duplicate.get("ok", false)) \
+			or not bool(barrage.get("ok", false)) \
+			or not bool(supply.get("ok", false)) \
+			or int(alpha.get("strength", 0)) != 3:
+		printerr("FAIL: attack preparations should spend strength, reject duplicates and keep source alive")
+		return false
+	var summary := ConquestManager.attack_preparation_summary(state, map_data, "alpha", "bravo")
+	if summary.find("戰場偵察") == -1 or summary.find("砲兵準備") == -1 or summary.find("補給整備") == -1:
+		printerr("FAIL: attack preparation summary should list prepared actions: %s" % summary)
+		return false
+	var preview := ConquestManager.preview_attack_preparation_context(state, map_data, "alpha", "bravo")
+	if int(preview.get("defender_strength_delta", 0)) != -3 or int(preview.get("attacker_xp_bonus", 0)) != 1:
+		printerr("FAIL: preparation preview should combine defender reduction and attacker XP: %s" % str(preview))
+		return false
+	var prepared_garrison := ConquestManager.apply_attack_preparation_to_garrison(
+		alpha.get("garrison", []) as Array, preview
+	)
+	var prepared_record: Dictionary = prepared_garrison[0] if prepared_garrison.size() == 1 else {}
+	if int(prepared_record.get("xp", 0)) != 2 or int(prepared_record.get("rank", 0)) != 1:
+		printerr("FAIL: supply preparation should add temporary battle XP and update rank")
+		return false
+	var consumed := ConquestManager.consume_attack_preparation_context(state, map_data, "alpha", "bravo")
+	if int(consumed.get("defender_strength_delta", 0)) != -3 \
+			or int(consumed.get("attacker_xp_bonus", 0)) != 1 \
+			or not (ConquestManager.preview_attack_preparation_context(state, map_data, "alpha", "bravo").get("actions", []) as Array).is_empty():
+		printerr("FAIL: consuming preparations should return effects once and clear pending actions")
+		return false
+
+	state = {"version": 2, "campaigns": {}}
+	conquest = ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 2
+	conquest["regions"]["alpha"]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"},
+	]
+	var blocked := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "barrage")
+	if bool(blocked.get("ok", false)):
+		printerr("FAIL: preparation should not spend the source below 1 strength")
 		return false
 	return true
 

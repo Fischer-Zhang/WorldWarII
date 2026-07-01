@@ -7,6 +7,27 @@ const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 const AI_MIN_ATTACK_STRENGTH := 3
 const TRAINING_MAX_LEVEL := 2
+const ATTACK_PREPARATION_ORDER := ["recon", "barrage", "supply"]
+const ATTACK_PREPARATIONS := {
+	"recon": {
+		"label": "戰場偵察",
+		"cost": 1,
+		"description": "本次進攻敵軍生成強度 -1。",
+		"effect": "敵軍強度 -1",
+	},
+	"barrage": {
+		"label": "砲兵準備",
+		"cost": 2,
+		"description": "本次進攻敵軍生成強度 -2。",
+		"effect": "敵軍強度 -2",
+	},
+	"supply": {
+		"label": "補給整備",
+		"cost": 2,
+		"description": "本次進攻參戰駐軍 +1 XP。",
+		"effect": "參戰駐軍 +1 XP",
+	},
+}
 const DEVELOPMENT_ACTIONS := {
 	"industry": {"label": "擴建產能", "cost": 4},
 	"fortify": {"label": "築防整備", "cost": 3},
@@ -25,7 +46,10 @@ static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionar
 		conquest["regions"] = _initial_regions(map_data)
 	if not conquest.has("next_unit_id"):
 		conquest["next_unit_id"] = 1
+	if not conquest.has("attack_preparations"):
+		conquest["attack_preparations"] = {}
 	_migrate_regions(conquest, map_data)
+	_prune_attack_preparations(conquest)
 	state["conquest"] = conquest
 	return conquest
 
@@ -34,6 +58,7 @@ static func reset_conquest(state: Dictionary, map_data: Dictionary) -> void:
 		"turn": 1,
 		"player_country": String(map_data.get("start_country", "germany")),
 		"regions": _initial_regions(map_data),
+		"attack_preparations": {},
 	}
 	CampaignManager.save_state(state)
 
@@ -130,6 +155,109 @@ static func transfer_units(state: Dictionary, map_data: Dictionary, from_id: Str
 	state["conquest"] = conquest
 	CampaignManager.save_state(state)
 	return {"ok": true, "message": "已將 %d 支部隊從 %s 調往 %s。" % [moved, _region_name(source), _region_name(target)]}
+
+static func attack_preparation_actions_for_region(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> Array:
+	if not can_attack(state, map_data, from_id, to_id):
+		return []
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions.get(from_id, {})
+	var prepared := _prepared_attack_actions(conquest, from_id, to_id)
+	var out: Array = []
+	for action_id in ATTACK_PREPARATION_ORDER:
+		var def: Dictionary = ATTACK_PREPARATIONS.get(action_id, {})
+		var cost := int(def.get("cost", 999))
+		var already_prepared := prepared.has(action_id)
+		var enabled := not already_prepared and _can_pay_attack_preparation(source, cost)
+		out.append({
+			"id": action_id,
+			"label": String(def.get("label", action_id)),
+			"cost": cost,
+			"prepared": already_prepared,
+			"enabled": enabled,
+			"description": String(def.get("description", "")),
+			"effect": String(def.get("effect", "")),
+			"reason": _attack_preparation_blocked_reason(source, cost, already_prepared),
+		})
+	return out
+
+static func attack_preparation_summary(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> String:
+	if from_id == "" or to_id == "":
+		return ""
+	if not can_attack(state, map_data, from_id, to_id):
+		return ""
+	var conquest := conquest_state(state, map_data)
+	var prepared := _prepared_attack_actions(conquest, from_id, to_id)
+	var labels: Array[String] = []
+	for action_id in ATTACK_PREPARATION_ORDER:
+		if prepared.has(action_id):
+			var def: Dictionary = ATTACK_PREPARATIONS.get(action_id, {})
+			labels.append("%s(%s)" % [String(def.get("label", action_id)), String(def.get("effect", ""))])
+	return "、".join(labels) if not labels.is_empty() else "無"
+
+static func prepare_attack(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String, action_id: String) -> Dictionary:
+	if not can_attack(state, map_data, from_id, to_id):
+		return {"ok": false, "message": "無法準備:需選擇相鄰敵方目標,且出發地要有駐軍。"}
+	if not ATTACK_PREPARATIONS.has(action_id):
+		return {"ok": false, "message": "未知的戰前準備。"}
+	var conquest := conquest_state(state, map_data)
+	var regions: Dictionary = conquest.get("regions", {})
+	var source: Dictionary = regions.get(from_id, {})
+	var key := _attack_preparation_key(from_id, to_id)
+	var preparations: Dictionary = conquest.get("attack_preparations", {})
+	var prepared: Dictionary = preparations.get(key, {})
+	if prepared.has(action_id):
+		return {"ok": false, "message": "此戰前準備已完成。"}
+	var def: Dictionary = ATTACK_PREPARATIONS.get(action_id, {})
+	var cost := int(def.get("cost", 999))
+	if not _can_pay_attack_preparation(source, cost):
+		return {"ok": false, "message": "兵力不足:戰前準備需花費 %d 並保留至少 1 兵力。" % cost}
+	source["strength"] = int(source.get("strength", 0)) - cost
+	prepared[action_id] = true
+	preparations[key] = prepared
+	regions[from_id] = source
+	conquest["regions"] = regions
+	conquest["attack_preparations"] = preparations
+	state["conquest"] = conquest
+	CampaignManager.save_state(state)
+	return {
+		"ok": true,
+		"message": "%s 完成%s: %s。" % [
+			_region_name(source),
+			String(def.get("label", action_id)),
+			String(def.get("effect", "")),
+		],
+	}
+
+static func preview_attack_preparation_context(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> Dictionary:
+	var conquest := conquest_state(state, map_data)
+	return _attack_preparation_context(_prepared_attack_actions(conquest, from_id, to_id))
+
+static func consume_attack_preparation_context(state: Dictionary, map_data: Dictionary, from_id: String, to_id: String) -> Dictionary:
+	var conquest := conquest_state(state, map_data)
+	var key := _attack_preparation_key(from_id, to_id)
+	var preparations: Dictionary = conquest.get("attack_preparations", {})
+	var prepared: Dictionary = preparations.get(key, {})
+	if prepared.is_empty():
+		return _attack_preparation_context({})
+	preparations.erase(key)
+	conquest["attack_preparations"] = preparations
+	state["conquest"] = conquest
+	CampaignManager.save_state(state)
+	return _attack_preparation_context(prepared)
+
+static func apply_attack_preparation_to_garrison(garrison: Array, preparation_context: Dictionary) -> Array:
+	var out: Array = garrison.duplicate(true)
+	var xp_bonus := int(preparation_context.get("attacker_xp_bonus", 0))
+	if xp_bonus <= 0:
+		return out
+	for i in range(out.size()):
+		var record: Dictionary = out[i]
+		var xp := int(record.get("xp", 0)) + xp_bonus
+		record["xp"] = xp
+		record["rank"] = maxi(int(record.get("rank", 0)), CombatModifiers.rank_for_xp(xp))
+		out[i] = record
+	return out
 
 static func development_actions_for_region(state: Dictionary, map_data: Dictionary, region_id: String) -> Array:
 	var conquest := conquest_state(state, map_data)
@@ -517,6 +645,30 @@ static func _migrate_regions(conquest: Dictionary, map_data: Dictionary) -> void
 		migrated[id] = fresh
 	conquest["regions"] = migrated
 
+static func _prune_attack_preparations(conquest: Dictionary) -> void:
+	var preparations: Dictionary = conquest.get("attack_preparations", {})
+	if preparations.is_empty():
+		return
+	var regions: Dictionary = conquest.get("regions", {})
+	var player_country := String(conquest.get("player_country", ""))
+	var kept := {}
+	for key in preparations.keys():
+		var pair := String(key).split(">")
+		if pair.size() != 2:
+			continue
+		var from_id := String(pair[0])
+		var to_id := String(pair[1])
+		var source: Dictionary = regions.get(from_id, {})
+		var target: Dictionary = regions.get(to_id, {})
+		if source.is_empty() or target.is_empty():
+			continue
+		if String(source.get("owner", "")) != player_country or String(target.get("owner", "")) == player_country:
+			continue
+		var neighbors: Array = source.get("neighbors", [])
+		if neighbors.has(to_id):
+			kept[key] = preparations[key]
+	conquest["attack_preparations"] = kept
+
 static func _region_from_map_def(region: Dictionary) -> Dictionary:
 	var id := String(region.get("id", ""))
 	var name := String(region.get("name_zh", id))
@@ -625,6 +777,53 @@ static func _development_description(region: Dictionary, action_id: String) -> S
 			return "新徵召部隊初始 XP +訓練等級,最多 2 級。"
 		_:
 			return ""
+
+static func _attack_preparation_key(from_id: String, to_id: String) -> String:
+	return "%s>%s" % [from_id, to_id]
+
+static func _prepared_attack_actions(conquest: Dictionary, from_id: String, to_id: String) -> Dictionary:
+	var preparations: Dictionary = conquest.get("attack_preparations", {})
+	var prepared: Dictionary = preparations.get(_attack_preparation_key(from_id, to_id), {})
+	var out := {}
+	for action_id in ATTACK_PREPARATION_ORDER:
+		if prepared.has(action_id):
+			out[action_id] = true
+	return out
+
+static func _can_pay_attack_preparation(region: Dictionary, cost: int) -> bool:
+	return int(region.get("strength", 0)) - cost >= 1
+
+static func _attack_preparation_blocked_reason(region: Dictionary, cost: int, prepared: bool) -> String:
+	if prepared:
+		return "已準備,將在下一場對此目標的進攻中消耗。"
+	if not _can_pay_attack_preparation(region, cost):
+		return "兵力不足,需花費 %d 並保留至少 1 兵力。" % cost
+	return ""
+
+static func _attack_preparation_context(prepared: Dictionary) -> Dictionary:
+	var actions: Array[String] = []
+	var notes: Array[String] = []
+	var defender_strength_delta := 0
+	var attacker_xp_bonus := 0
+	for action_id in ATTACK_PREPARATION_ORDER:
+		if not prepared.has(action_id):
+			continue
+		actions.append(action_id)
+		var def: Dictionary = ATTACK_PREPARATIONS.get(action_id, {})
+		match action_id:
+			"recon":
+				defender_strength_delta -= 1
+			"barrage":
+				defender_strength_delta -= 2
+			"supply":
+				attacker_xp_bonus += 1
+		notes.append("%s: %s" % [String(def.get("label", action_id)), String(def.get("effect", ""))])
+	return {
+		"actions": actions,
+		"notes": notes,
+		"defender_strength_delta": defender_strength_delta,
+		"attacker_xp_bonus": attacker_xp_bonus,
+	}
 
 static func _best_ai_attack_global(regions: Dictionary, player_country: String, map_data: Dictionary = {}) -> Dictionary:
 	# Best AI attack across all enemy countries. AI-vs-AI attacks are returned

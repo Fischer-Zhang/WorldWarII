@@ -317,9 +317,24 @@ func _update_detail(message: String = "") -> void:
 			lines.append("戰術作戰: %s" % String(battle_scenario.get("title", scenario_id)))
 			var src := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
 			var tgt := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+			var can_preview_attack := ConquestManager.can_attack(
+				state, DataLoader.conquest_map, selected_region_id, target_region_id
+			)
 			var my_force: int = (src.get("garrison", []) as Array).size()
-			var enemy_force: int = ConquestRecruit.generate_force(ConquestManager.defense_strength(tgt)).size()
+			var prep_summary := ConquestManager.attack_preparation_summary(
+				state, DataLoader.conquest_map, selected_region_id, target_region_id
+			)
+			var prep_context := ConquestManager.preview_attack_preparation_context(
+				state, DataLoader.conquest_map, selected_region_id, target_region_id
+			) if can_preview_attack else {}
+			var enemy_strength := maxi(
+				1,
+				ConquestManager.defense_strength(tgt) + int(prep_context.get("defender_strength_delta", 0))
+			)
+			var enemy_force: int = ConquestRecruit.generate_force(enemy_strength).size()
 			lines.append("我軍 %d 部隊 vs 敵軍約 %d 部隊" % [my_force, enemy_force])
+			if prep_summary != "":
+				lines.append("戰前準備: %s" % prep_summary)
 			lines.append("任務: %s" % ConquestBattleSetup.conquest_attack_objective_text(battle_scenario))
 			if my_force == 0:
 				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
@@ -479,6 +494,7 @@ func _rebuild_recruit_panel() -> void:
 		tip.add_theme_font_size_override("font_size", 11)
 		recruit_list.add_child(tip)
 	_add_development_panel()
+	_add_attack_preparation_panel()
 
 func _add_development_panel() -> void:
 	var actions: Array = ConquestManager.development_actions_for_region(state, DataLoader.conquest_map, selected_region_id)
@@ -497,6 +513,31 @@ func _add_development_panel() -> void:
 		btn.disabled = not bool(action.get("enabled", false))
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.pressed.connect(_on_develop_pressed.bind(String(action.get("id", ""))))
+		recruit_list.add_child(btn)
+
+func _add_attack_preparation_panel() -> void:
+	var actions: Array = ConquestManager.attack_preparation_actions_for_region(
+		state, DataLoader.conquest_map, selected_region_id, target_region_id
+	)
+	if actions.is_empty():
+		return
+	var header := Label.new()
+	header.text = "戰前準備"
+	header.add_theme_font_size_override("font_size", 14)
+	recruit_list.add_child(header)
+	for item in actions:
+		var action: Dictionary = item
+		var btn := Button.new()
+		var cost := int(action.get("cost", 0))
+		var prepared := bool(action.get("prepared", false))
+		var prefix := "✓ " if prepared else ""
+		btn.text = "%s%s (%d)" % [prefix, String(action.get("label", "")), cost]
+		btn.tooltip_text = String(action.get("reason", ""))
+		if btn.tooltip_text == "":
+			btn.tooltip_text = String(action.get("description", ""))
+		btn.disabled = prepared or not bool(action.get("enabled", false))
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.pressed.connect(_on_prepare_attack_pressed.bind(String(action.get("id", ""))))
 		recruit_list.add_child(btn)
 
 func _add_recruit_hint(text: String) -> void:
@@ -560,6 +601,14 @@ func _on_develop_pressed(action_id: String) -> void:
 		_rebuild()
 	_update_detail(String(result.get("message", "")))
 
+func _on_prepare_attack_pressed(action_id: String) -> void:
+	var result := ConquestManager.prepare_attack(
+		state, DataLoader.conquest_map, selected_region_id, target_region_id, action_id
+	)
+	if bool(result.get("ok", false)):
+		_rebuild()
+	_update_detail(String(result.get("message", "")))
+
 func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	if region.is_empty():
 		return "未選取"
@@ -591,14 +640,23 @@ func _on_attack_pressed() -> void:
 	if scenario_id == "":
 		_update_detail("找不到可用的戰術作戰。")
 		return
+	if not ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id):
+		_update_detail(_unavailable_reason())
+		return
 	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	var regions: Dictionary = conquest.get("regions", {})
 	var source: Dictionary = regions.get(selected_region_id, {})
 	var target: Dictionary = regions.get(target_region_id, {})
-	var attacker_garrison: Array = (source.get("garrison", []) as Array).duplicate(true)
-	if attacker_garrison.is_empty():
+	var source_garrison: Array = (source.get("garrison", []) as Array).duplicate(true)
+	if source_garrison.is_empty():
 		_update_detail("此地區沒有駐軍可出擊,請先徵兵。")
 		return
+	var prep_context := ConquestManager.consume_attack_preparation_context(
+		state, DataLoader.conquest_map, selected_region_id, target_region_id
+	)
+	var attacker_garrison := ConquestManager.apply_attack_preparation_to_garrison(
+		source_garrison, prep_context
+	)
 	var player_country := String(conquest.get("player_country", ""))
 	var enemy_country := String(target.get("owner", ""))
 	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
@@ -611,7 +669,11 @@ func _on_attack_pressed() -> void:
 		"enemy_name": String(countries.get(enemy_country, {}).get("name_zh", enemy_country)),
 		"battle_location": String(target.get("name_zh", "")),
 		"attacker_garrison": attacker_garrison,
-		"defender_types": ConquestRecruit.generate_force(ConquestManager.defense_strength(target)),
+		"defender_types": ConquestRecruit.generate_force(maxi(
+			1,
+			ConquestManager.defense_strength(target) + int(prep_context.get("defender_strength_delta", 0))
+		)),
+		"preparation_notes": prep_context.get("notes", []),
 		"role": "attack",
 	}
 	CampaignManager.save_state(state)

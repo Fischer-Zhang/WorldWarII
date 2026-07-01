@@ -101,6 +101,19 @@ func _list_has_prefix(list: VBoxContainer, prefix: String) -> bool:
 			return true
 	return false
 
+func _list_text(list: VBoxContainer) -> String:
+	var text := ""
+	for child in list.get_children():
+		if child is Label or child is Button:
+			text += " %s" % String(child.text)
+	return text
+
+func _button_with_text(list: VBoxContainer, needle: String) -> Button:
+	for child in list.get_children():
+		if child is Button and String(child.text).contains(needle):
+			return child
+	return null
+
 func _check_main_menu() -> void:
 	var scene := await _instantiate_scene("res://scenes/main_menu.tscn")
 	_expect("main menu starts on campaign focus", scene.get_node("VBox/CampaignButton").has_focus())
@@ -562,6 +575,10 @@ func _check_conquest() -> void:
 		await _free_scene(scene)
 		_restore_campaign_save(save_snapshot)
 		return
+	regions[own_id]["strength"] = 8
+	regions[own_id]["garrison"] = [
+		{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "測試步兵"},
+	]
 	scene._select_region(enemy_id)
 	scene._select_region(own_id)
 	var detail := String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
@@ -575,11 +592,22 @@ func _check_conquest() -> void:
 		await _free_scene(scene)
 		_restore_campaign_save(save_snapshot)
 		return
-	var recruit_text := ""
-	for child in recruit_list.get_children():
-		if child is Label or child is Button:
-			recruit_text += " %s" % String(child.text)
+	var recruit_text := _list_text(recruit_list)
 	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備") and recruit_text.contains("軍校訓練"))
+	_expect("conquest attack preparation controls", recruit_text.contains("戰前準備") and recruit_text.contains("戰場偵察") and recruit_text.contains("砲兵準備"))
+	var recon_button := _button_with_text(recruit_list, "戰場偵察")
+	if recon_button == null:
+		_fail("conquest attack preparation applies", "missing recon button")
+	else:
+		recon_button.pressed.emit()
+		await process_frame
+		await process_frame
+		detail = String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
+		recruit_text = _list_text(recruit_list)
+		_expect(
+			"conquest attack preparation applies",
+			detail.contains("戰前準備") and detail.contains("戰場偵察") and recruit_text.contains("✓ 戰場偵察")
+		)
 	var zoom_in: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton")
 	var zoom_reset: Button = scene.get_node("Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton")
 	var before_size: Vector2 = scene._map_button_size

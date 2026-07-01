@@ -51,8 +51,15 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 		title_label.text = "%s 進攻 %s" % [me, foe]
 		var attack_objective := ConquestBattleSetup.conquest_attack_objective_text(scenario)
 		var limit := ConquestBattleSetup.conquest_attack_turn_limit(scenario)
-		briefing_label.text = "戰場:%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n任務:%s。守軍撐過第 %d 回合則擊退你。" % [
-			loc, terrain_line, me, my_n, foe, foe_n, attack_objective, limit,
+		var prep_notes: Array = p.get("preparation_notes", [])
+		var prep_line := ""
+		if not prep_notes.is_empty():
+			var parts: Array[String] = []
+			for note in prep_notes:
+				parts.append(String(note))
+			prep_line = "\n\n戰前準備:%s" % "、".join(parts)
+		briefing_label.text = "戰場:%s%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n任務:%s。守軍撐過第 %d 回合則擊退你。" % [
+			loc, terrain_line, prep_line, me, my_n, foe, foe_n, attack_objective, limit,
 		]
 
 func _on_begin_pressed() -> void:

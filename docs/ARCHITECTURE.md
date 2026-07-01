@@ -201,7 +201,7 @@ Player-fought tactical flow:
 
 1. Player attacks choose a friendly source and adjacent enemy target; enemy-phase attacks on player regions pause for a defensive battle.
 2. `conquest.gd` selects the tactical scenario mapped to the target or defended region.
-3. `GameState.pending_conquest_battle` records the attacking garrison, generated defenders, country ids, display names, colors and role (`attack` or `defend`).
+3. `GameState.pending_conquest_battle` records the attacking garrison, generated defenders, country ids, display names, colors, preparation notes and role (`attack` or `defend`).
 4. Briefing shows generated conquest matchup text plus the themed scenario's terrain notes.
 5. Deployment applies `ConquestBattleSetup`; enemies start on-map, player units start unplaced, and every player unit must be deployed inside the conquest zone before battle can start.
 6. Battle applies the same `ConquestBattleSetup` before building units, then deployment overrides move the placed player units to their chosen hexes.
@@ -218,6 +218,14 @@ strategic and generated tactical defense strength, logistics upgrades ports or
 supply sources, and training academies raise starting XP for newly recruited
 garrison units. The conquest scene lists the available actions but does not
 duplicate their cost, ownership, training or cap rules.
+
+Before launching a player attack, the source region can also spend local strength
+through `ConquestManager.prepare_attack` on one-time preparation actions for the
+selected source-target pair. Recon and barrage reduce generated defender
+strength for that battle, while supply preparation gives the attacking garrison
+starting XP for that launch. `consume_attack_preparation_context` clears the
+pending actions when the attack is launched, so preparation effects do not
+persist across repeated battles.
 
 Theater objectives in `data/conquest_map.json` group several regions into
 strategic goals. `ConquestManager.theater_objective_status` evaluates them from
