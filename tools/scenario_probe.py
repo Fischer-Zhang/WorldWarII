@@ -445,6 +445,10 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
                 parts.append(f"campaign +{amount}p")
             elif effect_type == "conquest_reduce_enemy_strength":
                 parts.append(f"conquest enemy -{amount}")
+            elif effect_type == "conquest_reduce_enemy_fortification":
+                parts.append(f"conquest fort -{amount}")
+            elif effect_type == "conquest_disrupt_enemy_production":
+                parts.append(f"conquest prod -{amount}")
     return ", ".join(parts) if parts else "no reward"
 
 
@@ -585,6 +589,10 @@ def secondary_reward_audit_notes(scenario: dict[str, Any], objective: dict[str, 
                 notes.append(f"campaign bonus +{amount}")
             elif effect_type == "conquest_reduce_enemy_strength":
                 notes.append(f"conquest pressure -{amount}")
+            elif effect_type == "conquest_reduce_enemy_fortification":
+                notes.append(f"conquest fort -{amount}")
+            elif effect_type == "conquest_disrupt_enemy_production":
+                notes.append(f"conquest production -{amount}")
     return notes
 
 
@@ -619,49 +627,69 @@ def conquest_secondary_coverage_rows(scenarios: list[dict[str, Any]]) -> list[li
         objectives = scenario.get("secondary_objectives", [])
         objective_count = 0
         strategic_objectives = 0
-        pressure = 0
+        effect_counts: collections.Counter[str] = collections.Counter()
         if isinstance(objectives, list):
             for objective in objectives:
                 if not isinstance(objective, dict):
                     continue
                 objective_count += 1
-                objective_pressure = conquest_pressure_amount(objective)
-                if objective_pressure > 0:
+                objective_effect_counts = conquest_effect_counts(objective)
+                if objective_effect_counts:
                     strategic_objectives += 1
-                    pressure += objective_pressure
+                    effect_counts.update(objective_effect_counts)
         rows.append([
             scenario_id,
             objective_count,
             strategic_objectives,
-            f"-{pressure}" if pressure > 0 else "0",
-            conquest_secondary_check_text(objective_count, strategic_objectives, pressure),
+            conquest_effect_mix_text(effect_counts),
+            conquest_secondary_check_text(objective_count, strategic_objectives, effect_counts),
         ])
     return rows
 
 
-def conquest_pressure_amount(objective: dict[str, Any]) -> int:
-    total = 0
+def conquest_effect_counts(objective: dict[str, Any]) -> collections.Counter[str]:
+    counts: collections.Counter[str] = collections.Counter()
     strategic_effects = objective.get("strategic_effects", [])
     if not isinstance(strategic_effects, list):
-        return 0
+        return counts
     for effect in strategic_effects:
         if not isinstance(effect, dict):
             continue
-        if str(effect.get("type", "")) != "conquest_reduce_enemy_strength":
-            continue
+        effect_type = str(effect.get("type", ""))
         amount = int(effect.get("amount", 0))
+        if amount <= 0:
+            continue
+        if effect_type == "conquest_reduce_enemy_strength":
+            counts["strength"] += amount
+        elif effect_type == "conquest_reduce_enemy_fortification":
+            counts["fort"] += amount
+        elif effect_type == "conquest_disrupt_enemy_production":
+            counts["production"] += amount
+    return counts
+
+
+def conquest_effect_mix_text(effect_counts: collections.Counter[str]) -> str:
+    parts: list[str] = []
+    for key, label in [("strength", "strength"), ("fort", "fort"), ("production", "production")]:
+        amount = int(effect_counts.get(key, 0))
         if amount > 0:
-            total += amount
-    return total
+            parts.append(f"{label} -{amount}")
+    return ", ".join(parts) if parts else "none"
 
 
-def conquest_secondary_check_text(objective_count: int, strategic_objectives: int, pressure: int) -> str:
+def conquest_secondary_check_text(
+    objective_count: int,
+    strategic_objectives: int,
+    effect_counts: collections.Counter[str],
+) -> str:
     if objective_count <= 0:
         return "missing secondary"
-    if strategic_objectives <= 0 or pressure <= 0:
-        return "missing conquest pressure"
+    if strategic_objectives <= 0 or not effect_counts:
+        return "missing conquest effect"
     if strategic_objectives < objective_count:
         return "partial"
+    if len([key for key, amount in effect_counts.items() if amount > 0]) < 2:
+        return "single effect"
     return "covered"
 
 
@@ -1057,6 +1085,10 @@ def operation_reward_family(objective: dict[str, Any]) -> str:
                 families.append("campaign")
             elif effect_type == "conquest_reduce_enemy_strength":
                 families.append("conquest")
+            elif effect_type == "conquest_reduce_enemy_fortification":
+                families.append("conquest-fort")
+            elif effect_type == "conquest_disrupt_enemy_production":
+                families.append("conquest-production")
     if not families:
         return "xp"
     return "+".join(dict.fromkeys(families))
@@ -1524,13 +1556,13 @@ def generate_report() -> str:
             secondary_objective_focus_rows(scenarios),
         ),
         "## Conquest Secondary Coverage",
-        "Focused gate for conquest templates: each conq_* battle should give optional objectives a strategic enemy-strength effect instead of XP-only pressure.",
+        "Focused gate for conquest templates: each conq_* battle should give optional objectives varied strategic effects instead of XP-only or single-axis pressure.",
         table(
             [
                 "scenario",
                 "secondary objectives",
                 "strategic objectives",
-                "enemy strength pressure",
+                "strategic effect mix",
                 "check",
             ],
             conquest_secondary_coverage_rows(scenarios),

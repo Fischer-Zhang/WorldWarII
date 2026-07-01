@@ -31,7 +31,7 @@ def main() -> None:
     )
     require(
         "## Conquest Secondary Coverage" in report
-        and "| scenario | secondary objectives | strategic objectives | enemy strength pressure | check |" in report,
+        and "| scenario | secondary objectives | strategic objectives | strategic effect mix | check |" in report,
         "scenario probe missing conquest secondary coverage section",
     )
     require(
@@ -166,19 +166,24 @@ def main() -> None:
         scenario_id = parts[0]
         secondary_count = int(parts[1])
         strategic_count = int(parts[2])
-        pressure = int(parts[3])
+        effect_mix = parts[3]
         require(
             secondary_count >= 2 and strategic_count >= 2,
             f"{scenario_id} should have at least two conquest secondary objectives",
         )
         require(
-            strategic_count == secondary_count and pressure < 0,
-            f"{scenario_id} should make every conquest secondary objective apply enemy-strength pressure",
+            strategic_count == secondary_count and "strength -" in effect_mix,
+            f"{scenario_id} should make every conquest secondary objective apply strategic pressure",
+        )
+        effect_axes = sum(1 for marker in ["strength -", "fort -", "production -"] if marker in effect_mix)
+        require(
+            effect_axes >= 2,
+            f"{scenario_id} should mix at least two conquest strategic effect axes",
         )
     require(
-        "| conq_cbi_jungle | 2 | 2 | -3 | covered |" in report
-        and "| conq_atlantic_convoy | 2 | 2 | -2 | covered |" in report,
-        "Conquest secondary coverage should expose enemy-strength pressure amounts",
+        "| conq_cbi_jungle | 2 | 2 | strength -2, fort -1 | covered |" in report
+        and "| conq_middle_east_oilfields | 2 | 2 | strength -2, production -1 | covered |" in report,
+        "Conquest secondary coverage should expose varied strategic effect amounts",
     )
     conquest_primary_section = section_text(report, "## Conquest Primary Variety")
     conquest_primary_rows = [

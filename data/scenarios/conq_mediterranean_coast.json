@@ -61,7 +61,7 @@
       "faction": "allies",
       "target": [12, 11],
       "rewards": [{"type": "xp", "amount": 1}],
-      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}]
+      "strategic_effects": [{"type": "conquest_disrupt_enemy_production", "amount": 1}]
     },
     {
       "id": "med_coast_hill_road",

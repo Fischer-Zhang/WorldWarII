@@ -15,16 +15,16 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | blitz_00_poland_1939 | allies artillery:1, mg_team:1; axis artillery:1 | allies 27/384 (7%); axis 37/384 (10%) | axis 51/384 (13%), spots 0 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 1,1 own min 23 enemy min 0 | 摧毀 37mm 反戰車砲 3,3 destroy min 20 XP 1, repair 2; 偵察砲兵陣地 0,2 recon after neutralize_37mm min 24 XP 1, enemy supp +1 R2 | none |
 | blitz_02_dunkirk_1940 | allies artillery:1, mg_team:1; axis artillery:1 | allies 38/384 (10%); axis 23/384 (6%) | axis 43/384 (11%), spots 0 | axis: eng none, art 0/4, targets 4 | axis: eng turns none | axis: art move 0/4 | axis target 5,0 own min 18 enemy min 0 | 堅守撤退出口 5,0 hold 2t min 0 XP 1, supp -2; 偵察裝甲縱隊 22,2 recon after hold_dunkirk_exit min 18 XP 1, enemy supp +1 R2 | none |
 | blitz_03_moscow_1941 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 43/384 (11%); soviet 40/384 (10%) | none | soviet: eng none, art 0/1, targets 1 | soviet: eng turns none | soviet: art move 0/1 | soviet target 6,2 own min 16 enemy min 0 | 壓制 MG 34 17,2 destroy min 5 XP 1, enemy supp +1 R2; 前進觀測點 18,2 recon after silence_mg34 min 4 XP 1, enemy dig -1 R2 | none |
-| conq_atlantic_convoy | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港口補給線 16,9 capture min 16 XP 1, conquest enemy -1; 偵察海岸信號站 17,2 recon after atlantic_port_sabotage min 15 enemy supp +1 R2, conquest enemy -1 | none |
-| conq_cbi_jungle | allies mg_team:1; axis artillery:1, mg_team:1 | axis 34/384 (9%) | none | allies: eng min 20, art 0/5, targets 5 | allies: eng turns 12 | allies: art move none | n/a | 叢林補給村 9,5 capture min 9 XP 1, conquest enemy -2; 偵察叢林渡口 12,12 recon after cbi_jungle_supply min 10 enemy dig -1 R2, conquest enemy -1 | none |
-| conq_china_plains | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 河橋補給線 14,6 capture min 13 XP 1, conquest enemy -1; 固守前進鐵路站 10,10 hold 2t after china_bridge_cache min 9 supp -2, conquest enemy -1 | none |
-| conq_desert_north_africa | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 綠洲補給站 13,11 capture min 12 XP 1, conquest enemy -1; 偵察沙漠高地 20,6 recon after desert_oasis_depot min 19 enemy supp +1 R2, conquest enemy -1 | none |
-| conq_home_islands | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 山脊彈藥庫 15,6 capture min 14 XP 1, conquest enemy -2; 標定山口火點 17,12 recon after home_islands_fort_depot min 15 enemy dig -1 R2, conquest enemy -1 | none |
-| conq_mediterranean_coast | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 44/384 (11%) | none | n/a | n/a | n/a | n/a | 海岸補給港 12,11 capture min 8 XP 1, conquest enemy -1; 控制丘陵公路 17,5 hold 2t after med_coast_supply_port min 16 enemy supp +1 R2, conquest enemy -1 | none |
-| conq_middle_east_oilfields | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 油田泵站 12,4 capture min 10 XP 1, conquest enemy -2; 控制輸油管線 14,9 capture after oilfield_pump_station min 14 repair 2, conquest enemy -1 | none |
-| conq_north_sea_raid | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港灣油料庫 11,4 capture min 9 XP 1, conquest enemy -1; 偵察海岸雷達站 17,11 recon after north_sea_harbor_cache min 16 enemy supp +1 R2, conquest enemy -1 | none |
-| conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1; 守住潟湖錨地 14,4 hold 2t after carrier_atoll_radio min 12 repair 2, conquest enemy -1 | none |
-| conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | 中央港鎮倉庫 11,6 capture min 9 XP 1, conquest enemy -1; 偵察島內洞口 14,8 recon after island_port_cache min 13 enemy dig -1 R2, conquest enemy -1 | none |
+| conq_atlantic_convoy | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港口補給線 16,9 capture min 16 XP 1, conquest prod -1; 偵察海岸信號站 17,2 recon after atlantic_port_sabotage min 15 enemy supp +1 R2, conquest enemy -1 | none |
+| conq_cbi_jungle | allies mg_team:1; axis artillery:1, mg_team:1 | axis 34/384 (9%) | none | allies: eng min 20, art 0/5, targets 5 | allies: eng turns 12 | allies: art move none | n/a | 叢林補給村 9,5 capture min 9 XP 1, conquest enemy -2; 偵察叢林渡口 12,12 recon after cbi_jungle_supply min 10 enemy dig -1 R2, conquest fort -1 | none |
+| conq_china_plains | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 河橋補給線 14,6 capture min 13 XP 1, conquest enemy -1; 固守前進鐵路站 10,10 hold 2t after china_bridge_cache min 9 supp -2, conquest prod -1 | none |
+| conq_desert_north_africa | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 綠洲補給站 13,11 capture min 12 XP 1, conquest prod -1; 偵察沙漠高地 20,6 recon after desert_oasis_depot min 19 enemy supp +1 R2, conquest enemy -1 | none |
+| conq_home_islands | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 山脊彈藥庫 15,6 capture min 14 XP 1, conquest enemy -2; 標定山口火點 17,12 recon after home_islands_fort_depot min 15 enemy dig -1 R2, conquest fort -1 | none |
+| conq_mediterranean_coast | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 44/384 (11%) | none | n/a | n/a | n/a | n/a | 海岸補給港 12,11 capture min 8 XP 1, conquest prod -1; 控制丘陵公路 17,5 hold 2t after med_coast_supply_port min 16 enemy supp +1 R2, conquest enemy -1 | none |
+| conq_middle_east_oilfields | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 油田泵站 12,4 capture min 10 XP 1, conquest enemy -2; 控制輸油管線 14,9 capture after oilfield_pump_station min 14 repair 2, conquest prod -1 | none |
+| conq_north_sea_raid | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港灣油料庫 11,4 capture min 9 XP 1, conquest prod -1; 偵察海岸雷達站 17,11 recon after north_sea_harbor_cache min 16 enemy supp +1 R2, conquest enemy -1 | none |
+| conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1; 守住潟湖錨地 14,4 hold 2t after carrier_atoll_radio min 12 repair 2, conquest prod -1 | none |
+| conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | 中央港鎮倉庫 11,6 capture min 9 XP 1, conquest enemy -1; 偵察島內洞口 14,8 recon after island_port_cache min 13 enemy dig -1 R2, conquest fort -1 | none |
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 1 | 突破機槍據點 5,3 destroy min 18 XP 1, enemy supp +1 R2; 南側警戒線 5,4 recon after break_maxim_nest min 19 XP 1, enemy dig -1 R2 | none |
 | east_06_dnieper_1943 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 29/160 (18%); soviet 37/160 (23%) | soviet 61/160 (38%), spots 0 | soviet: eng min 5, art 0/3, targets 3 | soviet: eng turns 2 | soviet: art move 0/3 | soviet target 9,5 own min 6 enemy min 1 | 控制東岸渡口 5,4 hold 2t min 1 XP 1, reinforce -2t; 偵察西岸觀測點 12,4 recon after dnieper_east_crossing min 8 XP 1, enemy dig -1 R2 | soviet +77.6; T6 2 units |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 18,3 own min 21 enemy min 0 | 清除 MG 42 19,2 destroy min 22 XP 1, enemy supp +1 R2; 偵察砲兵觀測點 21,1 recon after clear_mg42 min 25 XP 1, enemy dig -1 R2 | none |
@@ -89,26 +89,26 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | blitz_02_dunkirk_1940 | 偵察裝甲縱隊 | recon 22,2 after hold_dunkirk_exit | allies | own 18 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | blitz_03_moscow_1941 | 壓制 MG 34 | destroy 17,2 | soviet | own 5 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | blitz_03_moscow_1941 | 前進觀測點 | recon 18,2 after silence_mg34 | soviet | own 4 / enemy 1 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
-| conq_atlantic_convoy | 港口補給線 | capture 16,9 | allies | own 16 / enemy 7 | XP 1, conquest enemy -1 | enemy closer; conquest pressure -1 |
+| conq_atlantic_convoy | 港口補給線 | capture 16,9 | allies | own 16 / enemy 7 | XP 1, conquest prod -1 | enemy closer; conquest production -1 |
 | conq_atlantic_convoy | 偵察海岸信號站 | recon 17,2 after atlantic_port_sabotage | allies | own 15 / enemy 5 | enemy supp +1 R2, conquest enemy -1 | enemy closer; tactical suppression reward R2; conquest pressure -1 |
 | conq_cbi_jungle | 叢林補給村 | capture 9,5 | allies | own 9 / enemy 14 | XP 1, conquest enemy -2 | conquest pressure -2 |
-| conq_cbi_jungle | 偵察叢林渡口 | recon 12,12 after cbi_jungle_supply | allies | own 10 / enemy 9 | enemy dig -1 R2, conquest enemy -1 | enemy closer; breach reward R2; conquest pressure -1 |
+| conq_cbi_jungle | 偵察叢林渡口 | recon 12,12 after cbi_jungle_supply | allies | own 10 / enemy 9 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
 | conq_china_plains | 河橋補給線 | capture 14,6 | allies | own 13 / enemy 9 | XP 1, conquest enemy -1 | enemy closer; conquest pressure -1 |
-| conq_china_plains | 固守前進鐵路站 | hold 2t 10,10 after china_bridge_cache | allies | own 9 / enemy 13 | supp -2, conquest enemy -1 | sustain reward; conquest pressure -1 |
-| conq_desert_north_africa | 綠洲補給站 | capture 13,11 | allies | own 12 / enemy 9 | XP 1, conquest enemy -1 | enemy closer; conquest pressure -1 |
+| conq_china_plains | 固守前進鐵路站 | hold 2t 10,10 after china_bridge_cache | allies | own 9 / enemy 13 | supp -2, conquest prod -1 | sustain reward; conquest production -1 |
+| conq_desert_north_africa | 綠洲補給站 | capture 13,11 | allies | own 12 / enemy 9 | XP 1, conquest prod -1 | enemy closer; conquest production -1 |
 | conq_desert_north_africa | 偵察沙漠高地 | recon 20,6 after desert_oasis_depot | allies | own 19 / enemy 3 | enemy supp +1 R2, conquest enemy -1 | enemy closer; tactical suppression reward R2; conquest pressure -1 |
 | conq_home_islands | 山脊彈藥庫 | capture 15,6 | allies | own 14 / enemy 8 | XP 1, conquest enemy -2 | enemy closer; conquest pressure -2 |
-| conq_home_islands | 標定山口火點 | recon 17,12 after home_islands_fort_depot | allies | own 15 / enemy 5 | enemy dig -1 R2, conquest enemy -1 | enemy closer; breach reward R2; conquest pressure -1 |
-| conq_mediterranean_coast | 海岸補給港 | capture 12,11 | allies | own 8 / enemy 10 | XP 1, conquest enemy -1 | conquest pressure -1 |
+| conq_home_islands | 標定山口火點 | recon 17,12 after home_islands_fort_depot | allies | own 15 / enemy 5 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
+| conq_mediterranean_coast | 海岸補給港 | capture 12,11 | allies | own 8 / enemy 10 | XP 1, conquest prod -1 | conquest production -1 |
 | conq_mediterranean_coast | 控制丘陵公路 | hold 2t 17,5 after med_coast_supply_port | allies | own 16 / enemy 2 | enemy supp +1 R2, conquest enemy -1 | enemy closer; tactical suppression reward R2; conquest pressure -1 |
 | conq_middle_east_oilfields | 油田泵站 | capture 12,4 | allies | own 10 / enemy 10 | XP 1, conquest enemy -2 | conquest pressure -2 |
-| conq_middle_east_oilfields | 控制輸油管線 | capture 14,9 after oilfield_pump_station | allies | own 14 / enemy 9 | repair 2, conquest enemy -1 | enemy closer; damage recovery; conquest pressure -1 |
-| conq_north_sea_raid | 港灣油料庫 | capture 11,4 | allies | own 9 / enemy 11 | XP 1, conquest enemy -1 | conquest pressure -1 |
+| conq_middle_east_oilfields | 控制輸油管線 | capture 14,9 after oilfield_pump_station | allies | own 14 / enemy 9 | repair 2, conquest prod -1 | enemy closer; damage recovery; conquest production -1 |
+| conq_north_sea_raid | 港灣油料庫 | capture 11,4 | allies | own 9 / enemy 11 | XP 1, conquest prod -1 | conquest production -1 |
 | conq_north_sea_raid | 偵察海岸雷達站 | recon 17,11 after north_sea_harbor_cache | allies | own 16 / enemy 5 | enemy supp +1 R2, conquest enemy -1 | enemy closer; tactical suppression reward R2; conquest pressure -1 |
 | conq_pacific_carrier | 環礁通信站 | capture 11,3 | allies | own 9 / enemy 10 | XP 1, conquest enemy -1 | conquest pressure -1 |
-| conq_pacific_carrier | 守住潟湖錨地 | hold 2t 14,4 after carrier_atoll_radio | allies | own 12 / enemy 8 | repair 2, conquest enemy -1 | enemy closer; damage recovery; conquest pressure -1 |
+| conq_pacific_carrier | 守住潟湖錨地 | hold 2t 14,4 after carrier_atoll_radio | allies | own 12 / enemy 8 | repair 2, conquest prod -1 | enemy closer; damage recovery; conquest production -1 |
 | conq_pacific_island | 中央港鎮倉庫 | capture 11,6 | allies | own 9 / enemy 11 | XP 1, conquest enemy -1 | conquest pressure -1 |
-| conq_pacific_island | 偵察島內洞口 | recon 14,8 after island_port_cache | allies | own 13 / enemy 9 | enemy dig -1 R2, conquest enemy -1 | enemy closer; breach reward R2; conquest pressure -1 |
+| conq_pacific_island | 偵察島內洞口 | recon 14,8 after island_port_cache | allies | own 13 / enemy 9 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
 | east_05_kharkov_1943 | 突破機槍據點 | destroy 5,3 | axis | own 18 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | east_05_kharkov_1943 | 南側警戒線 | recon 5,4 after break_maxim_nest | axis | own 19 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_06_dnieper_1943 | 控制東岸渡口 | hold 2t 5,4 | soviet | own 1 / enemy 4 | XP 1, reinforce -2t | reinforce best T6->T4 |
@@ -157,20 +157,20 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 
 ## Conquest Secondary Coverage
 
-Focused gate for conquest templates: each conq_* battle should give optional objectives a strategic enemy-strength effect instead of XP-only pressure.
+Focused gate for conquest templates: each conq_* battle should give optional objectives varied strategic effects instead of XP-only or single-axis pressure.
 
-| scenario | secondary objectives | strategic objectives | enemy strength pressure | check |
+| scenario | secondary objectives | strategic objectives | strategic effect mix | check |
 | --- | --- | --- | --- | --- |
-| conq_atlantic_convoy | 2 | 2 | -2 | covered |
-| conq_cbi_jungle | 2 | 2 | -3 | covered |
-| conq_china_plains | 2 | 2 | -2 | covered |
-| conq_desert_north_africa | 2 | 2 | -2 | covered |
-| conq_home_islands | 2 | 2 | -3 | covered |
-| conq_mediterranean_coast | 2 | 2 | -2 | covered |
-| conq_middle_east_oilfields | 2 | 2 | -3 | covered |
-| conq_north_sea_raid | 2 | 2 | -2 | covered |
-| conq_pacific_carrier | 2 | 2 | -2 | covered |
-| conq_pacific_island | 2 | 2 | -2 | covered |
+| conq_atlantic_convoy | 2 | 2 | strength -1, production -1 | covered |
+| conq_cbi_jungle | 2 | 2 | strength -2, fort -1 | covered |
+| conq_china_plains | 2 | 2 | strength -1, production -1 | covered |
+| conq_desert_north_africa | 2 | 2 | strength -1, production -1 | covered |
+| conq_home_islands | 2 | 2 | strength -2, fort -1 | covered |
+| conq_mediterranean_coast | 2 | 2 | strength -1, production -1 | covered |
+| conq_middle_east_oilfields | 2 | 2 | strength -2, production -1 | covered |
+| conq_north_sea_raid | 2 | 2 | strength -1, production -1 | covered |
+| conq_pacific_carrier | 2 | 2 | strength -1, production -1 | covered |
+| conq_pacific_island | 2 | 2 | strength -1, fort -1 | covered |
 
 ## Conquest Primary Variety
 

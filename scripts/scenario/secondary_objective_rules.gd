@@ -148,6 +148,10 @@ static func strategic_effect_text(effects: Array[Dictionary]) -> String:
 				parts.append("戰役資源 +%d" % amount)
 			"conquest_reduce_enemy_strength":
 				parts.append("敵戰力 -%d" % amount)
+			"conquest_reduce_enemy_fortification":
+				parts.append("敵工事 -%d" % amount)
+			"conquest_disrupt_enemy_production":
+				parts.append("敵產能 -%d" % amount)
 	if parts.is_empty():
 		return ""
 	return ", ".join(parts)

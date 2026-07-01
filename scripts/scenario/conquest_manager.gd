@@ -282,6 +282,10 @@ static func _apply_conquest_strategic_effects(region: Dictionary, effects: Array
 		match String(item.get("type", "")):
 			"conquest_reduce_enemy_strength":
 				region["strength"] = maxi(1, int(region.get("strength", 0)) - amount)
+			"conquest_reduce_enemy_fortification":
+				region["fort_level"] = maxi(0, int(region.get("fort_level", 0)) - amount)
+			"conquest_disrupt_enemy_production":
+				region["production"] = maxi(1, int(region.get("production", 1)) - amount)
 			_:
 				continue
 

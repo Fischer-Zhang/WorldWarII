@@ -70,7 +70,7 @@
       "faction": "allies",
       "target": [14, 9],
       "rewards": [{"type": "repair_hp", "amount": 2}],
-      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+      "strategic_effects": [{"type": "conquest_disrupt_enemy_production", "amount": 1}],
       "requires": "oilfield_pump_station"
     }
   ],

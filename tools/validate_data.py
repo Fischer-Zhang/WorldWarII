@@ -24,8 +24,10 @@ ALLOWED_SECONDARY_REWARD_TYPES = {
     "strip_enemy_dig_in",
 }
 ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
-    "campaign_bonus_points",
-    "conquest_reduce_enemy_strength",
+	"campaign_bonus_points",
+	"conquest_reduce_enemy_strength",
+	"conquest_reduce_enemy_fortification",
+	"conquest_disrupt_enemy_production",
 }
 ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES = {"theater_reinforcement"}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}

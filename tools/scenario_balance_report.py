@@ -312,6 +312,10 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
                 parts.append(f"campaign +{amount}p")
             elif effect_type == "conquest_reduce_enemy_strength":
                 parts.append(f"conquest enemy -{amount}")
+            elif effect_type == "conquest_reduce_enemy_fortification":
+                parts.append(f"conquest fort -{amount}")
+            elif effect_type == "conquest_disrupt_enemy_production":
+                parts.append(f"conquest prod -{amount}")
     return ", ".join(parts) if parts else "no reward"
 
 

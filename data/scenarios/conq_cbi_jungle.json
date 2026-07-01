@@ -70,7 +70,7 @@
       "faction": "allies",
       "target": [12, 12],
       "rewards": [{"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}],
-      "strategic_effects": [{"type": "conquest_reduce_enemy_strength", "amount": 1}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_fortification", "amount": 1}],
       "requires": "cbi_jungle_supply"
     }
   ],

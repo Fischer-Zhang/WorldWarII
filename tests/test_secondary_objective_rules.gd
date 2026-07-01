@@ -80,13 +80,15 @@ func _init() -> void:
 		"strategic_effects": [
 			{"type": "campaign_bonus_points", "amount": 1},
 			{"type": "conquest_reduce_enemy_strength", "amount": 2},
+			{"type": "conquest_reduce_enemy_fortification", "amount": 1},
+			{"type": "conquest_disrupt_enemy_production", "amount": 1},
 		],
 	}
 	var strategic_effects := SecondaryObjectiveRules.strategic_effects(strategic_objective)
 	var strategic_text := SecondaryObjectiveRules.strategic_effect_text(strategic_effects)
-	if strategic_effects.size() == 2 \
-			and strategic_text == "戰役資源 +1, 敵戰力 -2" \
-			and SecondaryObjectiveRules.objective_reward_text(strategic_objective) == "XP +1, 戰役資源 +1, 敵戰力 -2":
+	if strategic_effects.size() == 4 \
+			and strategic_text == "戰役資源 +1, 敵戰力 -2, 敵工事 -1, 敵產能 -1" \
+			and SecondaryObjectiveRules.objective_reward_text(strategic_objective) == "XP +1, 戰役資源 +1, 敵戰力 -2, 敵工事 -1, 敵產能 -1":
 		pass_count += 1
 	else:
 		fail_count += 1

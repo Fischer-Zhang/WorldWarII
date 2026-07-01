@@ -1310,6 +1310,10 @@ func _secondary_objective_future_strategic_value(objective: Dictionary) -> float
 				value += float(effect.get("amount", 0)) * 0.6
 			"conquest_reduce_enemy_strength":
 				value += float(effect.get("amount", 0)) * 0.45
+			"conquest_reduce_enemy_fortification":
+				value += float(effect.get("amount", 0)) * 0.35
+			"conquest_disrupt_enemy_production":
+				value += float(effect.get("amount", 0)) * 0.4
 	return value
 
 func _secondary_objective_position_weight(objective: Dictionary) -> float:

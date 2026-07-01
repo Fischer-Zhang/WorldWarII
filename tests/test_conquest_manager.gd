@@ -48,6 +48,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_conquest_strategic_effect_variety():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_resolve_real_battle_result():
 		pass_count += 1
 	else:
@@ -413,6 +418,31 @@ func _test_theater_objective_reinforcement_bonus() -> bool:
 	if String(step.get("status", "")) == "done" and after - before == 4:
 		return true
 	printerr("FAIL: completed theater objective should add reinforcement bonus, got %d" % (after - before))
+	return false
+
+func _test_conquest_strategic_effect_variety() -> bool:
+	var region := {
+		"strength": 6,
+		"fort_level": 2,
+		"production": 4,
+	}
+	ConquestManager._apply_conquest_strategic_effects(region, [
+		{"type": "conquest_reduce_enemy_strength", "amount": 2},
+		{"type": "conquest_reduce_enemy_fortification", "amount": 1},
+		{"type": "conquest_disrupt_enemy_production", "amount": 2},
+	])
+	if int(region.get("strength", 0)) != 4 \
+			or int(region.get("fort_level", 0)) != 1 \
+			or int(region.get("production", 0)) != 2:
+		printerr("FAIL: conquest strategic effects should reduce strength, fortification and production: %s" % str(region))
+		return false
+	ConquestManager._apply_conquest_strategic_effects(region, [
+		{"type": "conquest_reduce_enemy_fortification", "amount": 9},
+		{"type": "conquest_disrupt_enemy_production", "amount": 9},
+	])
+	if int(region.get("fort_level", 0)) == 0 and int(region.get("production", 0)) == 1:
+		return true
+	printerr("FAIL: conquest strategic effects should clamp fortification to 0 and production to 1: %s" % str(region))
 	return false
 
 func _test_resolve_real_battle_result() -> bool:
