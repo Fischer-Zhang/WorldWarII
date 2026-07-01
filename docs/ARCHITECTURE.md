@@ -227,6 +227,13 @@ starting XP for that launch. `consume_attack_preparation_context` clears the
 pending actions when the attack is launched, so preparation effects do not
 persist across repeated battles.
 
+Front-line owned regions can also spend local strength through
+`ConquestManager.prepare_defense` on one-time defensive preparations. Outposts
+reduce the next incoming enemy generated force, strongpoints add an MG support
+unit to the local defenders, and stockpiles give the defenders starting XP for
+that defensive launch. `consume_defense_preparation_context` clears those effects
+when an enemy-phase attack starts against the prepared region.
+
 Theater objectives in `data/conquest_map.json` group several regions into
 strategic goals. `ConquestManager.theater_objective_status` evaluates them from
 current ownership, and completed theater objectives add deterministic

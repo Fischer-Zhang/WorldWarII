@@ -307,6 +307,11 @@ func _update_detail(message: String = "") -> void:
 	else:
 		lines.append("[b]出擊點[/b]")
 		lines.append(_region_detail(ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id), countries))
+		var defense_summary := ConquestManager.defense_preparation_summary(
+			state, DataLoader.conquest_map, selected_region_id
+		)
+		if defense_summary != "":
+			lines.append("防禦準備: %s" % defense_summary)
 	if target_region_id != "":
 		lines.append("")
 		lines.append("[b]目標[/b]")
@@ -494,6 +499,7 @@ func _rebuild_recruit_panel() -> void:
 		tip.add_theme_font_size_override("font_size", 11)
 		recruit_list.add_child(tip)
 	_add_development_panel()
+	_add_defense_preparation_panel()
 	_add_attack_preparation_panel()
 
 func _add_development_panel() -> void:
@@ -538,6 +544,31 @@ func _add_attack_preparation_panel() -> void:
 		btn.disabled = prepared or not bool(action.get("enabled", false))
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.pressed.connect(_on_prepare_attack_pressed.bind(String(action.get("id", ""))))
+		recruit_list.add_child(btn)
+
+func _add_defense_preparation_panel() -> void:
+	var actions: Array = ConquestManager.defense_preparation_actions_for_region(
+		state, DataLoader.conquest_map, selected_region_id
+	)
+	if actions.is_empty():
+		return
+	var header := Label.new()
+	header.text = "防禦準備"
+	header.add_theme_font_size_override("font_size", 14)
+	recruit_list.add_child(header)
+	for item in actions:
+		var action: Dictionary = item
+		var btn := Button.new()
+		var cost := int(action.get("cost", 0))
+		var prepared := bool(action.get("prepared", false))
+		var prefix := "✓ " if prepared else ""
+		btn.text = "%s%s (%d)" % [prefix, String(action.get("label", "")), cost]
+		btn.tooltip_text = String(action.get("reason", ""))
+		if btn.tooltip_text == "":
+			btn.tooltip_text = String(action.get("description", ""))
+		btn.disabled = prepared or not bool(action.get("enabled", false))
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.pressed.connect(_on_prepare_defense_pressed.bind(String(action.get("id", ""))))
 		recruit_list.add_child(btn)
 
 func _add_recruit_hint(text: String) -> void:
@@ -604,6 +635,14 @@ func _on_develop_pressed(action_id: String) -> void:
 func _on_prepare_attack_pressed(action_id: String) -> void:
 	var result := ConquestManager.prepare_attack(
 		state, DataLoader.conquest_map, selected_region_id, target_region_id, action_id
+	)
+	if bool(result.get("ok", false)):
+		_rebuild()
+	_update_detail(String(result.get("message", "")))
+
+func _on_prepare_defense_pressed(action_id: String) -> void:
+	var result := ConquestManager.prepare_defense(
+		state, DataLoader.conquest_map, selected_region_id, action_id
 	)
 	if bool(result.get("ok", false)):
 		_rebuild()
@@ -729,6 +768,9 @@ func _launch_defense_battle(step: Dictionary) -> void:
 	var attacker_country := String(step.get("attacker_country", ""))
 	var atk_region: Dictionary = regions.get(from_id, {})
 	var def_region: Dictionary = regions.get(to_id, {})
+	var prep_context := ConquestManager.consume_defense_preparation_context(
+		state, DataLoader.conquest_map, to_id
+	)
 	var player_country := String(conquest.get("player_country", ""))
 	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
 	# Defend with the region's garrison; if it has none, a militia turns out.
@@ -739,6 +781,7 @@ func _launch_defense_battle(step: Dictionary) -> void:
 	else:
 		for t in ConquestManager.fortification_support_types(def_region):
 			defenders.append({"id": -1, "type": String(t), "xp": 0, "rank": 0, "name": "築防支援"})
+	defenders = ConquestManager.apply_defense_preparation_to_garrison(defenders, prep_context)
 	var context := {
 		"player_faction": player_country,
 		"enemy_faction": attacker_country,
@@ -748,7 +791,11 @@ func _launch_defense_battle(step: Dictionary) -> void:
 		"enemy_name": String(countries.get(attacker_country, {}).get("name_zh", attacker_country)),
 		"battle_location": String(def_region.get("name_zh", "")),
 		"attacker_garrison": defenders,
-		"defender_types": ConquestRecruit.generate_force(int(atk_region.get("strength", 0))),
+		"defender_types": ConquestRecruit.generate_force(maxi(
+			1,
+			int(atk_region.get("strength", 0)) + int(prep_context.get("incoming_strength_delta", 0))
+		)),
+		"preparation_notes": prep_context.get("notes", []),
 		"role": "defend",
 	}
 	CampaignManager.save_state(state)

@@ -594,6 +594,20 @@ func _check_conquest() -> void:
 		return
 	var recruit_text := _list_text(recruit_list)
 	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備") and recruit_text.contains("軍校訓練"))
+	_expect("conquest defense preparation controls", recruit_text.contains("防禦準備") and recruit_text.contains("前哨警戒") and recruit_text.contains("火力據點"))
+	var outposts_button := _button_with_text(recruit_list, "前哨警戒")
+	if outposts_button == null:
+		_fail("conquest defense preparation applies", "missing outposts button")
+	else:
+		outposts_button.pressed.emit()
+		await process_frame
+		await process_frame
+		detail = String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
+		recruit_text = _list_text(recruit_list)
+		_expect(
+			"conquest defense preparation applies",
+			detail.contains("防禦準備") and detail.contains("前哨警戒") and recruit_text.contains("✓ 前哨警戒")
+		)
 	_expect("conquest attack preparation controls", recruit_text.contains("戰前準備") and recruit_text.contains("戰場偵察") and recruit_text.contains("砲兵準備"))
 	var recon_button := _button_with_text(recruit_list, "戰場偵察")
 	if recon_button == null:

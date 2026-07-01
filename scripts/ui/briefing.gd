@@ -42,22 +42,25 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 	# text is generated.
 	var terrain := String(scenario.get("briefing", ""))
 	var terrain_line := ("\n\n地形:%s" % terrain) if terrain != "" else ""
+	var prep_notes: Array = p.get("preparation_notes", [])
+	var prep_line := ""
+	var parts: Array[String] = []
+	if not prep_notes.is_empty():
+		for note in prep_notes:
+			parts.append(String(note))
 	if String(p.get("role", "attack")) == "defend":
 		title_label.text = "%s 來犯 — 防守 %s" % [foe, loc]
-		briefing_label.text = "戰場:%s%s\n\n%s 出動約 %d 支部隊進攻;你以 %d 支部隊據守。\n\n守住 12 回合或殲滅來犯者即可保住此地;守軍被殲滅則該地失守。" % [
-			loc, terrain_line, foe, foe_n, my_n,
+		if not parts.is_empty():
+			prep_line = "\n\n防禦準備:%s" % "、".join(parts)
+		briefing_label.text = "戰場:%s%s%s\n\n%s 出動約 %d 支部隊進攻;你以 %d 支部隊據守。\n\n守住 12 回合或殲滅來犯者即可保住此地;守軍被殲滅則該地失守。" % [
+			loc, terrain_line, prep_line, foe, foe_n, my_n,
 		]
 	else:
 		title_label.text = "%s 進攻 %s" % [me, foe]
+		if not parts.is_empty():
+			prep_line = "\n\n戰前準備:%s" % "、".join(parts)
 		var attack_objective := ConquestBattleSetup.conquest_attack_objective_text(scenario)
 		var limit := ConquestBattleSetup.conquest_attack_turn_limit(scenario)
-		var prep_notes: Array = p.get("preparation_notes", [])
-		var prep_line := ""
-		if not prep_notes.is_empty():
-			var parts: Array[String] = []
-			for note in prep_notes:
-				parts.append(String(note))
-			prep_line = "\n\n戰前準備:%s" % "、".join(parts)
 		briefing_label.text = "戰場:%s%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n任務:%s。守軍撐過第 %d 回合則擊退你。" % [
 			loc, terrain_line, prep_line, me, my_n, foe, foe_n, attack_objective, limit,
 		]

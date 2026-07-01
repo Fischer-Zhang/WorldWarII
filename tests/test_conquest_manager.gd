@@ -43,6 +43,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_defense_preparations():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_theater_objective_status():
 		pass_count += 1
 	else:
@@ -419,6 +424,65 @@ func _test_attack_preparations() -> bool:
 	var blocked := ConquestManager.prepare_attack(state, map_data, "alpha", "bravo", "barrage")
 	if bool(blocked.get("ok", false)):
 		printerr("FAIL: preparation should not spend the source below 1 strength")
+		return false
+	return true
+
+func _test_defense_preparations() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 8
+	var actions := ConquestManager.defense_preparation_actions_for_region(state, map_data, "alpha")
+	if actions.size() != 3:
+		printerr("FAIL: front-line player region should expose three defense preparations")
+		return false
+	if not ConquestManager.defense_preparation_actions_for_region(state, map_data, "bravo").is_empty():
+		printerr("FAIL: enemy region should not expose defense preparations")
+		return false
+	var outposts := ConquestManager.prepare_defense(state, map_data, "alpha", "outposts")
+	var duplicate := ConquestManager.prepare_defense(state, map_data, "alpha", "outposts")
+	var strongpoints := ConquestManager.prepare_defense(state, map_data, "alpha", "strongpoints")
+	var stockpile := ConquestManager.prepare_defense(state, map_data, "alpha", "stockpile")
+	var alpha := ConquestManager.region_state(state, map_data, "alpha")
+	if not bool(outposts.get("ok", false)) \
+			or bool(duplicate.get("ok", false)) \
+			or not bool(strongpoints.get("ok", false)) \
+			or not bool(stockpile.get("ok", false)) \
+			or int(alpha.get("strength", 0)) != 3:
+		printerr("FAIL: defense preparations should spend strength, reject duplicates and keep source alive")
+		return false
+	var summary := ConquestManager.defense_preparation_summary(state, map_data, "alpha")
+	if summary.find("前哨警戒") == -1 or summary.find("火力據點") == -1 or summary.find("防線補給") == -1:
+		printerr("FAIL: defense preparation summary should list prepared actions: %s" % summary)
+		return false
+	var preview := ConquestManager.preview_defense_preparation_context(state, map_data, "alpha")
+	if int(preview.get("incoming_strength_delta", 0)) != -1 \
+			or int(preview.get("defender_xp_bonus", 0)) != 1 \
+			or not (preview.get("support_types", []) as Array).has("mg_team"):
+		printerr("FAIL: defense preparation preview should combine incoming reduction, XP and support: %s" % str(preview))
+		return false
+	var defenders := ConquestManager.apply_defense_preparation_to_garrison(
+		[{"id": 1, "type": "infantry", "xp": 1, "rank": 0, "name": "d1"}],
+		preview
+	)
+	if defenders.size() != 2 \
+			or int((defenders[0] as Dictionary).get("xp", 0)) != 2 \
+			or int((defenders[0] as Dictionary).get("rank", 0)) != 1 \
+			or String((defenders[1] as Dictionary).get("type", "")) != "mg_team":
+		printerr("FAIL: defense preparation should boost defenders and add support: %s" % str(defenders))
+		return false
+	var consumed := ConquestManager.consume_defense_preparation_context(state, map_data, "alpha")
+	if int(consumed.get("incoming_strength_delta", 0)) != -1 \
+			or not (ConquestManager.preview_defense_preparation_context(state, map_data, "alpha").get("actions", []) as Array).is_empty():
+		printerr("FAIL: consuming defense preparations should return effects once and clear pending actions")
+		return false
+
+	state = {"version": 2, "campaigns": {}}
+	conquest = ConquestManager.conquest_state(state, map_data)
+	conquest["regions"]["alpha"]["strength"] = 2
+	var blocked := ConquestManager.prepare_defense(state, map_data, "alpha", "strongpoints")
+	if bool(blocked.get("ok", false)):
+		printerr("FAIL: defense preparation should not spend the source below 1 strength")
 		return false
 	return true
 
