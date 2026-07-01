@@ -338,8 +338,9 @@ def secondary_objective_pressure(scenario: dict[str, Any]) -> str:
         label = str(objective.get("label", objective.get("id", "secondary")))
         if own_dist:
             prerequisite_text = secondary_objective_prerequisite_text(objective)
+            branch_text = secondary_objective_branch_text(objective)
             parts.append(
-                f"{label} {target[0]},{target[1]} {secondary_objective_type_text(objective)}{prerequisite_text} "
+                f"{label} {target[0]},{target[1]} {secondary_objective_type_text(objective)}{prerequisite_text}{branch_text} "
                 f"min {min(own_dist)} {secondary_reward_text(objective)}"
             )
     return "; ".join(parts) if parts else "none"
@@ -402,6 +403,11 @@ def secondary_objective_prerequisite_text(objective: dict[str, Any]) -> str:
         if required_ids:
             return f" after {','.join(required_ids)}"
     return ""
+
+
+def secondary_objective_branch_text(objective: dict[str, Any]) -> str:
+    group = str(objective.get("exclusive_group", ""))
+    return f" branch {group}" if group else ""
 
 
 def secondary_reward_text(objective: dict[str, Any]) -> str:
@@ -477,9 +483,10 @@ def secondary_objective_focus_rows(scenarios: list[dict[str, Any]]) -> list[list
 def secondary_objective_focus_target_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
     target = secondary_objective_target_offset(scenario, objective)
     prerequisite_text = secondary_objective_prerequisite_text(objective)
+    branch_text = secondary_objective_branch_text(objective)
     if target is None:
-        return f"{secondary_objective_type_text(objective)} n/a{prerequisite_text}"
-    return f"{secondary_objective_type_text(objective)} {target[0]},{target[1]}{prerequisite_text}"
+        return f"{secondary_objective_type_text(objective)} n/a{prerequisite_text}{branch_text}"
+    return f"{secondary_objective_type_text(objective)} {target[0]},{target[1]}{prerequisite_text}{branch_text}"
 
 
 def secondary_objective_factions(scenario: dict[str, Any], objective: dict[str, Any]) -> list[str]:
@@ -982,6 +989,45 @@ def operation_chain_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[
             operation_chain_check_text(chain_links, len(best_chain)),
         ])
     return rows
+
+
+def objective_branch_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not is_main_battle_scenario(scenario_id):
+            continue
+        groups: dict[str, list[dict[str, Any]]] = collections.defaultdict(list)
+        for objective in scenario.get("secondary_objectives", []):
+            if not isinstance(objective, dict):
+                continue
+            group = str(objective.get("exclusive_group", ""))
+            if group:
+                groups[group].append(objective)
+        for group, objectives in sorted(groups.items()):
+            rows.append([
+                scenario_id,
+                group,
+                len(objectives),
+                objective_branch_option_text(objectives),
+                objective_branch_reward_text(objectives),
+                objective_branch_check_text(len(objectives)),
+            ])
+    return rows
+
+
+def objective_branch_option_text(objectives: list[dict[str, Any]]) -> str:
+    return " / ".join(str(objective.get("label", objective.get("id", "secondary"))) for objective in objectives)
+
+
+def objective_branch_reward_text(objectives: list[dict[str, Any]]) -> str:
+    return " / ".join(operation_reward_family(objective) for objective in objectives)
+
+
+def objective_branch_check_text(option_count: int) -> str:
+    if option_count < 2:
+        return "broken branch"
+    return "covered"
 
 
 def longest_secondary_objective_chain(objectives: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1615,6 +1661,19 @@ def generate_report() -> str:
                 "check",
             ],
             operation_chain_coverage_rows(scenarios),
+        ),
+        "## Objective Branch Coverage",
+        "Focused gate for main battles with explicit secondary-objective tradeoffs: exclusive branches should present at least two mutually exclusive tactical rewards.",
+        table(
+            [
+                "scenario",
+                "branch",
+                "options",
+                "choices",
+                "reward families",
+                "check",
+            ],
+            objective_branch_coverage_rows(scenarios),
         ),
         "## Scenario Expansion Coverage",
         "Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.",

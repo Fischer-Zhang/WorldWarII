@@ -338,6 +338,43 @@ func _init() -> void:
 		printerr("FAIL: locked secondary objective should not score until prerequisite completes; locked %.2f unlocked %.2f expected %.2f" % [
 			locked_secondary_score, unlocked_secondary_score, secondary_near,
 		])
+
+	battle.scenario = {
+		"secondary_objectives": [
+			{
+				"id": "repair_route",
+				"type": "capture",
+				"faction": "axis",
+				"target": [2, 0],
+				"exclusive_group": "route_choice",
+				"rewards": [{"type": "repair_hp", "amount": 2}],
+			},
+			{
+				"id": "suppression_route",
+				"type": "capture",
+				"faction": "axis",
+				"target": [4, 0],
+				"exclusive_group": "route_choice",
+				"rewards": [{"type": "suppress_enemies", "amount": 1, "radius": 2}],
+			},
+		]
+	}
+	battle.captured_secondary_objectives.clear()
+	var branch_open: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(4, 0))
+	battle.captured_secondary_objectives["repair_route"] = {
+		"completed": true,
+		"exclusive_group": "route_choice",
+	}
+	var branch_blocked: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(4, 0))
+	if String(branch_open.get("key", "")) == "suppression_route" \
+			and float(branch_open.get("score", 0.0)) > 0.0 \
+			and float(branch_blocked.get("score", 0.0)) == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: AI should stop scoring secondary objectives blocked by completed branch; open=%s blocked=%s" % [
+			str(branch_open), str(branch_blocked),
+		])
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
@@ -390,6 +427,15 @@ func _init() -> void:
 		printerr("FAIL: prerequisite secondary should score locked follow-up future value; chain=%s plain=%s blocked=%s ready=%s unlocked=%s completed=%s" % [
 			str(chain_prereq), str(plain_prereq), str(blocked_multi_prereq), str(ready_multi_prereq), str(unlocked_followup), str(completed_chain),
 		])
+	battle.captured_secondary_objectives.clear()
+	battle.scenario["secondary_objectives"][0]["exclusive_group"] = "branch_followup"
+	battle.scenario["secondary_objectives"][1]["exclusive_group"] = "branch_followup"
+	var branch_prereq: Dictionary = ai._secondary_objective_position_breakdown("axis", Vector2i(3, 0))
+	if float(branch_prereq.get("future_pull", 0.0)) == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: prerequisite should not inherit future pull from a follow-up it will block via exclusive branch; got %s" % str(branch_prereq))
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
@@ -462,6 +508,20 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: completed destroy secondary objective should stop attack bonus, got %.2f" % completed_destroy_score)
+	battle.captured_secondary_objectives.clear()
+	battle.scenario["secondary_objectives"][0]["exclusive_group"] = "destroy_choice"
+	battle.captured_secondary_objectives["other_destroy_choice"] = {
+		"completed": true,
+		"exclusive_group": "destroy_choice",
+	}
+	var blocked_destroy_score: float = ai._secondary_destroy_target_score("axis", destroy_target)
+	if blocked_destroy_score == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: destroy secondary objective blocked by branch should stop attack bonus, got %.2f" % blocked_destroy_score)
+	battle.captured_secondary_objectives.clear()
+	battle.scenario["secondary_objectives"][0].erase("exclusive_group")
 	battle.scenario["secondary_objectives"][0]["requires"] = ["spot_ammo"]
 	battle.captured_secondary_objectives.clear()
 	var locked_destroy_score: float = ai._secondary_destroy_target_score("axis", destroy_target)

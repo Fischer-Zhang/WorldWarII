@@ -242,6 +242,65 @@ func _run() -> void:
 			battle.scenario = original_scenario
 			battle.captured_secondary_objectives.clear()
 
+			var branch_a := Vector2i(-999, -999)
+			var branch_b := Vector2i(-999, -999)
+			for c in battle.hex_map.tiles.keys():
+				if battle.hex_map.unit_at(c) == null:
+					if branch_a == Vector2i(-999, -999):
+						branch_a = c
+					elif c != branch_a:
+						branch_b = c
+						break
+			if branch_a == Vector2i(-999, -999) or branch_b == Vector2i(-999, -999):
+				fail_count += 1
+				printerr("FAIL: could not stage secondary objective branch hexes")
+			else:
+				var branch_a_offset := _axial_to_offset(branch_a)
+				var branch_b_offset := _axial_to_offset(branch_b)
+				battle.scenario["secondary_objectives"] = [
+					{
+						"id": "branch_repair",
+						"label": "修理路線",
+						"faction": battle.player_faction_id,
+						"target": [branch_a_offset.x, branch_a_offset.y],
+						"exclusive_group": "test_branch",
+						"rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}],
+					},
+					{
+						"id": "branch_suppress",
+						"label": "壓制路線",
+						"faction": battle.player_faction_id,
+						"target": [branch_b_offset.x, branch_b_offset.y],
+						"exclusive_group": "test_branch",
+						"rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 1}],
+					},
+				]
+				battle.captured_secondary_objectives.clear()
+				battle._apply_player_objective_pulse()
+				var branch_before_xp := int(player_unit.xp)
+				var branch_overlay_count: int = battle.hex_map.objective_overlays.size()
+				battle.hex_map.move_unit(player_unit, branch_a, 0.0)
+				player_unit.has_moved = false
+				var branch_a_text: String = battle._check_secondary_objective_capture(player_unit)
+				battle.hex_map.move_unit(player_unit, branch_b, 0.0)
+				player_unit.has_moved = false
+				var branch_b_text: String = battle._check_secondary_objective_capture(player_unit)
+				if branch_overlay_count >= 2 \
+						and branch_a_text.find("修理路線") != -1 \
+						and branch_b_text == "" \
+						and battle.captured_secondary_objectives.has("branch_repair") \
+						and not battle.captured_secondary_objectives.has("branch_suppress") \
+						and int(player_unit.xp) == branch_before_xp + 1:
+					pass_count += 1
+				else:
+					fail_count += 1
+					printerr("FAIL: completing one secondary branch should block same-group alternatives; overlays=%d text=%s/%s xp %d->%d captured=%s" % [
+						branch_overlay_count, branch_a_text, branch_b_text,
+						branch_before_xp, int(player_unit.xp), str(battle.captured_secondary_objectives),
+					])
+				battle.scenario = original_scenario
+				battle.captured_secondary_objectives.clear()
+
 		# Hold-turn secondary objectives progress at faction end-turn, reset when
 		# the point is empty, and pay out only once when the required hold is met.
 		var hold_coord := Vector2i(-999, -999)

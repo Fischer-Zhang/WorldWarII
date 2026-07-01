@@ -1305,7 +1305,7 @@ func _secondary_objective_position_breakdown(faction_id: String, pos: Vector2i) 
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured):
+		if not SecondaryObjectiveRules.is_available(objective, captured):
 			continue
 		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
@@ -1356,12 +1356,16 @@ func _secondary_objective_future_value(
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
+		if SecondaryObjectiveRules.is_blocked_by_exclusive_group(objective, captured):
+			continue
 		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue
 		var required_keys := SecondaryObjectiveRules.required_keys(objective)
 		if not required_keys.has(prerequisite_key):
 			continue
 		if not _secondary_objective_would_unlock(required_keys, prerequisite_key, captured):
+			continue
+		if _secondary_objective_would_block_branch(objective, prerequisite_key, objectives):
 			continue
 		var value := SecondaryObjectiveRules.tactical_reward_value(SecondaryObjectiveRules.rewards(objective))
 		value += _secondary_objective_future_strategic_value(objective)
@@ -1379,6 +1383,24 @@ func _secondary_objective_would_unlock(
 		if not captured.has(required_key):
 			return false
 	return true
+
+func _secondary_objective_would_block_branch(
+	objective: Dictionary,
+	prerequisite_key: String,
+	objectives: Array
+) -> bool:
+	var group := SecondaryObjectiveRules.exclusive_group(objective)
+	if group == "":
+		return false
+	for i in range(objectives.size()):
+		if typeof(objectives[i]) != TYPE_DICTIONARY:
+			continue
+		var prerequisite_objective: Dictionary = objectives[i]
+		var key := SecondaryObjectiveRules.key(prerequisite_objective, i)
+		if key != prerequisite_key:
+			continue
+		return SecondaryObjectiveRules.exclusive_group(prerequisite_objective) == group
+	return false
 
 func _secondary_objective_future_strategic_value(objective: Dictionary) -> float:
 	var value := 0.0
@@ -1420,7 +1442,7 @@ func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured):
+		if not SecondaryObjectiveRules.is_available(objective, captured):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "destroy_unit":
 			continue

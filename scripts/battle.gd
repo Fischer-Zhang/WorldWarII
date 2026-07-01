@@ -1975,7 +1975,7 @@ func _apply_player_objective_pulse() -> void:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if not SecondaryObjectiveRules.applies_to_faction(objective, player_faction_id, player_faction_id):
 			continue
@@ -2035,7 +2035,7 @@ func _check_secondary_objective_capture(unit: Unit) -> String:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "capture":
 			continue
@@ -2057,7 +2057,7 @@ func _check_secondary_objective_hold_turns(faction_id: String) -> Array[String]:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "hold_turns":
 			continue
@@ -2094,7 +2094,7 @@ func _check_secondary_objective_destroy_unit(killer: Unit, destroyed: Unit) -> S
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "destroy_unit":
 			continue
@@ -2120,7 +2120,7 @@ func _check_secondary_objective_recon_hex(faction_id: String) -> Array[String]:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if SecondaryObjectiveRules.objective_type(objective) != "recon_hex":
 			continue
@@ -2135,7 +2135,7 @@ func _check_secondary_objective_recon_hex(faction_id: String) -> Array[String]:
 	return messages
 
 func _complete_secondary_objective(unit: Unit, objective: Dictionary, key: String, verb: String) -> String:
-	captured_secondary_objectives[key] = true
+	captured_secondary_objectives[key] = SecondaryObjectiveRules.completion_record(objective)
 	secondary_objective_progress.erase(key)
 	var rewards := SecondaryObjectiveRules.rewards(objective)
 	var strategic_effects := SecondaryObjectiveRules.strategic_effects(objective)
@@ -2286,7 +2286,7 @@ func _secondary_objective_status_summary(faction_id: String) -> String:
 		var key := SecondaryObjectiveRules.key(objective, i)
 		if captured_secondary_objectives.has(key):
 			continue
-		if not SecondaryObjectiveRules.is_unlocked(objective, captured_secondary_objectives):
+		if not SecondaryObjectiveRules.is_available(objective, captured_secondary_objectives):
 			continue
 		if not SecondaryObjectiveRules.applies_to_faction(objective, faction_id, faction_id):
 			continue

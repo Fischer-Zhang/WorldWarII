@@ -55,6 +55,11 @@ def main() -> None:
         "scenario probe missing operation chain coverage section",
     )
     require(
+        "## Objective Branch Coverage" in report
+        and "| scenario | branch | options | choices | reward families | check |" in report,
+        "scenario probe missing objective branch coverage section",
+    )
+    require(
         "## Scenario Expansion Coverage" in report
         and "| campaign | scenarios | victory mix | special terrain | role hooks | check |" in report,
         "scenario probe missing scenario expansion coverage section",
@@ -71,7 +76,7 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 13,10 destroy after stalingrad_spot_engineers min 7 XP 1, enemy supp +1 R2" in report
+        and "突擊工兵 13,10 destroy after stalingrad_spot_engineers branch stalingrad_counterattack min 7 XP 1, enemy supp +1 R2" in report
         and "06_market_garden_1944" in report
         and "德軍遠程砲 18,2 destroy after nijmegen_south_bridgehead min 12 XP 1, enemy supp +1 R2" in report
         and "壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2" in report,
@@ -141,7 +146,7 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "突擊工兵 | destroy 13,10 after stalingrad_spot_engineers | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
+        and "突擊工兵 | destroy 13,10 after stalingrad_spot_engineers branch stalingrad_counterattack | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2"
         in report,
         "Reward audit should show Stalingrad local suppression counter-assault reward",
     )
@@ -291,9 +296,25 @@ def main() -> None:
         "Every operation chain row should be covered",
     )
     require(
-        "| 03_stalingrad_1942 | 1 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |" in report
+        "| 03_stalingrad_1942 | 2 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |" in report
         and "| west_10_remagen_1945 | 1 | 2 | 奪取橋西岸 -> 偵察東岸橋頭 | repair -> breach | covered |" in report,
         "Operation chain coverage should expose staged breach and bridgehead examples",
+    )
+    branch_section = section_text(report, "## Objective Branch Coverage")
+    branch_rows = [
+        line for line in branch_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| scenario |")
+    ]
+    require(
+        branch_rows and all(line.endswith("| covered |") for line in branch_rows),
+        "Every objective branch row should be covered",
+    )
+    require(
+        "| 03_stalingrad_1942 | stalingrad_counterattack | 2 | 突擊工兵 / 迫砲觀測所 | suppression / sustain | covered |" in report
+        and "| 05_bastogne_1944 | bastogne_relief_choice | 2 | 南側遠程砲 / 野戰醫護站 | suppression / repair | covered |" in report,
+        "Objective branch coverage should expose mutually exclusive tactical choices",
     )
     expansion_section = section_text(report, "## Scenario Expansion Coverage")
     expansion_rows = [

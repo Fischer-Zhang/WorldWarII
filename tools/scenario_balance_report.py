@@ -203,8 +203,9 @@ def secondary_objective_summary(scenario: dict[str, Any]) -> str:
         target = secondary_objective_target_text(scenario, objective)
         target_text = f" {target}" if target else ""
         prerequisite_text = secondary_objective_prerequisite_text(objective)
+        branch_text = secondary_objective_branch_text(objective)
         parts.append(
-            f"{label} [{secondary_objective_type_text(objective)}{target_text}{prerequisite_text}] "
+            f"{label} [{secondary_objective_type_text(objective)}{target_text}{prerequisite_text}{branch_text}] "
             f"({secondary_reward_text(objective)})"
         )
     return "; ".join(parts) if parts else "none"
@@ -219,6 +220,11 @@ def secondary_objective_prerequisite_text(objective: dict[str, Any]) -> str:
         if required_ids:
             return f" after {','.join(required_ids)}"
     return ""
+
+
+def secondary_objective_branch_text(objective: dict[str, Any]) -> str:
+    group = str(objective.get("exclusive_group", ""))
+    return f" branch {group}" if group else ""
 
 
 def secondary_objective_type_text(objective: dict[str, Any]) -> str:

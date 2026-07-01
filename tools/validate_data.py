@@ -328,6 +328,9 @@ def validate_scenario(
             objective_type = str(objective.get("type", "capture"))
             if objective_type not in ALLOWED_SECONDARY_OBJECTIVE_TYPES:
                 fail(errors, path, f"secondary_objectives[{index}] unknown type {objective_type!r}")
+            exclusive_group = str(objective.get("exclusive_group", ""))
+            if "exclusive_group" in objective and not exclusive_group:
+                fail(errors, path, f"secondary_objectives[{index}] exclusive_group must not be empty")
             faction_id = str(objective.get("faction", ""))
             if faction_id and faction_id not in faction_ids:
                 fail(errors, path, f"secondary_objectives[{index}] references unknown faction {faction_id!r}")
@@ -392,6 +395,15 @@ def validate_scenario(
                         fail(errors, path, f"secondary_objectives[{index}].strategic_effects[{effect_index}] amount must be an integer")
         prerequisite_graph: dict[str, list[str]] = {}
         prerequisite_indices: dict[str, int] = {}
+        exclusive_groups: dict[str, list[str]] = {}
+        objective_groups: dict[str, str] = {}
+        objective_index_by_id: dict[str, int] = {}
+        for index, objective, objective_id in objective_entries:
+            objective_index_by_id[objective_id] = index
+            exclusive_group = str(objective.get("exclusive_group", ""))
+            if exclusive_group:
+                exclusive_groups.setdefault(exclusive_group, []).append(objective_id)
+                objective_groups[objective_id] = exclusive_group
         for index, objective, objective_id in objective_entries:
             requires = objective.get("requires", [])
             if "requires" in objective and not isinstance(requires, (list, str)):
@@ -411,8 +423,14 @@ def validate_scenario(
                     fail(errors, path, f"secondary_objectives[{index}] cannot require itself")
                 elif required_id not in seen_secondary_ids:
                     fail(errors, path, f"secondary_objectives[{index}] requires unknown objective {required_id!r}")
+                elif objective_groups.get(objective_id, "") != "" and objective_groups.get(objective_id, "") == objective_groups.get(required_id, ""):
+                    fail(errors, path, f"secondary_objectives[{index}] cannot require objective {required_id!r} in the same exclusive_group")
                 else:
                     prerequisite_graph[objective_id].append(required_id)
+        for group, objective_ids in exclusive_groups.items():
+            if len(objective_ids) < 2:
+                index = objective_index_by_id.get(objective_ids[0], 0)
+                fail(errors, path, f"secondary_objectives[{index}] exclusive_group {group!r} must contain at least two objectives")
         for objective_id in prerequisite_graph:
             if secondary_prerequisite_has_cycle(objective_id, prerequisite_graph):
                 index = prerequisite_indices.get(objective_id, 0)

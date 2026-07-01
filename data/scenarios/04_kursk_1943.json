@@ -69,7 +69,18 @@
       "faction": "axis",
       "target_unit": "SU-152",
       "requires": ["northern_ridge_recon"],
+      "exclusive_group": "kursk_breakthrough_choice",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
+    },
+    {
+      "id": "kursk_forward_fuel",
+      "label": "前進燃料補給",
+      "type": "capture",
+      "faction": "axis",
+      "target": [12, 6],
+      "requires": ["northern_ridge_recon"],
+      "exclusive_group": "kursk_breakthrough_choice",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "recover_suppression", "amount": 2}]
     },
     {
       "id": "northern_ridge_recon",

@@ -25,6 +25,34 @@ static func is_unlocked(objective: Dictionary, completed: Dictionary) -> bool:
 			return false
 	return true
 
+static func exclusive_group(objective: Dictionary) -> String:
+	return String(objective.get("exclusive_group", ""))
+
+static func is_blocked_by_exclusive_group(objective: Dictionary, completed: Dictionary) -> bool:
+	var group := exclusive_group(objective)
+	if group == "":
+		return false
+	for completed_key in completed.keys():
+		var completed_value = completed.get(completed_key)
+		if typeof(completed_value) != TYPE_DICTIONARY:
+			continue
+		if String(completed_value.get("exclusive_group", "")) == group:
+			return true
+	return false
+
+static func is_available(objective: Dictionary, completed: Dictionary) -> bool:
+	return is_unlocked(objective, completed) and not is_blocked_by_exclusive_group(objective, completed)
+
+static func completion_record(objective: Dictionary) -> Dictionary:
+	var record := {"completed": true}
+	var group := exclusive_group(objective)
+	if group != "":
+		record["exclusive_group"] = group
+	return record
+
+static func completed_has(completed: Dictionary, key: String) -> bool:
+	return completed.has(key)
+
 static func objective_type(objective: Dictionary) -> String:
 	return String(objective.get("type", "capture"))
 

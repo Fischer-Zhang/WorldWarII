@@ -78,7 +78,19 @@
       "faction": "allies",
       "target_unit": "150 mm",
       "requires": ["bastogne_supply_hold"],
+      "exclusive_group": "bastogne_relief_choice",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
+    },
+    {
+      "id": "bastogne_field_aid",
+      "type": "hold_turns",
+      "label": "野戰醫護站",
+      "faction": "allies",
+      "target": [5, 11],
+      "required_turns": 2,
+      "requires": ["bastogne_supply_hold"],
+      "exclusive_group": "bastogne_relief_choice",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     }
   ],
   "victory": {

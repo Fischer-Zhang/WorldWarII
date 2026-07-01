@@ -59,7 +59,7 @@ Current rules established before large number changes:
 - Engineers can spend their action to mark a nearby visible entrenched LOS target; the next same-faction active attack against that target consumes the mark and adds +1 dig-in loss through `CombatEffects` on damaging hits.
 - Pinned units cannot overwatch or build dig-in and do not project ZoC; heavier suppression reduces movement/attack, indirect fire strips one dig-in level on damaging hits, and engineers strip up to two dig-in levels on damaging attacks.
 - Rally spends the unit's action to recover suppression; defensive cover improves the recovery amount.
-- Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that can require earlier secondary completions, grant one-time data-authored rewards such as XP, suppression recovery, repair, reinforcement timing or local enemy suppression, and do not alter victory resolution.
+- Secondary objectives are optional capture, hold-turn, recon-hex or destroy-unit tasks that can require earlier secondary completions, can belong to explicit mutually exclusive branches, grant one-time data-authored rewards such as XP, suppression recovery, repair, reinforcement timing or local enemy suppression, and do not alter victory resolution.
 
 These semantics materially affect artillery, AT guns, overwatch, and fog-of-war balance.
 
@@ -84,7 +84,8 @@ Use `python3 tools/scenario_probe.py` to regenerate
 `docs/progress/scenario_probe.md` for suppression sources, artillery coverage,
 spotter coverage, breach-path distance, terrain-aware breach tempo, artillery
 reposition coverage, objective pressure, secondary pressure, reinforcement
-deltas, secondary reward audits, and the Stalingrad/Berlin urban breach focus gate.
+deltas, secondary reward audits, secondary branch coverage, and the
+Stalingrad/Berlin urban breach focus gate.
 
 Evaluate scenarios in this order:
 
@@ -126,5 +127,6 @@ Current role-shaping pass:
 - Recon and destroy-unit secondary objectives bias movement toward their target hex or marked unit, and destroy targets get a direct attack-score bonus.
 - Secondary objective movement pull includes deterministic reward value, so tactical rewards such as local suppression or breach rewards can matter before raw distance ties.
 - Secondary objective movement pull includes immediately unlocked follow-up value, so prerequisite objectives can surface the next tactical or strategic payoff without scoring locked chains too early.
+- Secondary objective movement pull stops scoring mutually exclusive branch alternatives once one objective in that branch completes.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 - Overwatch scoring uses unit-data reaction-fire percentages, so MG lane denial reflects its full-damage reaction profile.

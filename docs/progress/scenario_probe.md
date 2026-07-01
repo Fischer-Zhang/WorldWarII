@@ -7,9 +7,9 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | 00_sandbox | allies mg_team:1; axis artillery:1 | allies 24/384 (6%); axis 54/384 (14%) | axis 43/384 (11%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | none | none |
 | 01_sedan_1940 | allies mg_team:2; axis artillery:1 | axis 33/384 (9%) | axis 64/384 (17%), spots 1 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 1/3 | axis target 20,14 own min 2 enemy min 0 | 橋頭補給 15,5 capture after sedan_crossing_recon min 7 XP 1, repair 2; 中路渡口 13,5 recon min 9 XP 1, enemy supp +1 R2 | none |
 | 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 南翼掃蕩 3,13 recon min 18 XP 1, enemy dig -1 R2; 壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2 | none |
-| 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 標定突擊路線 13,10 recon min 7 XP 1, enemy dig -1 R2; 突擊工兵 13,10 destroy after stalingrad_spot_engineers min 7 XP 1, enemy supp +1 R2 | none |
-| 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | n/a | n/a | n/a | axis control 2/3 own min 6 enemy min 0 | 壓制 SU-152 4,0 destroy after northern_ridge_recon min 18 XP 1, repair 2; 北側高地偵察 18,2 recon min 4 XP 1, enemy dig -1 R2 | none |
-| 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0; allies hold 6,4 12t own min 0 enemy min 3 | 鎮心補給 6,4 hold 2t min 0 XP 1, supp -2, reinforce -2t; 南側遠程砲 22,11 destroy after bastogne_supply_hold min 16 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
+| 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 標定突擊路線 13,10 recon min 7 XP 1, enemy dig -1 R2; 突擊工兵 13,10 destroy after stalingrad_spot_engineers branch stalingrad_counterattack min 7 XP 1, enemy supp +1 R2; 迫砲觀測所 20,12 hold 2t after stalingrad_spot_engineers branch stalingrad_counterattack min 1 XP 1, supp -2 | none |
+| 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | n/a | n/a | n/a | axis control 2/3 own min 6 enemy min 0 | 壓制 SU-152 4,0 destroy after northern_ridge_recon branch kursk_breakthrough_choice min 18 XP 1, repair 2; 前進燃料補給 12,6 capture after northern_ridge_recon branch kursk_breakthrough_choice min 10 XP 1, supp -2; 北側高地偵察 18,2 recon min 4 XP 1, enemy dig -1 R2 | none |
+| 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 | allies 61/384 (16%); axis 42/384 (11%) | none | axis: eng none, art 0/5, targets 5 | axis: eng turns none | axis: art move 0/5 | axis target 6,4 own min 3 enemy min 0; allies hold 6,4 12t own min 0 enemy min 3 | 鎮心補給 6,4 hold 2t min 0 XP 1, supp -2, reinforce -2t; 南側遠程砲 22,11 destroy after bastogne_supply_hold branch bastogne_relief_choice min 16 XP 1, enemy supp +1 R2; 野戰醫護站 5,11 hold 2t after bastogne_supply_hold branch bastogne_relief_choice min 0 XP 1, repair 2 | allies +129.5; T7 3 units |
 | 06_market_garden_1944 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 55/384 (14%); axis 50/384 (13%) | none | allies: eng min 2, art 5/6, targets 6 | allies: eng turns 2 | allies: art move 5/6 | allies target 5,11 own min 7 enemy min 9 | 南岸橋頭 5,12 hold 2t min 8 XP 1, reinforce -2t; 德軍遠程砲 18,2 destroy after nijmegen_south_bridgehead min 12 XP 1, enemy supp +1 R2 | allies +129.5; T7 3 units |
 | 07_bagration_1944 | axis artillery:1, mg_team:1; soviet artillery:1, mg_team:1 | axis 34/384 (9%); soviet 61/384 (16%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 2,4 own min 20 enemy min 1 | 奪取路口 3,4 capture min 19 XP 1, reinforce -2t; 壓制德軍砲位 1,2 destroy after seize_crossroads min 21 XP 1, enemy supp +1 R2 | soviet +77.6; T6 2 units |
 | blitz_00_poland_1939 | allies artillery:1, mg_team:1; axis artillery:1 | allies 27/384 (7%); axis 37/384 (10%) | axis 51/384 (13%), spots 0 | axis: eng none, art 0/2, targets 2 | axis: eng turns none | axis: art move 0/2 | axis target 1,1 own min 23 enemy min 0 | 摧毀 37mm 反戰車砲 3,3 destroy min 20 XP 1, repair 2; 偵察砲兵陣地 0,2 recon after neutralize_37mm min 24 XP 1, enemy supp +1 R2 | none |
@@ -74,11 +74,14 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | 02_kiev_1941 | 南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 after southern_sweep | axis | own 19 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 03_stalingrad_1942 | 標定突擊路線 | recon 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
-| 03_stalingrad_1942 | 突擊工兵 | destroy 13,10 after stalingrad_spot_engineers | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
-| 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 after northern_ridge_recon | axis | own 18 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
+| 03_stalingrad_1942 | 突擊工兵 | destroy 13,10 after stalingrad_spot_engineers branch stalingrad_counterattack | soviet | own 7 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 03_stalingrad_1942 | 迫砲觀測所 | hold 2t 20,12 after stalingrad_spot_engineers branch stalingrad_counterattack | soviet | own 1 / enemy 6 | XP 1, supp -2 | sustain reward |
+| 04_kursk_1943 | 壓制 SU-152 | destroy 4,0 after northern_ridge_recon branch kursk_breakthrough_choice | axis | own 18 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
+| 04_kursk_1943 | 前進燃料補給 | capture 12,6 after northern_ridge_recon branch kursk_breakthrough_choice | axis | own 10 / enemy 8 | XP 1, supp -2 | enemy closer; sustain reward |
 | 04_kursk_1943 | 北側高地偵察 | recon 18,2 | axis | own 4 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | 05_bastogne_1944 | 鎮心補給 | hold 2t 6,4 | allies | own 0 / enemy 3 | XP 1, supp -2, reinforce -2t | starts held; sustain reward; reinforce best T7->T5 |
-| 05_bastogne_1944 | 南側遠程砲 | destroy 22,11 after bastogne_supply_hold | allies | own 16 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 05_bastogne_1944 | 南側遠程砲 | destroy 22,11 after bastogne_supply_hold branch bastogne_relief_choice | allies | own 16 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
+| 05_bastogne_1944 | 野戰醫護站 | hold 2t 5,11 after bastogne_supply_hold branch bastogne_relief_choice | allies | own 0 / enemy 10 | XP 1, repair 2 | starts held; damage recovery |
 | 06_market_garden_1944 | 南岸橋頭 | hold 2t 5,12 | allies | own 8 / enemy 10 | XP 1, reinforce -2t | reinforce best T7->T5 |
 | 06_market_garden_1944 | 德軍遠程砲 | destroy 18,2 after nijmegen_south_bridgehead | allies | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 07_bagration_1944 | 奪取路口 | capture 3,4 | soviet | own 19 / enemy 0 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
@@ -197,9 +200,9 @@ Focused gate for terrain/theater identity: each non-tutorial battle should expos
 | --- | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | forest | forest:21% | capture:2, recon_hex:1; targets town:1 | armor:4, artillery:1, recon:1, scout:1, suppression:1 | covered |
 | 02_kiev_1941 | river | forest:7%, river:7% | destroy_unit:1, eliminate:1, recon_hex:1 | armor:4, artillery:2, breach:1, recon:1, suppression:1 | covered |
-| 03_stalingrad_1942 | town, river | town:42%, river:6% | destroy_unit:1, recon_hex:1, survive:1; targets town:2 | artillery:1, breach:1, mg:2, recon:1, suppression:1 | covered |
-| 04_kursk_1943 | open | forest:7% | control_count:1, destroy_unit:1, recon_hex:1; targets town:3 | armor:6, artillery:1, breach:1, recon:1, scout:1 | tracked |
-| 05_bastogne_1944 | forest | forest:18% | destroy_unit:1, hold_hex_turns:1, hold_turns:1; targets town:2 | airdrop:2, armor:1, artillery:1, engineer:1, mg:1, suppression:1 | covered |
+| 03_stalingrad_1942 | town, river | town:42%, river:6% | destroy_unit:1, hold_turns:1, recon_hex:1, survive:1; targets town:3 | artillery:1, breach:1, mg:2, recon:1, suppression:1 | covered |
+| 04_kursk_1943 | open | forest:7% | capture:1, control_count:1, destroy_unit:1, recon_hex:1; targets town:3 | armor:6, artillery:1, breach:1, recon:1, scout:1 | tracked |
+| 05_bastogne_1944 | forest | forest:18% | destroy_unit:1, hold_hex_turns:1, hold_turns:2; targets town:3 | airdrop:2, armor:1, artillery:1, engineer:1, mg:1, suppression:1 | covered |
 | 06_market_garden_1944 | river | river:11%, forest:7% | capture:1, destroy_unit:1, hold_turns:1; targets town:1 | airdrop:3, artillery:1, engineer:1, mg:1, suppression:1 | covered |
 | 07_bagration_1944 | open | forest:6% | capture:2, destroy_unit:1; targets town:1 | armor:3, artillery:2, mg:1, suppression:1 | tracked |
 | blitz_00_poland_1939 | river | forest:8%, river:7% | capture:1, destroy_unit:1, recon_hex:1; targets town:1 | armor:3, artillery:1, recon:1, scout:2, suppression:1 | covered |
@@ -246,9 +249,9 @@ Focused gate for non-tutorial, non-conquest battles: each main battle should hav
 | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 2 | 0 | 2 | covered |
 | 02_kiev_1941 | 2 | 0 | 2 | covered |
-| 03_stalingrad_1942 | 2 | 0 | 2 | covered |
-| 04_kursk_1943 | 2 | 0 | 2 | covered |
-| 05_bastogne_1944 | 2 | 0 | 2 | covered |
+| 03_stalingrad_1942 | 3 | 0 | 3 | covered |
+| 04_kursk_1943 | 3 | 0 | 3 | covered |
+| 05_bastogne_1944 | 3 | 0 | 3 | covered |
 | 06_market_garden_1944 | 2 | 0 | 2 | covered |
 | 07_bagration_1944 | 2 | 0 | 2 | covered |
 | blitz_00_poland_1939 | 2 | 0 | 2 | covered |
@@ -285,9 +288,9 @@ Focused gate for main battles: secondary objectives should form at least one exp
 | --- | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 1 | 2 | 中路渡口 -> 橋頭補給 | suppression -> repair | covered |
 | 02_kiev_1941 | 1 | 2 | 南翼掃蕩 -> 壓制馬克沁火點 | breach -> suppression | covered |
-| 03_stalingrad_1942 | 1 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |
-| 04_kursk_1943 | 1 | 2 | 北側高地偵察 -> 壓制 SU-152 | breach -> repair | covered |
-| 05_bastogne_1944 | 1 | 2 | 鎮心補給 -> 南側遠程砲 | sustain+reinforcement -> suppression | covered |
+| 03_stalingrad_1942 | 2 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |
+| 04_kursk_1943 | 2 | 2 | 北側高地偵察 -> 壓制 SU-152 | breach -> repair | covered |
+| 05_bastogne_1944 | 2 | 2 | 鎮心補給 -> 南側遠程砲 | sustain+reinforcement -> suppression | covered |
 | 06_market_garden_1944 | 1 | 2 | 南岸橋頭 -> 德軍遠程砲 | reinforcement -> suppression | covered |
 | 07_bagration_1944 | 1 | 2 | 奪取路口 -> 壓制德軍砲位 | reinforcement -> suppression | covered |
 | blitz_00_poland_1939 | 1 | 2 | 摧毀 37mm 反戰車砲 -> 偵察砲兵陣地 | repair -> suppression | covered |
@@ -315,6 +318,16 @@ Focused gate for main battles: secondary objectives should form at least one exp
 | west_09_hurtgen_1944 | 1 | 2 | 林道 MG 42 -> 控制前進林道 | suppression -> sustain | covered |
 | west_10_remagen_1945 | 1 | 2 | 奪取橋西岸 -> 偵察東岸橋頭 | repair -> breach | covered |
 | west_11_colmar_1945 | 1 | 2 | 壓制口袋機槍 -> 側翼村道 | suppression -> breach | covered |
+
+## Objective Branch Coverage
+
+Focused gate for main battles with explicit secondary-objective tradeoffs: exclusive branches should present at least two mutually exclusive tactical rewards.
+
+| scenario | branch | options | choices | reward families | check |
+| --- | --- | --- | --- | --- | --- |
+| 03_stalingrad_1942 | stalingrad_counterattack | 2 | 突擊工兵 / 迫砲觀測所 | suppression / sustain | covered |
+| 04_kursk_1943 | kursk_breakthrough_choice | 2 | 壓制 SU-152 / 前進燃料補給 | repair / sustain | covered |
+| 05_bastogne_1944 | bastogne_relief_choice | 2 | 南側遠程砲 / 野戰醫護站 | suppression / repair | covered |
 
 ## Scenario Expansion Coverage
 

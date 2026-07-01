@@ -73,7 +73,19 @@
       "faction": "soviet",
       "target_unit": "axis_assault_engineer",
       "requires": ["stalingrad_spot_engineers"],
+      "exclusive_group": "stalingrad_counterattack",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
+    },
+    {
+      "id": "stalingrad_aid_station",
+      "type": "hold_turns",
+      "label": "迫砲觀測所",
+      "faction": "soviet",
+      "target": [20, 12],
+      "required_turns": 2,
+      "requires": ["stalingrad_spot_engineers"],
+      "exclusive_group": "stalingrad_counterattack",
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "recover_suppression", "amount": 2}]
     }
   ],
   "victory": {

@@ -128,5 +128,19 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: objective prerequisites should parse and gate unlock state")
 
+	var branch_choice := {"id": "repair_route", "exclusive_group": "relief_choice"}
+	var branch_completed := {
+		"suppression_route": SecondaryObjectiveRules.completion_record({"exclusive_group": "relief_choice"})
+	}
+	if SecondaryObjectiveRules.exclusive_group(branch_choice) == "relief_choice" \
+			and SecondaryObjectiveRules.is_blocked_by_exclusive_group(branch_choice, branch_completed) \
+			and not SecondaryObjectiveRules.is_available(branch_choice, branch_completed) \
+			and SecondaryObjectiveRules.is_available(branch_choice, {}) \
+			and not SecondaryObjectiveRules.is_blocked_by_exclusive_group(branch_choice, {"legacy_complete": true}):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: exclusive secondary branch should block only when a same-group completion record exists")
+
 	print("SecondaryObjectiveRules tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
