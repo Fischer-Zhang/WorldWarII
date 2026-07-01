@@ -1030,6 +1030,84 @@ def objective_branch_check_text(option_count: int) -> str:
     return "covered"
 
 
+def campaign_strategic_reward_rows(
+    scenarios: list[dict[str, Any]],
+    campaigns: dict[str, Any],
+) -> list[list[Any]]:
+    scenario_by_id = {str(scenario.get("id", "")): scenario for scenario in scenarios}
+    rows: list[list[Any]] = []
+    for campaign_id, campaign in campaigns.items():
+        if campaign_id == "00_tutorial" or not isinstance(campaign, dict):
+            continue
+        scenario_ids = [str(scenario_id) for scenario_id in campaign.get("scenario_order", [])]
+        campaign_scenarios = [
+            scenario_by_id[scenario_id]
+            for scenario_id in scenario_ids
+            if scenario_id in scenario_by_id
+        ]
+        objectives = campaign_bonus_objectives(campaign_scenarios)
+        rows.append([
+            campaign_id,
+            len(campaign_scenarios),
+            len(objectives),
+            campaign_bonus_scenario_text(objectives),
+            campaign_bonus_path_text(objectives),
+            campaign_strategic_reward_check_text(len(campaign_scenarios), len(objectives)),
+        ])
+    return rows
+
+
+def campaign_bonus_objectives(scenarios: list[dict[str, Any]]) -> list[tuple[str, dict[str, Any]]]:
+    objectives: list[tuple[str, dict[str, Any]]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        for objective in scenario.get("secondary_objectives", []):
+            if not isinstance(objective, dict):
+                continue
+            if secondary_objective_campaign_bonus(objective) > 0:
+                objectives.append((scenario_id, objective))
+    return objectives
+
+
+def secondary_objective_campaign_bonus(objective: dict[str, Any]) -> int:
+    total = 0
+    strategic_effects = objective.get("strategic_effects", [])
+    if not isinstance(strategic_effects, list):
+        return 0
+    for effect in strategic_effects:
+        if not isinstance(effect, dict):
+            continue
+        if str(effect.get("type", "")) == "campaign_bonus_points":
+            total += max(0, int(effect.get("amount", 0)))
+    return total
+
+
+def campaign_bonus_scenario_text(objectives: list[tuple[str, dict[str, Any]]]) -> str:
+    if not objectives:
+        return "none"
+    scenario_ids = sorted({scenario_id for scenario_id, _objective in objectives})
+    return ", ".join(scenario_ids)
+
+
+def campaign_bonus_path_text(objectives: list[tuple[str, dict[str, Any]]]) -> str:
+    if not objectives:
+        return "none"
+    parts: list[str] = []
+    for scenario_id, objective in objectives:
+        label = str(objective.get("label", objective.get("id", "secondary")))
+        amount = secondary_objective_campaign_bonus(objective)
+        parts.append(f"{scenario_id}:{label} +{amount}p")
+    return "; ".join(parts)
+
+
+def campaign_strategic_reward_check_text(scenario_count: int, objective_count: int) -> str:
+    if scenario_count <= 0:
+        return "missing scenarios"
+    if objective_count <= 0:
+        return "missing campaign reward"
+    return "covered"
+
+
 def longest_secondary_objective_chain(objectives: list[dict[str, Any]]) -> list[dict[str, Any]]:
     by_id = {
         secondary_objective_id(objective, index): objective
@@ -1674,6 +1752,19 @@ def generate_report() -> str:
                 "check",
             ],
             objective_branch_coverage_rows(scenarios),
+        ),
+        "## Campaign Strategic Reward Coverage",
+        "Focused gate for formal campaigns: optional objectives should create at least one cross-battle resource decision per campaign.",
+        table(
+            [
+                "campaign",
+                "scenarios",
+                "campaign reward objectives",
+                "reward scenarios",
+                "reward paths",
+                "check",
+            ],
+            campaign_strategic_reward_rows(scenarios, campaigns),
         ),
         "## Scenario Expansion Coverage",
         "Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.",

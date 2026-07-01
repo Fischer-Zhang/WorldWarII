@@ -341,6 +341,18 @@ Focused gate for main battles with explicit secondary-objective tradeoffs: exclu
 | pacific_05_okinawa_1945 | okinawa_observer_choice | 2 | 摧毀首里機槍 / 偵察稜線機槍 | suppression / breach+campaign | covered |
 | west_08_pegasus_bridge_1944 | pegasus_bridge_choice | 2 | 摧毀橋北機槍 / 佔領橋北醫護點 | suppression / repair+campaign | covered |
 
+## Campaign Strategic Reward Coverage
+
+Focused gate for formal campaigns: optional objectives should create at least one cross-battle resource decision per campaign.
+
+| campaign | scenarios | campaign reward objectives | reward scenarios | reward paths | check |
+| --- | --- | --- | --- | --- | --- |
+| blitzkrieg_early_war | 5 | 1 | 01_sedan_1940 | 01_sedan_1940:清除南翼機槍 +1p | covered |
+| eastern_front | 7 | 2 | east_05_kharkov_1943, east_10_berlin_1945 | east_05_kharkov_1943:南側警戒線 +1p; east_10_berlin_1945:標定重砲陣地 +1p | covered |
+| north_africa | 5 | 1 | north_04_bizerte_1943 | north_04_bizerte_1943:標定碼頭構工 +1p | covered |
+| pacific_front | 6 | 3 | pacific_04_manila_1945, pacific_05_iwo_jima_1945, pacific_05_okinawa_1945 | pacific_04_manila_1945:標定城北砲位 +1p; pacific_05_iwo_jima_1945:偵察北側洞窟 +1p; pacific_05_okinawa_1945:偵察稜線機槍 +1p | covered |
+| western_front | 9 | 1 | west_08_pegasus_bridge_1944 | west_08_pegasus_bridge_1944:佔領橋北醫護點 +1p | covered |
+
 ## Scenario Expansion Coverage
 
 Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.
