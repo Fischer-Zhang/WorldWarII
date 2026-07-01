@@ -244,6 +244,39 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: capture objective score expected near %.2f > far %.2f" % [objective_near, objective_far])
+
+	battle.scenario = {"victory": {"axis": {
+		"type": "control_count",
+		"targets": [[3, 0], [7, 0], [3, 2]],
+		"required": 2,
+	}}}
+	var control_far: float = ai._objective_position_score("axis", Vector2i(0, 0))
+	var control_near: float = ai._objective_position_score("axis", Vector2i(3, 0))
+	var control_info: Dictionary = ai._primary_objective_position_breakdown("axis", Vector2i(3, 0))
+	if control_near > control_far and String(control_info.get("type", "")) == "control_count" \
+			and int(control_info.get("required", 0)) == 2:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: control_count objective should score nearest held cluster; far %.2f near %.2f info=%s" % [
+			control_far, control_near, str(control_info),
+		])
+
+	battle.scenario = {"victory": {"axis": {
+		"type": "hold_hex_turns",
+		"target": [5, 0],
+		"required_turns": 2,
+	}}}
+	var hold_far: float = ai._objective_position_score("axis", Vector2i(0, 0))
+	var hold_near: float = ai._objective_position_score("axis", Vector2i(5, 0))
+	var hold_info: Dictionary = ai._primary_objective_position_breakdown("axis", Vector2i(5, 0))
+	if hold_near > hold_far and String(hold_info.get("type", "")) == "hold_hex_turns":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: hold_hex_turns objective should score toward hold hex; far %.2f near %.2f info=%s" % [
+			hold_far, hold_near, str(hold_info),
+		])
 	battle.scenario = {}
 
 	# 6b) Unfinished secondary objectives should also pull AI movement, but completed ones stop scoring.

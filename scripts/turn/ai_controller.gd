@@ -26,6 +26,8 @@ const W_ARMOR_STANDOFF := 2.0
 const W_SUPPRESSION := 1.2
 const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
+const W_CONTROL_OBJECTIVE := 1.45
+const W_HOLD_OBJECTIVE := 1.65
 const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
@@ -1148,20 +1150,61 @@ func _objective_position_breakdown(faction_id: String, pos: Vector2i) -> Diction
 func _primary_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
 	var victory_cfg: Dictionary = battle.scenario.get("victory", {})
 	var objective: Dictionary = victory_cfg.get(faction_id, {})
-	if String(objective.get("type", "")) != "capture":
+	match String(objective.get("type", "")):
+		"capture":
+			return _single_primary_target_breakdown(objective, pos, "capture", W_CAPTURE_OBJECTIVE)
+		"hold_hex_turns":
+			return _single_primary_target_breakdown(objective, pos, "hold_hex_turns", W_HOLD_OBJECTIVE)
+		"control_count":
+			return _control_count_primary_breakdown(objective, pos)
+	return {"score": 0.0}
+
+func _single_primary_target_breakdown(
+	objective: Dictionary,
+	pos: Vector2i,
+	objective_type: String,
+	weight: float
+) -> Dictionary:
+	var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(objective.get("target", []))
+	if target_coord_value == null:
 		return {"score": 0.0}
-	var target: Variant = objective.get("target", [])
-	if typeof(target) != TYPE_ARRAY or target.size() < 2:
-		return {"score": 0.0}
-	var col := int(target[0])
-	var row := int(target[1])
-	var target_coord := Vector2i(col - (row >> 1), row)
+	var target_coord: Vector2i = target_coord_value
 	var distance := HexCoord.distance(pos, target_coord)
 	return {
-		"score": -float(distance) * W_CAPTURE_OBJECTIVE,
+		"score": -float(distance) * weight,
 		"target": target_coord,
 		"distance": distance,
-		"type": "capture",
+		"type": objective_type,
+		"weight": weight,
+	}
+
+func _control_count_primary_breakdown(objective: Dictionary, pos: Vector2i) -> Dictionary:
+	var targets: Array = objective.get("targets", [])
+	if targets.is_empty():
+		return {"score": 0.0}
+	var required: int = max(1, int(objective.get("required", targets.size())))
+	var best_distance := 9999
+	var best_target := Vector2i.ZERO
+	for target in targets:
+		var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(target)
+		if target_coord_value == null:
+			continue
+		var target_coord: Vector2i = target_coord_value
+		var distance := HexCoord.distance(pos, target_coord)
+		if distance < best_distance:
+			best_distance = distance
+			best_target = target_coord
+	if best_distance == 9999:
+		return {"score": 0.0}
+	var weight: float = W_CONTROL_OBJECTIVE + 0.15 * float(required - 1)
+	return {
+		"score": -float(best_distance) * weight,
+		"target": best_target,
+		"distance": best_distance,
+		"type": "control_count",
+		"required": required,
+		"targets": targets.size(),
+		"weight": weight,
 	}
 
 func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> float:

@@ -1959,18 +1959,13 @@ func _update_status() -> void:
 	status_label.text = text
 
 func _apply_player_objective_pulse() -> void:
-	# Highlights the hexes the player should care about: primary capture target plus
+	# Highlights the hexes the player should care about: primary objectives plus
 	# optional secondary objectives that can grant side rewards.
-	var victory_cfg: Dictionary = scenario.get("victory", {})
 	var markers: Array[Dictionary] = []
 	for fid in factions.keys():
 		if String(factions[fid].get("controller", "")) != "player":
 			continue
-		var v: Dictionary = victory_cfg.get(fid, {})
-		if String(v.get("type", "")) == "capture":
-			var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(v.get("target", []))
-			if coord_value != null:
-				markers.append({"coord": coord_value, "kind": "primary", "label": "勝利格"})
+		markers.append_array(_primary_objective_markers(fid))
 		break
 	var secondary_objectives: Array = scenario.get("secondary_objectives", [])
 	for i in range(secondary_objectives.size()):
@@ -1992,6 +1987,39 @@ func _apply_player_objective_pulse() -> void:
 				"label": _secondary_objective_marker_label(objective, key),
 			})
 	hex_map.set_objective_markers(markers)
+
+func _primary_objective_markers(faction_id: String) -> Array[Dictionary]:
+	var victory_cfg: Dictionary = scenario.get("victory", {})
+	var objective: Dictionary = victory_cfg.get(faction_id, {})
+	var markers: Array[Dictionary] = []
+	match String(objective.get("type", "")):
+		"capture":
+			var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(objective.get("target", []))
+			if coord_value != null:
+				markers.append({"coord": coord_value, "kind": "primary", "label": "勝利格"})
+		"control_count":
+			var targets: Array = objective.get("targets", [])
+			var required: int = int(objective.get("required", targets.size()))
+			var held := _control_count_held(faction_id, targets)
+			for i in range(targets.size()):
+				var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(targets[i])
+				if coord_value != null:
+					markers.append({
+						"coord": coord_value,
+						"kind": "primary",
+						"label": "控制 %d/%d" % [held, required],
+					})
+		"hold_hex_turns":
+			var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(objective.get("target", []))
+			if coord_value != null:
+				var required_turns: int = max(1, int(objective.get("required_turns", 1)))
+				var progress: int = int(victory_hold_progress.get(faction_id, 0))
+				markers.append({
+					"coord": coord_value,
+					"kind": "primary",
+					"label": "守住 %d/%d" % [progress, required_turns],
+				})
+	return markers
 
 func _secondary_objective_marker_coord(objective: Dictionary) -> Variant:
 	return SecondaryObjectiveRules.target_coord(objective, units)
@@ -2198,6 +2226,14 @@ func _unit_holding_coord(faction_id: String, coord: Vector2i) -> Unit:
 		if unit.is_alive() and unit.faction_id == faction_id and unit.coord == coord:
 			return unit
 	return null
+
+func _control_count_held(faction_id: String, targets: Array) -> int:
+	var held := 0
+	for raw_target in targets:
+		var coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(raw_target)
+		if coord_value != null and _unit_holding_coord(faction_id, coord_value) != null:
+			held += 1
+	return held
 
 func _nearest_unit_with_visibility(faction_id: String, coord: Vector2i) -> Unit:
 	var best: Unit = null

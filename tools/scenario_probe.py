@@ -254,21 +254,53 @@ def spotter_coverage(scenario: dict[str, Any], units: dict[str, Any]) -> str:
 def objective_pressure(scenario: dict[str, Any]) -> str:
     parts: list[str] = []
     for faction_id, cfg in scenario.get("victory", {}).items():
-        if cfg.get("type") != "capture":
+        objective_type = str(cfg.get("type", ""))
+        if objective_type not in {"capture", "control_count", "hold_hex_turns"}:
             continue
-        target = cfg.get("target", [])
-        if not isinstance(target, list) or len(target) < 2:
+        targets = primary_objective_targets(cfg)
+        if not targets:
             continue
-        target_coord = axial_from_offset(target)
         own = [u for u in initial_units(scenario) if u.get("faction") == faction_id]
         enemies = [u for u in initial_units(scenario) if u.get("faction") != faction_id]
-        own_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own]
-        enemy_dist = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in enemies]
+        own_dist = [nearest_distance_to_targets(u, targets) for u in own]
+        enemy_dist = [nearest_distance_to_targets(u, targets) for u in enemies]
         if own_dist and enemy_dist:
-            parts.append(
-                f"{faction_id} target {target[0]},{target[1]} own min {min(own_dist)} enemy min {min(enemy_dist)}"
-            )
+            if objective_type == "capture":
+                target = targets[0]
+                parts.append(
+                    f"{faction_id} target {target[0]},{target[1]} own min {min(own_dist)} enemy min {min(enemy_dist)}"
+                )
+            elif objective_type == "control_count":
+                required = int(cfg.get("required", len(targets)))
+                parts.append(
+                    f"{faction_id} control {required}/{len(targets)} own min {min(own_dist)} enemy min {min(enemy_dist)}"
+                )
+            else:
+                target = targets[0]
+                turns = int(cfg.get("required_turns", 1))
+                parts.append(
+                    f"{faction_id} hold {target[0]},{target[1]} {turns}t own min {min(own_dist)} enemy min {min(enemy_dist)}"
+                )
     return "; ".join(parts) if parts else "n/a"
+
+
+def primary_objective_targets(objective: dict[str, Any]) -> list[list[Any]]:
+    objective_type = str(objective.get("type", ""))
+    if objective_type in {"capture", "hold_hex_turns"}:
+        target = objective.get("target", [])
+        if isinstance(target, list) and len(target) >= 2:
+            return [target]
+        return []
+    if objective_type == "control_count":
+        targets = objective.get("targets", [])
+        if isinstance(targets, list):
+            return [target for target in targets if isinstance(target, list) and len(target) >= 2]
+    return []
+
+
+def nearest_distance_to_targets(unit: dict[str, Any], targets: list[list[Any]]) -> int:
+    unit_coord = axial_from_offset(unit.get("at", [0, 0]))
+    return min(hex_distance(unit_coord, axial_from_offset(target)) for target in targets)
 
 
 def scenario_faction_ids(scenario: dict[str, Any]) -> list[str]:

@@ -145,18 +145,50 @@ def objective_distance(scenario: dict[str, Any]) -> str:
     units = scenario.get("units", [])
     parts: list[str] = []
     for fid, cfg in victory.items():
-        if cfg.get("type") != "capture":
+        objective_type = str(cfg.get("type", ""))
+        if objective_type not in {"capture", "control_count", "hold_hex_turns"}:
             continue
-        target = cfg.get("target", [])
-        if not isinstance(target, list) or len(target) < 2:
+        targets = primary_objective_targets(cfg)
+        if not targets:
             continue
-        target_coord = axial_from_offset(target)
         own_units = [u for u in units if u.get("faction") == fid]
         if not own_units:
             continue
-        distances = [hex_distance(axial_from_offset(u.get("at", [0, 0])), target_coord) for u in own_units]
-        parts.append(f"{fid}->{target[0]},{target[1]} min {min(distances)} avg {sum(distances) / len(distances):.1f}")
+        distances = [
+            min(hex_distance(axial_from_offset(u.get("at", [0, 0])), axial_from_offset(target)) for target in targets)
+            for u in own_units
+        ]
+        if objective_type == "capture":
+            target = targets[0]
+            parts.append(
+                f"{fid}->{target[0]},{target[1]} min {min(distances)} avg {sum(distances) / len(distances):.1f}"
+            )
+        elif objective_type == "control_count":
+            required = int(cfg.get("required", len(targets)))
+            parts.append(
+                f"{fid} control {required}/{len(targets)} min {min(distances)} avg {sum(distances) / len(distances):.1f}"
+            )
+        else:
+            target = targets[0]
+            turns = int(cfg.get("required_turns", 1))
+            parts.append(
+                f"{fid} hold {target[0]},{target[1]} {turns}t min {min(distances)} avg {sum(distances) / len(distances):.1f}"
+            )
     return "; ".join(parts) if parts else "n/a"
+
+
+def primary_objective_targets(objective: dict[str, Any]) -> list[list[Any]]:
+    objective_type = str(objective.get("type", ""))
+    if objective_type in {"capture", "hold_hex_turns"}:
+        target = objective.get("target", [])
+        if isinstance(target, list) and len(target) >= 2:
+            return [target]
+        return []
+    if objective_type == "control_count":
+        targets = objective.get("targets", [])
+        if isinstance(targets, list):
+            return [target for target in targets if isinstance(target, list) and len(target) >= 2]
+    return []
 
 
 def secondary_objective_summary(scenario: dict[str, Any]) -> str:
