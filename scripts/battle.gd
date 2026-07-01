@@ -260,6 +260,98 @@ func _apply_conquest_garrison_xp() -> void:
 		unit.rank = int(record.get("rank", 0))
 		unit.queue_redraw()
 
+# ---------- MORALE & ROUT ----------
+
+func _adjacent_enemy_count(unit: Unit) -> int:
+	var n := 0
+	for u in units:
+		var other: Unit = u
+		if other.is_alive() and other.faction_id != unit.faction_id \
+				and HexCoord.distance(other.coord, unit.coord) == 1:
+			n += 1
+	return n
+
+func _apply_morale_pressure(defender: Unit, pressure: int) -> bool:
+	# Drain morale from a non-lethal hit (pressure = the suppression it applied).
+	# Returns true if this hit newly routs the defender.
+	if pressure <= 0 or not defender.is_alive() or defender.routed:
+		return false
+	var pinned := CombatEffects.is_pinned(defender.suppression)
+	defender.morale = CombatEffects.morale_after_hit(
+		defender.morale, pressure, _adjacent_enemy_count(defender), pinned
+	)
+	defender.queue_redraw()
+	if defender.morale <= 0:
+		defender.routed = true
+		return true
+	return false
+
+func _out_of_enemy_range(unit: Unit) -> bool:
+	# True when no living enemy could reach attack range of this hex next turn.
+	for u in units:
+		var other: Unit = u
+		if not other.is_alive() or other.faction_id == unit.faction_id:
+			continue
+		var edef: Dictionary = DataLoader.get_unit_def(other.type_id)
+		var reach := int(edef.get("move", 0)) + int(edef.get("range", 1))
+		if HexCoord.distance(other.coord, unit.coord) <= reach:
+			return false
+	return true
+
+func _recover_morale_for_faction(faction_id: String) -> void:
+	# At its turn start, a unit out of enemy reach recovers morale (faster the
+	# lower it is) and reforms once it climbs back to half.
+	for u in units:
+		var unit: Unit = u
+		if unit.faction_id != faction_id or not unit.is_alive() or not _out_of_enemy_range(unit):
+			continue
+		unit.morale = CombatEffects.morale_after_recovery(unit.morale, unit.morale_max)
+		if unit.routed and unit.morale >= CombatEffects.reform_threshold(unit.morale_max):
+			unit.routed = false
+		unit.queue_redraw()
+
+func _retreat_score(pos: Vector2i, unit: Unit) -> float:
+	var nearest := 9999
+	for u in units:
+		var other: Unit = u
+		if other.is_alive() and other.faction_id != unit.faction_id:
+			nearest = min(nearest, HexCoord.distance(pos, other.coord))
+	var terr: Dictionary = DataLoader.get_terrain_def(hex_map.terrain_at(pos))
+	return float(nearest) * 2.0 + float(terr.get("defense", 0))
+
+func _coord_before(a: Vector2i, b: Vector2i) -> bool:
+	return a.x < b.x or (a.x == b.x and a.y < b.y)
+
+func _retreat_routed_units(faction_id: String) -> void:
+	# Routed units withdraw toward safety (max distance from nearest enemy + cover,
+	# deterministic tie-break) and are spent — cannot be ordered this turn. Applied
+	# to both sides at their own turn start.
+	for u in units.duplicate():
+		var unit: Unit = u
+		if not is_instance_valid(unit) or not unit.is_alive() or unit.faction_id != faction_id or not unit.routed:
+			continue
+		var atk_def: Dictionary = DataLoader.get_unit_def(unit.type_id)
+		var move_pts: int = max(0, int(atk_def.get("move", 0)) - CombatEffects.move_penalty(unit.suppression))
+		var reachable: Dictionary = Pathfinding.movement_range(
+			unit.coord, move_pts, hex_map, hex_map.occupants, unit.faction_id, unit.type_id
+		)
+		var best: Vector2i = unit.coord
+		var best_score := _retreat_score(unit.coord, unit)
+		for c in reachable.keys():
+			var cand: Vector2i = c
+			var s := _retreat_score(cand, unit)
+			if s > best_score or (s == best_score and _coord_before(cand, best)):
+				best_score = s
+				best = cand
+		if best != unit.coord:
+			var path := Pathfinding.reconstruct_path(
+				unit.coord, best, reachable, hex_map, hex_map.occupants, unit.faction_id, unit.type_id
+			)
+			hex_map.move_unit_along_path(unit, path)
+		unit.has_moved = true
+		unit.has_attacked = true  # spent while routed
+		unit.queue_redraw()
+
 # ---------- TURN LIFECYCLE ----------
 
 func _on_turn_started(faction_id: String, turn_number: int) -> void:
@@ -269,6 +361,10 @@ func _on_turn_started(faction_id: String, turn_number: int) -> void:
 			u.reset_for_new_turn()
 			# Drop expired active effects (general's skill buffs).
 			u.tick_active_effects(turn_number)
+	# Morale: units out of enemy reach recover (and may reform); those still
+	# broken then withdraw and are spent for the turn.
+	_recover_morale_for_faction(faction_id)
+	_retreat_routed_units(faction_id)
 	phase = Phase.IDLE
 	_deselect()
 	end_turn_button.text = "結束 %s 回合 (T%d)" % [factions[faction_id]["name"], turn_number]
@@ -310,6 +406,8 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			return
 		if not u.is_alive():
 			continue
+		if u.routed:
+			continue  # routed units already withdrew and are spent at turn start
 		var plan: Dictionary = ai.plan_for_unit(u)
 		var dest: Vector2i = plan["move_to"]
 		if dest != u.coord:
@@ -784,9 +882,11 @@ func _enter_attack_phase(status_prefix: String = "") -> void:
 		bridge_button.visible = false
 		damage_preview_panel.visible = false
 		var done_text := "%s 本回合已行動 — 點空地或選其他單位" % selected_unit.display_name
+		if selected_unit.routed:
+			done_text = "%s 士氣潰散 — 無法指揮,正在潰退;脫離敵軍射程後士氣才會恢復" % selected_unit.display_name
 		if status_prefix != "":
 			done_text = "%s；%s" % [status_prefix, done_text]
-		_set_prompt("行動已用", done_text)
+		_set_prompt("潰散中" if selected_unit.routed else "行動已用", done_text)
 		return
 	var atk_def := DataLoader.get_unit_def(selected_unit.type_id)
 	attack_targets = _visible_attack_targets(selected_unit, atk_def)
@@ -794,7 +894,9 @@ func _enter_attack_phase(status_prefix: String = "") -> void:
 	# Overwatch button: enabled whenever a unit has finished its move and
 	# is making the attack-or-skip decision.
 	overwatch_button.visible = not CombatEffects.is_pinned(selected_unit.suppression)
-	rally_button.visible = selected_unit.suppression > 0
+	# Rally is available any time there is suppression to shake off OR morale to
+	# recover — a proactive way to steady a unit before it breaks.
+	rally_button.visible = selected_unit.suppression > 0 or selected_unit.morale < selected_unit.morale_max
 	# Skill buttons: one per active skill the unit has (its own kit + general's).
 	_refresh_skill_buttons(selected_unit)
 	# Engineer bridge: when adjacent to impassable water it can build a crossing.
@@ -1237,6 +1339,7 @@ func _do_suppressive_fire(unit: Unit, target: Unit) -> void:
 	unit.queue_redraw()
 	unit.play_attack_animation(target.position)
 	target.add_suppression(amount)
+	_apply_morale_pressure(target, amount)
 	action_log.record_skill(unit, skill_id, turn_manager.turn_number)
 	AudioBank.play("attack")
 	suppressive_fire_targets.clear()
@@ -1381,6 +1484,7 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 	AudioBank.play("attack")
 	defender.take_damage(result.damage_to_defender)
 	defender.add_suppression(result.suppression_to_defender)
+	var just_routed := _apply_morale_pressure(defender, result.suppression_to_defender)
 	defender.reduce_dig_in(result.defender_dig_in_loss)
 	DamagePopup.spawn(hex_map, defender.position, result.damage_to_defender)
 	var msg := "%s → %s 造成 %d" % [attacker.display_name, defender.display_name, result.damage_to_defender]
@@ -1398,6 +1502,8 @@ func _resolve_attack(attacker: Unit, defender: Unit) -> void:
 		attacker.take_damage(result.counter_damage)
 		DamagePopup.spawn(hex_map, attacker.position, result.counter_damage, Color(1.0, 0.75, 0.4))
 		msg += ",反擊 %d" % result.counter_damage
+	if just_routed:
+		msg += " — %s 士氣潰散!" % defender.display_name
 
 	# Veteran XP: kill = +3, damage-without-kill = +1 per damage dealt.
 	# Defender also earns XP for surviving + landing counter damage.
@@ -1504,6 +1610,7 @@ func _apply_splash(attacker: Unit, atk_def: Dictionary, center: Vector2i, primar
 			continue
 		unit.take_damage(dmg)
 		unit.add_suppression(result.suppression_to_defender)
+		_apply_morale_pressure(unit, result.suppression_to_defender)
 		unit.reduce_dig_in(result.defender_dig_in_loss)
 		DamagePopup.spawn(hex_map, unit.position, dmg, Color(1.0, 0.6, 0.2))
 		out.hit += 1
@@ -2040,6 +2147,7 @@ func _suppress_enemies_near(source: Unit, amount: int, radius: int) -> void:
 			continue
 		if HexCoord.distance(source.coord, target.coord) <= radius:
 			target.add_suppression(amount)
+			_apply_morale_pressure(target, amount)
 
 func _strip_enemy_dig_in_near(source: Unit, amount: int, radius: int) -> void:
 	if source == null or amount <= 0 or radius < 0:

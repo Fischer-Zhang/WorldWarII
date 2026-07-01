@@ -49,6 +49,11 @@ var suppression: int = 0
 # Veteran XP (in-battle progression) — rank derived from xp.
 var xp: int = 0
 var rank: int = 0
+# Morale: a separate pool seeded from rank. Suppression pressure drains it; at 0
+# the unit routs (forced withdrawal, can't be ordered). See CombatEffects.
+var morale: int = CombatEffects.MORALE_BASE
+var morale_max: int = CombatEffects.MORALE_BASE
+var routed: bool = false
 # Optional attached general (data lookup via DataLoader.get_general_def).
 var general_id: String = ""
 # Conquest-mode garrison identity: maps a battlefield unit back to its
@@ -78,7 +83,15 @@ func configure(_type_id: String, _faction_id: String, _faction_color: Color, _co
 	max_hp = int(def.get("hp", 10))
 	hp = max_hp
 	display_name = _name if _name != "" else String(def.get("name_zh", _type_id))
+	refresh_morale()
 	queue_redraw()
+
+func refresh_morale() -> void:
+	# Re-seed morale from the current rank and fill it. Called at spawn (after the
+	# factory sets rank) and whenever the ceiling should reset.
+	morale_max = CombatEffects.morale_max(rank)
+	morale = morale_max
+	routed = false
 
 func is_alive() -> bool:
 	return hp > 0
@@ -126,6 +139,10 @@ func reduce_dig_in(amount: int) -> void:
 func rally(terrain_def: Dictionary) -> int:
 	var before := suppression
 	suppression = CombatEffects.rally_suppression(suppression, terrain_def)
+	# Rally also steadies morale, and can pull a unit back out of a rout.
+	morale = min(morale_max, morale + CombatEffects.RALLY_MORALE)
+	if routed and morale >= CombatEffects.reform_threshold(morale_max):
+		routed = false
 	on_overwatch = false
 	has_moved = true
 	has_attacked = true
@@ -139,6 +156,10 @@ func gain_xp(amount: int) -> void:
 	var new_rank: int = CombatModifiers.rank_for_xp(xp)
 	if new_rank > rank:
 		rank = new_rank
+		# Promotion raises the morale ceiling and steadies the unit by the gain.
+		var new_max := CombatEffects.morale_max(rank)
+		morale = min(new_max, morale + (new_max - morale_max))
+		morale_max = new_max
 		ranked_up.emit(rank)
 	queue_redraw()
 
@@ -322,6 +343,22 @@ func _draw() -> void:
 				Color(0.0, 0.0, 0.0, 0.7),
 				false, 0.8
 			)
+
+	# Morale: a vertical bar on the right edge (fills from the bottom), shown when
+	# below full. Cyan normally, red while routed.
+	if morale_max > 0 and morale < morale_max:
+		var mh := RADIUS * 1.6
+		var mx := RADIUS + 2.0
+		var top := -mh / 2.0
+		draw_rect(Rect2(mx, top, 3.0, mh), Color(0.12, 0.12, 0.15, 0.9))
+		var pct: float = clampf(float(morale) / float(morale_max), 0.0, 1.0)
+		var fill_h := mh * pct
+		var mcol := Color(0.95, 0.4, 0.3) if routed else Color(0.3, 0.7, 1.0)
+		draw_rect(Rect2(mx, top + (mh - fill_h), 3.0, fill_h), mcol)
+
+	# Routed: a bold red ring — the unit is broken and will withdraw.
+	if routed and not dying:
+		draw_arc(Vector2.ZERO, RADIUS + 6.0, 0, TAU, 28, Color(0.95, 0.3, 0.3, 0.9), 2.5)
 
 func _hp_color(pct: float) -> Color:
 	if pct > 0.6:

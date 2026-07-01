@@ -60,4 +60,5 @@ static func create_unit(data: Dictionary, factions: Dictionary) -> Unit:
 	unit.suppression = clampi(int(data.get("suppression", 0)), 0, CombatEffects.MAX_SUPPRESSION)
 	unit.dig_in_level = clampi(int(data.get("dig_in", 0)), 0, Unit.MAX_DIG_IN)
 	unit.on_overwatch = bool(data.get("on_overwatch", false))
+	unit.refresh_morale()  # seed morale_max from the final rank, filled
 	return unit

@@ -86,6 +86,56 @@ static func overwatch_damage(full_damage: int, atk_def: Dictionary) -> int:
 	var pct := int(atk_def.get("overwatch_damage_pct", OVERWATCH_DAMAGE_PCT))
 	return max(1, int(ceil(full_damage * pct / 100.0)))
 
+# --- Morale & rout ---
+#
+# Morale is a separate pool, seeded from veteran rank so leveled units are
+# steadier. Each non-lethal hit drains morale by its suppression pressure minus
+# the unit's resistance; resistance rises with current morale and falls when the
+# unit is ganged up on (adjacent enemies) or already suppressed. At 0 the unit
+# routs (forced withdrawal). Morale only recovers out of enemy reach, and the
+# lower it is the faster it comes back. Tuned so a full-morale rank-0 unit
+# withstands 3 attackers focus-firing in one round and breaks on the 4th.
+const MORALE_BASE := 10
+const MORALE_RESIST_DIV := 3
+const MORALE_MIN_DRAIN := 1
+const MORALE_RECOVER_BASE := 1
+const MORALE_RECOVER_DIV := 2
+const RALLY_MORALE := 3
+
+static func morale_max(rank: int) -> int:
+	return MORALE_BASE + max(0, rank)
+
+static func morale_resistance(morale: int, adjacent_enemies: int, pinned: bool) -> int:
+	# Higher morale resists; being ganged up on (each adjacent enemy past the
+	# first) or already suppressed lowers resistance.
+	var resist := int(morale / MORALE_RESIST_DIV)
+	resist -= max(0, adjacent_enemies - 1)
+	if pinned:
+		resist -= 1
+	return max(0, resist)
+
+static func morale_drain(pressure: int, morale: int, adjacent_enemies: int, pinned: bool) -> int:
+	if pressure <= 0:
+		return 0
+	return max(MORALE_MIN_DRAIN, pressure - morale_resistance(morale, adjacent_enemies, pinned))
+
+static func morale_after_hit(morale: int, pressure: int, adjacent_enemies: int, pinned: bool) -> int:
+	return max(0, morale - morale_drain(pressure, morale, adjacent_enemies, pinned))
+
+static func morale_recovery(morale: int, max_morale: int) -> int:
+	# Lower morale recovers faster (a broken unit pulled to safety rallies quickly).
+	return MORALE_RECOVER_BASE + int((max_morale - morale) / MORALE_RECOVER_DIV)
+
+static func morale_after_recovery(morale: int, max_morale: int) -> int:
+	return min(max_morale, morale + morale_recovery(morale, max_morale))
+
+static func reform_threshold(max_morale: int) -> int:
+	# A routed unit reforms (un-routs) once morale climbs back to half of its max.
+	return int(ceil(max_morale / 2.0))
+
+static func is_routed_morale(morale: int) -> bool:
+	return morale <= 0
+
 static func is_pinned(suppression: int) -> bool:
 	return suppression >= SUPPRESSION_PIN_THRESHOLD
 

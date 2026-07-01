@@ -175,5 +175,53 @@ func _init() -> void:
 			% [default_overwatch, mg_overwatch, zero_overwatch]
 		)
 
+	# --- Morale & rout ---
+
+	# M1) Balance target: a full-morale rank-0 unit withstands 3 attackers
+	# focus-firing in one round (worst case: adjacent MGs, pressure 3) and breaks
+	# on the 4th. Suppression climbs alongside and feeds the resistance drop.
+	var mmax := CombatEffects.morale_max(0)
+	var m := mmax
+	var supp := 0
+	var routed_on := 0
+	for hit in range(1, 6):
+		var pinned := CombatEffects.is_pinned(supp)
+		m = CombatEffects.morale_after_hit(m, 3, 3, pinned)  # pressure 3, 3 adjacent enemies
+		supp = CombatEffects.apply_suppression(supp, 3)
+		if m <= 0 and routed_on == 0:
+			routed_on = hit
+	if routed_on == 4:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: full unit should survive 3 focus hits and rout on the 4th, routed on hit %d (max %d)" % [routed_on, mmax])
+
+	# M2) Veteran rank raises the morale ceiling (steadier / investment pays off).
+	if CombatEffects.morale_max(3) > CombatEffects.morale_max(0):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: higher rank should raise morale_max")
+
+	# M3) Resistance rises with morale; gang-up and being pinned lower it.
+	var r_high := CombatEffects.morale_resistance(mmax, 1, false)
+	var r_low := CombatEffects.morale_resistance(2, 1, false)
+	var r_ganged := CombatEffects.morale_resistance(mmax, 3, false)
+	var r_pinned := CombatEffects.morale_resistance(mmax, 1, true)
+	if r_high > r_low and r_ganged < r_high and r_pinned < r_high:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: resistance should be higher at high morale and lower when ganged/pinned; high %d low %d ganged %d pinned %d" % [r_high, r_low, r_ganged, r_pinned])
+
+	# M4) Recovery is larger the lower the morale; reform threshold is half of max.
+	var rec_low := CombatEffects.morale_recovery(0, mmax)
+	var rec_high := CombatEffects.morale_recovery(mmax - 2, mmax)
+	if rec_low > rec_high and CombatEffects.morale_after_recovery(0, mmax) >= CombatEffects.reform_threshold(mmax):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: low morale should recover faster and a broken unit pulled to safety should reform in one turn; rec_low %d rec_high %d" % [rec_low, rec_high])
+
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
