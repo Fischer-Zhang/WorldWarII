@@ -29,6 +29,7 @@ ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
 }
 ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES = {"theater_reinforcement"}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
+ALLOWED_CONQUEST_VICTORY_TYPES = {"eliminate", "capture", "control_count", "hold_hex_turns"}
 # Conquest powers a general may belong to (drives which country can field them);
 # "france" has no conquest country but is used by campaign scenarios.
 GENERAL_COUNTRIES = {"germany", "soviet", "usa", "britain", "japan", "china", "france"}
@@ -297,6 +298,16 @@ def validate_scenario(
                     except (TypeError, ValueError):
                         fail(errors, path, f"victory {faction_id!r} control_count required must be an integer")
 
+    validate_objective_shape(
+        path,
+        scenario.get("conquest_victory", {}),
+        "conquest_victory",
+        width,
+        height,
+        errors,
+        allow_empty=True,
+    )
+
     secondary_objectives = scenario.get("secondary_objectives", [])
     if "secondary_objectives" in scenario and not isinstance(secondary_objectives, list):
         fail(errors, path, "secondary_objectives must be a list when present")
@@ -407,6 +418,55 @@ def validate_scenario(
                 break
 
     validate_tutorial_metadata(path, scenario, units, terrains, width, height, errors)
+
+
+def validate_objective_shape(
+    path: Path,
+    objective: Any,
+    label: str,
+    width: int,
+    height: int,
+    errors: list[str],
+    allow_empty: bool = False,
+) -> None:
+    if allow_empty and objective == {}:
+        return
+    if not isinstance(objective, dict):
+        fail(errors, path, f"{label} must be an object")
+        return
+    objective_type = str(objective.get("type", ""))
+    if objective_type not in ALLOWED_CONQUEST_VICTORY_TYPES:
+        fail(errors, path, f"{label} has unknown type {objective_type!r}")
+    if objective_type in {"capture", "hold_hex_turns"}:
+        target = objective.get("target", [])
+        if not in_bounds(target, width, height):
+            fail(errors, path, f"{label} {objective_type} target out of bounds: {target!r}")
+    if objective_type == "hold_hex_turns":
+        try:
+            if int(objective.get("required_turns", 0)) <= 0:
+                fail(errors, path, f"{label} hold_hex_turns required_turns must be positive")
+        except (TypeError, ValueError):
+            fail(errors, path, f"{label} hold_hex_turns required_turns must be an integer")
+    if objective_type == "control_count":
+        targets = objective.get("targets", [])
+        if not isinstance(targets, list) or not targets:
+            fail(errors, path, f"{label} control_count needs a non-empty targets list")
+        else:
+            for target in targets:
+                if not in_bounds(target, width, height):
+                    fail(errors, path, f"{label} control_count target out of bounds: {target!r}")
+            try:
+                required = int(objective.get("required", len(targets)))
+                if required <= 0 or required > len(targets):
+                    fail(errors, path, f"{label} control_count required must be 1..{len(targets)}")
+            except (TypeError, ValueError):
+                fail(errors, path, f"{label} control_count required must be an integer")
+    if "by_turn" in objective:
+        try:
+            if int(objective.get("by_turn", 0)) <= 0:
+                fail(errors, path, f"{label} by_turn must be positive")
+        except (TypeError, ValueError):
+            fail(errors, path, f"{label} by_turn must be an integer")
 
 
 def secondary_prerequisite_has_cycle(

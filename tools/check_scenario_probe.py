@@ -35,6 +35,11 @@ def main() -> None:
         "scenario probe missing conquest secondary coverage section",
     )
     require(
+        "## Conquest Primary Variety" in report
+        and "| scenario | attack objective | objective pressure | check |" in report,
+        "scenario probe missing conquest primary variety section",
+    )
+    require(
         "## Gameplay Depth Coverage" in report
         and "| scenario | secondary objectives | xp-only objectives | enriched objectives | check |" in report,
         "scenario probe missing gameplay depth coverage section",
@@ -164,6 +169,27 @@ def main() -> None:
         "| conq_cbi_jungle | 2 | 2 | -3 | covered |" in report
         and "| conq_atlantic_convoy | 2 | 2 | -2 | covered |" in report,
         "Conquest secondary coverage should expose enemy-strength pressure amounts",
+    )
+    conquest_primary_section = section_text(report, "## Conquest Primary Variety")
+    conquest_primary_rows = [
+        line for line in conquest_primary_section.splitlines()
+        if line.startswith("| conq_")
+    ]
+    require(
+        len(conquest_primary_rows) == conquest_count,
+        "Conquest primary variety should include every conquest template",
+    )
+    require(
+        all(line.endswith("| varied |") for line in conquest_primary_rows),
+        "Every conquest template should use a varied attack objective instead of fallback eliminate",
+    )
+    primary_objective_mix = {
+        line.strip("|").split("|")[1].strip().split(" ", 1)[0]
+        for line in conquest_primary_rows
+    }
+    require(
+        {"capture", "control", "hold"}.issubset(primary_objective_mix),
+        "Conquest primary variety should include capture, control_count and hold objectives",
     )
     depth_section = section_text(report, "## Gameplay Depth Coverage")
     depth_rows = [

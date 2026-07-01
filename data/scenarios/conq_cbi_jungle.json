@@ -74,6 +74,12 @@
       "requires": "cbi_jungle_supply"
     }
   ],
+  "conquest_victory": {
+    "type": "hold_hex_turns",
+    "target": [14, 6],
+    "required_turns": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

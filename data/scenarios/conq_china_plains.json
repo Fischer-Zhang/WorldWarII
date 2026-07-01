@@ -75,6 +75,12 @@
       "requires": "china_bridge_cache"
     }
   ],
+  "conquest_victory": {
+    "type": "control_count",
+    "targets": [[14, 6], [10, 10], [19, 8]],
+    "required": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

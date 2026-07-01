@@ -172,6 +172,23 @@ Focused gate for conquest templates: each conq_* battle should give optional obj
 | conq_pacific_carrier | 2 | 2 | -2 | covered |
 | conq_pacific_island | 2 | 2 | -2 | covered |
 
+## Conquest Primary Variety
+
+Focused gate for conquest templates: attack battles should vary their formal objective instead of defaulting every region to a roster wipe.
+
+| scenario | attack objective | objective pressure | check |
+| --- | --- | --- | --- |
+| conq_atlantic_convoy | control 2/3 by T13 | own min 15 enemy min 3 | varied |
+| conq_cbi_jungle | hold 14,6 2t by T13 | own min 14 enemy min 10 | varied |
+| conq_china_plains | control 2/3 by T13 | own min 9 enemy min 5 | varied |
+| conq_desert_north_africa | control 2/3 by T13 | own min 12 enemy min 0 | varied |
+| conq_home_islands | capture 15,6 by T13 | own min 14 enemy min 8 | varied |
+| conq_mediterranean_coast | hold 12,11 2t by T12 | own min 8 enemy min 10 | varied |
+| conq_middle_east_oilfields | control 2/3 by T13 | own min 10 enemy min 7 | varied |
+| conq_north_sea_raid | capture 11,4 by T12 | own min 9 enemy min 11 | varied |
+| conq_pacific_carrier | hold 14,4 2t by T12 | own min 12 enemy min 8 | varied |
+| conq_pacific_island | control 2/3 by T13 | own min 9 enemy min 9 | varied |
+
 ## Gameplay Depth Coverage
 
 Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.

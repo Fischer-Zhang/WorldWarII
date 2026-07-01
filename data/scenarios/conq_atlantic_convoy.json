@@ -74,6 +74,12 @@
       "requires": "atlantic_port_sabotage"
     }
   ],
+  "conquest_victory": {
+    "type": "control_count",
+    "targets": [[16, 9], [17, 2], [20, 10]],
+    "required": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

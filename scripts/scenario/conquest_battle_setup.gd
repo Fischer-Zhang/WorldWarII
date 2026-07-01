@@ -2,8 +2,9 @@ class_name ConquestBattleSetup
 extends RefCounted
 
 # Builds a Conquest battle on a region's themed map. The terrain comes from the
-# themed scenario, but factions, unit rosters and victory are OVERRIDDEN so the
-# conquest player fights its own recruited army (attacker) against a
+# themed scenario, but factions, unit rosters and victory context are
+# OVERRIDDEN so the conquest player fights its own recruited army (attacker)
+# against a
 # strength-generated force (defender), always controlling its own side —
 # regardless of which faction the scenario was originally authored for.
 #
@@ -71,12 +72,17 @@ static func apply(
 	]
 	scenario["units"] = player_entries + enemy_entries
 	scenario["reinforcements"] = []
-	# The attacking side must wipe the defenders; the defending side wins by
-	# holding out to the turn limit. On a "defend" the AI is the attacker.
+	# Attacking conquest battles may use the template's `conquest_victory`;
+	# defender wins by holding out to the same turn limit. On a "defend" the AI
+	# remains a simple attacker and the player survives to the default limit.
 	if role == "attack":
+		var attack_objective := _conquest_attack_objective(scenario)
 		scenario["victory"] = {
-			player_faction: {"type": "eliminate"},
-			enemy_faction: {"type": "survive", "by_turn": DEFENDER_SURVIVE_TURNS},
+			player_faction: attack_objective,
+			enemy_faction: {
+				"type": "survive",
+				"by_turn": int(attack_objective.get("by_turn", DEFENDER_SURVIVE_TURNS)),
+			},
 		}
 	else:
 		scenario["victory"] = {
@@ -132,6 +138,67 @@ static func _remap_secondary_objectives(
 			objective["faction"] = player_faction
 			objectives[i] = objective
 	scenario["secondary_objectives"] = objectives
+
+static func conquest_attack_objective_text(scenario: Dictionary) -> String:
+	var objective := _conquest_attack_objective(scenario)
+	var objective_type := String(objective.get("type", "eliminate"))
+	var by_turn: int = int(objective.get("by_turn", DEFENDER_SURVIVE_TURNS))
+	match objective_type:
+		"capture":
+			var target: Array = objective.get("target", [])
+			return "在第 %d 回合結束前佔領 %s" % [by_turn, _target_text(target)]
+		"control_count":
+			var targets: Array = objective.get("targets", [])
+			var required: int = int(objective.get("required", targets.size()))
+			return "在第 %d 回合結束前控制 %d/%d 個地標" % [by_turn, required, targets.size()]
+		"hold_hex_turns":
+			var target: Array = objective.get("target", [])
+			var required_turns: int = int(objective.get("required_turns", 1))
+			return "在第 %d 回合結束前佔住 %s 並連續守住 %d 個我方回合" % [
+				by_turn, _target_text(target), required_turns,
+			]
+		_:
+			return "在 %d 回合內殲滅所有守軍" % DEFENDER_SURVIVE_TURNS
+
+static func conquest_attack_turn_limit(scenario: Dictionary) -> int:
+	var objective := _conquest_attack_objective(scenario)
+	return int(objective.get("by_turn", DEFENDER_SURVIVE_TURNS))
+
+static func _conquest_attack_objective(scenario: Dictionary) -> Dictionary:
+	var raw = scenario.get("conquest_victory", {})
+	if typeof(raw) != TYPE_DICTIONARY:
+		return {"type": "eliminate"}
+	var cfg: Dictionary = raw
+	var objective_type := String(cfg.get("type", "eliminate"))
+	match objective_type:
+		"capture":
+			return {
+				"type": "capture",
+				"target": (cfg.get("target", []) as Array).duplicate(true),
+				"by_turn": int(cfg.get("by_turn", DEFENDER_SURVIVE_TURNS)),
+			}
+		"control_count":
+			var targets: Array = cfg.get("targets", [])
+			return {
+				"type": "control_count",
+				"targets": targets.duplicate(true),
+				"required": int(cfg.get("required", targets.size())),
+				"by_turn": int(cfg.get("by_turn", DEFENDER_SURVIVE_TURNS)),
+			}
+		"hold_hex_turns":
+			return {
+				"type": "hold_hex_turns",
+				"target": (cfg.get("target", []) as Array).duplicate(true),
+				"required_turns": int(cfg.get("required_turns", 1)),
+				"by_turn": int(cfg.get("by_turn", DEFENDER_SURVIVE_TURNS)),
+			}
+		_:
+			return {"type": "eliminate"}
+
+static func _target_text(target: Array) -> String:
+	if target.size() < 2:
+		return "目標格"
+	return "%d,%d" % [int(target[0]), int(target[1])]
 
 static func _map_bounds(scenario: Dictionary) -> Dictionary:
 	var map: Dictionary = scenario.get("map", {})

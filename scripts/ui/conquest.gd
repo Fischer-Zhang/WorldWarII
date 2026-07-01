@@ -3,6 +3,7 @@ extends Control
 const CampaignManager := preload("res://scripts/scenario/campaign_manager.gd")
 const ConquestManager := preload("res://scripts/scenario/conquest_manager.gd")
 const ConquestCatalog := preload("res://scripts/scenario/conquest_catalog.gd")
+const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
 const ConquestRecruit := preload("res://scripts/scenario/conquest_recruit.gd")
 const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 
@@ -319,6 +320,7 @@ func _update_detail(message: String = "") -> void:
 			var my_force: int = (src.get("garrison", []) as Array).size()
 			var enemy_force: int = ConquestRecruit.generate_force(ConquestManager.defense_strength(tgt)).size()
 			lines.append("我軍 %d 部隊 vs 敵軍約 %d 部隊" % [my_force, enemy_force])
+			lines.append("任務: %s" % ConquestBattleSetup.conquest_attack_objective_text(battle_scenario))
 			if my_force == 0:
 				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
 	var can_attack := selected_region_id != "" \

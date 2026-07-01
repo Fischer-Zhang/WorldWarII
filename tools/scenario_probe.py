@@ -655,6 +655,87 @@ def conquest_secondary_check_text(objective_count: int, strategic_objectives: in
     return "covered"
 
 
+def conquest_primary_variety_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not scenario_id.startswith("conq_"):
+            continue
+        objective = conquest_primary_objective(scenario)
+        rows.append([
+            scenario_id,
+            conquest_primary_text(objective),
+            conquest_primary_pressure_text(scenario, objective),
+            conquest_primary_check_text(objective),
+        ])
+    return rows
+
+
+def conquest_primary_objective(scenario: dict[str, Any]) -> dict[str, Any]:
+    objective = scenario.get("conquest_victory", {})
+    if isinstance(objective, dict) and objective:
+        return objective
+    return {"type": "eliminate"}
+
+
+def conquest_primary_text(objective: dict[str, Any]) -> str:
+    objective_type = str(objective.get("type", "eliminate"))
+    by_turn = int(objective.get("by_turn", 12))
+    if objective_type == "capture":
+        target = objective.get("target", [])
+        return f"capture {target[0]},{target[1]} by T{by_turn}" if valid_offset_target(target) else "capture n/a"
+    if objective_type == "control_count":
+        targets = objective.get("targets", [])
+        required = int(objective.get("required", len(targets)))
+        return f"control {required}/{len(targets)} by T{by_turn}"
+    if objective_type == "hold_hex_turns":
+        target = objective.get("target", [])
+        turns = int(objective.get("required_turns", 1))
+        if valid_offset_target(target):
+            return f"hold {target[0]},{target[1]} {turns}t by T{by_turn}"
+        return f"hold n/a {turns}t by T{by_turn}"
+    return "eliminate defenders"
+
+
+def conquest_primary_pressure_text(scenario: dict[str, Any], objective: dict[str, Any]) -> str:
+    targets = primary_objective_targets(objective)
+    if not targets:
+        return "roster wipe"
+    player_faction = player_faction_id(scenario)
+    own = [
+        unit for unit in initial_units(scenario)
+        if str(unit.get("faction", "")) == player_faction
+    ]
+    enemies = [
+        unit for unit in initial_units(scenario)
+        if str(unit.get("faction", "")) != player_faction
+    ]
+    own_dist = [nearest_distance_to_targets(unit, targets) for unit in own]
+    enemy_dist = [nearest_distance_to_targets(unit, targets) for unit in enemies]
+    own_text = "n/a" if not own_dist else str(min(own_dist))
+    enemy_text = "n/a" if not enemy_dist else str(min(enemy_dist))
+    return f"own min {own_text} enemy min {enemy_text}"
+
+
+def conquest_primary_check_text(objective: dict[str, Any]) -> str:
+    objective_type = str(objective.get("type", "eliminate"))
+    if objective_type == "eliminate":
+        return "fallback eliminate"
+    if objective_type == "control_count":
+        targets = objective.get("targets", [])
+        required = int(objective.get("required", len(targets)))
+        if len(targets) < 2 or required <= 0 or required > len(targets):
+            return "check target count"
+    elif objective_type in {"capture", "hold_hex_turns"}:
+        if not valid_offset_target(objective.get("target", [])):
+            return "missing target"
+    return "varied"
+
+
+def valid_offset_target(target: Any) -> bool:
+    return isinstance(target, list) and len(target) >= 2
+
+
 def gameplay_depth_coverage_rows(scenarios: list[dict[str, Any]]) -> list[list[Any]]:
     rows: list[list[Any]] = []
     for scenario in scenarios:
@@ -1142,6 +1223,17 @@ def generate_report() -> str:
                 "check",
             ],
             conquest_secondary_coverage_rows(scenarios),
+        ),
+        "## Conquest Primary Variety",
+        "Focused gate for conquest templates: attack battles should vary their formal objective instead of defaulting every region to a roster wipe.",
+        table(
+            [
+                "scenario",
+                "attack objective",
+                "objective pressure",
+                "check",
+            ],
+            conquest_primary_variety_rows(scenarios),
         ),
         "## Gameplay Depth Coverage",
         "Focused gate for non-tutorial, non-conquest battles: each main battle should have optional pressure, and reports should show XP-only objectives separately from richer tactical or strategic rewards.",

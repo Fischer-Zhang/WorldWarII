@@ -74,6 +74,11 @@
       "requires": "north_sea_harbor_cache"
     }
   ],
+  "conquest_victory": {
+    "type": "capture",
+    "target": [11, 4],
+    "by_turn": 12
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

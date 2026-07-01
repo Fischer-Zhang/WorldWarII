@@ -75,6 +75,12 @@
       "requires": "med_coast_supply_port"
     }
   ],
+  "conquest_victory": {
+    "type": "hold_hex_turns",
+    "target": [12, 11],
+    "required_turns": 2,
+    "by_turn": 12
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

@@ -74,6 +74,11 @@
       "requires": "home_islands_fort_depot"
     }
   ],
+  "conquest_victory": {
+    "type": "capture",
+    "target": [15, 6],
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

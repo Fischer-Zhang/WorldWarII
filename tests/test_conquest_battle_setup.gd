@@ -11,6 +11,8 @@ func _init() -> void:
 	var fail_count := 0
 	if _test_attack_setup(): pass_count += 1
 	else: fail_count += 1
+	if _test_attack_template_victory(): pass_count += 1
+	else: fail_count += 1
 	if _test_overflow_slots_unique(): pass_count += 1
 	else: fail_count += 1
 	if _test_overflow_slots_stay_in_bounds(): pass_count += 1
@@ -162,7 +164,7 @@ func _test_attack_setup() -> bool:
 
 	var victory: Dictionary = scenario["victory"]
 	if String((victory.get("germany", {}) as Dictionary).get("type", "")) != "eliminate":
-		printerr("FAIL: attacker victory should be eliminate")
+		printerr("FAIL: default attack objective should be eliminate")
 		return false
 	if String((victory.get("soviet", {}) as Dictionary).get("type", "")) != "survive":
 		printerr("FAIL: defender victory should be survive")
@@ -170,6 +172,58 @@ func _test_attack_setup() -> bool:
 	var anchors: Array = scenario.get(ConquestBattleSetup.DEPLOYMENT_ANCHORS_KEY, [])
 	if anchors.size() != 2 or not _has_coord(anchors, [0, 0]) or not _has_coord(anchors, [1, 0]):
 		printerr("FAIL: attack deployment anchors should mirror authored attacker slots: %s" % str(anchors))
+		return false
+	return true
+
+func _test_attack_template_victory() -> bool:
+	var scenario := _themed()
+	scenario["conquest_victory"] = {
+		"type": "control_count",
+		"targets": [[3, 0], [6, 0]],
+		"required": 1,
+		"by_turn": 9,
+	}
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": [
+			{"id": 7, "type": "medium_tank", "xp": 5, "rank": 2, "name": "T #7"},
+		],
+		"defender_types": ["infantry"],
+		"role": "attack",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+
+	var victory: Dictionary = scenario["victory"]
+	var attacker: Dictionary = victory.get("germany", {})
+	var defender: Dictionary = victory.get("soviet", {})
+	if String(attacker.get("type", "")) != "control_count":
+		printerr("FAIL: conquest template objective should become attacker victory, got %s" % String(attacker.get("type", "")))
+		return false
+	if int(attacker.get("required", 0)) != 1 or (attacker.get("targets", []) as Array).size() != 2:
+		printerr("FAIL: conquest control_count objective should preserve required/targets: %s" % str(attacker))
+		return false
+	if int(attacker.get("by_turn", 0)) != 9:
+		printerr("FAIL: conquest control_count objective should preserve by_turn")
+		return false
+	if String(defender.get("type", "")) != "survive" or int(defender.get("by_turn", 0)) != 9:
+		printerr("FAIL: defender survive should share conquest objective turn limit: %s" % str(defender))
+		return false
+	var summary := ConquestBattleSetup.conquest_attack_objective_text(scenario)
+	if summary.find("控制 1/2 個地標") == -1:
+		printerr("FAIL: conquest objective summary should describe control_count, got %s" % summary)
+		return false
+
+	var hold_scenario := _themed()
+	hold_scenario["conquest_victory"] = {
+		"type": "hold_hex_turns",
+		"target": [4, 0],
+		"required_turns": 2,
+		"by_turn": 8,
+	}
+	var hold_summary := ConquestBattleSetup.conquest_attack_objective_text(hold_scenario)
+	if hold_summary.find("連續守住 2") == -1 or ConquestBattleSetup.conquest_attack_turn_limit(hold_scenario) != 8:
+		printerr("FAIL: conquest objective summary should describe hold_hex_turns, got %s" % hold_summary)
 		return false
 	return true
 

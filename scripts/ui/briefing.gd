@@ -1,5 +1,7 @@
 extends Control
 
+const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
+
 @onready var title_label: Label = $Margin/VBox/Title
 @onready var briefing_label: RichTextLabel = $Margin/VBox/BriefingScroll/Briefing
 @onready var begin_button: Button = $Margin/VBox/Buttons/BeginButton
@@ -47,8 +49,10 @@ func _show_conquest_briefing(scenario: Dictionary) -> void:
 		]
 	else:
 		title_label.text = "%s 進攻 %s" % [me, foe]
-		briefing_label.text = "戰場:%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n殲滅所有守軍即可佔領此地;守軍撐過 12 回合則擊退你。" % [
-			loc, terrain_line, me, my_n, foe, foe_n,
+		var attack_objective := ConquestBattleSetup.conquest_attack_objective_text(scenario)
+		var limit := ConquestBattleSetup.conquest_attack_turn_limit(scenario)
+		briefing_label.text = "戰場:%s%s\n\n%s 出動 %d 支部隊,向 %s 的守軍發起進攻;敵軍約 %d 支部隊據守地形。\n\n任務:%s。守軍撐過第 %d 回合則擊退你。" % [
+			loc, terrain_line, me, my_n, foe, foe_n, attack_objective, limit,
 		]
 
 func _on_begin_pressed() -> void:

@@ -74,6 +74,12 @@
       "requires": "island_port_cache"
     }
   ],
+  "conquest_victory": {
+    "type": "control_count",
+    "targets": [[11, 6], [14, 8], [12, 12]],
+    "required": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

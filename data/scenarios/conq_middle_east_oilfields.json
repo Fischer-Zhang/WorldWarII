@@ -74,6 +74,12 @@
       "requires": "oilfield_pump_station"
     }
   ],
+  "conquest_victory": {
+    "type": "control_count",
+    "targets": [[12, 4], [14, 9], [16, 10]],
+    "required": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"

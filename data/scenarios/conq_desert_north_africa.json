@@ -74,6 +74,12 @@
       "requires": "desert_oasis_depot"
     }
   ],
+  "conquest_victory": {
+    "type": "control_count",
+    "targets": [[13, 11], [20, 6], [21, 3]],
+    "required": 2,
+    "by_turn": 13
+  },
   "victory": {
     "allies": {
       "type": "eliminate"
