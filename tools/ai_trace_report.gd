@@ -290,6 +290,22 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			},
 			"notes": "Defenders should value blocking opponent control objectives even when they only have a survival objective.",
 		},
+		{
+			"id": "victory_point_guard_hold",
+			"title": "Victory point guard hold",
+			"difficulty": "normal",
+			"attacker": _unit("infantry", "axis", Vector2i(2, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(6, 0), data_loader), "visible": true},
+			],
+			"scenario": {
+				"victory": {
+					"axis": {"type": "survive", "by_turn": 12},
+					"allies": {"type": "capture", "target": [2, 0], "by_turn": 12},
+				},
+			},
+			"notes": "A survival defender already on the attacker's victory hex should not abandon it for a distant visible lure.",
+		},
 	]
 
 func _case_report(case_def: Dictionary, data_loader) -> String:
@@ -331,14 +347,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | objective | objective detail | lookahead | preservation |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -359,6 +375,7 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("primary_objective", 0.0)),
 			_score(c.get("secondary_objective", 0.0)),
 			_score(c.get("denial_objective", 0.0)),
+			_score(c.get("guard_objective", 0.0)),
 			_score(c.get("objective", 0.0)),
 			_objective_detail_text(c.get("objective_detail", {})),
 			_score(c.get("lookahead", 0.0)),
@@ -446,6 +463,14 @@ func _objective_detail_text(value: Variant) -> String:
 			_coord_text(denial.get("target", Vector2i.ZERO)),
 			int(denial.get("distance", 0)),
 			float(denial.get("weight", 0.0)),
+		])
+	var guard: Dictionary = detail.get("guard_info", {})
+	if guard.has("target"):
+		parts.append("guard:%s %s d%d w%.2f" % [
+			String(guard.get("type", "guard")),
+			_coord_text(guard.get("target", Vector2i.ZERO)),
+			int(guard.get("distance", 0)),
+			float(guard.get("weight", 0.0)),
 		])
 	if parts.is_empty():
 		return "none"

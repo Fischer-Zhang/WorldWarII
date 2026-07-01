@@ -303,6 +303,24 @@ func _init() -> void:
 		])
 	battle.scenario = {}
 
+	battle.scenario = {"victory": {
+		"axis": {"type": "survive", "by_turn": 12},
+		"allies": {"type": "capture", "target": [3, 0], "by_turn": 12},
+	}}
+	var guard_far: Dictionary = ai._objective_position_breakdown("axis", Vector2i(0, 0))
+	var guard_near: Dictionary = ai._objective_position_breakdown("axis", Vector2i(3, 0))
+	var guard_info: Dictionary = guard_near.get("guard_info", {})
+	if float(guard_near.get("guard", 0.0)) > float(guard_far.get("guard", 0.0)) \
+			and String(guard_info.get("type", "")) == "capture" \
+			and String(guard_info.get("faction", "")) == "allies":
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: survival guard should score staying near opponent capture objective; far=%s near=%s" % [
+			str(guard_far), str(guard_near),
+		])
+	battle.scenario = {}
+
 	# 6c) Unfinished secondary objectives should also pull AI movement, but completed ones stop scoring.
 	battle.scenario = {
 		"secondary_objectives": [{
@@ -914,6 +932,7 @@ func _init() -> void:
 			and components.has("primary_objective") \
 			and components.has("secondary_objective") \
 			and components.has("denial_objective") \
+			and components.has("guard_objective") \
 			and components.has("total") \
 			and top.has("fire_support_score") \
 			and top.has("breach_support_score") \
@@ -922,6 +941,7 @@ func _init() -> void:
 				float(components.get("primary_objective", 0.0))
 				+ float(components.get("secondary_objective", 0.0))
 				+ float(components.get("denial_objective", 0.0))
+				+ float(components.get("guard_objective", 0.0))
 			)) < 0.001 \
 			and primary_info.has("target") \
 			and secondary_info.get("key", "") == "trace_cache" \

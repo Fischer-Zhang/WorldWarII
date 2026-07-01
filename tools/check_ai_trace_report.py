@@ -25,6 +25,15 @@ def section_text(report: str, heading: str) -> str:
     return report[start:next_heading]
 
 
+def table_row(section: str, rank: int) -> list[str]:
+    prefix = f"| {rank} |"
+    for line in section.splitlines():
+        if line.startswith(prefix):
+            return [part.strip() for part in line.strip("|").split("|")]
+    require(False, f"missing rank {rank} trace row")
+    return []
+
+
 def main() -> None:
     report = REPORT_PATH.read_text(encoding="utf-8")
     section = section_text(report, "## Secondary objective pull")
@@ -42,16 +51,30 @@ def main() -> None:
 
     denial_section = section_text(report, "## Objective denial guard")
     require(
-        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | objective | objective detail | lookahead | preservation |"
+        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation |"
         in denial_section,
-        "AI trace table must expose denial objective scores",
+        "AI trace table must expose denial and guard objective scores",
     )
     denial_match = re.search(
-        r"\|\s*1\s*\|[^\n]*\|\s*([0-9.]+)\s*\|\s*[0-9.-]+\s*\|\s*`[^`]*denial:control_count",
+        r"\|\s*1\s*\|[^\n]*\|\s*([0-9.]+)\s*\|\s*[0-9.]+\s*\|\s*[0-9.-]+\s*\|\s*`[^`]*denial:control_count",
         denial_section,
     )
     require(denial_match is not None, "objective denial guard lacks top-ranked control_count detail")
     require(float(denial_match.group(1)) > 0.0, "objective denial guard must show positive denial score")
+
+    guard_section = section_text(report, "## Victory point guard hold")
+    require(
+        re.search(r"Plan: `(wait|overwatch)` to `2,0`, target `none`", guard_section) is not None,
+        "victory point guard should hold the defended capture hex",
+    )
+    guard_row = table_row(guard_section, 1)
+    require(guard_row[1] == "`2,0`", "victory point guard top row must remain on the capture hex")
+    require(guard_row[2] == "`none`", "victory point guard should not chase a target")
+    require(float(guard_row[20]) > 0.0, "victory point guard must show positive guard score")
+    require(
+        "guard:capture 2,0 d0" in guard_row[22],
+        "victory point guard lacks top-ranked guard capture detail",
+    )
     print("AI trace report checks passed")
 
 

@@ -29,6 +29,8 @@ const W_CAPTURE_OBJECTIVE := 1.8
 const W_CONTROL_OBJECTIVE := 1.45
 const W_HOLD_OBJECTIVE := 1.65
 const W_DENIAL_OBJECTIVE := 1.15
+const W_GUARD_OBJECTIVE := 2.8
+const GUARD_OBJECTIVE_RADIUS := 2
 const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
@@ -384,7 +386,9 @@ func _score_position_breakdown(
 	var primary_objective_term: float = float(objective_breakdown.get("primary", 0.0))
 	var secondary_objective_term: float = float(objective_breakdown.get("secondary", 0.0))
 	var denial_objective_term: float = float(objective_breakdown.get("denial", 0.0))
-	var objective_term: float = primary_objective_term + secondary_objective_term + denial_objective_term
+	var guard_objective_term: float = float(objective_breakdown.get("guard", 0.0))
+	var objective_term: float = primary_objective_term + secondary_objective_term \
+		+ denial_objective_term + guard_objective_term
 
 	# 1-ply lookahead: discount by the (anti gang-up) counter the player could
 	# deliver *after* we land on this hex. Only enabled on Hard difficulty.
@@ -422,6 +426,7 @@ func _score_position_breakdown(
 		"primary_objective": primary_objective_term,
 		"secondary_objective": secondary_objective_term,
 		"denial_objective": denial_objective_term,
+		"guard_objective": guard_objective_term,
 		"objective": objective_term,
 		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
@@ -1143,19 +1148,23 @@ func _objective_position_score(faction_id: String, pos: Vector2i) -> float:
 		float(breakdown.get("primary", 0.0))
 		+ float(breakdown.get("secondary", 0.0))
 		+ float(breakdown.get("denial", 0.0))
+		+ float(breakdown.get("guard", 0.0))
 	)
 
 func _objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
 	var primary := _primary_objective_position_breakdown(faction_id, pos)
 	var secondary := _secondary_objective_position_breakdown(faction_id, pos)
 	var denial := _denial_objective_position_breakdown(faction_id, pos)
+	var guard := _guard_objective_position_breakdown(faction_id, pos)
 	return {
 		"primary": float(primary.get("score", 0.0)),
 		"secondary": float(secondary.get("score", 0.0)),
 		"denial": float(denial.get("score", 0.0)),
+		"guard": float(guard.get("score", 0.0)),
 		"primary_info": primary,
 		"secondary_info": secondary,
 		"denial_info": denial,
+		"guard_info": guard,
 	}
 
 func _primary_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
@@ -1284,6 +1293,89 @@ func _control_count_denial_breakdown(objective: Dictionary, pos: Vector2i) -> Di
 		"targets": targets.size(),
 		"weight": weight,
 	}
+
+func _guard_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
+	var victory_cfg: Dictionary = battle.scenario.get("victory", {})
+	var own_objective: Dictionary = victory_cfg.get(faction_id, {})
+	if String(own_objective.get("type", "")) != "survive":
+		return {"score": 0.0}
+	var best := {"score": 0.0}
+	for other_faction in victory_cfg.keys():
+		var objective_faction := String(other_faction)
+		if objective_faction == faction_id:
+			continue
+		var objective: Dictionary = victory_cfg.get(objective_faction, {})
+		for target_info in _guard_targets_for_objective(objective):
+			var candidate: Dictionary = _guard_target_breakdown(target_info, pos)
+			if float(candidate.get("score", 0.0)) > float(best.get("score", 0.0)):
+				best = candidate
+				best["faction"] = objective_faction
+	if float(best.get("score", 0.0)) > 0.0:
+		return best
+	return _fallback_fortified_guard_breakdown(faction_id, pos)
+
+func _guard_targets_for_objective(objective: Dictionary) -> Array:
+	var out: Array = []
+	var objective_type := String(objective.get("type", ""))
+	match objective_type:
+		"capture", "hold_hex_turns":
+			var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(objective.get("target", []))
+			if target_coord_value != null:
+				out.append({
+					"target": target_coord_value,
+					"type": objective_type,
+					"weight": 1.0,
+				})
+		"control_count":
+			var targets: Array = objective.get("targets", [])
+			for target in targets:
+				var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(target)
+				if target_coord_value != null:
+					out.append({
+						"target": target_coord_value,
+						"type": objective_type,
+						"weight": 0.9,
+					})
+	return out
+
+func _guard_target_breakdown(target_info: Dictionary, pos: Vector2i) -> Dictionary:
+	var target_coord: Vector2i = target_info.get("target", Vector2i.ZERO)
+	var distance := HexCoord.distance(pos, target_coord)
+	var weight: float = W_GUARD_OBJECTIVE * float(target_info.get("weight", 1.0))
+	var score: float = weight / float(distance + 1)
+	if distance <= GUARD_OBJECTIVE_RADIUS:
+		score += weight * float(GUARD_OBJECTIVE_RADIUS + 1 - distance) / float(GUARD_OBJECTIVE_RADIUS + 1)
+	return {
+		"score": score,
+		"target": target_coord,
+		"distance": distance,
+		"type": String(target_info.get("type", "guard")),
+		"weight": weight,
+		"label": String(target_info.get("label", "")),
+	}
+
+func _fallback_fortified_guard_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
+	var best := {"score": 0.0}
+	for u in battle.units:
+		var unit = u
+		if unit == null or not unit.is_alive() or unit.faction_id != faction_id:
+			continue
+		var terrain_def: Dictionary = _get_terrain_def(battle.hex_map.terrain_at(unit.coord))
+		var dig_in := int(unit.dig_in_level)
+		var cover := int(terrain_def.get("defense", 0))
+		if dig_in <= 0 and cover < 2:
+			continue
+		var target_info := {
+			"target": unit.coord,
+			"type": "fortified",
+			"weight": 0.55 + float(dig_in) * 0.15 + float(max(0, cover)) * 0.08,
+			"label": String(unit.display_name),
+		}
+		var candidate: Dictionary = _guard_target_breakdown(target_info, pos)
+		if float(candidate.get("score", 0.0)) > float(best.get("score", 0.0)):
+			best = candidate
+			best["faction"] = faction_id
+	return best
 
 func _secondary_objective_position_score(faction_id: String, pos: Vector2i) -> float:
 	return float(_secondary_objective_position_breakdown(faction_id, pos).get("score", 0.0))
