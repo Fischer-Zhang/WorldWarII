@@ -389,7 +389,7 @@ def risk_notes(scenario: dict[str, Any], faction_summary: dict[str, Any], terrai
         low = min(first["power"], second["power"])
         high = max(first["power"], second["power"])
         if low > 0 and high / low >= 1.35:
-            notes.append("force power ratio above 1.35: check victory-clock compensation")
+            notes.append("force power ratio above 1.35: check objective or roster compensation")
         for fid, summary in faction_summary.items():
             enemy_armor = sum(other["armor"] for other_fid, other in faction_summary.items() if other_fid != fid)
             if enemy_armor >= 3 and summary["anti_armor"] == 0:
