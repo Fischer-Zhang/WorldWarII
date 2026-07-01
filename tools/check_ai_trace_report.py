@@ -39,6 +39,19 @@ def main() -> None:
     require(reward_pull > 0.0, "forward_cache reward pull must remain visible")
     require(future_value > 0.0, "forward_cache future value must remain visible")
     require(future_pull > 0.0, "forward_cache future pull must remain visible")
+
+    denial_section = section_text(report, "## Objective denial guard")
+    require(
+        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | objective | objective detail | lookahead | preservation |"
+        in denial_section,
+        "AI trace table must expose denial objective scores",
+    )
+    denial_match = re.search(
+        r"\|\s*1\s*\|[^\n]*\|\s*([0-9.]+)\s*\|\s*[0-9.-]+\s*\|\s*`[^`]*denial:control_count",
+        denial_section,
+    )
+    require(denial_match is not None, "objective denial guard lacks top-ranked control_count detail")
+    require(float(denial_match.group(1)) > 0.0, "objective denial guard must show positive denial score")
     print("AI trace report checks passed")
 
 

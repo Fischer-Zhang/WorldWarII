@@ -270,6 +270,26 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			},
 			"notes": "Primary, secondary and locked follow-up objective pressure should be split so reviewers can see which target shaped the move.",
 		},
+		{
+			"id": "objective_denial_guard",
+			"title": "Objective denial guard",
+			"difficulty": "normal",
+			"attacker": _unit("infantry", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(6, 0), data_loader), "visible": false},
+			],
+			"scenario": {
+				"victory": {
+					"axis": {"type": "survive", "by_turn": 12},
+					"allies": {
+						"type": "control_count",
+						"targets": [[2, 0], [4, 0], [2, 2]],
+						"required": 2,
+					},
+				},
+			},
+			"notes": "Defenders should value blocking opponent control objectives even when they only have a survival objective.",
+		},
 	]
 
 func _case_report(case_def: Dictionary, data_loader) -> String:
@@ -311,14 +331,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | objective | objective detail | lookahead | preservation |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | objective | objective detail | lookahead | preservation |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -338,6 +358,7 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("role", 0.0)),
 			_score(c.get("primary_objective", 0.0)),
 			_score(c.get("secondary_objective", 0.0)),
+			_score(c.get("denial_objective", 0.0)),
 			_score(c.get("objective", 0.0)),
 			_objective_detail_text(c.get("objective_detail", {})),
 			_score(c.get("lookahead", 0.0)),
@@ -417,6 +438,14 @@ func _objective_detail_text(value: Variant) -> String:
 			float(secondary.get("reward_pull", 0.0)),
 			float(secondary.get("future_value", 0.0)),
 			float(secondary.get("future_pull", 0.0)),
+		])
+	var denial: Dictionary = detail.get("denial_info", {})
+	if denial.has("target"):
+		parts.append("denial:%s %s d%d w%.2f" % [
+			String(denial.get("type", "objective")),
+			_coord_text(denial.get("target", Vector2i.ZERO)),
+			int(denial.get("distance", 0)),
+			float(denial.get("weight", 0.0)),
 		])
 	if parts.is_empty():
 		return "none"

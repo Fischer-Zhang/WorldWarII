@@ -28,6 +28,7 @@ const W_DIG_IN_BREAK := 2.0
 const W_CAPTURE_OBJECTIVE := 1.8
 const W_CONTROL_OBJECTIVE := 1.45
 const W_HOLD_OBJECTIVE := 1.65
+const W_DENIAL_OBJECTIVE := 1.15
 const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
@@ -382,7 +383,8 @@ func _score_position_breakdown(
 	var objective_breakdown := _objective_position_breakdown(unit.faction_id, pos)
 	var primary_objective_term: float = float(objective_breakdown.get("primary", 0.0))
 	var secondary_objective_term: float = float(objective_breakdown.get("secondary", 0.0))
-	var objective_term: float = primary_objective_term + secondary_objective_term
+	var denial_objective_term: float = float(objective_breakdown.get("denial", 0.0))
+	var objective_term: float = primary_objective_term + secondary_objective_term + denial_objective_term
 
 	# 1-ply lookahead: discount by the (anti gang-up) counter the player could
 	# deliver *after* we land on this hex. Only enabled on Hard difficulty.
@@ -419,6 +421,7 @@ func _score_position_breakdown(
 		"role": role_term,
 		"primary_objective": primary_objective_term,
 		"secondary_objective": secondary_objective_term,
+		"denial_objective": denial_objective_term,
 		"objective": objective_term,
 		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
@@ -1135,16 +1138,24 @@ func _artillery_standoff_score(pos: Vector2i, known: Array) -> float:
 	return penalty
 
 func _objective_position_score(faction_id: String, pos: Vector2i) -> float:
-	return float(_primary_objective_position_breakdown(faction_id, pos).get("score", 0.0))
+	var breakdown := _objective_position_breakdown(faction_id, pos)
+	return (
+		float(breakdown.get("primary", 0.0))
+		+ float(breakdown.get("secondary", 0.0))
+		+ float(breakdown.get("denial", 0.0))
+	)
 
 func _objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
 	var primary := _primary_objective_position_breakdown(faction_id, pos)
 	var secondary := _secondary_objective_position_breakdown(faction_id, pos)
+	var denial := _denial_objective_position_breakdown(faction_id, pos)
 	return {
 		"primary": float(primary.get("score", 0.0)),
 		"secondary": float(secondary.get("score", 0.0)),
+		"denial": float(denial.get("score", 0.0)),
 		"primary_info": primary,
 		"secondary_info": secondary,
+		"denial_info": denial,
 	}
 
 func _primary_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
@@ -1199,6 +1210,73 @@ func _control_count_primary_breakdown(objective: Dictionary, pos: Vector2i) -> D
 	var weight: float = W_CONTROL_OBJECTIVE + 0.15 * float(required - 1)
 	return {
 		"score": -float(best_distance) * weight,
+		"target": best_target,
+		"distance": best_distance,
+		"type": "control_count",
+		"required": required,
+		"targets": targets.size(),
+		"weight": weight,
+	}
+
+func _denial_objective_position_breakdown(faction_id: String, pos: Vector2i) -> Dictionary:
+	var victory_cfg: Dictionary = battle.scenario.get("victory", {})
+	var best := {"score": 0.0}
+	for other_faction in victory_cfg.keys():
+		var objective_faction := String(other_faction)
+		if objective_faction == faction_id:
+			continue
+		var objective: Dictionary = victory_cfg.get(objective_faction, {})
+		var candidate: Dictionary = _denial_for_objective(objective, pos)
+		if float(candidate.get("score", 0.0)) > float(best.get("score", 0.0)):
+			best = candidate
+			best["faction"] = objective_faction
+	return best
+
+func _denial_for_objective(objective: Dictionary, pos: Vector2i) -> Dictionary:
+	match String(objective.get("type", "")):
+		"capture":
+			return _single_denial_target_breakdown(objective, pos, "capture")
+		"hold_hex_turns":
+			return _single_denial_target_breakdown(objective, pos, "hold_hex_turns")
+		"control_count":
+			return _control_count_denial_breakdown(objective, pos)
+	return {"score": 0.0}
+
+func _single_denial_target_breakdown(objective: Dictionary, pos: Vector2i, objective_type: String) -> Dictionary:
+	var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(objective.get("target", []))
+	if target_coord_value == null:
+		return {"score": 0.0}
+	var target_coord: Vector2i = target_coord_value
+	var distance := HexCoord.distance(pos, target_coord)
+	return {
+		"score": W_DENIAL_OBJECTIVE / float(distance + 1),
+		"target": target_coord,
+		"distance": distance,
+		"type": objective_type,
+		"weight": W_DENIAL_OBJECTIVE,
+	}
+
+func _control_count_denial_breakdown(objective: Dictionary, pos: Vector2i) -> Dictionary:
+	var targets: Array = objective.get("targets", [])
+	if targets.is_empty():
+		return {"score": 0.0}
+	var required: int = max(1, int(objective.get("required", targets.size())))
+	var best_distance := 9999
+	var best_target := Vector2i.ZERO
+	for target in targets:
+		var target_coord_value: Variant = SecondaryObjectiveRules.coord_from_offset_array(target)
+		if target_coord_value == null:
+			continue
+		var target_coord: Vector2i = target_coord_value
+		var distance := HexCoord.distance(pos, target_coord)
+		if distance < best_distance:
+			best_distance = distance
+			best_target = target_coord
+	if best_distance == 9999:
+		return {"score": 0.0}
+	var weight := W_DENIAL_OBJECTIVE + 0.1 * float(required - 1)
+	return {
+		"score": weight / float(best_distance + 1),
 		"target": best_target,
 		"distance": best_distance,
 		"type": "control_count",

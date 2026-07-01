@@ -279,7 +279,31 @@ func _init() -> void:
 		])
 	battle.scenario = {}
 
-	# 6b) Unfinished secondary objectives should also pull AI movement, but completed ones stop scoring.
+	# 6b) Opposing primary objectives should pull defenders toward denial positions.
+	battle.scenario = {"victory": {
+		"axis": {"type": "survive", "by_turn": 12},
+		"allies": {
+			"type": "control_count",
+			"targets": [[3, 0], [7, 0], [3, 2]],
+			"required": 2,
+		},
+	}}
+	var denial_far: Dictionary = ai._objective_position_breakdown("axis", Vector2i(0, 0))
+	var denial_near: Dictionary = ai._objective_position_breakdown("axis", Vector2i(3, 0))
+	var denial_info: Dictionary = denial_near.get("denial_info", {})
+	if float(denial_near.get("denial", 0.0)) > float(denial_far.get("denial", 0.0)) \
+			and String(denial_info.get("type", "")) == "control_count" \
+			and String(denial_info.get("faction", "")) == "allies" \
+			and int(denial_info.get("required", 0)) == 2:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: control_count denial should score toward opponent objective; far=%s near=%s" % [
+			str(denial_far), str(denial_near),
+		])
+	battle.scenario = {}
+
+	# 6c) Unfinished secondary objectives should also pull AI movement, but completed ones stop scoring.
 	battle.scenario = {
 		"secondary_objectives": [{
 			"id": "forward_cache",
@@ -317,7 +341,7 @@ func _init() -> void:
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
-	# 6c) Prerequisite objectives should inherit a small future pull from valuable locked follow-ups.
+	# 6d) Prerequisite objectives should inherit a small future pull from valuable locked follow-ups.
 	battle.scenario = {
 		"secondary_objectives": [
 			{
@@ -369,7 +393,7 @@ func _init() -> void:
 	battle.scenario = {}
 	battle.captured_secondary_objectives.clear()
 
-	# 6d) Tactical secondary rewards should increase objective pull without bypassing completion guards.
+	# 6e) Tactical secondary rewards should increase objective pull without bypassing completion guards.
 	battle.scenario = {
 		"secondary_objectives": [{
 			"id": "xp_cache",
@@ -829,6 +853,7 @@ func _init() -> void:
 			and components.has("attack") \
 			and components.has("primary_objective") \
 			and components.has("secondary_objective") \
+			and components.has("denial_objective") \
 			and components.has("total") \
 			and top.has("fire_support_score") \
 			and top.has("breach_support_score") \
@@ -836,6 +861,7 @@ func _init() -> void:
 			and abs(float(components.get("objective", 0.0)) - (
 				float(components.get("primary_objective", 0.0))
 				+ float(components.get("secondary_objective", 0.0))
+				+ float(components.get("denial_objective", 0.0))
 			)) < 0.001 \
 			and primary_info.has("target") \
 			and secondary_info.get("key", "") == "trace_cache" \
