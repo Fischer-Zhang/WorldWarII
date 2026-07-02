@@ -78,6 +78,8 @@ expectations include:
   focus-fire pull toward targets already engaged this turn (geometric scale, no
   hard cap) and a synergy pull toward targets carrying an unspent friendly
   fire-support or breach mark
+- parking on a narrow corridor takes a scale-based blocking penalty when unacted
+  allies still need to advance through it
 - the net-exchange lookahead sums concentrated player retaliation (anti gang-up),
   credits discounted return fire (never flipping the term positive), adds a
   kill-zone penalty when the sum is lethal, and runs at every difficulty

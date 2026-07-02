@@ -117,6 +117,7 @@ class StubUnit:
 	var suppression: int = 0
 	var morale: int = 10
 	var morale_max: int = 10
+	var has_moved: bool = false
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
 	func _init(_type_id: String, _faction: String, _coord: Vector2i, _hp: int) -> void:
@@ -1278,6 +1279,45 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: mark synergy expected marked target pull; bundle %s breach %.2f unmarked %.2f enemy %.2f" % [
 			str(mark_bundle), breach_pull, unmarked_pull, enemy_mark_pull,
+		])
+
+	# 31) Corridor blocking: parking on a chokepoint with an unacted ally still
+	# behind takes a scale-based penalty; the same hex is free once the ally
+	# has already moved (or when nobody needs through).
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var block_ai := AIController.new(battle, "aggressive", "normal")
+	block_ai._data_loader = ai._data_loader
+	var block_unit := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var block_ally := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var block_enemy := make_unit("infantry", "allies", Vector2i(5, 0), 10)
+	battle.units = [block_unit, block_ally, block_enemy]
+	for corridor_coord in [Vector2i(3, -1), Vector2i(2, -1), Vector2i(1, 1), Vector2i(2, 1)]:
+		battle.hex_map.terrain_overrides[corridor_coord] = "river"
+	var block_known := [{"coord": block_enemy.coord, "visible": true, "unit": block_enemy}]
+	var block_def: Dictionary = block_ai._get_unit_def("infantry")
+	var blocked: float = float(block_ai._score_position_breakdown(
+		block_unit, Vector2i(2, 0), block_known, [block_enemy], battle.hex_map, block_def, {block_enemy.coord: true}
+	).get("blocking", 0.0))
+	block_ally.has_moved = true
+	var freed: float = float(block_ai._score_position_breakdown(
+		block_unit, Vector2i(2, 0), block_known, [block_enemy], battle.hex_map, block_def, {block_enemy.coord: true}
+	).get("blocking", 0.0))
+	block_ally.has_moved = false
+	var open_hex: float = float(block_ai._score_position_breakdown(
+		block_unit, Vector2i(-2, 0), block_known, [block_enemy], battle.hex_map, block_def, {block_enemy.coord: true}
+	).get("blocking", 0.0))
+	if blocked < 0.0 and freed == 0.0 and open_hex == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: corridor blocking expected blocked < 0, freed == 0, open == 0; blocked %.2f freed %.2f open %.2f" % [
+			blocked, freed, open_hex,
 		])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])

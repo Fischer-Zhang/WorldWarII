@@ -69,6 +69,9 @@ const GANG_UP_FALLOFF := 0.5
 const RETURN_FIRE_CREDIT := 0.35
 # Encirclement: penalty scale for hexes whose escape routes are under threat.
 const W_ENCIRCLEMENT := 0.5
+# Corridor blocking: penalty scale for parking on a chokepoint while unacted
+# allies still need to come through (friendly occupancy blocks pathing).
+const W_SELF_BLOCK := 1.5
 # Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
 const MISTAKE_JITTER_SCALE := 0.6
 
@@ -127,11 +130,15 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 # so this resets naturally. battle.gd reports each executed plan so units
 # still waiting to plan feel the focus-fire pull toward engaged targets.
 var _turn_engagements: Dictionary = {}  # enemy instance id -> engagement count
+var _turn_claims: Dictionary = {}  # executed destination hex -> true (diagnostics)
 
 func notify_plan_executed(_unit, plan: Dictionary) -> void:
 	# Called by battle.gd after each AI unit finishes acting. Intent is
 	# recorded even if execution degraded (a dead target drops out of
 	# visible_enemies, so a phantom engagement cannot attract anyone).
+	var move_to = plan.get("move_to")
+	if move_to is Vector2i:
+		_turn_claims[move_to] = true
 	var target = null
 	match String(plan.get("action", "")):
 		"attack":
@@ -398,11 +405,7 @@ func _score_position_breakdown(
 	visible_hexes: Dictionary,
 ) -> Dictionary:
 	# Distance term: use the best known position (memory or current).
-	var nearest := 9999
-	for k in known:
-		var d: int = HexCoord.distance(pos, k["coord"])
-		if d < nearest:
-			nearest = d
+	var nearest: int = _nearest_known_distance(pos, known)
 	var dist_term: float = -float(nearest) * W_OBJECTIVE
 
 	# Attack + coordination terms: only currently-visible enemies (can't shoot
@@ -466,32 +469,45 @@ func _score_position_breakdown(
 	# intact). Always 0 for Normal/Hard, leaving their scores bit-identical.
 	var mistake_term: float = _mistake_jitter(unit, pos)
 
+	# Exit census, shared by encirclement and corridor blocking: an exit is a
+	# neighbor that is on-map and terrain-passable (occupancy fluctuates
+	# per-turn and is deliberately ignored).
+	var open_exits := 0
+	var threatened_exits := 0
+	for n in HexCoord.neighbors(pos):
+		var n_terrain: String = hex_map.terrain_at(n)
+		if n_terrain == "":
+			continue  # off-map
+		var bridged: bool = hex_map.has_method("is_bridged") and hex_map.is_bridged(n)
+		if not bridged and hex_map.has_method("terrain_impassable") \
+				and hex_map.terrain_impassable(n_terrain):
+			continue
+		open_exits += 1
+		if not _threat_at(n).is_empty():
+			threatened_exits += 1
+
 	# Encirclement: a hex whose exits are themselves under threat is a pocket
 	# in the making. Scales with the fraction of threatened exits and rises
 	# with preservation need, so wounded/veteran units fear pockets harder.
 	var encirclement_term := 0.0
-	if not visible_enemies.is_empty():
-		var open_exits := 0
-		var threatened_exits := 0
-		for n in HexCoord.neighbors(pos):
-			var n_terrain: String = hex_map.terrain_at(n)
-			if n_terrain == "":
-				continue  # off-map
-			var bridged: bool = hex_map.has_method("is_bridged") and hex_map.is_bridged(n)
-			if not bridged and hex_map.has_method("terrain_impassable") \
-					and hex_map.terrain_impassable(n_terrain):
-				continue
-			open_exits += 1
-			if not _threat_at(n).is_empty():
-				threatened_exits += 1
-		if threatened_exits > 0:
-			encirclement_term = -W_ENCIRCLEMENT \
-				* (float(threatened_exits) / float(max(1, open_exits))) \
-				* (1.0 + _preservation_need(unit, atk_def))
+	if threatened_exits > 0:
+		encirclement_term = -W_ENCIRCLEMENT \
+			* (float(threatened_exits) / float(max(1, open_exits))) \
+			* (1.0 + _preservation_need(unit, atk_def))
+
+	# Corridor blocking: parking on a chokepoint strands the unacted allies
+	# that still have to come through it (friendly occupancy blocks pathing).
+	# Scale-based: grows as the corridor narrows and as more allies queue up.
+	var blocking_term := 0.0
+	if _coordination_w > 0.0 and open_exits < 3 and not known.is_empty():
+		var behind: int = _unacted_allies_behind(unit, pos, known)
+		if behind > 0:
+			blocking_term = -W_SELF_BLOCK * _coordination_w * float(3 - open_exits) \
+				* min(1.0, 0.5 * float(behind))
 
 	var raw_total: float = dist_term + attack_term + coordination_term + exposure_term \
 		+ terrain_term + role_term + objective_term + lookahead_term + preservation_term \
-		+ encirclement_term + mistake_term
+		+ encirclement_term + blocking_term + mistake_term
 	var total := _apply_personality(raw_total, attack_term, exposure_term)
 	return {
 		"distance": dist_term,
@@ -515,6 +531,7 @@ func _score_position_breakdown(
 		"lookahead_detail": lookahead_detail,
 		"preservation": preservation_term,
 		"encirclement": encirclement_term,
+		"blocking": blocking_term,
 		"mistake": mistake_term,
 		"raw_total": raw_total,
 		"total": total,
@@ -574,6 +591,35 @@ func _apply_personality(total: float, attack_term: float, exposure_term: float) 
 			return total - 0.5
 		_:
 			return total
+
+func _nearest_known_distance(pos: Vector2i, known: Array) -> int:
+	var nearest := 9999
+	for k in known:
+		var d: int = HexCoord.distance(pos, k["coord"])
+		if d < nearest:
+			nearest = d
+	return nearest
+
+func _unacted_allies_behind(unit, pos: Vector2i, known: Array) -> int:
+	# Allies that have not acted yet this turn and still need to come through:
+	# close enough that our hex plausibly sits on their approach (within twice
+	# their move) and farther from the nearest known enemy than the candidate.
+	var pos_distance: int = _nearest_known_distance(pos, known)
+	var behind := 0
+	for u in battle.units:
+		var ally = u
+		if ally == unit or ally.faction_id != unit.faction_id or not ally.is_alive():
+			continue
+		var moved = ally.get("has_moved")
+		if moved == null or bool(moved):
+			continue
+		var ally_def: Dictionary = _get_unit_def(ally.type_id)
+		var ally_move := int(ally_def.get("move", 0))
+		if HexCoord.distance(ally.coord, pos) > ally_move * 2:
+			continue
+		if _nearest_known_distance(ally.coord, known) > pos_distance:
+			behind += 1
+	return behind
 
 func _preservation_need(unit, atk_def: Dictionary) -> float:
 	# 0 while healthy; rises as HP drops below PRESERVE_HP_THRESHOLD and is

@@ -52,6 +52,7 @@ class StubUnit:
 	var general_id: String = ""
 	var dig_in_level: int = 0
 	var suppression: int = 0
+	var has_moved: bool = false
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
 
@@ -389,14 +390,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement | coordination |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement | coordination | blocking |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s | %s | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -424,6 +425,7 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("preservation", 0.0)),
 			_score(c.get("encirclement", 0.0)),
 			_score(c.get("coordination", 0.0)),
+			_score(c.get("blocking", 0.0)),
 		])
 	return "\n".join(lines)
 
