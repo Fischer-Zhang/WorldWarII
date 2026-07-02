@@ -31,6 +31,7 @@ The map has 32 regions. Each region carries these settings:
 | `training_level` | 0–**2**. Newly recruited units in the region start with `+training_level` XP. |
 | `port` / `supply_source` | Supply-network nodes (see Supply). |
 | `neighbors` / `rail_neighbors` | Adjacency for movement/attack, and rail links for supply. |
+| `region_traits` | Region identity hooks such as industrial hubs, fortress lines, rail junctions, airfields, naval bases, jungle fronts and oilfields. These add deterministic tactical pressure when a battle is fought in the region. |
 
 ## Per-turn player actions (own regions only)
 
@@ -105,6 +106,10 @@ its terrain, but replaces factions, rosters and victory:
   **surviving 12 turns** (`DEFENDER_SURVIVE_TURNS`).
 - Your garrison deploys with its veteran XP/rank and its assigned generals; the
   defending force is generated from strength and given free national generals.
+- The target region's `region_traits` are folded into the battle context. Traits
+  can raise generated defender strength, add local support units, or grant
+  defender XP. The briefing and conquest detail panel show the active trait
+  effects before deployment.
 - After the battle, survivors carry their XP/rank back into the garrison record,
   and any secondary-objective strategic effects are applied to the map.
 

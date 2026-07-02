@@ -191,7 +191,7 @@ Conquest is a strategic wrapper around the same tactical battle loop.
 
 Files:
 
-- `data/conquest_map.json`: countries, regions, owners, production, graph, supply sources, ports and rail links.
+- `data/conquest_map.json`: countries, regions, owners, production, graph, supply sources, ports, rail links and region traits.
 - `ConquestCatalog`: region -> scenario mapping and country -> side mapping.
 - `ConquestManager`: ownership, transfer, region development, end-turn and battle-result resolution.
 - `ConquestSupply`: deterministic supply connectivity and reinforcement scaling.
@@ -218,6 +218,13 @@ strategic and generated tactical defense strength, logistics upgrades ports or
 supply sources, and training academies raise starting XP for newly recruited
 garrison units. The conquest scene lists the available actions but does not
 duplicate their cost, ownership, training or cap rules.
+
+Region `region_traits` in `data/conquest_map.json` give operational areas
+data-authored tactical identity without changing combat formulas. `ConquestManager`
+normalizes traits from map data, builds deterministic battle-context modifiers
+such as generated defender strength, local support units and defender XP, and
+the conquest UI passes those modifiers through `GameState.pending_conquest_battle`
+for `ConquestBattleSetup` to apply.
 
 Before launching a player attack, the source region can also spend local strength
 through `ConquestManager.prepare_attack` on one-time preparation actions for the

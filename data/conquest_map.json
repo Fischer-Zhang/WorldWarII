@@ -115,6 +115,7 @@
       "production": 5,
       "supply_source": true,
       "port": true,
+      "region_traits": ["industrial_hub", "naval_base"],
       "neighbors": ["atlantic", "pacific"]
     },
     {
@@ -126,6 +127,7 @@
       "y": 1,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["north_america", "britain", "northern_france", "southern_france", "maghreb"]
     },
     {
@@ -138,6 +140,7 @@
       "production": 4,
       "supply_source": true,
       "port": true,
+      "region_traits": ["fortress_line", "naval_base", "airfield_network"],
       "neighbors": ["atlantic", "low_countries", "northern_france", "north_sea"]
     },
     {
@@ -149,6 +152,7 @@
       "y": 0,
       "production": 3,
       "port": true,
+      "region_traits": ["rail_junction", "fortress_line"],
       "rail_neighbors": ["northern_france", "germany"],
       "neighbors": ["britain", "northern_france", "germany", "north_sea"]
     },
@@ -161,6 +165,7 @@
       "y": 1,
       "production": 3,
       "port": true,
+      "region_traits": ["rail_junction", "fortress_line"],
       "rail_neighbors": ["low_countries", "southern_france", "germany"],
       "neighbors": ["atlantic", "britain", "low_countries", "southern_france", "germany"]
     },
@@ -173,6 +178,7 @@
       "y": 2,
       "production": 2,
       "port": true,
+      "region_traits": ["rail_junction", "naval_base"],
       "rail_neighbors": ["northern_france", "germany", "italy"],
       "neighbors": ["atlantic", "northern_france", "germany", "italy", "maghreb"]
     },
@@ -185,6 +191,7 @@
       "y": 1,
       "production": 6,
       "supply_source": true,
+      "region_traits": ["industrial_hub", "rail_junction", "fortress_line"],
       "rail_neighbors": ["low_countries", "northern_france", "southern_france", "poland", "ukraine", "italy"],
       "neighbors": ["low_countries", "northern_france", "southern_france", "north_sea", "poland", "ukraine", "italy"]
     },
@@ -197,6 +204,7 @@
       "y": 0,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["britain", "low_countries", "germany", "poland", "leningrad"]
     },
     {
@@ -207,6 +215,7 @@
       "x": 4,
       "y": 1,
       "production": 3,
+      "region_traits": ["rail_junction", "fortress_line"],
       "rail_neighbors": ["germany", "leningrad", "moscow", "ukraine"],
       "neighbors": ["north_sea", "germany", "leningrad", "moscow", "ukraine"]
     },
@@ -218,6 +227,7 @@
       "x": 4,
       "y": 2,
       "production": 4,
+      "region_traits": ["industrial_hub", "rail_junction"],
       "rail_neighbors": ["germany", "poland", "moscow", "volga", "balkans"],
       "neighbors": ["germany", "poland", "moscow", "volga", "balkans", "middle_east"]
     },
@@ -230,6 +240,7 @@
       "y": 2,
       "production": 3,
       "port": true,
+      "region_traits": ["naval_base", "rail_junction"],
       "rail_neighbors": ["southern_france", "germany", "balkans"],
       "neighbors": ["southern_france", "germany", "balkans", "mediterranean", "maghreb"]
     },
@@ -241,6 +252,7 @@
       "x": 4,
       "y": 3,
       "production": 2,
+      "region_traits": ["rail_junction", "fortress_line"],
       "rail_neighbors": ["italy", "ukraine"],
       "neighbors": ["italy", "ukraine", "mediterranean", "middle_east"]
     },
@@ -253,6 +265,7 @@
       "y": 0,
       "production": 3,
       "port": true,
+      "region_traits": ["fortress_line", "rail_junction", "naval_base"],
       "rail_neighbors": ["poland", "moscow", "siberia"],
       "neighbors": ["north_sea", "poland", "moscow", "siberia"]
     },
@@ -265,6 +278,7 @@
       "y": 1,
       "production": 6,
       "supply_source": true,
+      "region_traits": ["industrial_hub", "rail_junction", "fortress_line"],
       "rail_neighbors": ["poland", "ukraine", "leningrad", "volga", "siberia", "central_asia"],
       "neighbors": ["poland", "ukraine", "leningrad", "volga", "siberia", "central_asia"]
     },
@@ -276,6 +290,7 @@
       "x": 5,
       "y": 2,
       "production": 4,
+      "region_traits": ["industrial_hub", "rail_junction"],
       "rail_neighbors": ["ukraine", "moscow", "central_asia"],
       "neighbors": ["ukraine", "moscow", "central_asia", "middle_east"]
     },
@@ -288,6 +303,7 @@
       "y": 0,
       "production": 3,
       "supply_source": true,
+      "region_traits": ["industrial_hub", "rail_junction"],
       "rail_neighbors": ["leningrad", "moscow", "central_asia", "manchuria"],
       "neighbors": ["leningrad", "moscow", "central_asia", "manchuria"]
     },
@@ -299,6 +315,7 @@
       "x": 6,
       "y": 2,
       "production": 3,
+      "region_traits": ["rail_junction", "airfield_network"],
       "rail_neighbors": ["moscow", "volga", "siberia", "india", "north_china"],
       "neighbors": ["moscow", "volga", "siberia", "middle_east", "india", "north_china"]
     },
@@ -311,6 +328,7 @@
       "y": 3,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["atlantic", "southern_france", "italy", "mediterranean", "egypt"]
     },
     {
@@ -322,6 +340,7 @@
       "y": 3,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base"],
       "neighbors": ["italy", "balkans", "maghreb", "egypt", "middle_east"]
     },
     {
@@ -333,6 +352,7 @@
       "y": 4,
       "production": 3,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["maghreb", "mediterranean", "middle_east", "india"]
     },
     {
@@ -344,6 +364,7 @@
       "y": 3,
       "production": 4,
       "port": true,
+      "region_traits": ["oilfield", "naval_base", "airfield_network"],
       "neighbors": ["ukraine", "balkans", "volga", "central_asia", "mediterranean", "egypt", "india"]
     },
     {
@@ -356,6 +377,7 @@
       "production": 4,
       "supply_source": true,
       "port": true,
+      "region_traits": ["industrial_hub", "rail_junction", "jungle_front"],
       "rail_neighbors": ["central_asia", "north_china", "south_china"],
       "neighbors": ["central_asia", "middle_east", "egypt", "north_china", "south_china", "southeast_asia"]
     },
@@ -367,6 +389,7 @@
       "x": 7,
       "y": 2,
       "production": 3,
+      "region_traits": ["rail_junction", "fortress_line"],
       "rail_neighbors": ["central_asia", "india", "central_china", "manchuria"],
       "neighbors": ["central_asia", "india", "central_china", "manchuria"]
     },
@@ -379,6 +402,7 @@
       "y": 3,
       "production": 3,
       "supply_source": true,
+      "region_traits": ["industrial_hub", "rail_junction"],
       "rail_neighbors": ["north_china", "south_china", "manchuria"],
       "neighbors": ["north_china", "south_china", "manchuria"]
     },
@@ -391,6 +415,7 @@
       "y": 4,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "rail_junction", "jungle_front"],
       "rail_neighbors": ["india", "central_china"],
       "neighbors": ["india", "central_china", "southeast_asia"]
     },
@@ -402,6 +427,7 @@
       "x": 8,
       "y": 2,
       "production": 4,
+      "region_traits": ["industrial_hub", "rail_junction"],
       "rail_neighbors": ["siberia", "north_china", "central_china", "japan_home"],
       "neighbors": ["siberia", "north_china", "central_china", "japan_home"]
     },
@@ -415,6 +441,7 @@
       "production": 5,
       "supply_source": true,
       "port": true,
+      "region_traits": ["industrial_hub", "rail_junction", "fortress_line", "naval_base", "airfield_network"],
       "rail_neighbors": ["manchuria"],
       "neighbors": ["manchuria", "southeast_asia", "central_pacific", "north_pacific"]
     },
@@ -427,6 +454,7 @@
       "y": 4,
       "production": 4,
       "port": true,
+      "region_traits": ["jungle_front", "naval_base", "oilfield"],
       "neighbors": ["india", "south_china", "japan_home", "central_pacific", "south_pacific"]
     },
     {
@@ -438,6 +466,7 @@
       "y": 1,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["japan_home", "central_pacific", "pacific"]
     },
     {
@@ -449,6 +478,7 @@
       "y": 3,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["japan_home", "southeast_asia", "north_pacific", "south_pacific", "pacific"]
     },
     {
@@ -460,6 +490,7 @@
       "y": 4,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "jungle_front"],
       "neighbors": ["southeast_asia", "central_pacific"]
     },
     {
@@ -471,6 +502,7 @@
       "y": 2,
       "production": 2,
       "port": true,
+      "region_traits": ["naval_base", "airfield_network"],
       "neighbors": ["north_america", "north_pacific", "central_pacific"]
     }
   ]
