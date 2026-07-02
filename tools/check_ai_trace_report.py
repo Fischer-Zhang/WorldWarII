@@ -62,6 +62,13 @@ def main() -> None:
     require(denial_match is not None, "objective denial guard lacks top-ranked control_count detail")
     require(float(denial_match.group(1)) > 0.0, "objective denial guard must show positive denial score")
 
+    exchange_section = section_text(report, "## Normal lookahead exchange")
+    exchange_row = table_row(exchange_section, 1)
+    require(
+        float(exchange_row[23]) < 0.0,
+        "normal difficulty must expose a net-exchange lookahead penalty",
+    )
+
     guard_section = section_text(report, "## Victory point guard hold")
     require(
         re.search(r"Plan: `(wait|overwatch)` to `2,0`, target `none`", guard_section) is not None,

@@ -74,10 +74,12 @@ expectations include:
 - exposure comes from a per-plan threat map built on true pathing reach of visible
   enemies (ZoC, terrain, occupancy), and hexes whose exits are threatened take a
   scale-based encirclement penalty that rises with preservation need
-- Hard's lookahead sums concentrated player retaliation (anti gang-up), not just
-  the single worst attacker, and adds a kill-zone penalty when the sum is lethal
-- difficulty shapes four axes (trade aggression, lookahead, preservation, Easy
-  deterministic mistake budget); keep any Easy "mistakes" seed-free and reproducible
+- the net-exchange lookahead sums concentrated player retaliation (anti gang-up),
+  credits discounted return fire (never flipping the term positive), adds a
+  kill-zone penalty when the sum is lethal, and runs at every difficulty
+- difficulty shapes four axes (trade aggression, lookahead weight, preservation,
+  Easy deterministic mistake budget); keep any Easy "mistakes" seed-free and
+  reproducible
 
 For balance or scenario work:
 

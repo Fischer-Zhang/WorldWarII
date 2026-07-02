@@ -182,7 +182,17 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"enemies": [
 				{"unit": _unit("medium_tank", "allies", Vector2i(0, 2), data_loader), "visible": true},
 			],
-			"notes": "Hard AI should expose the one-ply retaliation penalty in candidate components.",
+			"notes": "The net-exchange retaliation discount runs at all difficulties; Hard weights it most heavily.",
+		},
+		{
+			"id": "normal_lookahead_exchange",
+			"title": "Normal lookahead exchange",
+			"difficulty": "normal",
+			"attacker": _unit_with_hp("at_gun", "axis", Vector2i(0, 0), 4, data_loader),
+			"enemies": [
+				{"unit": _unit("medium_tank", "allies", Vector2i(0, 2), data_loader), "visible": true},
+			],
+			"notes": "A slow AT gun caught inside a tank's reach shows the retaliation discount on every candidate at Normal weight.",
 		},
 		{
 			"id": "wounded_veteran_withdraw",

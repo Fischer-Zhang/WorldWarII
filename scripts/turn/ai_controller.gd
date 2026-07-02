@@ -13,13 +13,12 @@ const SecondaryObjectiveRules := preload("res://scripts/scenario/secondary_objec
 # Heuristic AI: scores every reachable hex for each unit, picks the best,
 # moves there, attacks if a target is available.
 #
-# Difficulty profiles tune the heuristic weights and enable an optional
-# 1-ply lookahead that discounts a candidate hex by the worst counter-
-# attack the player could deliver next turn.
+# Difficulty profiles tune the heuristic weights, including how heavily the
+# net-exchange lookahead (retaliation the player could deliver next turn,
+# offset by discounted return fire) discounts a candidate hex.
 
 const W_OBJECTIVE := 1.0
 const W_TERRAIN := 0.3
-const W_LOOKAHEAD := 1.0
 const W_SCOUT := 0.45
 const W_ARTILLERY_STANDOFF := 2.5
 const W_ARMOR_STANDOFF := 2.0
@@ -59,6 +58,10 @@ const PRESERVE_HP_THRESHOLD := 0.5  # below half HP the safety pull starts to ri
 const PRESERVE_RANK_WEIGHT := 0.35  # each veteran rank amplifies how hard we pull back
 # Anti gang-up lookahead: concentrated fire is summed but discounted geometrically.
 const GANG_UP_FALLOFF := 0.5
+# Return fire is credited at a discount — the unit may be dead, suppressed or
+# forced to retreat before it answers, so a promised counter is worth less
+# than damage already on the board.
+const RETURN_FIRE_CREDIT := 0.35
 # Encirclement: penalty scale for hexes whose escape routes are under threat.
 const W_ENCIRCLEMENT := 0.5
 # Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
@@ -66,13 +69,15 @@ const MISTAKE_JITTER_SCALE := 0.6
 
 # Difficulty is shaped on four axes, not just attack weighting:
 #   - attack_w / kill_bonus / exposure_w: how aggressively it values trades
-#   - lookahead: whether it foresees (summed, anti gang-up) player retaliation
+#   - lookahead_w: how heavily it discounts (summed, anti gang-up) player
+#     retaliation net of return fire — the mechanism runs at every difficulty,
+#     only the weight scales
 #   - preservation_w: how hard it pulls wounded/veteran units to safety
 #   - mistake_rate: deterministic positioning jitter so Easy reads as fallible
 const DIFFICULTY_PROFILE := {
-	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead": false, "preservation_w": 0.0, "mistake_rate": 2},
-	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead": false, "preservation_w": 0.5, "mistake_rate": 0},
-	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead": true,  "preservation_w": 1.0, "mistake_rate": 0},
+	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead_w": 0.35, "preservation_w": 0.0, "mistake_rate": 2},
+	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead_w": 0.7, "preservation_w": 0.5, "mistake_rate": 0},
+	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead_w": 1.0, "preservation_w": 1.0, "mistake_rate": 0},
 }
 
 var personality: String = "aggressive"
@@ -83,7 +88,7 @@ var battle: Object  # the battle node — duck-typed (provides hex_map, units, f
 var _attack_w: float = 2.5
 var _kill_bonus: float = 5.0
 var _exposure_w: float = 0.5
-var _use_lookahead: bool = false
+var _lookahead_w: float = 0.7
 var _preservation_w: float = 0.5
 var _mistake_rate: int = 0
 var _data_loader = null
@@ -106,7 +111,7 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 	_attack_w = float(p["attack_w"])
 	_kill_bonus = float(p["kill_bonus"])
 	_exposure_w = float(p["exposure_w"])
-	_use_lookahead = bool(p["lookahead"])
+	_lookahead_w = float(p["lookahead_w"])
 	_preservation_w = float(p.get("preservation_w", 0.0))
 	_mistake_rate = int(p.get("mistake_rate", 0))
 
@@ -399,12 +404,21 @@ func _score_position_breakdown(
 	var objective_term: float = primary_objective_term + secondary_objective_term \
 		+ denial_objective_term + guard_objective_term
 
-	# 1-ply lookahead: discount by the (anti gang-up) counter the player could
-	# deliver *after* we land on this hex. Only enabled on Hard difficulty.
+	# 1-ply net-exchange lookahead, at every difficulty: discount by the (anti
+	# gang-up) retaliation the player could deliver *after* we land on this hex,
+	# offset by our discounted return fire — a hex where the trade favors us
+	# reads safer than one where we absorb fire without answering. The offset
+	# never flips the term positive: a bad trade for the enemy just means they
+	# decline it, not that standing exposed becomes a bonus.
 	var lookahead_term := 0.0
-	if _use_lookahead and not visible_enemies.is_empty():
-		var counter_dmg: int = _lookahead_counter_damage(unit, pos, visible_enemies, hex_map, atk_def)
-		lookahead_term = -float(counter_dmg) * W_LOOKAHEAD
+	var lookahead_detail := {"incoming": 0.0, "return_fire": 0.0, "kill_zone": 0.0}
+	if _lookahead_w > 0.0 and not visible_enemies.is_empty():
+		lookahead_detail = _lookahead_exchange(unit, pos, visible_enemies, hex_map, atk_def)
+		var net_threat: float = max(
+			0.0,
+			float(lookahead_detail["incoming"]) - RETURN_FIRE_CREDIT * float(lookahead_detail["return_fire"])
+		) + float(lookahead_detail["kill_zone"])
+		lookahead_term = -net_threat * _lookahead_w
 
 	# Unit preservation: pull wounded (and especially veteran) units toward
 	# safety — distance from threats and cover — but only when no profitable
@@ -463,6 +477,7 @@ func _score_position_breakdown(
 		"objective": objective_term,
 		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
+		"lookahead_detail": lookahead_detail,
 		"preservation": preservation_term,
 		"encirclement": encirclement_term,
 		"mistake": mistake_term,
@@ -1618,7 +1633,7 @@ func _threat_at(pos: Vector2i) -> Dictionary:
 	# {} means no visible enemy can strike this hex next turn.
 	return _threat_map.get(pos, {})
 
-# ---------- 1-ply lookahead ----------
+# ---------- 1-ply net-exchange lookahead ----------
 
 func _ensure_enemy_reach_cached(enemies: Array, hex_map) -> void:
 	for p in enemies:
@@ -1635,64 +1650,62 @@ func _ensure_enemy_reach_cached(enemies: Array, hex_map) -> void:
 		reach[enemy.coord] = 0
 		_enemy_reach_cache[enemy] = reach
 
-func _lookahead_counter_damage(
+func _lookahead_exchange(
 	ai_unit,
 	candidate: Vector2i,
-	visible_players: Array,
+	visible_enemies: Array,
 	hex_map,
 	ai_def: Dictionary,
-) -> int:
-	# Threat any visible player could bring to `ai_unit` on `candidate` next turn.
-	# Unlike a single-attacker max, this sums EVERY player that can reach attack
-	# range — sorted high-to-low and discounted geometrically (GANG_UP_FALLOFF) —
-	# so concentrated fire reads as dangerous (the AI stops walking a lone unit
-	# into a cluster) without the raw sum causing total paralysis. If the combined
-	# fire could destroy the unit, its remaining HP is added so the AI refuses to
-	# step a wounded unit into an outright kill-zone.
-	_ensure_enemy_reach_cached(visible_players, hex_map)
+) -> Dictionary:
+	# Net exchange any visible enemy could force on `ai_unit` at `candidate`
+	# next turn. Threat sources come from the threat map (true pathing reach).
+	# Incoming fire is summed high-to-low and discounted geometrically
+	# (GANG_UP_FALLOFF) so concentrated fire reads as dangerous without the raw
+	# sum causing paralysis; our return fire is summed with the same falloff so
+	# a unit that answers back holds ground more readily than one that cannot.
+	# If the combined true fire could destroy the unit, its remaining HP is
+	# added as a kill-zone penalty and the return-fire credit is zeroed —
+	# destroyed units do not shoot back.
+	_ensure_threat_map(visible_enemies, hex_map)
+	var sources: Array = _threat_at(candidate).get("sources", [])
 	var ai_terrain_def: Dictionary = _get_terrain_def(hex_map.terrain_at(candidate))
-	var threats: Array[int] = []
-	for p in visible_players:
-		var player = p
-		var pdef: Dictionary = _get_unit_def(player.type_id)
-		var prange := int(pdef.get("range", 1))
-		var reach: Dictionary = _enemy_reach_cache[player]
-		# Can the player move to anywhere within prange of `candidate`?
-		var in_threat := false
-		for pos in reach.keys():
-			if HexCoord.distance(pos, candidate) <= prange:
-				in_threat = true
-				break
-		if not in_threat:
-			continue
+	var exchanges: Array = []  # [damage_to_us, our_counter] per threatening enemy
+	for p in sources:
+		var enemy = p
+		var pdef: Dictionary = _get_unit_def(enemy.type_id)
 		# Damage formula doesn't depend on the attacker's terrain (only counter does).
 		var plain := {"defense": 0}
-		var p_general: Dictionary = _get_general_def(player.general_id)
-		var p_mods: Dictionary = CombatModifiers.for_unit(player, p_general)
+		var p_general: Dictionary = _get_general_def(enemy.general_id)
+		var p_mods: Dictionary = CombatModifiers.for_unit(enemy, p_general)
 		var ai_general: Dictionary = _get_general_def(ai_unit.general_id)
 		var ai_mods: Dictionary = CombatModifiers.for_unit(ai_unit, ai_general)
-		p_mods.attack -= CombatEffects.attack_penalty(player.suppression)
+		p_mods.attack -= CombatEffects.attack_penalty(enemy.suppression)
 		var result: CombatResolver.Result = CombatResolver.resolve(
-			pdef, ai_def, player.hp, ai_unit.hp,
+			pdef, ai_def, enemy.hp, ai_unit.hp,
 			plain, ai_terrain_def, 1,
 			ai_unit.dig_in_level, p_mods, ai_mods,
 		)
 		if result.damage_to_defender > 0:
-			threats.append(int(result.damage_to_defender))
-	if threats.is_empty():
-		return 0
-	threats.sort()
-	threats.reverse()  # highest-damage attacker counts fully, the rest discounted
-	var aggregate := 0.0
+			exchanges.append([int(result.damage_to_defender), int(result.counter_damage)])
+	if exchanges.is_empty():
+		return {"incoming": 0.0, "return_fire": 0.0, "kill_zone": 0.0}
+	exchanges.sort_custom(func(a, b):
+		return a[0] > b[0]  # highest-damage attacker counts fully, the rest discounted
+	)
+	var incoming := 0.0
+	var return_fire := 0.0
 	var falloff := 1.0
 	var true_sum := 0
-	for d in threats:
-		aggregate += float(d) * falloff
+	for ex in exchanges:
+		incoming += float(ex[0]) * falloff
+		return_fire += float(ex[1]) * falloff
 		falloff *= GANG_UP_FALLOFF
-		true_sum += d
+		true_sum += int(ex[0])
+	var kill_zone := 0.0
 	if true_sum >= int(ai_unit.hp):
-		aggregate += float(ai_unit.hp)
-	return int(round(aggregate))
+		kill_zone = float(ai_unit.hp)
+		return_fire = 0.0
+	return {"incoming": incoming, "return_fire": return_fire, "kill_zone": kill_zone}
 
 func _get_unit_def(type_id: String) -> Dictionary:
 	if _data_loader != null:

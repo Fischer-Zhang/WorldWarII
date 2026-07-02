@@ -190,30 +190,39 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: light tank scout score expected scout %.2f > far %.2f" % [scout_score, too_far_score])
 
-	# 4) Hard AI should apply 1-ply lookahead as a counter-damage penalty.
+	# 4) Net-exchange lookahead runs at every difficulty, scaled by lookahead_w.
 	var hard_ai := AIController.new(battle, "aggressive", "hard")
 	hard_ai._data_loader = ai._data_loader
 	var normal_ai := AIController.new(battle, "aggressive", "normal")
 	normal_ai._data_loader = ai._data_loader
+	var easy_look_ai := AIController.new(battle, "aggressive", "easy")
+	easy_look_ai._data_loader = ai._data_loader
 	battle.hex_map.occupants.clear()
 	var wounded_tank := make_unit("medium_tank", "axis", Vector2i(0, 0), 4)
 	var player_tank := make_unit("medium_tank", "allies", Vector2i(0, 2), 16)
 	var visible_enemies := [player_tank]
 	var tank_def: Dictionary = hard_ai._get_unit_def(wounded_tank.type_id)
-	var normal_exposed_score: float = normal_ai._score_position(
-		wounded_tank, Vector2i(0, 1), [{"coord": player_tank.coord, "visible": true}], visible_enemies, battle.hex_map, tank_def, {}
-	)
-	var hard_exposed_score: float = hard_ai._score_position(
-		wounded_tank, Vector2i(0, 1), [{"coord": player_tank.coord, "visible": true}], visible_enemies, battle.hex_map, tank_def, {}
-	)
-	var counter_damage: int = hard_ai._lookahead_counter_damage(
+	var look_known := [{"coord": player_tank.coord, "visible": true}]
+	var easy_look: float = float(easy_look_ai._score_position_breakdown(
+		wounded_tank, Vector2i(0, 1), look_known, visible_enemies, battle.hex_map, tank_def, {}
+	).get("lookahead", 0.0))
+	var normal_look: float = float(normal_ai._score_position_breakdown(
+		wounded_tank, Vector2i(0, 1), look_known, visible_enemies, battle.hex_map, tank_def, {}
+	).get("lookahead", 0.0))
+	var hard_look: float = float(hard_ai._score_position_breakdown(
+		wounded_tank, Vector2i(0, 1), look_known, visible_enemies, battle.hex_map, tank_def, {}
+	).get("lookahead", 0.0))
+	var exchange: Dictionary = hard_ai._lookahead_exchange(
 		wounded_tank, Vector2i(0, 1), visible_enemies, battle.hex_map, tank_def
 	)
-	if counter_damage > 0 and hard_exposed_score < normal_exposed_score:
+	if float(exchange["incoming"]) > 0.0 and easy_look < 0.0 \
+			and abs(easy_look) < abs(normal_look) and abs(normal_look) < abs(hard_look):
 		pass_count += 1
 	else:
 		fail_count += 1
-		printerr("FAIL: hard lookahead expected counter penalty, normal %.2f hard %.2f counter %d" % [normal_exposed_score, hard_exposed_score, counter_damage])
+		printerr("FAIL: lookahead ladder expected 0 > easy > normal > hard with incoming > 0; easy %.2f normal %.2f hard %.2f incoming %.2f" % [
+			easy_look, normal_look, hard_look, float(exchange["incoming"]),
+		])
 
 	# 5) Artillery should prefer breaking an entrenched target when damage is otherwise comparable.
 	battle.hex_map.terrain_overrides.clear()
@@ -970,17 +979,17 @@ func _init() -> void:
 	var gang_p2 := make_unit("infantry", "allies", Vector2i(-1, 0), 10)
 	var gang_p3 := make_unit("infantry", "allies", Vector2i(0, 1), 10)
 	var lone_def: Dictionary = gang_ai._get_unit_def("medium_tank")
-	var single_threat: int = gang_ai._lookahead_counter_damage(
+	var single_threat: float = float(gang_ai._lookahead_exchange(
 		lone_tank, Vector2i(0, 0), [gang_p1], battle.hex_map, lone_def
-	)
-	var triple_threat: int = gang_ai._lookahead_counter_damage(
+	)["incoming"])
+	var triple_threat: float = float(gang_ai._lookahead_exchange(
 		lone_tank, Vector2i(0, 0), [gang_p1, gang_p2, gang_p3], battle.hex_map, lone_def
-	)
+	)["incoming"])
 	if triple_threat > single_threat:
 		pass_count += 1
 	else:
 		fail_count += 1
-		printerr("FAIL: gang-up lookahead should exceed single attacker, single %d triple %d" % [single_threat, triple_threat])
+		printerr("FAIL: gang-up lookahead should exceed single attacker, single %.2f triple %.2f" % [single_threat, triple_threat])
 
 	# 22) Preservation need is 0 for healthy units and rises (amplified by rank) for wounded ones.
 	var healthy_vet := make_unit("medium_tank", "axis", Vector2i(0, 0), 16)
@@ -1071,7 +1080,9 @@ func _init() -> void:
 	var normal_jitter: float = ai._mistake_jitter(jitter_unit, Vector2i(2, 1))
 	if j1 == j1_again and j1 != j2 and normal_jitter == 0.0 \
 			and easy_ai._preservation_w == 0.0 and easy_ai._mistake_rate > 0 \
-			and ai._mistake_rate == 0 and gang_ai._preservation_w > ai._preservation_w:
+			and ai._mistake_rate == 0 and gang_ai._preservation_w > ai._preservation_w \
+			and easy_ai._lookahead_w > 0.0 and easy_ai._lookahead_w < ai._lookahead_w \
+			and ai._lookahead_w < gang_ai._lookahead_w:
 		pass_count += 1
 	else:
 		fail_count += 1
@@ -1156,6 +1167,40 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: encirclement expected pocket %.3f < flank %.3f < 0 and wounded %.3f < pocket" % [
 			pocket_enc, flank_enc, hurt_enc,
+		])
+
+	# 28) Net exchange: a defender that answers back reads safer than one that
+	# cannot (return-fire credit), and a lethal kill-zone zeroes the credit.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var exchange_ai := AIController.new(battle, "aggressive", "hard")
+	exchange_ai._data_loader = ai._data_loader
+	var exchange_enemy := make_unit("medium_tank", "allies", Vector2i(0, 0), 16)
+	var counter_tank := make_unit("medium_tank", "axis", Vector2i(2, 0), 16)
+	var mute_artillery := make_unit("artillery", "axis", Vector2i(2, 0), 8)
+	var tank_ex: Dictionary = exchange_ai._lookahead_exchange(
+		counter_tank, Vector2i(2, 0), [exchange_enemy], battle.hex_map, exchange_ai._get_unit_def("medium_tank")
+	)
+	var arty_ex: Dictionary = exchange_ai._lookahead_exchange(
+		mute_artillery, Vector2i(2, 0), [exchange_enemy], battle.hex_map, exchange_ai._get_unit_def("artillery")
+	)
+	var doomed_tank := make_unit("medium_tank", "axis", Vector2i(0, 5), 2)
+	var mob_a := make_unit("medium_tank", "allies", Vector2i(1, 5), 16)
+	var mob_b := make_unit("medium_tank", "allies", Vector2i(-1, 5), 16)
+	var doomed_ex: Dictionary = exchange_ai._lookahead_exchange(
+		doomed_tank, Vector2i(0, 5), [mob_a, mob_b], battle.hex_map, exchange_ai._get_unit_def("medium_tank")
+	)
+	if float(tank_ex["incoming"]) > 0.0 and float(tank_ex["return_fire"]) > 0.0 \
+			and float(arty_ex["return_fire"]) == 0.0 \
+			and float(doomed_ex["kill_zone"]) == 2.0 and float(doomed_ex["return_fire"]) == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: net exchange expected tank return fire > 0, artillery 0, kill-zone credit zeroed; tank %s arty %s doomed %s" % [
+			str(tank_ex), str(arty_ex), str(doomed_ex),
 		])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
