@@ -74,6 +74,10 @@ expectations include:
 - exposure comes from a per-plan threat map built on true pathing reach of visible
   enemies (ZoC, terrain, occupancy), and hexes whose exits are threatened take a
   scale-based encirclement penalty that rises with preservation need
+- executed plans feed a per-turn coordination ledger: later units gain a
+  focus-fire pull toward targets already engaged this turn (geometric scale, no
+  hard cap) and a synergy pull toward targets carrying an unspent friendly
+  fire-support or breach mark
 - the net-exchange lookahead sums concentrated player retaliation (anti gang-up),
   credits discounted return fire (never flipping the term positive), adds a
   kill-zone penalty when the sum is lethal, and runs at every difficulty

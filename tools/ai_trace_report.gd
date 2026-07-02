@@ -28,6 +28,8 @@ class StubBattle:
 	var factions: Dictionary = {}
 	var scenario: Dictionary = {}
 	var captured_secondary_objectives: Dictionary = {}
+	var fire_support_marks: Dictionary = {}
+	var breach_support_marks: Dictionary = {}
 
 	func get_known_enemies(faction_id: String) -> Array:
 		var out: Array = []
@@ -195,6 +197,30 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 			"notes": "A slow AT gun caught inside a tank's reach shows the retaliation discount on every candidate at Normal weight.",
 		},
 		{
+			"id": "focus_fire_convergence",
+			"title": "Focus fire convergence",
+			"difficulty": "normal",
+			"attacker": _unit("medium_tank", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(2, 0), data_loader), "visible": true},
+				{"unit": _unit("infantry", "allies", Vector2i(-2, 0), data_loader), "visible": true},
+			],
+			"pre_engaged": [1],
+			"notes": "Two symmetric targets; an earlier unit already engaged the second one, so the tank should converge on it instead of the tie-break default.",
+		},
+		{
+			"id": "fire_support_followup",
+			"title": "Fire support mark follow-up",
+			"difficulty": "normal",
+			"attacker": _unit("artillery", "axis", Vector2i(0, 0), data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(3, 0), data_loader), "visible": true},
+				{"unit": _unit("infantry", "allies", Vector2i(-3, 0), data_loader), "visible": true},
+			],
+			"fire_support_marked": [1],
+			"notes": "A spotter already marked the second target this turn; the artillery should convert the mark instead of the tie-break default.",
+		},
+		{
 			"id": "wounded_veteran_withdraw",
 			"title": "Wounded veteran withdrawal",
 			"difficulty": "hard",
@@ -342,6 +368,12 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 
 	var ai := AIController.new(battle, "aggressive", String(case_def.get("difficulty", "normal")))
 	ai._data_loader = data_loader
+	for enemy_index in case_def.get("pre_engaged", []):
+		var engaged = case_def["enemies"][int(enemy_index)]["unit"]
+		ai.notify_plan_executed(null, {"action": "attack", "attack": engaged})
+	for enemy_index in case_def.get("fire_support_marked", []):
+		var marked = case_def["enemies"][int(enemy_index)]["unit"]
+		battle.fire_support_marks[marked.get_instance_id()] = {"faction": attacker.faction_id}
 	var trace: Dictionary = ai.plan_trace_for_unit(attacker)
 	var plan: Dictionary = trace.get("plan", {})
 	var candidates: Array = trace.get("candidates", [])
@@ -357,14 +389,14 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(plan.get("score", 0.0)),
 		],
 		"",
-		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement | coordination |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	]
 	var limit: int = min(5, candidates.size())
 	for i in range(limit):
 		var row: Dictionary = candidates[i]
 		var c: Dictionary = row.get("components", {})
-		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s | %s |" % [
+		lines.append("| %d | `%s` | `%s` | `%s` | `%s` | `%s` | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | `%s` | %s | %s | %s | %s |" % [
 			i + 1,
 			_coord_text(row.get("coord", Vector2i.ZERO)),
 			_unit_text(row.get("target", null)),
@@ -391,6 +423,7 @@ func _case_report(case_def: Dictionary, data_loader) -> String:
 			_score(c.get("lookahead", 0.0)),
 			_score(c.get("preservation", 0.0)),
 			_score(c.get("encirclement", 0.0)),
+			_score(c.get("coordination", 0.0)),
 		])
 	return "\n".join(lines)
 

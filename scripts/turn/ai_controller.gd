@@ -44,6 +44,11 @@ const W_BREACH_SUPPORT := 2.0
 const W_SUPPRESSIVE_FIRE := 1.2
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
+# Turn-level coordination: value of converging on a target an earlier unit
+# already engaged this turn, and of converting an unspent friendly support
+# mark before it expires.
+const W_FOCUS_FIRE := 1.2
+const W_MARK_SYNERGY := 1.5
 const AT_ARMOR_TARGET_BONUS := 2.0
 const AT_SOFT_TARGET_PENALTY := 1.0
 const ENGINEER_BREACH_TARGET_BONUS := 2.5
@@ -67,17 +72,18 @@ const W_ENCIRCLEMENT := 0.5
 # Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
 const MISTAKE_JITTER_SCALE := 0.6
 
-# Difficulty is shaped on four axes, not just attack weighting:
+# Difficulty is shaped on five axes, not just attack weighting:
 #   - attack_w / kill_bonus / exposure_w: how aggressively it values trades
 #   - lookahead_w: how heavily it discounts (summed, anti gang-up) player
 #     retaliation net of return fire — the mechanism runs at every difficulty,
 #     only the weight scales
+#   - coordination_w: how strongly units converge on engaged/marked targets
 #   - preservation_w: how hard it pulls wounded/veteran units to safety
 #   - mistake_rate: deterministic positioning jitter so Easy reads as fallible
 const DIFFICULTY_PROFILE := {
-	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead_w": 0.35, "preservation_w": 0.0, "mistake_rate": 2},
-	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead_w": 0.7, "preservation_w": 0.5, "mistake_rate": 0},
-	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead_w": 1.0, "preservation_w": 1.0, "mistake_rate": 0},
+	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead_w": 0.35, "coordination_w": 0.5, "preservation_w": 0.0, "mistake_rate": 2},
+	"normal": {"attack_w": 2.5, "kill_bonus": 5.0, "exposure_w": 0.5, "lookahead_w": 0.7, "coordination_w": 1.0, "preservation_w": 0.5, "mistake_rate": 0},
+	"hard":   {"attack_w": 3.0, "kill_bonus": 7.0, "exposure_w": 0.4, "lookahead_w": 1.0, "coordination_w": 1.3, "preservation_w": 1.0, "mistake_rate": 0},
 }
 
 var personality: String = "aggressive"
@@ -89,6 +95,7 @@ var _attack_w: float = 2.5
 var _kill_bonus: float = 5.0
 var _exposure_w: float = 0.5
 var _lookahead_w: float = 0.7
+var _coordination_w: float = 1.0
 var _preservation_w: float = 0.5
 var _mistake_rate: int = 0
 var _data_loader = null
@@ -112,8 +119,33 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 	_kill_bonus = float(p["kill_bonus"])
 	_exposure_w = float(p["exposure_w"])
 	_lookahead_w = float(p["lookahead_w"])
+	_coordination_w = float(p.get("coordination_w", 1.0))
 	_preservation_w = float(p.get("preservation_w", 0.0))
 	_mistake_rate = int(p.get("mistake_rate", 0))
+
+# Per-AI-turn coordination ledger: the controller is recreated each AI turn,
+# so this resets naturally. battle.gd reports each executed plan so units
+# still waiting to plan feel the focus-fire pull toward engaged targets.
+var _turn_engagements: Dictionary = {}  # enemy instance id -> engagement count
+
+func notify_plan_executed(_unit, plan: Dictionary) -> void:
+	# Called by battle.gd after each AI unit finishes acting. Intent is
+	# recorded even if execution degraded (a dead target drops out of
+	# visible_enemies, so a phantom engagement cannot attract anyone).
+	var target = null
+	match String(plan.get("action", "")):
+		"attack":
+			target = plan.get("attack")
+		"fire_support_mark":
+			target = plan.get("fire_support_target")
+		"breach_support":
+			target = plan.get("breach_support_target")
+		"suppressive_fire":
+			target = plan.get("suppressive_fire_target")
+	if target == null:
+		return
+	var key: int = target.get_instance_id()
+	_turn_engagements[key] = int(_turn_engagements.get(key, 0)) + 1
 
 func plan_for_unit(unit) -> Dictionary:
 	# Returns: { "move_to": Vector2i, "attack": Unit | null, "action": String, "score": float, "reachable": Dictionary }
@@ -176,15 +208,16 @@ func plan_for_unit(unit) -> Dictionary:
 	for cand in candidates:
 		var coord: Vector2i = cand
 		var base_score: float = _score_position(unit, coord, known, visible_enemies, hex_map, atk_def, visible_hexes)
-		var target = _best_attack_from(coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes, unit)
-		# Attack score is implicit in base_score (already includes attack_term).
-		# Overwatch is an alternative: subtract the attack contribution (not
-		# attacking this turn) and add the overwatch score.
+		var bundle: Dictionary = _attack_bundle(
+			unit, coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes
+		)
+		var target = bundle["target"]
+		# Attack score is implicit in base_score (already includes the attack
+		# and coordination terms). Overwatch is an alternative: subtract the
+		# whole attacking contribution (not attacking forfeits the coordination
+		# pull too) and add the overwatch score.
 		var overwatch_value: float = _overwatch_score(unit, coord, visible_enemies, hex_map, atk_def, rng)
-		var attack_value: float = _best_attack_value(unit, coord, visible_enemies, hex_map, atk_def, visible_hexes)
-		# attack_value and overwatch_value are both pre-weighted contributions.
-		# base_score already has attack_value baked in (via _score_position).
-		# To get the "overwatch" total, swap them:
+		var attack_value: float = float(bundle["attack"]) + float(bundle["coordination"])
 		var overwatch_score: float = base_score - attack_value + overwatch_value
 		var rally_score: float = _rally_score(unit, coord, hex_map, atk_def)
 		var fire_support := _best_fire_support_mark_from(
@@ -291,10 +324,11 @@ func plan_trace_for_unit(unit) -> Dictionary:
 		var breakdown := _score_position_breakdown(
 			unit, coord, known, visible_enemies, battle.hex_map, atk_def, visible_hexes
 		)
-		var target = _best_attack_from(
-			coord, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes, unit
-		)
-		var attack_value: float = _best_attack_value(unit, coord, visible_enemies, battle.hex_map, atk_def, visible_hexes)
+		# The breakdown already ran the attack bundle; reuse its target and
+		# attacking contribution so trace and plan cannot diverge.
+		var target = breakdown.get("coordination_detail", {}).get("target", null)
+		var attack_value: float = float(breakdown.get("attack", 0.0)) \
+			+ float(breakdown.get("coordination", 0.0))
 		var overwatch_value: float = _overwatch_score(unit, coord, visible_enemies, battle.hex_map, atk_def, int(atk_def.get("range", 1)))
 		var rally_value: float = _rally_score(unit, coord, battle.hex_map, atk_def)
 		var fire_support := _best_fire_support_mark_from(
@@ -371,19 +405,14 @@ func _score_position_breakdown(
 			nearest = d
 	var dist_term: float = -float(nearest) * W_OBJECTIVE
 
-	# Attack term: only currently-visible enemies (can't shoot fog).
-	var attack_term := 0.0
-	var atk_general_for_score: Dictionary = _get_general_def(unit.general_id)
-	var atk_mods_for_score: Dictionary = CombatModifiers.for_unit(unit, atk_general_for_score)
-	for e in visible_enemies:
-		var enemy = e
-		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
-			continue
-		var dmg_score: float = _attack_candidate_score(
-			unit, pos, unit.faction_id, unit.type_id, enemy, atk_def, atk_mods_for_score
-		)
-		attack_term = max(attack_term, dmg_score)
-	attack_term *= _attack_w
+	# Attack + coordination terms: only currently-visible enemies (can't shoot
+	# fog). The bundle picks one target for both, so the breakdown explains the
+	# same shot the plan would take.
+	var attack_bundle: Dictionary = _attack_bundle(
+		unit, pos, unit.faction_id, unit.type_id, visible_enemies, atk_def, visible_hexes
+	)
+	var attack_term: float = float(attack_bundle["attack"])
+	var coordination_term: float = float(attack_bundle["coordination"])
 
 	# Exposure: only visible enemies are a known threat. The threat map uses
 	# true pathing reach (ZoC, terrain, occupancy) instead of a raw move+range
@@ -460,13 +489,19 @@ func _score_position_breakdown(
 				* (float(threatened_exits) / float(max(1, open_exits))) \
 				* (1.0 + _preservation_need(unit, atk_def))
 
-	var raw_total: float = dist_term + attack_term + exposure_term + terrain_term \
-		+ role_term + objective_term + lookahead_term + preservation_term \
+	var raw_total: float = dist_term + attack_term + coordination_term + exposure_term \
+		+ terrain_term + role_term + objective_term + lookahead_term + preservation_term \
 		+ encirclement_term + mistake_term
 	var total := _apply_personality(raw_total, attack_term, exposure_term)
 	return {
 		"distance": dist_term,
 		"attack": attack_term,
+		"coordination": coordination_term,
+		"coordination_detail": {
+			"focus": float(attack_bundle["focus"]),
+			"mark": float(attack_bundle["mark"]),
+			"target": attack_bundle["target"],
+		},
 		"exposure": exposure_term,
 		"terrain": terrain_term,
 		"role": role_term,
@@ -567,25 +602,77 @@ func _mistake_jitter(unit, pos: Vector2i) -> float:
 	var norm: float = float(seed_val & 0xffff) / 65535.0
 	return (norm * 2.0 - 1.0) * float(_mistake_rate) * MISTAKE_JITTER_SCALE
 
-func _best_attack_value(
-	unit, pos: Vector2i, visible_enemies: Array, hex_map,
-	atk_def: Dictionary, visible_hexes: Dictionary,
-) -> float:
-	# Returns the (pre-weighted) attack-term contribution this candidate
-	# position would produce — mirrors the attack block in _score_position
-	# so the AI can compare attack vs overwatch on equal footing.
-	var best := 0.0
-	var atk_general_local: Dictionary = _get_general_def(unit.general_id)
-	var atk_mods_local: Dictionary = CombatModifiers.for_unit(unit, atk_general_local)
-	for e in visible_enemies:
+func _attack_bundle(
+	attacker,  # may be null on legacy call paths; scoring then uses atk_def defaults
+	pos: Vector2i,
+	attacker_faction: String,
+	attacker_type: String,
+	enemies: Array,
+	atk_def: Dictionary,
+	visible_hexes: Dictionary,
+) -> Dictionary:
+	# Single source of truth for "what would we shoot from pos and what is it
+	# worth": the chosen target plus the weighted attack and coordination
+	# contributions, so plan, trace and target choice can never diverge. The
+	# coordination pull (focus fire + mark synergy) participates in target
+	# choice, so a committed or marked target can win a near-tie.
+	var attacker_mods: Dictionary = {}
+	if attacker != null:
+		var atk_general: Dictionary = _get_general_def(attacker.general_id)
+		attacker_mods = CombatModifiers.for_unit(attacker, atk_general)
+	var best = null
+	var best_total := 0.0
+	var best_attack := 0.0
+	var best_focus := 0.0
+	var best_mark := 0.0
+	for e in enemies:
 		var enemy = e
-		if not CombatRules.can_attack_from_coord(pos, unit.faction_id, enemy, atk_def, hex_map, visible_hexes):
+		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, battle.hex_map, visible_hexes):
 			continue
 		var dmg: float = _attack_candidate_score(
-			unit, pos, unit.faction_id, unit.type_id, enemy, atk_def, atk_mods_local
+			attacker, pos, attacker_faction, attacker_type, enemy, atk_def, attacker_mods
 		)
-		best = max(best, dmg)
-	return best * _attack_w
+		var focus: float = _focus_fire_bonus(enemy)
+		var mark: float = _mark_synergy_bonus(attacker_faction, enemy)
+		var total: float = dmg * _attack_w + (focus + mark) * _coordination_w
+		if total > best_total:
+			best_total = total
+			best = enemy
+			best_attack = dmg * _attack_w
+			best_focus = focus
+			best_mark = mark
+	return {
+		"target": best,
+		"attack": best_attack,
+		"coordination": (best_focus + best_mark) * _coordination_w,
+		"focus": best_focus,
+		"mark": best_mark,
+	}
+
+func _focus_fire_bonus(enemy) -> float:
+	# This-turn commitment: units already engaging this enemy make it a better
+	# target for the rest of the turn. The geometric series mirrors
+	# GANG_UP_FALLOFF so our concentration is valued on the same diminishing
+	# curve the enemy's is feared with — scale-based, no hard cap.
+	var engagements := int(_turn_engagements.get(enemy.get_instance_id(), 0))
+	if engagements <= 0:
+		return 0.0
+	var scale: float = (1.0 - pow(GANG_UP_FALLOFF, float(engagements))) / (1.0 - GANG_UP_FALLOFF)
+	return W_FOCUS_FIRE * scale
+
+func _mark_synergy_bonus(faction_id: String, enemy) -> float:
+	# Executed support marks are real battle state, so every unit planning
+	# after the spotter/engineer feels the pull to convert them before they
+	# expire. Payoff reuses the same CombatEffects bonuses the resolver will
+	# apply on the follow-up hit (probed with a minimal landed attack).
+	var bonus := 0.0
+	if _target_has_fire_support_mark(faction_id, enemy):
+		bonus += W_MARK_SYNERGY \
+			+ float(CombatEffects.fire_support_suppression_bonus(true, 1, false)) * W_SUPPRESSION
+	if _target_has_breach_support_mark(faction_id, enemy) and int(enemy.dig_in_level) > 0:
+		bonus += W_MARK_SYNERGY \
+			+ float(CombatEffects.breach_support_dig_in_bonus(true, 1, int(enemy.dig_in_level))) * W_DIG_IN_BREAK
+	return bonus
 
 func _overwatch_score(
 	unit, pos: Vector2i, visible_enemies: Array, hex_map,
@@ -637,24 +724,10 @@ func _best_attack_from(
 	visible_hexes: Dictionary,
 	attacker = null,
 ) -> Variant:
-	var best = null
-	var best_dmg := 0.0
 	var attacker_unit = attacker if attacker != null else _unit_at(pos, attacker_faction, attacker_type)
-	var attacker_mods: Dictionary = {}
-	if attacker_unit != null:
-		var atk_general: Dictionary = _get_general_def(attacker_unit.general_id)
-		attacker_mods = CombatModifiers.for_unit(attacker_unit, atk_general)
-	for e in enemies:
-		var enemy = e
-		if not CombatRules.can_attack_from_coord(pos, attacker_faction, enemy, atk_def, battle.hex_map, visible_hexes):
-			continue
-		var dmg: float = _attack_candidate_score(
-			attacker_unit, pos, attacker_faction, attacker_type, enemy, atk_def, attacker_mods
-		)
-		if dmg > best_dmg:
-			best_dmg = dmg
-			best = enemy
-	return best
+	return _attack_bundle(
+		attacker_unit, pos, attacker_faction, attacker_type, enemies, atk_def, visible_hexes
+	)["target"]
 
 func _best_fire_support_mark_from(
 	unit,

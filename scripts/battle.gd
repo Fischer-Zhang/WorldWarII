@@ -492,6 +492,9 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			_:  # "wait" or anything else
 				u.has_attacked = true
 				u.queue_redraw()
+		# Feed the coordination ledger so units still waiting to plan converge
+		# on targets this unit just engaged.
+		ai.notify_plan_executed(u, plan)
 
 func _on_end_turn_pressed() -> void:
 	if phase == Phase.GAME_OVER:

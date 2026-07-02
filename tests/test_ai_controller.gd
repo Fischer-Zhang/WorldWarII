@@ -69,6 +69,8 @@ class StubBattle:
 	var factions: Dictionary = {}
 	var scenario: Dictionary = {}
 	var captured_secondary_objectives: Dictionary = {}
+	var fire_support_marks: Dictionary = {}
+	var breach_support_marks: Dictionary = {}
 	func get_known_enemies(faction_id: String) -> Array:
 		var out: Array = []
 		var visible: Dictionary = visibility_by_faction.get(faction_id, {})
@@ -1201,6 +1203,81 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: net exchange expected tank return fire > 0, artillery 0, kill-zone credit zeroed; tank %s arty %s doomed %s" % [
 			str(tank_ex), str(arty_ex), str(doomed_ex),
+		])
+
+	# 29) Focus fire: an engaged target wins the symmetric near-tie, and repeat
+	# engagements deepen the pull on the gang-up falloff curve.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var focus_ai := AIController.new(battle, "aggressive", "normal")
+	focus_ai._data_loader = ai._data_loader
+	var focus_shooter := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var focus_first := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	var focus_engaged := make_unit("infantry", "allies", Vector2i(-1, 0), 10)
+	battle.units = [focus_shooter, focus_first, focus_engaged]
+	battle.hex_map.occupants[focus_shooter.coord] = focus_shooter
+	battle.hex_map.occupants[focus_first.coord] = focus_first
+	battle.hex_map.occupants[focus_engaged.coord] = focus_engaged
+	battle.visibility_by_faction = {"axis": {focus_first.coord: true, focus_engaged.coord: true}}
+	var focus_visible := {focus_first.coord: true, focus_engaged.coord: true}
+	var inf_def: Dictionary = focus_ai._get_unit_def("infantry")
+	focus_ai.notify_plan_executed(null, {"action": "attack", "attack": focus_engaged})
+	var focus_bundle: Dictionary = focus_ai._attack_bundle(
+		focus_shooter, Vector2i(0, 0), "axis", "infantry", [focus_first, focus_engaged], inf_def, focus_visible
+	)
+	var focus_plan: Dictionary = focus_ai.plan_for_unit(focus_shooter)
+	focus_ai.notify_plan_executed(null, {"action": "suppressive_fire", "suppressive_fire_target": focus_engaged})
+	var deeper_bundle: Dictionary = focus_ai._attack_bundle(
+		focus_shooter, Vector2i(0, 0), "axis", "infantry", [focus_first, focus_engaged], inf_def, focus_visible
+	)
+	if focus_bundle["target"] == focus_engaged and float(focus_bundle["coordination"]) > 0.0 \
+			and focus_plan.get("attack") == focus_engaged \
+			and float(deeper_bundle["coordination"]) > float(focus_bundle["coordination"]):
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: focus fire expected convergence on engaged target; bundle %s plan %s deeper %.2f first %.2f" % [
+			str(focus_bundle), str(focus_plan.get("attack")),
+			float(deeper_bundle["coordination"]), float(focus_bundle["coordination"]),
+		])
+
+	# 30) Mark synergy: an unspent friendly support mark pulls the follow-up
+	# attack onto the marked target; unmarked twins feel nothing.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var mark_ai := AIController.new(battle, "aggressive", "normal")
+	mark_ai._data_loader = ai._data_loader
+	var mark_shooter := make_unit("artillery", "axis", Vector2i(0, 0), 8)
+	var plain_infantry := make_unit("infantry", "allies", Vector2i(3, 0), 10)
+	var marked_infantry := make_unit("infantry", "allies", Vector2i(-3, 0), 10)
+	battle.units = [mark_shooter, plain_infantry, marked_infantry]
+	battle.visibility_by_faction = {"axis": {plain_infantry.coord: true, marked_infantry.coord: true}}
+	battle.fire_support_marks[marked_infantry.get_instance_id()] = {"faction": "axis"}
+	var mark_visible := {plain_infantry.coord: true, marked_infantry.coord: true}
+	var mark_bundle: Dictionary = mark_ai._attack_bundle(
+		mark_shooter, Vector2i(0, 0), "axis", "artillery", [plain_infantry, marked_infantry], ARTILLERY_DEF, mark_visible
+	)
+	var dug_marked := make_unit("infantry", "allies", Vector2i(2, 2), 10)
+	dug_marked.dig_in_level = 2
+	battle.breach_support_marks[dug_marked.get_instance_id()] = {"faction": "axis"}
+	var breach_pull: float = mark_ai._mark_synergy_bonus("axis", dug_marked)
+	var unmarked_pull: float = mark_ai._mark_synergy_bonus("axis", plain_infantry)
+	var enemy_mark_pull: float = mark_ai._mark_synergy_bonus("allies", marked_infantry)
+	if mark_bundle["target"] == marked_infantry and float(mark_bundle["mark"]) > 0.0 \
+			and breach_pull > 0.0 and unmarked_pull == 0.0 and enemy_mark_pull == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: mark synergy expected marked target pull; bundle %s breach %.2f unmarked %.2f enemy %.2f" % [
+			str(mark_bundle), breach_pull, unmarked_pull, enemy_mark_pull,
 		])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])

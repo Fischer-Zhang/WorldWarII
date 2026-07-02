@@ -51,9 +51,9 @@ def main() -> None:
 
     denial_section = section_text(report, "## Objective denial guard")
     require(
-        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement |"
+        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement | coordination |"
         in denial_section,
-        "AI trace table must expose denial, guard and encirclement scores",
+        "AI trace table must expose denial, guard, encirclement and coordination scores",
     )
     denial_match = re.search(
         r"\|\s*1\s*\|[^\n]*\|\s*([0-9.]+)\s*\|\s*[0-9.]+\s*\|\s*[0-9.-]+\s*\|\s*`[^`]*denial:control_count",
@@ -61,6 +61,22 @@ def main() -> None:
     )
     require(denial_match is not None, "objective denial guard lacks top-ranked control_count detail")
     require(float(denial_match.group(1)) > 0.0, "objective denial guard must show positive denial score")
+
+    focus_section = section_text(report, "## Focus fire convergence")
+    require(
+        re.search(r"Plan: `attack` to `[^`]+`, target `infantry@-2,0`", focus_section) is not None,
+        "focus fire case must converge on the engaged target",
+    )
+    focus_row = table_row(focus_section, 1)
+    require(float(focus_row[26]) > 0.0, "focus fire case must show positive coordination score")
+
+    followup_section = section_text(report, "## Fire support mark follow-up")
+    require(
+        re.search(r"Plan: `attack` to `[^`]+`, target `infantry@-3,0`", followup_section) is not None,
+        "mark follow-up case must convert the marked target",
+    )
+    followup_row = table_row(followup_section, 1)
+    require(float(followup_row[26]) > 0.0, "mark follow-up case must show positive coordination score")
 
     exchange_section = section_text(report, "## Normal lookahead exchange")
     exchange_row = table_row(exchange_section, 1)
