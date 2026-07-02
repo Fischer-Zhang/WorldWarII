@@ -1,6 +1,8 @@
 class_name ConquestBattleSetup
 extends RefCounted
 
+const CombatModifiers := preload("res://scripts/combat/combat_modifiers.gd")
+
 # Builds a Conquest battle on a region's themed map. The terrain comes from the
 # themed scenario, but factions, unit rosters and victory context are
 # OVERRIDDEN so the conquest player fights its own recruited army (attacker)
@@ -52,6 +54,28 @@ static func apply(
 	var enemy_entries := _type_entries(
 		pending.get("defender_types", []), enemy_faction, enemy_pool, occupied, map_bounds
 	)
+	var defender_support_types: Array = pending.get("defender_support_types", [])
+	if not defender_support_types.is_empty():
+		if role == "attack":
+			enemy_entries.append_array(_type_entries(
+				defender_support_types, enemy_faction, enemy_pool, occupied, map_bounds, enemy_entries.size()
+			))
+		else:
+			player_entries.append_array(_type_entries(
+				defender_support_types, player_faction, player_pool, occupied, map_bounds, player_entries.size()
+			))
+	var defender_xp_bonus := int(pending.get("defender_xp_bonus", 0))
+	if defender_xp_bonus > 0:
+		if role == "attack":
+			_apply_xp_bonus(enemy_entries, defender_xp_bonus)
+		else:
+			_apply_xp_bonus(player_entries, defender_xp_bonus)
+	var attacker_xp_bonus := int(pending.get("attacker_xp_bonus", 0))
+	if attacker_xp_bonus > 0:
+		if role == "attack":
+			_apply_xp_bonus(player_entries, attacker_xp_bonus)
+		else:
+			_apply_xp_bonus(enemy_entries, attacker_xp_bonus)
 	# AI defenders get free commanders from their own nation, scaled by force size.
 	_assign_ai_generals(enemy_entries, enemy_faction, generals_catalog)
 
@@ -308,16 +332,27 @@ static func _type_entries(
 	faction_id: String,
 	slots: Array,
 	occupied: Dictionary,
-	map_bounds: Dictionary
+	map_bounds: Dictionary,
+	slot_offset: int = 0
 ) -> Array:
 	var entries: Array = []
 	for i in range(types.size()):
 		entries.append({
 			"type": String(types[i]),
 			"faction": faction_id,
-			"at": _slot_or_free(slots, i, occupied, map_bounds),
+			"at": _slot_or_free(slots, i + slot_offset, occupied, map_bounds),
 		})
 	return entries
+
+static func _apply_xp_bonus(entries: Array, xp_bonus: int) -> void:
+	if xp_bonus <= 0:
+		return
+	for i in range(entries.size()):
+		var entry: Dictionary = entries[i]
+		var xp := int(entry.get("xp", 0)) + xp_bonus
+		entry["xp"] = xp
+		entry["rank"] = maxi(int(entry.get("rank", 0)), CombatModifiers.rank_for_xp(xp))
+		entries[i] = entry
 
 static func _slot_or_free(slots: Array, idx: int, occupied: Dictionary, map_bounds: Dictionary) -> Array:
 	if idx < slots.size():

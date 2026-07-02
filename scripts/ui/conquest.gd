@@ -322,6 +322,7 @@ func _update_detail(message: String = "") -> void:
 			lines.append("戰術作戰: %s" % String(battle_scenario.get("title", scenario_id)))
 			var src := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
 			var tgt := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
+			var trait_context := ConquestManager.region_trait_battle_context(tgt)
 			var can_preview_attack := ConquestManager.can_attack(
 				state, DataLoader.conquest_map, selected_region_id, target_region_id
 			)
@@ -334,12 +335,18 @@ func _update_detail(message: String = "") -> void:
 			) if can_preview_attack else {}
 			var enemy_strength := maxi(
 				1,
-				ConquestManager.defense_strength(tgt) + int(prep_context.get("defender_strength_delta", 0))
+				ConquestManager.defense_strength(tgt)
+					+ int(prep_context.get("defender_strength_delta", 0))
+					+ int(trait_context.get("defender_strength_delta", 0))
 			)
-			var enemy_force: int = ConquestRecruit.generate_force(enemy_strength).size()
+			var enemy_force: int = ConquestRecruit.generate_force(enemy_strength).size() \
+					+ (trait_context.get("defender_support_types", []) as Array).size()
 			lines.append("我軍 %d 部隊 vs 敵軍約 %d 部隊" % [my_force, enemy_force])
 			if prep_summary != "":
 				lines.append("戰前準備: %s" % prep_summary)
+			var trait_notes: Array = trait_context.get("notes", [])
+			if not trait_notes.is_empty():
+				lines.append("區域特性: %s" % "、".join(trait_notes))
 			lines.append("任務: %s" % ConquestBattleSetup.conquest_attack_objective_text(battle_scenario))
 			if my_force == 0:
 				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
@@ -663,13 +670,16 @@ func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	var rail_neighbors: Array = region.get("rail_neighbors", [])
 	if not rail_neighbors.is_empty():
 		logistics.append("鐵路: %s" % ", ".join(rail_neighbors))
-	return "%s · %s · 兵力 %d · 產能 %d · 防備 %d · 訓練 %d\n後勤: %s\n相鄰: %s" % [
+	var trait_summary := ConquestManager.region_trait_summary(region)
+	var trait_line := "\n特性: %s" % trait_summary if trait_summary != "" else ""
+	return "%s · %s · 兵力 %d · 產能 %d · 防備 %d · 訓練 %d%s\n後勤: %s\n相鄰: %s" % [
 		String(region.get("name_zh", "")),
 		String(countries.get(owner, {}).get("name_zh", owner)),
 		int(region.get("strength", 0)),
 		int(region.get("production", 0)),
 		int(region.get("fort_level", 0)),
 		int(region.get("training_level", 0)),
+		trait_line,
 		" · ".join(logistics),
 		", ".join(neighbors),
 	]
@@ -693,6 +703,7 @@ func _on_attack_pressed() -> void:
 	var prep_context := ConquestManager.consume_attack_preparation_context(
 		state, DataLoader.conquest_map, selected_region_id, target_region_id
 	)
+	var trait_context := ConquestManager.region_trait_battle_context(target)
 	var attacker_garrison := ConquestManager.apply_attack_preparation_to_garrison(
 		source_garrison, prep_context
 	)
@@ -710,9 +721,14 @@ func _on_attack_pressed() -> void:
 		"attacker_garrison": attacker_garrison,
 		"defender_types": ConquestRecruit.generate_force(maxi(
 			1,
-			ConquestManager.defense_strength(target) + int(prep_context.get("defender_strength_delta", 0))
+			ConquestManager.defense_strength(target)
+				+ int(prep_context.get("defender_strength_delta", 0))
+				+ int(trait_context.get("defender_strength_delta", 0))
 		)),
+		"defender_support_types": trait_context.get("defender_support_types", []),
+		"defender_xp_bonus": int(trait_context.get("defender_xp_bonus", 0)),
 		"preparation_notes": prep_context.get("notes", []),
+		"region_trait_notes": trait_context.get("notes", []),
 		"role": "attack",
 	}
 	CampaignManager.save_state(state)
@@ -782,6 +798,8 @@ func _launch_defense_battle(step: Dictionary) -> void:
 		for t in ConquestManager.fortification_support_types(def_region):
 			defenders.append({"id": -1, "type": String(t), "xp": 0, "rank": 0, "name": "築防支援"})
 	defenders = ConquestManager.apply_defense_preparation_to_garrison(defenders, prep_context)
+	var trait_context := ConquestManager.region_trait_battle_context(def_region)
+	defenders = ConquestManager.apply_region_trait_to_garrison(defenders, trait_context)
 	var context := {
 		"player_faction": player_country,
 		"enemy_faction": attacker_country,
@@ -796,6 +814,7 @@ func _launch_defense_battle(step: Dictionary) -> void:
 			int(atk_region.get("strength", 0)) + int(prep_context.get("incoming_strength_delta", 0))
 		)),
 		"preparation_notes": prep_context.get("notes", []),
+		"region_trait_notes": trait_context.get("notes", []),
 		"role": "defend",
 	}
 	CampaignManager.save_state(state)

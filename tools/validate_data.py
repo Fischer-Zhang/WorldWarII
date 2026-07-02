@@ -30,6 +30,15 @@ ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
 	"conquest_disrupt_enemy_production",
 }
 ALLOWED_CONQUEST_OBJECTIVE_REWARD_TYPES = {"theater_reinforcement"}
+ALLOWED_CONQUEST_REGION_TRAITS = {
+    "industrial_hub",
+    "fortress_line",
+    "rail_junction",
+    "airfield_network",
+    "naval_base",
+    "jungle_front",
+    "oilfield",
+}
 ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "recon_hex"}
 ALLOWED_CONQUEST_VICTORY_TYPES = {"eliminate", "capture", "control_count", "hold_hex_turns"}
 # Conquest powers a general may belong to (drives which country can field them);
@@ -882,6 +891,18 @@ def validate_conquest(errors: list[str]) -> None:
                     fail(errors, path, f"region {region_id!r} training_level must be between 0 and 2")
             except (TypeError, ValueError):
                 fail(errors, path, f"region {region_id!r} training_level must be an integer")
+        region_traits = region.get("region_traits", [])
+        if "region_traits" in region and not isinstance(region_traits, list):
+            fail(errors, path, f"region {region_id!r} region_traits must be a list when present")
+        elif isinstance(region_traits, list):
+            seen_traits: set[str] = set()
+            for trait in region_traits:
+                trait_id = str(trait)
+                if trait_id not in ALLOWED_CONQUEST_REGION_TRAITS:
+                    fail(errors, path, f"region {region_id!r} has unknown region_trait {trait_id!r}")
+                elif trait_id in seen_traits:
+                    fail(errors, path, f"region {region_id!r} repeats region_trait {trait_id!r}")
+                seen_traits.add(trait_id)
         try:
             coord = (int(region.get("x", -1)), int(region.get("y", -1)))
         except (TypeError, ValueError):

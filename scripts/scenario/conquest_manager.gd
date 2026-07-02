@@ -55,6 +55,59 @@ const DEVELOPMENT_ACTIONS := {
 	"logistics": {"label": "整修後勤", "cost": 3},
 	"training": {"label": "軍校訓練", "cost": 4},
 }
+const REGION_TRAIT_ORDER = [
+	"industrial_hub",
+	"fortress_line",
+	"rail_junction",
+	"airfield_network",
+	"naval_base",
+	"jungle_front",
+	"oilfield",
+]
+const REGION_TRAITS = {
+	"industrial_hub": {
+		"label": "工業樞紐",
+		"description": "守軍可就地徵集守備隊,戰鬥生成強度 +1。",
+		"effect": "守軍生成強度 +1",
+		"defender_strength_delta": 1,
+	},
+	"fortress_line": {
+		"label": "要塞防線",
+		"description": "固定火力點支援守軍,戰鬥多 1 支機槍支援。",
+		"effect": "守軍機槍支援 +1",
+		"defender_support_types": ["mg_team"],
+	},
+	"rail_junction": {
+		"label": "鐵路樞紐",
+		"description": "守軍可快速集結預備隊,戰鬥守軍 +1 XP。",
+		"effect": "守軍 +1 XP",
+		"defender_xp_bonus": 1,
+	},
+	"airfield_network": {
+		"label": "機場群",
+		"description": "守軍空地聯絡更完整,戰鬥守軍 +1 XP。",
+		"effect": "守軍 +1 XP",
+		"defender_xp_bonus": 1,
+	},
+	"naval_base": {
+		"label": "海軍基地",
+		"description": "港區補給支撐守勢,戰鬥生成強度 +1。",
+		"effect": "守軍生成強度 +1",
+		"defender_strength_delta": 1,
+	},
+	"jungle_front": {
+		"label": "叢林縱深",
+		"description": "地方步兵熟悉隱蔽路線,戰鬥多 1 支步兵支援。",
+		"effect": "守軍步兵支援 +1",
+		"defender_support_types": ["infantry"],
+	},
+	"oilfield": {
+		"label": "油田設施",
+		"description": "燃料與工兵資材提高守備韌性,戰鬥生成強度 +1。",
+		"effect": "守軍生成強度 +1",
+		"defender_strength_delta": 1,
+	},
+}
 const THEATER_REINFORCEMENT_REWARD := "theater_reinforcement"
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
@@ -133,6 +186,69 @@ static func can_transfer(state: Dictionary, map_data: Dictionary, from_id: Strin
 
 static func defense_strength(region: Dictionary) -> int:
 	return int(region.get("strength", 0)) + int(region.get("fort_level", 0)) * 2
+
+static func region_traits(region: Dictionary) -> Array:
+	return _normalise_region_traits(region.get("region_traits", []))
+
+static func region_trait_summary(region: Dictionary) -> String:
+	var labels: Array[String] = []
+	for trait_id in region_traits(region):
+		var trait_def: Dictionary = REGION_TRAITS.get(String(trait_id), {})
+		var label := String(trait_def.get("label", trait_id))
+		if label != "":
+			labels.append(label)
+	return "、".join(labels)
+
+static func region_trait_battle_context(region: Dictionary) -> Dictionary:
+	var traits := region_traits(region)
+	var notes: Array[String] = []
+	var support_types: Array[String] = []
+	var defender_strength_delta := 0
+	var defender_xp_bonus := 0
+	for trait_id in REGION_TRAIT_ORDER:
+		if not traits.has(trait_id):
+			continue
+		var trait_def: Dictionary = REGION_TRAITS.get(trait_id, {})
+		defender_strength_delta += int(trait_def.get("defender_strength_delta", 0))
+		defender_xp_bonus += int(trait_def.get("defender_xp_bonus", 0))
+		for support_type in trait_def.get("defender_support_types", []):
+			support_types.append(String(support_type))
+		var effect := String(trait_def.get("effect", ""))
+		if effect != "":
+			notes.append("%s: %s" % [String(trait_def.get("label", trait_id)), effect])
+	return {
+		"traits": traits,
+		"notes": notes,
+		"defender_strength_delta": defender_strength_delta,
+		"defender_xp_bonus": defender_xp_bonus,
+		"defender_support_types": support_types,
+	}
+
+static func apply_region_trait_to_garrison(garrison: Array, trait_context: Dictionary) -> Array:
+	var out := apply_attack_preparation_to_garrison(garrison, {
+		"attacker_xp_bonus": int(trait_context.get("defender_xp_bonus", 0)),
+	})
+	var xp_bonus := int(trait_context.get("defender_xp_bonus", 0))
+	var rank := CombatModifiers.rank_for_xp(xp_bonus)
+	var strength_delta := int(trait_context.get("defender_strength_delta", 0))
+	if strength_delta > 0:
+		for support_type in ConquestRecruit.generate_force(strength_delta):
+			out.append({
+				"id": -1,
+				"type": String(support_type),
+				"xp": xp_bonus,
+				"rank": rank,
+				"name": "地區守備",
+			})
+	for support_type in trait_context.get("defender_support_types", []):
+		out.append({
+			"id": -1,
+			"type": String(support_type),
+			"xp": xp_bonus,
+			"rank": rank,
+			"name": "地區支援",
+		})
+	return out
 
 static func fortification_support_types(region: Dictionary) -> Array:
 	var level := clampi(int(region.get("fort_level", 0)), 0, 3)
@@ -843,10 +959,22 @@ static func _region_from_map_def(region: Dictionary) -> Dictionary:
 		"fort_level": int(region.get("fort_level", 0)),
 		"logistics_level": int(region.get("logistics_level", 0)),
 		"training_level": clampi(int(region.get("training_level", 0)), 0, TRAINING_MAX_LEVEL),
+		"region_traits": _normalise_region_traits(region.get("region_traits", [])),
 		"strength": int(region.get("production", 1)) + 2,
 		"garrison": [],
 		"neighbors": region.get("neighbors", []),
 	}
+
+static func _normalise_region_traits(raw_traits) -> Array:
+	var out: Array = []
+	if typeof(raw_traits) != TYPE_ARRAY:
+		return out
+	for raw_trait in raw_traits:
+		var trait_id := String(raw_trait)
+		if trait_id == "" or not REGION_TRAITS.has(trait_id) or out.has(trait_id):
+			continue
+		out.append(trait_id)
+	return out
 
 static func _completed_theater_objective_ids_for_regions(regions: Dictionary, player_country: String, map_data: Dictionary) -> Dictionary:
 	var completed := {}

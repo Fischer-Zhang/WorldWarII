@@ -23,10 +23,53 @@ func _init() -> void:
 	else: fail_count += 1
 	if _test_secondary_objectives_remap_to_conquest_player(): pass_count += 1
 	else: fail_count += 1
+	if _test_region_trait_context_applies_to_defender(): pass_count += 1
+	else: fail_count += 1
 	if _test_conquest_generals(): pass_count += 1
 	else: fail_count += 1
 	print("ConquestBattleSetup tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
+
+func _test_region_trait_context_applies_to_defender() -> bool:
+	var scenario := _themed()
+	var pending := {
+		"player_faction": "germany",
+		"enemy_faction": "soviet",
+		"attacker_garrison": [
+			{"id": 1, "type": "infantry", "xp": 0, "rank": 0, "name": "a1"},
+		],
+		"defender_types": ["infantry"],
+		"defender_support_types": ["mg_team"],
+		"defender_xp_bonus": 2,
+		"role": "attack",
+	}
+	ConquestBattleSetup.apply(scenario, pending)
+	var enemy_units: Array = []
+	var seen := {}
+	for u in scenario["units"]:
+		var unit: Dictionary = u
+		if String(unit.get("faction", "")) != "soviet":
+			continue
+		enemy_units.append(unit)
+		if int(unit.get("xp", 0)) != 2 or int(unit.get("rank", 0)) != 1:
+			printerr("FAIL: defender trait XP should apply to every defender entry: %s" % str(unit))
+			return false
+		var at: Array = unit.get("at", [])
+		var key := "%d,%d" % [int(at[0]), int(at[1])]
+		if seen.has(key):
+			printerr("FAIL: defender support should not stack on generated defender slots: %s" % str(enemy_units))
+			return false
+		seen[key] = true
+	if enemy_units.size() != 2:
+		printerr("FAIL: defender support should add one extra defender, got %d" % enemy_units.size())
+		return false
+	var types := {}
+	for unit in enemy_units:
+		types[String((unit as Dictionary).get("type", ""))] = true
+	if types.has("infantry") and types.has("mg_team"):
+		return true
+	printerr("FAIL: defender trait context should preserve base defender and support type: %s" % str(enemy_units))
+	return false
 
 func _test_conquest_generals() -> bool:
 	# Player commanders ride in on each garrison record's general_id; AI defenders

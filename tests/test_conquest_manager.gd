@@ -48,6 +48,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_region_traits():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_theater_objective_status():
 		pass_count += 1
 	else:
@@ -483,6 +488,64 @@ func _test_defense_preparations() -> bool:
 	var blocked := ConquestManager.prepare_defense(state, map_data, "alpha", "strongpoints")
 	if bool(blocked.get("ok", false)):
 		printerr("FAIL: defense preparation should not spend the source below 1 strength")
+		return false
+	return true
+
+func _test_region_traits() -> bool:
+	var state := {"version": 2, "campaigns": {}}
+	var map_data := _test_map()
+	map_data["regions"][1]["region_traits"] = [
+		"industrial_hub",
+		"fortress_line",
+		"rail_junction",
+		"unknown_trait",
+		"fortress_line",
+	]
+	var conquest := ConquestManager.conquest_state(state, map_data)
+	var bravo: Dictionary = conquest.get("regions", {}).get("bravo", {})
+	var traits := ConquestManager.region_traits(bravo)
+	if traits.size() != 3 \
+			or not traits.has("industrial_hub") \
+			or not traits.has("fortress_line") \
+			or not traits.has("rail_junction"):
+		printerr("FAIL: region traits should normalise known unique ids: %s" % str(traits))
+		return false
+	var summary := ConquestManager.region_trait_summary(bravo)
+	if summary.find("工業樞紐") == -1 or summary.find("要塞防線") == -1 or summary.find("鐵路樞紐") == -1:
+		printerr("FAIL: region trait summary should expose labels: %s" % summary)
+		return false
+	var context := ConquestManager.region_trait_battle_context(bravo)
+	if int(context.get("defender_strength_delta", 0)) != 1 \
+			or int(context.get("defender_xp_bonus", 0)) != 1 \
+			or not (context.get("defender_support_types", []) as Array).has("mg_team") \
+			or (context.get("notes", []) as Array).size() != 3:
+		printerr("FAIL: region trait battle context should combine strength, support, XP and notes: %s" % str(context))
+		return false
+	var defenders := ConquestManager.apply_region_trait_to_garrison(
+		[{"id": 1, "type": "infantry", "xp": 1, "rank": 0, "name": "d1"}],
+		context
+	)
+	if defenders.size() != 3 \
+			or int((defenders[0] as Dictionary).get("xp", 0)) != 2 \
+			or int((defenders[0] as Dictionary).get("rank", 0)) != 1 \
+			or String((defenders[1] as Dictionary).get("type", "")) != "infantry" \
+			or String((defenders[2] as Dictionary).get("type", "")) != "mg_team":
+		printerr("FAIL: region trait context should boost defenders and add support: %s" % str(defenders))
+		return false
+	var saved_state := {
+		"version": 2,
+		"campaigns": {},
+		"conquest": {
+			"regions": {
+				"bravo": {"owner": "b", "region_traits": ["oilfield"]},
+			},
+		},
+	}
+	var migrated := ConquestManager.conquest_state(saved_state, map_data)
+	var migrated_bravo: Dictionary = migrated.get("regions", {}).get("bravo", {})
+	var migrated_traits := ConquestManager.region_traits(migrated_bravo)
+	if (migrated_traits as Array).has("oilfield") or not (migrated_traits as Array).has("industrial_hub"):
+		printerr("FAIL: migration should keep map-authored traits, not saved stale traits")
 		return false
 	return true
 
