@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 UNITS_PATH = ROOT / "data" / "units.json"
 TERRAINS_PATH = ROOT / "data" / "terrains.json"
 CAMPAIGNS_PATH = ROOT / "data" / "campaigns.json"
+CONQUEST_MAP_PATH = ROOT / "data" / "conquest_map.json"
 SCENARIOS_GLOB = str(ROOT / "data" / "scenarios" / "*.json")
 DEFAULT_OUTPUT = ROOT / "docs" / "progress" / "scenario_probe.md"
 
@@ -47,6 +48,15 @@ SUPPRESSION_BY_TYPE = {
     "light_tank": 1,
     "medium_tank": 1,
     "artillery": 3,
+}
+REGION_TRAIT_EFFECTS = {
+    "industrial_hub": {"strength": 1},
+    "fortress_line": {"support": ["mg_team"]},
+    "rail_junction": {"xp": 1},
+    "airfield_network": {"xp": 1},
+    "naval_base": {"strength": 1},
+    "jungle_front": {"support": ["infantry"]},
+    "oilfield": {"strength": 1},
 }
 
 
@@ -775,6 +785,76 @@ def conquest_primary_check_text(objective: dict[str, Any]) -> str:
         if not valid_offset_target(objective.get("target", [])):
             return "missing target"
     return "varied"
+
+
+def conquest_region_trait_rows(conquest_map: dict[str, Any]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for region in conquest_map.get("regions", []):
+        if not isinstance(region, dict):
+            continue
+        traits = [str(trait) for trait in region.get("region_traits", [])]
+        rows.append([
+            str(region.get("id", "")),
+            str(region.get("owner", "")),
+            conquest_region_logistics_text(region),
+            ", ".join(traits) if traits else "none",
+            conquest_region_trait_effect_text(traits),
+            conquest_region_trait_check_text(region, traits),
+        ])
+    return rows
+
+
+def conquest_region_logistics_text(region: dict[str, Any]) -> str:
+    parts = [f"prod {int(region.get('production', 0))}"]
+    if bool(region.get("supply_source", False)):
+        parts.append("supply")
+    if bool(region.get("port", False)):
+        parts.append("port")
+    rail_count = len(region.get("rail_neighbors", [])) if isinstance(region.get("rail_neighbors", []), list) else 0
+    if rail_count > 0:
+        parts.append(f"rail {rail_count}")
+    return ", ".join(parts)
+
+
+def conquest_region_trait_effect_text(traits: list[str]) -> str:
+    strength = 0
+    xp = 0
+    support: list[str] = []
+    for trait in traits:
+        effect = REGION_TRAIT_EFFECTS.get(trait, {})
+        strength += int(effect.get("strength", 0))
+        xp += int(effect.get("xp", 0))
+        for unit_type in effect.get("support", []):
+            support.append(str(unit_type))
+    parts: list[str] = []
+    if strength > 0:
+        parts.append(f"strength +{strength}")
+    if support:
+        counts = collections.Counter(support)
+        parts.append("support " + ",".join(f"{unit}:{count}" for unit, count in sorted(counts.items())))
+    if xp > 0:
+        parts.append(f"XP +{xp}")
+    return ", ".join(parts) if parts else "none"
+
+
+def conquest_region_trait_check_text(region: dict[str, Any], traits: list[str]) -> str:
+    notes: list[str] = []
+    if not traits:
+        notes.append("missing trait")
+    unknown = [trait for trait in traits if trait not in REGION_TRAIT_EFFECTS]
+    if unknown:
+        notes.append("unknown " + ",".join(sorted(set(unknown))))
+    if len(set(traits)) != len(traits):
+        notes.append("duplicate trait")
+    if "naval_base" in traits and not bool(region.get("port", False)):
+        notes.append("naval without port")
+    rail_neighbors = region.get("rail_neighbors", [])
+    has_rail = isinstance(rail_neighbors, list) and len(rail_neighbors) > 0
+    if "rail_junction" in traits and not has_rail:
+        notes.append("rail trait without rail")
+    if has_rail and "rail_junction" not in traits:
+        notes.append("rail links missing trait")
+    return "; ".join(notes) if notes else "covered"
 
 
 def valid_offset_target(target: Any) -> bool:
@@ -1613,6 +1693,7 @@ def generate_report() -> str:
     units = load_json(UNITS_PATH)
     terrains = load_json(TERRAINS_PATH)
     campaigns = load_json(CAMPAIGNS_PATH)
+    conquest_map = load_json(CONQUEST_MAP_PATH)
     scenarios = [load_json(Path(path)) for path in sorted(glob.glob(SCENARIOS_GLOB))]
 
     rows: list[list[Any]] = []
@@ -1701,6 +1782,19 @@ def generate_report() -> str:
                 "check",
             ],
             conquest_primary_variety_rows(scenarios),
+        ),
+        "## Conquest Region Trait Coverage",
+        "Focused gate for conquest-map identity: each strategic region should carry deterministic tactical traits that match its logistics and theater role.",
+        table(
+            [
+                "region",
+                "owner",
+                "logistics",
+                "traits",
+                "battle effects",
+                "check",
+            ],
+            conquest_region_trait_rows(conquest_map),
         ),
         "## Terrain Identity Coverage",
         "Focused gate for terrain/theater identity: each non-tutorial battle should expose its dominant terrain signals, objective hooks, and player-side role hooks.",

@@ -198,6 +198,45 @@ Focused gate for conquest templates: attack battles should vary their formal obj
 | conq_pacific_carrier | hold 14,4 2t by T12 | own min 12 enemy min 8 | varied |
 | conq_pacific_island | control 2/3 by T13 | own min 9 enemy min 9 | varied |
 
+## Conquest Region Trait Coverage
+
+Focused gate for conquest-map identity: each strategic region should carry deterministic tactical traits that match its logistics and theater role.
+
+| region | owner | logistics | traits | battle effects | check |
+| --- | --- | --- | --- | --- | --- |
+| north_america | usa | prod 5, supply, port | industrial_hub, naval_base | strength +2 | covered |
+| atlantic | britain | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| britain | britain | prod 4, supply, port | fortress_line, naval_base, airfield_network | strength +1, support mg_team:1, XP +1 | covered |
+| low_countries | germany | prod 3, port, rail 2 | rail_junction, fortress_line | support mg_team:1, XP +1 | covered |
+| northern_france | germany | prod 3, port, rail 3 | rail_junction, fortress_line | support mg_team:1, XP +1 | covered |
+| southern_france | germany | prod 2, port, rail 3 | rail_junction, naval_base | strength +1, XP +1 | covered |
+| germany | germany | prod 6, supply, rail 6 | industrial_hub, rail_junction, fortress_line | strength +1, support mg_team:1, XP +1 | covered |
+| north_sea | germany | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| poland | germany | prod 3, rail 4 | rail_junction, fortress_line | support mg_team:1, XP +1 | covered |
+| ukraine | soviet | prod 4, rail 5 | industrial_hub, rail_junction | strength +1, XP +1 | covered |
+| italy | germany | prod 3, port, rail 3 | naval_base, rail_junction | strength +1, XP +1 | covered |
+| balkans | germany | prod 2, rail 2 | rail_junction, fortress_line | support mg_team:1, XP +1 | covered |
+| leningrad | soviet | prod 3, port, rail 3 | fortress_line, rail_junction, naval_base | strength +1, support mg_team:1, XP +1 | covered |
+| moscow | soviet | prod 6, supply, rail 6 | industrial_hub, rail_junction, fortress_line | strength +1, support mg_team:1, XP +1 | covered |
+| volga | soviet | prod 4, rail 3 | industrial_hub, rail_junction | strength +1, XP +1 | covered |
+| siberia | soviet | prod 3, supply, rail 4 | industrial_hub, rail_junction | strength +1, XP +1 | covered |
+| central_asia | soviet | prod 3, rail 5 | rail_junction, airfield_network | XP +2 | covered |
+| maghreb | britain | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| mediterranean | germany | prod 2, port | naval_base | strength +1 | covered |
+| egypt | britain | prod 3, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| middle_east | neutral | prod 4, port | oilfield, naval_base, airfield_network | strength +2, XP +1 | covered |
+| india | britain | prod 4, supply, port, rail 3 | industrial_hub, rail_junction, jungle_front | strength +1, support infantry:1, XP +1 | covered |
+| north_china | china | prod 3, rail 4 | rail_junction, fortress_line | support mg_team:1, XP +1 | covered |
+| central_china | china | prod 3, supply, rail 3 | industrial_hub, rail_junction | strength +1, XP +1 | covered |
+| south_china | china | prod 2, port, rail 2 | naval_base, rail_junction, jungle_front | strength +1, support infantry:1, XP +1 | covered |
+| manchuria | japan | prod 4, rail 4 | industrial_hub, rail_junction | strength +1, XP +1 | covered |
+| japan_home | japan | prod 5, supply, port, rail 1 | industrial_hub, rail_junction, fortress_line, naval_base, airfield_network | strength +2, support mg_team:1, XP +2 | covered |
+| southeast_asia | japan | prod 4, port | jungle_front, naval_base, oilfield | strength +2, support infantry:1 | covered |
+| north_pacific | usa | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| central_pacific | usa | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+| south_pacific | usa | prod 2, port | naval_base, jungle_front | strength +1, support infantry:1 | covered |
+| pacific | usa | prod 2, port | naval_base, airfield_network | strength +1, XP +1 | covered |
+
 ## Terrain Identity Coverage
 
 Focused gate for terrain/theater identity: each non-tutorial battle should expose its dominant terrain signals, objective hooks, and player-side role hooks.

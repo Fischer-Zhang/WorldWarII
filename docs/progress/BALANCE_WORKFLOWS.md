@@ -85,7 +85,8 @@ Use `python3 tools/scenario_probe.py` to regenerate
 spotter coverage, breach-path distance, terrain-aware breach tempo, artillery
 reposition coverage, objective pressure, secondary pressure, reinforcement
 deltas, secondary reward audits, secondary branch coverage, campaign strategic
-reward coverage, and the Stalingrad/Berlin urban breach focus gate.
+reward coverage, conquest region trait coverage, and the Stalingrad/Berlin
+urban breach focus gate.
 
 Evaluate scenarios in this order:
 

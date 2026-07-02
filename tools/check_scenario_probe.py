@@ -20,6 +20,7 @@ def main() -> None:
     main_scenario_count = count_main_battle_scenarios()
     campaign_count = count_non_tutorial_campaigns()
     conquest_count = count_conquest_scenarios()
+    conquest_region_count = count_conquest_regions()
     require("breach path" in report, "scenario probe missing breach path column")
     require("breach tempo" in report, "scenario probe missing breach tempo column")
     require("artillery reposition" in report, "scenario probe missing artillery reposition column")
@@ -38,6 +39,11 @@ def main() -> None:
         "## Conquest Primary Variety" in report
         and "| scenario | attack objective | objective pressure | check |" in report,
         "scenario probe missing conquest primary variety section",
+    )
+    require(
+        "## Conquest Region Trait Coverage" in report
+        and "| region | owner | logistics | traits | battle effects | check |" in report,
+        "scenario probe missing conquest region trait coverage section",
     )
     require(
         "## Terrain Identity Coverage" in report
@@ -215,6 +221,51 @@ def main() -> None:
     require(
         {"capture", "control", "hold"}.issubset(primary_objective_mix),
         "Conquest primary variety should include capture, control_count and hold objectives",
+    )
+    region_trait_section = section_text(report, "## Conquest Region Trait Coverage")
+    region_trait_rows = [
+        line for line in region_trait_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| region |")
+    ]
+    require(
+        len(region_trait_rows) == conquest_region_count,
+        "Conquest region trait coverage should include every conquest-map region",
+    )
+    require(
+        all(line.endswith("| covered |") for line in region_trait_rows),
+        "Every conquest region trait row should be covered",
+    )
+    trait_ids = set()
+    region_ids = set()
+    for line in region_trait_rows:
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        require(len(parts) >= 6, "Conquest region trait rows should expose all columns")
+        region_ids.add(parts[0])
+        for trait_id in parts[3].split(","):
+            trait_id = trait_id.strip()
+            if trait_id and trait_id != "none":
+                trait_ids.add(trait_id)
+        require(parts[4] != "none", f"{parts[0]} should expose tactical trait effects")
+    require(
+        set(scenario_probe.REGION_TRAIT_EFFECTS.keys()).issubset(trait_ids),
+        "Conquest region trait coverage should use every allowed trait family",
+    )
+    require(
+        {"north_america", "atlantic", "britain", "germany", "poland", "ukraine", "moscow",
+         "maghreb", "egypt", "middle_east", "north_pacific", "pacific", "central_pacific",
+         "japan_home"}.issubset(region_ids),
+        "Conquest region trait coverage should include all theater objective regions",
+    )
+    require(
+        "| japan_home | japan | prod 5, supply, port, rail 1 | industrial_hub, rail_junction, fortress_line, naval_base, airfield_network | strength +2, support mg_team:1, XP +2 | covered |"
+        in report
+        and "| india | britain | prod 4, supply, port, rail 3 | industrial_hub, rail_junction, jungle_front | strength +1, support infantry:1, XP +1 | covered |"
+        in report
+        and "| middle_east | neutral | prod 4, port | oilfield, naval_base, airfield_network | strength +2, XP +1 | covered |"
+        in report,
+        "Conquest region trait coverage should expose capital, jungle and oilfield examples",
     )
     terrain_section = section_text(report, "## Terrain Identity Coverage")
     terrain_rows = [
@@ -438,6 +489,14 @@ def count_conquest_scenarios() -> int:
         if scenario_id.startswith("conq_"):
             total += 1
     return total
+
+
+def count_conquest_regions() -> int:
+    root = Path(__file__).resolve().parents[1]
+    with (root / "data" / "conquest_map.json").open("r", encoding="utf-8") as fh:
+        conquest_map = json.load(fh)
+    regions = conquest_map.get("regions", [])
+    return sum(1 for region in regions if isinstance(region, dict))
 
 
 def section_text(report: str, heading: str) -> str:
