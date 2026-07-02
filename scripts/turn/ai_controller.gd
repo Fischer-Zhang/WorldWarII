@@ -59,6 +59,8 @@ const PRESERVE_HP_THRESHOLD := 0.5  # below half HP the safety pull starts to ri
 const PRESERVE_RANK_WEIGHT := 0.35  # each veteran rank amplifies how hard we pull back
 # Anti gang-up lookahead: concentrated fire is summed but discounted geometrically.
 const GANG_UP_FALLOFF := 0.5
+# Encirclement: penalty scale for hexes whose escape routes are under threat.
+const W_ENCIRCLEMENT := 0.5
 # Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
 const MISTAKE_JITTER_SCALE := 0.6
 
@@ -86,8 +88,15 @@ var _preservation_w: float = 0.5
 var _mistake_rate: int = 0
 var _data_loader = null
 
-# Per-turn cache: player_unit -> Dictionary[Vector2i, int] (reachable hexes)
-var _player_reach_cache: Dictionary = {}
+# Per-turn cache: enemy_unit -> Dictionary[Vector2i, int] (reachable hexes)
+var _enemy_reach_cache: Dictionary = {}
+# Threat/influence map: hex -> {"attack_sum": float, "sources": Array} covering
+# every hex a visible enemy could strike next turn (true pathing reach + weapon
+# range). Lazily rebuilt when the visible-enemy signature changes, so direct
+# _score_position callers (tests, trace tooling) stay correct without extra
+# plumbing (see _ensure_threat_map).
+var _threat_map: Dictionary = {}
+var _threat_map_key: Array = []
 
 func _init(battle_node: Object, ai_personality: String = "aggressive", ai_difficulty: String = "normal") -> void:
 	battle = battle_node
@@ -103,11 +112,13 @@ func _init(battle_node: Object, ai_personality: String = "aggressive", ai_diffic
 
 func plan_for_unit(unit) -> Dictionary:
 	# Returns: { "move_to": Vector2i, "attack": Unit | null, "action": String, "score": float, "reachable": Dictionary }
-	# Invalidate the player-reach cache: a previous AI unit on this turn
-	# may have killed or displaced players, so cached reach is stale.
-	# (Within a single plan_for_unit, the cache still amortises across the
-	# candidate enumeration — it's rebuilt lazily on first lookup.)
-	_player_reach_cache.clear()
+	# Invalidate the enemy-reach cache and threat map: a previous AI unit on
+	# this turn may have killed or displaced enemies, so cached state is stale.
+	# (Within a single plan_for_unit, both still amortise across the candidate
+	# enumeration — they're rebuilt lazily on first lookup.)
+	_enemy_reach_cache.clear()
+	_threat_map = {}
+	_threat_map_key = []
 	var hex_map = battle.hex_map
 	var atk_def: Dictionary = _get_unit_def(unit.type_id)
 	var atk_general: Dictionary = _get_general_def(unit.general_id)
@@ -316,7 +327,9 @@ func plan_trace_for_unit(unit) -> Dictionary:
 	traces.sort_custom(func(a, b):
 		return _trace_sort_score(a) > _trace_sort_score(b)
 	)
-	_player_reach_cache.clear()
+	_enemy_reach_cache.clear()
+	_threat_map = {}
+	_threat_map_key = []
 	return {
 		"unit": unit,
 		"plan": plan,
@@ -367,15 +380,11 @@ func _score_position_breakdown(
 		attack_term = max(attack_term, dmg_score)
 	attack_term *= _attack_w
 
-	# Exposure: only visible enemies are a known threat.
-	var exposure := 0.0
-	for e in visible_enemies:
-		var enemy = e
-		var enemy_def: Dictionary = _get_unit_def(enemy.type_id)
-		var enemy_rng := int(enemy_def.get("range", 1))
-		var enemy_move := int(enemy_def.get("move", 0))
-		if HexCoord.distance(pos, enemy.coord) <= enemy_move + enemy_rng:
-			exposure += float(enemy_def.get("attack", 0)) * 0.5
+	# Exposure: only visible enemies are a known threat. The threat map uses
+	# true pathing reach (ZoC, terrain, occupancy) instead of a raw move+range
+	# radius, so cover behind rivers and blocked lanes reads as actual safety.
+	_ensure_threat_map(visible_enemies, hex_map)
+	var exposure: float = float(_threat_at(pos).get("attack_sum", 0.0)) * 0.5
 	var exposure_term: float = -exposure * _exposure_w
 
 	# Terrain defense bonus
@@ -414,8 +423,32 @@ func _score_position_breakdown(
 	# intact). Always 0 for Normal/Hard, leaving their scores bit-identical.
 	var mistake_term: float = _mistake_jitter(unit, pos)
 
+	# Encirclement: a hex whose exits are themselves under threat is a pocket
+	# in the making. Scales with the fraction of threatened exits and rises
+	# with preservation need, so wounded/veteran units fear pockets harder.
+	var encirclement_term := 0.0
+	if not visible_enemies.is_empty():
+		var open_exits := 0
+		var threatened_exits := 0
+		for n in HexCoord.neighbors(pos):
+			var n_terrain: String = hex_map.terrain_at(n)
+			if n_terrain == "":
+				continue  # off-map
+			var bridged: bool = hex_map.has_method("is_bridged") and hex_map.is_bridged(n)
+			if not bridged and hex_map.has_method("terrain_impassable") \
+					and hex_map.terrain_impassable(n_terrain):
+				continue
+			open_exits += 1
+			if not _threat_at(n).is_empty():
+				threatened_exits += 1
+		if threatened_exits > 0:
+			encirclement_term = -W_ENCIRCLEMENT \
+				* (float(threatened_exits) / float(max(1, open_exits))) \
+				* (1.0 + _preservation_need(unit, atk_def))
+
 	var raw_total: float = dist_term + attack_term + exposure_term + terrain_term \
-		+ role_term + objective_term + lookahead_term + preservation_term + mistake_term
+		+ role_term + objective_term + lookahead_term + preservation_term \
+		+ encirclement_term + mistake_term
 	var total := _apply_personality(raw_total, attack_term, exposure_term)
 	return {
 		"distance": dist_term,
@@ -431,6 +464,7 @@ func _score_position_breakdown(
 		"objective_detail": objective_breakdown,
 		"lookahead": lookahead_term,
 		"preservation": preservation_term,
+		"encirclement": encirclement_term,
 		"mistake": mistake_term,
 		"raw_total": raw_total,
 		"total": total,
@@ -1544,22 +1578,62 @@ func _secondary_destroy_target_score(faction_id: String, enemy) -> float:
 			return SECONDARY_DESTROY_TARGET_BONUS
 	return 0.0
 
+# ---------- threat / influence map ----------
+
+func _threat_signature(visible_enemies: Array) -> Array:
+	# Deterministic validity key: any enemy appearing, moving, dying or changing
+	# suppression (reach) invalidates the map. Direct _score_position callers
+	# (tests, trace tooling) get a transparent rebuild on mismatch.
+	var sig: Array = []
+	for e in visible_enemies:
+		var enemy = e
+		sig.append([enemy.get_instance_id(), enemy.coord, int(enemy.hp), int(enemy.suppression)])
+	return sig
+
+func _ensure_threat_map(visible_enemies: Array, hex_map) -> void:
+	var sig: Array = _threat_signature(visible_enemies)
+	if sig == _threat_map_key:
+		return
+	_threat_map_key = sig
+	_threat_map = {}
+	_enemy_reach_cache.clear()
+	_ensure_enemy_reach_cached(visible_enemies, hex_map)
+	for e in visible_enemies:
+		var enemy = e
+		var enemy_def: Dictionary = _get_unit_def(enemy.type_id)
+		var enemy_attack := float(enemy_def.get("attack", 0))
+		var enemy_range := int(enemy_def.get("range", 1))
+		var strike: Dictionary = {}  # dedup: hexes this enemy can fire on next turn
+		var reach: Dictionary = _enemy_reach_cache[enemy]
+		for fire_pos in reach.keys():
+			for hex in HexCoord.range_within(fire_pos, enemy_range):
+				strike[hex] = true
+		for hex in strike.keys():
+			var cell: Dictionary = _threat_map.get(hex, {"attack_sum": 0.0, "sources": []})
+			cell["attack_sum"] = float(cell["attack_sum"]) + enemy_attack
+			cell["sources"].append(enemy)
+			_threat_map[hex] = cell
+
+func _threat_at(pos: Vector2i) -> Dictionary:
+	# {} means no visible enemy can strike this hex next turn.
+	return _threat_map.get(pos, {})
+
 # ---------- 1-ply lookahead ----------
 
-func _ensure_player_reach_cached(players: Array, hex_map) -> void:
-	for p in players:
-		var player = p
-		if _player_reach_cache.has(player):
+func _ensure_enemy_reach_cached(enemies: Array, hex_map) -> void:
+	for p in enemies:
+		var enemy = p
+		if _enemy_reach_cache.has(enemy):
 			continue
-		var pdef: Dictionary = _get_unit_def(player.type_id)
-		var pmove := int(pdef.get("move", 0)) - CombatEffects.move_penalty(player.suppression)
+		var pdef: Dictionary = _get_unit_def(enemy.type_id)
+		var pmove := int(pdef.get("move", 0)) - CombatEffects.move_penalty(enemy.suppression)
 		pmove = max(0, pmove)
 		var reach: Dictionary = Pathfinding.movement_range(
-			player.coord, pmove, hex_map, hex_map.occupants, player.faction_id, player.type_id
+			enemy.coord, pmove, hex_map, hex_map.occupants, enemy.faction_id, enemy.type_id
 		)
-		# Player can also fire from their current hex without moving
-		reach[player.coord] = 0
-		_player_reach_cache[player] = reach
+		# The enemy can also fire from its current hex without moving
+		reach[enemy.coord] = 0
+		_enemy_reach_cache[enemy] = reach
 
 func _lookahead_counter_damage(
 	ai_unit,
@@ -1575,14 +1649,14 @@ func _lookahead_counter_damage(
 	# into a cluster) without the raw sum causing total paralysis. If the combined
 	# fire could destroy the unit, its remaining HP is added so the AI refuses to
 	# step a wounded unit into an outright kill-zone.
-	_ensure_player_reach_cached(visible_players, hex_map)
+	_ensure_enemy_reach_cached(visible_players, hex_map)
 	var ai_terrain_def: Dictionary = _get_terrain_def(hex_map.terrain_at(candidate))
 	var threats: Array[int] = []
 	for p in visible_players:
 		var player = p
 		var pdef: Dictionary = _get_unit_def(player.type_id)
 		var prange := int(pdef.get("range", 1))
-		var reach: Dictionary = _player_reach_cache[player]
+		var reach: Dictionary = _enemy_reach_cache[player]
 		# Can the player move to anywhere within prange of `candidate`?
 		var in_threat := false
 		for pos in reach.keys():

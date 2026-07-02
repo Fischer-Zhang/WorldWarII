@@ -51,9 +51,9 @@ def main() -> None:
 
     denial_section = section_text(report, "## Objective denial guard")
     require(
-        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation |"
+        "| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement |"
         in denial_section,
-        "AI trace table must expose denial and guard objective scores",
+        "AI trace table must expose denial, guard and encirclement scores",
     )
     denial_match = re.search(
         r"\|\s*1\s*\|[^\n]*\|\s*([0-9.]+)\s*\|\s*[0-9.]+\s*\|\s*[0-9.-]+\s*\|\s*`[^`]*denial:control_count",

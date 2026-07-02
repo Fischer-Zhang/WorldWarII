@@ -933,6 +933,7 @@ func _init() -> void:
 			and components.has("secondary_objective") \
 			and components.has("denial_objective") \
 			and components.has("guard_objective") \
+			and components.has("encirclement") \
 			and components.has("total") \
 			and top.has("fire_support_score") \
 			and top.has("breach_support_score") \
@@ -1091,6 +1092,71 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: AI should rally a shaky unit (got %.2f) but not a steady one (got %.2f)" % [shaky_rally, steady_rally])
+
+	# 26) Threat map: exposure uses true pathing reach — an enemy sealed behind
+	# rivers cannot threaten hexes it has no path to strike, and fogged enemies
+	# contribute nothing.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	var tm_unit := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var sealed_enemy := make_unit("infantry", "allies", Vector2i(4, 0), 10)
+	var tm_known := [{"coord": sealed_enemy.coord, "visible": true, "unit": sealed_enemy}]
+	var tm_def: Dictionary = ai._get_unit_def("infantry")
+	var open_ai := AIController.new(battle, "aggressive", "normal")
+	open_ai._data_loader = ai._data_loader
+	var open_exposure: float = float(open_ai._score_position_breakdown(
+		tm_unit, Vector2i(2, 0), tm_known, [sealed_enemy], battle.hex_map, tm_def, {sealed_enemy.coord: true}
+	).get("exposure", 0.0))
+	for ring_coord in [Vector2i(5, 0), Vector2i(5, -1), Vector2i(4, -1), Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 1)]:
+		battle.hex_map.terrain_overrides[ring_coord] = "river"
+	# Fresh controller: the threat-map signature tracks enemies, not terrain,
+	# so a terrain edit between direct calls needs a fresh cache.
+	var sealed_ai := AIController.new(battle, "aggressive", "normal")
+	sealed_ai._data_loader = ai._data_loader
+	var sealed_exposure: float = float(sealed_ai._score_position_breakdown(
+		tm_unit, Vector2i(2, 0), tm_known, [sealed_enemy], battle.hex_map, tm_def, {sealed_enemy.coord: true}
+	).get("exposure", 0.0))
+	var fogged_exposure: float = float(sealed_ai._score_position_breakdown(
+		tm_unit, Vector2i(2, 0), tm_known, [], battle.hex_map, tm_def, {}
+	).get("exposure", 0.0))
+	if open_exposure < 0.0 and sealed_exposure == 0.0 and fogged_exposure == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: threat map expected open exposure < 0, sealed/fogged == 0; open %.2f sealed %.2f fogged %.2f" % [
+			open_exposure, sealed_exposure, fogged_exposure,
+		])
+
+	# 27) Encirclement: a hex whose exits are all threatened reads worse than an
+	# edge hex with open flanks, and wounded units fear pockets harder.
+	battle.hex_map.terrain_overrides.clear()
+	var pocket_enemy := make_unit("medium_tank", "allies", Vector2i(0, 0), 16)
+	var pocket_known := [{"coord": pocket_enemy.coord, "visible": true, "unit": pocket_enemy}]
+	var pocket_mover := make_unit("medium_tank", "axis", Vector2i(10, 0), 16)
+	var pocket_def: Dictionary = ai._get_unit_def("medium_tank")
+	var enc_ai := AIController.new(battle, "aggressive", "normal")
+	enc_ai._data_loader = ai._data_loader
+	var pocket_enc: float = float(enc_ai._score_position_breakdown(
+		pocket_mover, Vector2i(2, 0), pocket_known, [pocket_enemy], battle.hex_map, pocket_def, {pocket_enemy.coord: true}
+	).get("encirclement", 0.0))
+	var flank_enc: float = float(enc_ai._score_position_breakdown(
+		pocket_mover, Vector2i(6, 0), pocket_known, [pocket_enemy], battle.hex_map, pocket_def, {pocket_enemy.coord: true}
+	).get("encirclement", 0.0))
+	var pocket_hurt := make_unit("medium_tank", "axis", Vector2i(10, 0), 3)
+	pocket_hurt.max_hp = 16
+	var hurt_enc: float = float(enc_ai._score_position_breakdown(
+		pocket_hurt, Vector2i(2, 0), pocket_known, [pocket_enemy], battle.hex_map, pocket_def, {pocket_enemy.coord: true}
+	).get("encirclement", 0.0))
+	if pocket_enc < flank_enc and flank_enc < 0.0 and hurt_enc < pocket_enc:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: encirclement expected pocket %.3f < flank %.3f < 0 and wounded %.3f < pocket" % [
+			pocket_enc, flank_enc, hurt_enc,
+		])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

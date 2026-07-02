@@ -71,6 +71,9 @@ expectations include:
 - suppressed units can Rally when recovery is worth more than other actions
 - wounded/veteran units get a scale-based preservation pull toward safety when no
   profitable kill is available, but a clean kill still overrides retreat
+- exposure comes from a per-plan threat map built on true pathing reach of visible
+  enemies (ZoC, terrain, occupancy), and hexes whose exits are threatened take a
+  scale-based encirclement penalty that rises with preservation need
 - Hard's lookahead sums concentrated player retaliation (anti gang-up), not just
   the single worst attacker, and adds a kill-zone penalty when the sum is lethal
 - difficulty shapes four axes (trade aggression, lookahead, preservation, Easy
