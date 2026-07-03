@@ -1,7 +1,7 @@
 {
   "id": "conq_pacific_carrier",
   "title": "太平洋海空決戰",
-  "briefing": "汪洋中的環礁群島。兩翼島嶼隔著大海,唯一的中央環礁陸橋直通敵陣;搶下中央港鎮便能扼住整片海域。",
+  "briefing": "汪洋中的環礁群島。兩翼島嶼隔著大海,唯一的中央環礁陸橋直通敵陣;搶下中央港鎮便能扼住整片海域。奪取通信站、守住錨地並標定岸防砲廓,可在戰略地圖上同時削弱敵戰力、產能與工事。",
   "map": {
     "width": 24,
     "height": 16,
@@ -73,6 +73,16 @@
       "rewards": [{"type": "repair_hp", "amount": 2}],
       "strategic_effects": [{"type": "conquest_disrupt_enemy_production", "amount": 1}],
       "requires": "carrier_atoll_radio"
+    },
+    {
+      "id": "carrier_casemate_spotting",
+      "type": "recon_hex",
+      "label": "標定岸防砲廓",
+      "faction": "allies",
+      "target": [20, 4],
+      "rewards": [{"type": "strip_enemy_dig_in", "amount": 1, "radius": 2}],
+      "strategic_effects": [{"type": "conquest_reduce_enemy_fortification", "amount": 1}],
+      "requires": "carrier_lagoon_anchor"
     }
   ],
   "conquest_victory": {

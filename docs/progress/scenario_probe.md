@@ -23,7 +23,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | conq_mediterranean_coast | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 44/384 (11%) | none | n/a | n/a | n/a | n/a | 海岸補給港 12,11 capture min 8 XP 1, conquest prod -1; 控制丘陵公路 17,5 hold 2t after med_coast_supply_port min 16 enemy supp +1 R2, conquest enemy -1 | none |
 | conq_middle_east_oilfields | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 油田泵站 12,4 capture min 10 XP 1, conquest enemy -2; 控制輸油管線 14,9 capture after oilfield_pump_station min 14 repair 2, conquest prod -1 | none |
 | conq_north_sea_raid | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港灣油料庫 11,4 capture min 9 XP 1, conquest prod -1; 偵察海岸雷達站 17,11 recon after north_sea_harbor_cache min 16 enemy supp +1 R2, conquest enemy -1 | none |
-| conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1; 守住潟湖錨地 14,4 hold 2t after carrier_atoll_radio min 12 repair 2, conquest prod -1 | none |
+| conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1; 守住潟湖錨地 14,4 hold 2t after carrier_atoll_radio min 12 repair 2, conquest prod -1; 標定岸防砲廓 20,4 recon after carrier_lagoon_anchor min 18 enemy dig -1 R2, conquest fort -1 | none |
 | conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | 中央港鎮倉庫 11,6 capture min 9 XP 1, conquest enemy -1; 偵察島內洞口 14,8 recon after island_port_cache min 13 enemy dig -1 R2, conquest fort -1 | none |
 | east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 0 | 突破機槍據點 5,3 destroy min 18 XP 1, enemy supp +1 R2; 南側警戒線 5,4 recon after break_maxim_nest branch kharkov_city_choice min 19 XP 1, enemy dig -1 R2, campaign +1p; 奪取野戰修理所 6,2 capture after break_maxim_nest branch kharkov_city_choice min 17 XP 1, repair 2 | none |
 | east_06_dnieper_1943 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 29/160 (18%); soviet 37/160 (23%) | soviet 61/160 (38%), spots 0 | soviet: eng min 5, art 0/3, targets 3 | soviet: eng turns 2 | soviet: art move 0/3 | soviet target 9,5 own min 6 enemy min 1 | 控制東岸渡口 5,4 hold 2t min 1 XP 1, reinforce -2t; 偵察西岸觀測點 12,4 recon after dnieper_east_crossing min 8 XP 1, enemy dig -1 R2 | soviet +77.6; T6 2 units |
@@ -151,6 +151,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | conq_north_sea_raid | 偵察海岸雷達站 | recon 17,11 after north_sea_harbor_cache | allies | own 16 / enemy 5 | enemy supp +1 R2, conquest enemy -1 | enemy closer; tactical suppression reward R2; conquest pressure -1 |
 | conq_pacific_carrier | 環礁通信站 | capture 11,3 | allies | own 9 / enemy 10 | XP 1, conquest enemy -1 | conquest pressure -1 |
 | conq_pacific_carrier | 守住潟湖錨地 | hold 2t 14,4 after carrier_atoll_radio | allies | own 12 / enemy 8 | repair 2, conquest prod -1 | enemy closer; damage recovery; conquest production -1 |
+| conq_pacific_carrier | 標定岸防砲廓 | recon 20,4 after carrier_lagoon_anchor | allies | own 18 / enemy 2 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
 | conq_pacific_island | 中央港鎮倉庫 | capture 11,6 | allies | own 9 / enemy 11 | XP 1, conquest enemy -1 | conquest pressure -1 |
 | conq_pacific_island | 偵察島內洞口 | recon 14,8 after island_port_cache | allies | own 13 / enemy 9 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
 | east_05_kharkov_1943 | 突破機槍據點 | destroy 5,3 | axis | own 18 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
@@ -220,7 +221,7 @@ Focused gate for conquest templates: each conq_* battle should give optional obj
 | conq_mediterranean_coast | 2 | 2 | strength -1, production -1 | covered |
 | conq_middle_east_oilfields | 2 | 2 | strength -2, production -1 | covered |
 | conq_north_sea_raid | 2 | 2 | strength -1, production -1 | covered |
-| conq_pacific_carrier | 2 | 2 | strength -1, production -1 | covered |
+| conq_pacific_carrier | 3 | 3 | strength -1, fort -1, production -1 | covered |
 | conq_pacific_island | 2 | 2 | strength -1, fort -1 | covered |
 
 ## Conquest Primary Variety
@@ -303,7 +304,7 @@ Focused gate for terrain/theater identity: each non-tutorial battle should expos
 | conq_mediterranean_coast | open | sea:7% | capture:1, hold_hex_turns:1, hold_turns:1; targets town:2 | armor:1, artillery:1, suppression:1 | tracked |
 | conq_middle_east_oilfields | desert | desert:79% | capture:2, control_count:1; targets town:5 | armor:2, artillery:1, scout:1 | covered |
 | conq_north_sea_raid | sea | sea:12%, town:7% | capture:2, recon_hex:1; targets town:3 | armor:2, artillery:1, recon:1, scout:1, suppression:1 | covered |
-| conq_pacific_carrier | sea | sea:17%, town:6% | capture:1, hold_hex_turns:1, hold_turns:1; targets town:3 | armor:2, artillery:1, scout:1 | covered |
+| conq_pacific_carrier | sea | sea:17%, town:6% | capture:1, hold_hex_turns:1, hold_turns:1, recon_hex:1; targets jungle:1, town:3 | armor:2, artillery:1, breach:1, recon:1, scout:1 | covered |
 | conq_pacific_island | jungle, sea | sea:10%, jungle:8% | capture:1, control_count:1, recon_hex:1; targets town:5 | armor:1, breach:1, mg:1, recon:1, scout:1 | covered |
 | east_05_kharkov_1943 | open | forest:7%, town:5% | capture:2, destroy_unit:1, recon_hex:1; targets town:4 | armor:5, artillery:1, breach:1, recon:1, scout:1, suppression:1 | tracked |
 | east_06_dnieper_1943 | river, forest | forest:11%, river:9% | capture:1, hold_turns:1, recon_hex:1; targets town:1 | armor:2, artillery:1, breach:1, engineer:1, recon:1, scout:1 | covered |

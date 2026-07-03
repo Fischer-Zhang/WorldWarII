@@ -102,8 +102,12 @@ the tactical battle (see Battle handoff).
 `ConquestBattleSetup.apply` takes the region's themed scenario template and keeps
 its terrain, but replaces factions, rosters and victory:
 
-- **Attacker** wins by **eliminating** the defenders; the **defender** wins by
-  **surviving 12 turns** (`DEFENDER_SURVIVE_TURNS`).
+- On **attacks**, the template's `conquest_victory` decides the tactical win
+  shape: capture a key hex, control several landmarks, hold a hex for consecutive
+  turns, or fall back to elimination. The defender survives to the same turn
+  limit.
+- On player **defenses**, the AI attacker uses elimination and the player wins
+  by **surviving 12 turns** (`DEFENDER_SURVIVE_TURNS`).
 - Your garrison deploys with its veteran XP/rank and its assigned generals; the
   defending force is generated from strength and given free national generals.
 - The target region's `region_traits` are folded into the battle context. Traits
@@ -111,7 +115,10 @@ its terrain, but replaces factions, rosters and victory:
   defender XP. The briefing and conquest detail panel show the active trait
   effects before deployment.
 - After the battle, survivors carry their XP/rank back into the garrison record,
-  and any secondary-objective strategic effects are applied to the map.
+  and secondary objectives can carry strategic effects back to the map. On an
+  attack that fails short of conquest they can still reduce the target's
+  strength, fortification or production pressure; during player defenses they
+  can blunt the attacking source region even when the front line holds or falls.
 
 ## The AI turn (after "End turn")
 

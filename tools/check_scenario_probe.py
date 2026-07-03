@@ -254,6 +254,12 @@ def main() -> None:
         and "| conq_middle_east_oilfields | 2 | 2 | strength -2, production -1 | covered |" in report,
         "Conquest secondary coverage should expose varied strategic effect amounts",
     )
+    require(
+        "| conq_pacific_carrier | 3 | 3 | strength -1, fort -1, production -1 | covered |" in report
+        and "標定岸防砲廓 | recon 20,4 after carrier_lagoon_anchor | allies | own 18 / enemy 2 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1"
+        in report,
+        "Pacific carrier conquest coverage should expose chained three-axis strategic pressure",
+    )
     conquest_primary_section = section_text(report, "## Conquest Primary Variety")
     conquest_primary_rows = [
         line for line in conquest_primary_section.splitlines()

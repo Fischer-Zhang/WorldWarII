@@ -38,6 +38,10 @@ def main() -> None:
         "橋面工兵補給 [capture 10,12 after nijmegen_south_bridgehead] (XP 1, supp -2, repair 1)" in report,
         "Market Garden should expose the bridge engineer sustain cache",
     )
+    require(
+        "標定岸防砲廓 [recon 20,4 after carrier_lagoon_anchor] (enemy dig -1 R2, conquest fort -1)" in report,
+        "Pacific carrier should expose the chained conquest fortification pressure objective",
+    )
     require("east_10_berlin_1945" in report, "scenario report missing Berlin row")
     require(
         "soviet: eng 1, art 1, rocket 0, mg 0" in report,
