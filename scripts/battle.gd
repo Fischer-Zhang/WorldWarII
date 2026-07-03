@@ -216,6 +216,38 @@ func _battle_map_screen_rect() -> Rect2:
 	var size := Vector2(max(320.0, viewport_size.x - 280.0), max(240.0, viewport_size.y - 112.0))
 	return Rect2(origin, size)
 
+func _input(event: InputEvent) -> void:
+	# Tab / Shift+Tab cycle to the next player unit that still has an action.
+	# Handled here (not _unhandled_key_input) because the GUI consumes Tab for
+	# focus traversal before it reaches unhandled input.
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo or key.keycode != KEY_TAB:
+		return
+	if _can_cycle_units():
+		_cycle_unacted_unit(not key.shift_pressed)
+		get_viewport().set_input_as_handled()
+
+func _can_cycle_units() -> bool:
+	return phase in [Phase.IDLE, Phase.UNIT_SELECTED] \
+		and not ai_running \
+		and turn_manager.current_faction() == player_faction_id
+
+func _cycle_unacted_unit(forward: bool) -> void:
+	var candidates: Array[Unit] = []
+	for u in units:
+		if u.faction_id == player_faction_id and u.is_alive() \
+				and not u.routed and not u.is_done_for_turn():
+			candidates.append(u)
+	if candidates.is_empty():
+		return
+	var start := candidates.find(selected_unit)
+	var step := 1 if forward else -1
+	var next_idx := (start + step + candidates.size()) % candidates.size() if start != -1 \
+		else (0 if forward else candidates.size() - 1)
+	var target: Unit = candidates[next_idx]
+	_select_unit(target)
+	camera.focus_on(target.global_position, _battle_map_screen_rect())
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	# Keyboard shortcuts mirror the on-screen buttons. O/R only fire when their
 	# button is actually available (same gating as a click); H toggles the

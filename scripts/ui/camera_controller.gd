@@ -59,3 +59,13 @@ func fit_world_rect(world_rect: Rect2, screen_rect: Rect2 = Rect2(), max_initial
 	var viewport_center := viewport_rect.size * 0.5
 	var screen_center := screen_rect.position + screen_rect.size * 0.5
 	position = world_center - (screen_center - viewport_center) / zoom_v
+
+# Center a world point at the middle of screen_rect (the visible map area,
+# minus the HUD panels) without changing zoom. Used by the Tab unit-cycle.
+func focus_on(world_pos: Vector2, screen_rect: Rect2 = Rect2()) -> void:
+	var viewport_rect := get_viewport_rect()
+	if screen_rect.size.x <= 0.0 or screen_rect.size.y <= 0.0:
+		screen_rect = viewport_rect
+	var viewport_center := viewport_rect.size * 0.5
+	var screen_center := screen_rect.position + screen_rect.size * 0.5
+	position = world_pos - (screen_center - viewport_center) / zoom.x

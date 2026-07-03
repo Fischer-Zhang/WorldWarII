@@ -277,10 +277,13 @@ func _draw() -> void:
 		if quality != "":
 			var ring_color: Color = GENERAL_QUALITY_COLOR.get(quality, Color.WHITE)
 			draw_arc(Vector2.ZERO, RADIUS + 3.0, 0, TAU, 32, ring_color, 2.5)
-	# Faction-colored circle
+	# Faction-colored circle. A spent (already acted) unit reads clearly dimmer —
+	# both the fill and the type label desaturate — so the player can scan the
+	# board for units that still have an action left (also see Tab-cycle).
+	var spent := is_done_for_turn()
 	var fill_color := faction_color
-	if is_done_for_turn():
-		fill_color = fill_color.darkened(0.4)
+	if spent:
+		fill_color = fill_color.darkened(0.62)
 	draw_circle(Vector2.ZERO, RADIUS, fill_color)
 	draw_arc(Vector2.ZERO, RADIUS, 0, TAU, 32, Color(0, 0, 0, 0.7), 2.0)
 
@@ -289,8 +292,9 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var font_size := 18
 	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+	var label_color := Color(0.55, 0.55, 0.58) if spent else Color(1, 1, 1)
 	draw_string(font, Vector2(-text_size.x / 2.0, text_size.y / 3.0), label,
-		HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(1, 1, 1))
+		HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, label_color)
 
 	# HP bar (only if damaged)
 	if hp < max_hp:
