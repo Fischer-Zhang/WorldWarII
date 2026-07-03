@@ -17,7 +17,7 @@ func _init() -> void:
 		"road_checkpoint",
 		[{"type": "xp", "amount": 1}],
 		3,
-		[{"type": "campaign_bonus_points", "amount": 1}]
+		[{"type": "conquest_reduce_enemy_strength", "amount": 1}]
 	)
 	if log.events.size() == 1:
 		pass_count += 1

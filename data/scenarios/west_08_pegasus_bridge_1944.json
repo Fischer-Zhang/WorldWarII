@@ -78,8 +78,7 @@
       "target": [9, 4],
       "requires": ["pegasus_hold_bridge"],
       "exclusive_group": "pegasus_bridge_choice",
-      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}],
-      "strategic_effects": [{"type": "campaign_bonus_points", "amount": 1}]
+      "rewards": [{"type": "xp", "amount": 1}, {"type": "repair_hp", "amount": 2}]
     }
   ],
   "victory": {

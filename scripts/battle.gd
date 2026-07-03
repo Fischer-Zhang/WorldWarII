@@ -569,28 +569,26 @@ func _handle_game_over(winner: String) -> void:
 		var scenario_order: Array = campaign.get("scenario_order", [])
 		var scenario_id := String(scenario.get("id", ""))
 		var survivors: Array = units.filter(func(u): return u.is_alive())
-		var strategic_effects := _completed_secondary_strategic_effects()
-		var strategic_bonus_points := _campaign_bonus_points(strategic_effects)
 		var progress_before := int(CampaignManager.campaign_state(
 			camp_state, GameState.current_campaign_id, scenario_order
 		).get("progress", 0))
 		if player_won:
 			CampaignManager.complete_scenario(
-				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors, strategic_effects
+				camp_state, GameState.current_campaign_id, scenario_order, scenario_id, survivors
 			)
 			var progress_after := int(CampaignManager.campaign_state(
 				camp_state, GameState.current_campaign_id, scenario_order
 			).get("progress", 0))
-			campaign_reward_points = (2 if progress_after > progress_before else 0) + strategic_bonus_points
+			campaign_reward_points = 2 if progress_after > progress_before else 0
 			next_campaign_scenario_id = CampaignManager.current_scenario_id(
 				camp_state, GameState.current_campaign_id, scenario_order
 			)
 		else:
 			# Defeat: snapshot survivors but don't advance progress.
 			CampaignManager.complete_scenario(
-				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors, strategic_effects
+				camp_state, GameState.current_campaign_id, scenario_order, "__no_advance__", survivors
 			)
-			campaign_reward_points = strategic_bonus_points
+			campaign_reward_points = 0
 		# Steer the Back button to the campaign scene rather than scenario_select.
 		menu_button.text = "返回戰役地圖"
 		lounge_button.visible = true
@@ -2327,16 +2325,6 @@ func _completed_secondary_strategic_effects() -> Array[Dictionary]:
 		for effect in SecondaryObjectiveRules.strategic_effects(objective):
 			out.append(effect)
 	return out
-
-func _campaign_bonus_points(effects: Array) -> int:
-	var total := 0
-	for effect in effects:
-		if typeof(effect) != TYPE_DICTIONARY:
-			continue
-		var item: Dictionary = effect
-		if String(item.get("type", "")) == "campaign_bonus_points":
-			total += max(0, int(item.get("amount", 0)))
-	return total
 
 func _trigger_overwatch_along_path(mover: Unit, path: Array) -> int:
 	return OverwatchResolver.trigger_along_path(

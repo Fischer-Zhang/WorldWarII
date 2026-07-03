@@ -1666,8 +1666,6 @@ func _secondary_objective_future_strategic_value(objective: Dictionary) -> float
 	var value := 0.0
 	for effect in SecondaryObjectiveRules.strategic_effects(objective):
 		match String(effect.get("type", "")):
-			"campaign_bonus_points":
-				value += float(effect.get("amount", 0)) * 0.6
 			"conquest_reduce_enemy_strength":
 				value += float(effect.get("amount", 0)) * 0.45
 			"conquest_reduce_enemy_fortification":

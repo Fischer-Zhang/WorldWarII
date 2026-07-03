@@ -65,15 +65,16 @@ func _init() -> void:
 		east_order,
 		"04_kursk_1943",
 		[],
-		[{"type": "campaign_bonus_points", "amount": 1}]
+		[{"type": "conquest_reduce_enemy_strength", "amount": 1}]
 	)
+	east_state = CampaignManager.campaign_state(state, "east", east_order)
 	if int(east_state.get("progress", 0)) == 2 \
-			and int(east_state.get("bonus_points", 0)) == 1 \
-			and LoungeManager.total_points(state) == 8:
+			and int(east_state.get("bonus_points", 0)) == 0 \
+			and LoungeManager.total_points(state) == 7:
 		pass_count += 1
 	else:
 		fail_count += 1
-		printerr("FAIL: campaign strategic effects should add lounge resource points")
+		printerr("FAIL: campaign completion should ignore cross-battle strategic effects")
 
 	var old_save := {
 		"version": 1,

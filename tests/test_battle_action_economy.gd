@@ -465,7 +465,6 @@ func _run() -> void:
 				{"type": "suppress_enemies", "amount": 1, "radius": 1},
 				{"type": "strip_enemy_dig_in", "amount": 1, "radius": 1},
 			],
-			"strategic_effects": [{"type": "campaign_bonus_points", "amount": 1}],
 		}
 		battle.scenario["secondary_objectives"] = [strategic_reward_objective]
 		var reward_text: String = battle._complete_secondary_objective(
@@ -488,12 +487,11 @@ func _run() -> void:
 				and near_reward_ok \
 				and far_reward_ok \
 				and dig_reward_ok \
-				and strategic_effects.size() == 1 \
+				and strategic_effects.is_empty() \
 				and reward_text.find("戰地補給") != -1 \
 				and reward_text.find("援軍提前 2T") != -1 \
 				and reward_text.find("敵壓制 +1 R1") != -1 \
-				and reward_text.find("敵構工 -1 R1") != -1 \
-				and reward_text.find("戰役資源 +1") != -1:
+				and reward_text.find("敵構工 -1 R1") != -1:
 			pass_count += 1
 		else:
 			fail_count += 1

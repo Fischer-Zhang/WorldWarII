@@ -24,7 +24,6 @@ ALLOWED_SECONDARY_REWARD_TYPES = {
     "strip_enemy_dig_in",
 }
 ALLOWED_SECONDARY_STRATEGIC_EFFECT_TYPES = {
-	"campaign_bonus_points",
 	"conquest_reduce_enemy_strength",
 	"conquest_reduce_enemy_fortification",
 	"conquest_disrupt_enemy_production",

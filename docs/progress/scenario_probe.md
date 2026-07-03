@@ -5,7 +5,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | scenario | suppression sources | artillery coverage | spotter coverage | breach path | breach tempo | artillery reposition | objective pressure | secondary pressure | reinforcement delta |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00_sandbox | allies mg_team:1, rocket_artillery:1; axis artillery:1, rocket_artillery:1 | allies 24/384 (6%); axis 54/384 (14%) | axis 43/384 (11%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | none | none |
-| 01_sedan_1940 | allies mg_team:2; axis artillery:1 | axis 33/384 (9%) | axis 64/384 (17%), spots 1 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 1/3 | axis target 20,14 own min 2 enemy min 0 | 中路渡口 13,5 recon min 9 XP 1, enemy supp +1 R2; 橋頭補給 15,5 capture after sedan_crossing_recon branch sedan_crossing_choice min 7 XP 1, repair 2; 清除南翼機槍 3,13 destroy after sedan_crossing_recon branch sedan_crossing_choice min 18 XP 1, enemy supp +1 R2, campaign +1p | none |
+| 01_sedan_1940 | allies mg_team:2; axis artillery:1 | axis 33/384 (9%) | axis 64/384 (17%), spots 1 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 1/3 | axis target 20,14 own min 2 enemy min 0 | 中路渡口 13,5 recon min 9 XP 1, enemy supp +1 R2; 橋頭補給 15,5 capture after sedan_crossing_recon branch sedan_crossing_choice min 7 XP 1, repair 2; 清除南翼機槍 3,13 destroy after sedan_crossing_recon branch sedan_crossing_choice min 18 XP 1, enemy supp +1 R2 | none |
 | 02_kiev_1941 | axis artillery:2; soviet mg_team:1 | axis 57/384 (15%) | soviet 68/384 (18%), spots 0 | axis: eng none, art 0/1, targets 1 | axis: eng turns none | axis: art move 0/1 | n/a | 南翼掃蕩 3,13 recon min 18 XP 1, enemy dig -1 R2; 壓制馬克沁火點 4,4 destroy after southern_sweep min 19 XP 1, enemy supp +1 R2 | none |
 | 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2, rocket_artillery:1 | axis 61/384 (16%); soviet 21/384 (5%) | axis 65/384 (17%), spots 0 | axis: eng min 7, art 0/6, targets 6 | axis: eng turns 3 | axis: art move 1/6 | n/a | 標定突擊路線 13,10 recon min 7 XP 1, enemy dig -1 R2; 突擊工兵 13,10 destroy after stalingrad_spot_engineers branch stalingrad_counterattack min 7 XP 1, enemy supp +1 R2; 迫砲觀測所 20,12 hold 2t after stalingrad_spot_engineers branch stalingrad_counterattack min 1 XP 1, supp -2 | none |
 | 04_kursk_1943 | axis artillery:1; soviet artillery:1 | axis 34/384 (9%); soviet 42/384 (11%) | axis 43/384 (11%), spots 2 | n/a | n/a | n/a | axis control 2/3 own min 6 enemy min 0 | 壓制 SU-152 4,0 destroy after northern_ridge_recon branch kursk_breakthrough_choice min 18 XP 1, repair 2; 前進燃料補給 12,6 capture after northern_ridge_recon branch kursk_breakthrough_choice min 10 XP 1, supp -2; 北側高地偵察 18,2 recon min 4 XP 1, enemy dig -1 R2 | none |
@@ -25,21 +25,21 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | conq_north_sea_raid | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 港灣油料庫 11,4 capture min 9 XP 1, conquest prod -1; 偵察海岸雷達站 17,11 recon after north_sea_harbor_cache min 16 enemy supp +1 R2, conquest enemy -1 | none |
 | conq_pacific_carrier | allies artillery:1; axis artillery:1, mg_team:1 | allies 37/384 (10%); axis 34/384 (9%) | allies 60/384 (16%), spots 0 | n/a | n/a | n/a | n/a | 環礁通信站 11,3 capture min 9 XP 1, conquest enemy -1; 守住潟湖錨地 14,4 hold 2t after carrier_atoll_radio min 12 repair 2, conquest prod -1; 標定岸防砲廓 20,4 recon after carrier_lagoon_anchor min 18 enemy dig -1 R2, conquest fort -1 | none |
 | conq_pacific_island | allies mg_team:1; axis artillery:1, mg_team:1 | axis 50/384 (13%) | allies 57/384 (15%), spots 0 | n/a | n/a | n/a | n/a | 中央港鎮倉庫 11,6 capture min 9 XP 1, conquest enemy -1; 偵察島內洞口 14,8 recon after island_port_cache min 13 enemy dig -1 R2, conquest fort -1 | none |
-| east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 0 | 突破機槍據點 5,3 destroy min 18 XP 1, enemy supp +1 R2; 南側警戒線 5,4 recon after break_maxim_nest branch kharkov_city_choice min 19 XP 1, enemy dig -1 R2, campaign +1p; 奪取野戰修理所 6,2 capture after break_maxim_nest branch kharkov_city_choice min 17 XP 1, repair 2 | none |
+| east_05_kharkov_1943 | axis artillery:1; soviet artillery:1, mg_team:1 | axis 33/384 (9%); soviet 46/384 (12%) | axis 56/384 (15%), spots 0 | axis: eng none, art 0/7, targets 7 | axis: eng turns none | axis: art move 0/7 | axis target 4,3 own min 19 enemy min 0 | 突破機槍據點 5,3 destroy min 18 XP 1, enemy supp +1 R2; 南側警戒線 5,4 recon after break_maxim_nest branch kharkov_city_choice min 19 XP 1, enemy dig -1 R2; 奪取野戰修理所 6,2 capture after break_maxim_nest branch kharkov_city_choice min 17 XP 1, repair 2 | none |
 | east_06_dnieper_1943 | axis artillery:1, mg_team:1; soviet artillery:1 | axis 29/160 (18%); soviet 37/160 (23%) | soviet 61/160 (38%), spots 0 | soviet: eng min 5, art 0/3, targets 3 | soviet: eng turns 2 | soviet: art move 0/3 | soviet target 9,5 own min 6 enemy min 1 | 控制東岸渡口 5,4 hold 2t min 1 XP 1, reinforce -2t; 偵察西岸觀測點 12,4 recon after dnieper_east_crossing min 8 XP 1, enemy dig -1 R2 | soviet +77.6; T6 2 units |
 | east_09_seelow_1945 | axis artillery:1, mg_team:1; soviet artillery:1, rocket_artillery:1 | axis 35/384 (9%); soviet 24/384 (6%) | none | soviet: eng none, art 0/4, targets 4 | soviet: eng turns none | soviet: art move 0/4 | soviet target 18,3 own min 21 enemy min 0 | 清除 MG 42 19,2 destroy min 22 XP 1, enemy supp +1 R2; 偵察砲兵觀測點 21,1 recon after clear_mg42 min 25 XP 1, enemy dig -1 R2 | none |
-| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 56/384 (15%) | none | soviet: eng min 7, art 0/3, targets 3 | soviet: eng turns 3 | soviet: art move 1/3 | soviet target 19,4 own min 9 enemy min 0 | 清除西側 MG 42 18,3 destroy min 9 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon after clear_western_mg min 13 XP 1, enemy dig -1 R2, campaign +1p; 最後突擊集結點 18,4 hold 2t after locate_heavy_battery min 8 XP 1, supp -2, enemy supp +1 R1 | none |
+| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 | axis 37/384 (10%); soviet 56/384 (15%) | none | soviet: eng min 7, art 0/3, targets 3 | soviet: eng turns 3 | soviet: art move 1/3 | soviet target 19,4 own min 9 enemy min 0 | 清除西側 MG 42 18,3 destroy min 9 XP 1, repair 2, enemy supp +1 R2; 標定重砲陣地 22,2 recon after clear_western_mg min 13 XP 1, enemy dig -1 R2; 最後突擊集結點 18,4 hold 2t after locate_heavy_battery min 8 XP 1, supp -2, enemy supp +1 R1 | none |
 | north_00_gazala_1942 | allies artillery:1, mg_team:1; axis artillery:1 | allies 32/160 (20%); axis 23/160 (14%) | axis 49/160 (31%), spots 0 | axis: eng none, art 0/4, targets 4 | axis: eng turns none | axis: art move 0/4 | axis target 11,4 own min 8 enemy min 0 | 偵察北側崖線 8,1 recon min 7 XP 1, enemy supp +1 R2; 摧毀 6-pdr 反戰車砲 10,2 destroy after gazala_ridge_recon min 8 XP 1, repair 2 | none |
 | north_01_el_alamein_1942 | allies artillery:1; axis artillery:1 | allies 23/160 (14%); axis 26/160 (16%) | allies 49/160 (31%), spots 0 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | n/a | 奪取綠洲補給 8,5 capture min 6 XP 1, repair 2; 偵察北側山脊 10,2 recon after el_alamein_oasis_depot min 9 XP 1, enemy supp +1 R2 | none |
 | north_02_kasserine_1943 | allies artillery:1, mg_team:1; axis artillery:1 | allies 29/160 (18%); axis 26/160 (16%) | allies 68/160 (42%), spots 0; axis 57/160 (36%), spots 0 | axis: eng none, art 0/3, targets 3 | axis: eng turns none | axis: art move 0/3 | axis target 5,4 own min 7 enemy min 0 | 守住山口補給 5,4 hold 2t min 0 XP 1, reinforce -2t; 偵察南側山脊 10,6 recon after kasserine_pass_hold min 5 XP 1, enemy supp +1 R2 | allies +122.8; T6 3 units |
 | north_03_tunis_1943 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 55/160 (34%), spots 0 | allies: eng min 8, art 0/4, targets 4 | allies: eng turns 3 | allies: art move 0/4 | n/a | 奪取山口補給站 8,5 capture min 6 XP 1, repair 2; 摧毀山地遠程砲 14,8 destroy after tunis_pass_depot min 11 XP 1, enemy supp +1 R2 | none |
-| north_04_bizerte_1943 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 13,4 own min 11 enemy min 0 | 奪取前進燃料站 9,4 capture min 7 XP 1, reinforce -2t; 摧毀港口遠程砲 14,8 destroy after bizerte_forward_fuel branch bizerte_harbor_choice min 11 XP 1, enemy supp +1 R2; 標定碼頭構工 12,4 recon after bizerte_forward_fuel branch bizerte_harbor_choice min 10 XP 1, enemy dig -1 R2, campaign +1p | allies +77.6; T7 2 units |
+| north_04_bizerte_1943 | allies artillery:1, mg_team:1; axis artillery:1, mg_team:1 | allies 23/160 (14%); axis 32/160 (20%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 13,4 own min 11 enemy min 0 | 奪取前進燃料站 9,4 capture min 7 XP 1, reinforce -2t; 摧毀港口遠程砲 14,8 destroy after bizerte_forward_fuel branch bizerte_harbor_choice min 11 XP 1, enemy supp +1 R2; 標定碼頭構工 12,4 recon after bizerte_forward_fuel branch bizerte_harbor_choice min 10 XP 1, enemy dig -1 R2 | allies +77.6; T7 2 units |
 | pacific_01_guadalcanal_1942 | allies mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:1 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 9, art 0/4, targets 4 | allies: eng turns 4 | allies: art move 0/4 | n/a | 奪取補給村 8,4 capture min 6 XP 1, supp -2; 摧毀叢林機槍 12,6 destroy after guadalcanal_supply_village min 9 XP 1, enemy supp +1 R2 | none |
 | pacific_02_tarawa_1943 | allies mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 25/160 (16%); axis 34/160 (21%) | allies 68/160 (42%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 奪取棧橋補給 7,6 capture min 4 XP 1, supp -2; 摧毀海堤機槍 10,4 destroy after tarawa_pier_supply min 8 XP 1, enemy supp +1 R2 | none |
 | pacific_03_peleliu_1944 | allies mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 8, art 0/5, targets 5 | allies: eng turns 3 | allies: art move 0/5 | allies target 11,4 own min 9 enemy min 0 | 摧毀洞窟機槍 10,4 destroy min 8 XP 1, enemy supp +1 R2; 偵察北側山脊 12,2 recon after peleliu_cave_mg min 11 XP 1, enemy dig -1 R2 | none |
-| pacific_04_manila_1945 | allies artillery:1, mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | n/a | n/a | n/a | allies control 3/4 own min 7 enemy min 0 | 奪取醫院補給 8,5 capture min 6 XP 1, supp -2; 標定城北砲位 12,2 recon after manila_hospital_supply min 11 XP 1, enemy dig -1 R2, campaign +1p | none |
-| pacific_05_iwo_jima_1945 | allies mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 10, art 0/7, targets 7 | allies: eng turns 4 | allies: art move 0/7 | allies target 13,4 own min 10 enemy min 0 | 控制機場補給點 6,4 hold 2t min 3 XP 1, reinforce -2t; 偵察北側洞窟 12,2 recon after iwo_airfield_supply branch iwo_airfield_choice min 10 XP 1, enemy dig -1 R2, campaign +1p; 摧毀島內山砲 14,7 destroy after iwo_airfield_supply branch iwo_airfield_choice min 12 XP 1, enemy supp +1 R2 | allies +77.6; T7 2 units |
-| pacific_05_okinawa_1945 | allies artillery:1, mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/6, targets 6 | allies: eng turns 4 | allies: art move 0/6 | n/a | 控制前進觀測所 8,4 hold 2t min 6 XP 1, reinforce -2t; 摧毀首里機槍 10,4 destroy after okinawa_forward_observer branch okinawa_observer_choice min 8 XP 1, enemy supp +1 R2; 偵察稜線機槍 12,2 recon after okinawa_forward_observer branch okinawa_observer_choice min 11 XP 1, enemy dig -1 R2, campaign +1p | allies +109.7; T6 3 units |
+| pacific_04_manila_1945 | allies artillery:1, mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | n/a | n/a | n/a | allies control 3/4 own min 7 enemy min 0 | 奪取醫院補給 8,5 capture min 6 XP 1, supp -2; 標定城北砲位 12,2 recon after manila_hospital_supply min 11 XP 1, enemy dig -1 R2 | none |
+| pacific_05_iwo_jima_1945 | allies mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 27/160 (17%); axis 34/160 (21%) | allies 70/160 (44%), spots 0 | allies: eng min 10, art 0/7, targets 7 | allies: eng turns 4 | allies: art move 0/7 | allies target 13,4 own min 10 enemy min 0 | 控制機場補給點 6,4 hold 2t min 3 XP 1, reinforce -2t; 偵察北側洞窟 12,2 recon after iwo_airfield_supply branch iwo_airfield_choice min 10 XP 1, enemy dig -1 R2; 摧毀島內山砲 14,7 destroy after iwo_airfield_supply branch iwo_airfield_choice min 12 XP 1, enemy supp +1 R2 | allies +77.6; T7 2 units |
+| pacific_05_okinawa_1945 | allies artillery:1, mg_team:1, rocket_artillery:1; axis artillery:1, mg_team:2 | allies 24/160 (15%); axis 37/160 (23%) | allies 60/160 (38%), spots 0 | allies: eng min 9, art 0/6, targets 6 | allies: eng turns 4 | allies: art move 0/6 | n/a | 控制前進觀測所 8,4 hold 2t min 6 XP 1, reinforce -2t; 摧毀首里機槍 10,4 destroy after okinawa_forward_observer branch okinawa_observer_choice min 8 XP 1, enemy supp +1 R2; 偵察稜線機槍 12,2 recon after okinawa_forward_observer branch okinawa_observer_choice min 11 XP 1, enemy dig -1 R2 | allies +109.7; T6 3 units |
 | tut_00_basic_turn | none | none | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,2 own min 5 enemy min 0 | none | none |
 | tut_01_terrain_zoc_overwatch | allies mg_team:1 | none | axis 38/54 (70%), spots 3 | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move none | allies target 6,0 own min 4 enemy min 2 | 道路檢查點 4,0 capture min 2 XP 1 | none |
 | tut_02_los_spotting_artillery | allies artillery:1 | allies 50/70 (71%) | allies 62/70 (89%), spots 2 | allies: eng none, art 1/1, targets 1 | allies: eng turns none | allies: art move 1/1 | n/a | none | none |
@@ -48,7 +48,7 @@ Static tactical probe for pressure tuning. Coverage is approximate and ignores L
 | tut_05_airdrop_reinforcement_rocket | allies rocket_artillery:1; axis mg_team:1 | allies 37/70 (53%) | none | allies: eng none, art 2/2, targets 2 | allies: eng turns none | allies: art move 2/2 | n/a | none | allies +77.6; T3 2 units |
 | west_08_falaise_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 21,4 own min 19 enemy min 0 | 封鎖撤退道路 22,11 recon min 19 XP 1, enemy supp +1 R1; 摧毀 StuG 掩護 22,0 destroy after seal_escape_road min 20 XP 1, repair 2 | none |
 | west_08_normandy_cobra_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 2,2 own min 2 enemy min 0 | 清除 MG 42 1,2 destroy min 2 XP 1, enemy supp +1 R2; 反砲兵偵察 22,2 recon after clear_mg42 min 21 XP 1, enemy dig -1 R2 | none |
-| west_08_pegasus_bridge_1944 | allies mg_team:1; axis artillery:1, mg_team:1 | axis 32/160 (20%) | none | n/a | n/a | n/a | allies hold 7,4 3t own min 4 enemy min 1 | 穩住南岸橋頭 7,5 hold 2t min 4 XP 1, reinforce -2t; 摧毀橋北機槍 8,3 destroy after pegasus_hold_bridge branch pegasus_bridge_choice min 5 XP 1, enemy supp +1 R2; 佔領橋北醫護點 9,4 capture after pegasus_hold_bridge branch pegasus_bridge_choice min 6 XP 1, repair 2, campaign +1p | allies +77.6; T6 2 units |
+| west_08_pegasus_bridge_1944 | allies mg_team:1; axis artillery:1, mg_team:1 | axis 32/160 (20%) | none | n/a | n/a | n/a | allies hold 7,4 3t own min 4 enemy min 1 | 穩住南岸橋頭 7,5 hold 2t min 4 XP 1, reinforce -2t; 摧毀橋北機槍 8,3 destroy after pegasus_hold_bridge branch pegasus_bridge_choice min 5 XP 1, enemy supp +1 R2; 佔領橋北醫護點 9,4 capture after pegasus_hold_bridge branch pegasus_bridge_choice min 6 XP 1, repair 2 | allies +77.6; T6 2 units |
 | west_09_aachen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies target 5,11 own min 2 enemy min 0 | 清除西側 PaK 40 6,4 destroy min 4 XP 1, enemy dig -1 R1; 市政廳側翼 5,11 recon after clear_western_at min 2 XP 1, enemy dig -1 R2; 前線救護站 5,5 capture after clear_western_at min 4 XP 1, supp -2, repair 1 | none |
 | west_09_hurtgen_1944 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | n/a | n/a | n/a | allies hold 5,4 2t own min 3 enemy min 0 | 林道 MG 42 4,4 destroy min 2 XP 1, enemy supp +1 R2; 控制前進林道 4,5 hold 2t after silence_forest_mg min 3 XP 1, supp -2 | none |
 | west_10_remagen_1945 | allies artillery:1; axis artillery:1, mg_team:1 | allies 23/384 (6%); axis 37/384 (10%) | none | allies: eng none, art 0/1, targets 1 | allies: eng turns none | allies: art move 0/1 | allies target 17,4 own min 15 enemy min 0 | 奪取橋西岸 12,0 capture min 10 XP 1, repair 2; 偵察東岸橋頭 17,4 recon after secure_bridge_west_bank min 15 XP 1, enemy dig -1 R2 | none |
@@ -110,7 +110,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | --- | --- | --- | --- | --- | --- | --- |
 | 01_sedan_1940 | 中路渡口 | recon 13,5 | axis | own 9 / enemy 11 | XP 1, enemy supp +1 R2 | tactical suppression reward R2 |
 | 01_sedan_1940 | 橋頭補給 | capture 15,5 after sedan_crossing_recon branch sedan_crossing_choice | axis | own 7 / enemy 9 | XP 1, repair 2 | damage recovery |
-| 01_sedan_1940 | 清除南翼機槍 | destroy 3,13 after sedan_crossing_recon branch sedan_crossing_choice | axis | own 18 / enemy 0 | XP 1, enemy supp +1 R2, campaign +1p | enemy closer; tactical suppression reward R2; campaign bonus +1 |
+| 01_sedan_1940 | 清除南翼機槍 | destroy 3,13 after sedan_crossing_recon branch sedan_crossing_choice | axis | own 18 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 02_kiev_1941 | 南翼掃蕩 | recon 3,13 | axis | own 18 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | 02_kiev_1941 | 壓制馬克沁火點 | destroy 4,4 after southern_sweep | axis | own 19 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | 03_stalingrad_1942 | 標定突擊路線 | recon 13,10 | soviet | own 7 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
@@ -155,14 +155,14 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | conq_pacific_island | 中央港鎮倉庫 | capture 11,6 | allies | own 9 / enemy 11 | XP 1, conquest enemy -1 | conquest pressure -1 |
 | conq_pacific_island | 偵察島內洞口 | recon 14,8 after island_port_cache | allies | own 13 / enemy 9 | enemy dig -1 R2, conquest fort -1 | enemy closer; breach reward R2; conquest fort -1 |
 | east_05_kharkov_1943 | 突破機槍據點 | destroy 5,3 | axis | own 18 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
-| east_05_kharkov_1943 | 南側警戒線 | recon 5,4 after break_maxim_nest branch kharkov_city_choice | axis | own 19 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| east_05_kharkov_1943 | 南側警戒線 | recon 5,4 after break_maxim_nest branch kharkov_city_choice | axis | own 19 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_05_kharkov_1943 | 奪取野戰修理所 | capture 6,2 after break_maxim_nest branch kharkov_city_choice | axis | own 17 / enemy 1 | XP 1, repair 2 | enemy closer; damage recovery |
 | east_06_dnieper_1943 | 控制東岸渡口 | hold 2t 5,4 | soviet | own 1 / enemy 4 | XP 1, reinforce -2t | reinforce best T6->T4 |
 | east_06_dnieper_1943 | 偵察西岸觀測點 | recon 12,4 after dnieper_east_crossing | soviet | own 8 / enemy 1 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_09_seelow_1945 | 清除 MG 42 | destroy 19,2 | soviet | own 22 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | east_09_seelow_1945 | 偵察砲兵觀測點 | recon 21,1 after clear_mg42 | soviet | own 25 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_10_berlin_1945 | 清除西側 MG 42 | destroy 18,3 | soviet | own 9 / enemy 0 | XP 1, repair 2, enemy supp +1 R2 | enemy closer; damage recovery; tactical suppression reward R2 |
-| east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| east_10_berlin_1945 | 標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | east_10_berlin_1945 | 最後突擊集結點 | hold 2t 18,4 after locate_heavy_battery | soviet | own 8 / enemy 0 | XP 1, supp -2, enemy supp +1 R1 | enemy closer; sustain reward; tactical suppression reward R1 |
 | north_00_gazala_1942 | 偵察北側崖線 | recon 8,1 | axis | own 7 / enemy 2 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | north_00_gazala_1942 | 摧毀 6-pdr 反戰車砲 | destroy 10,2 after gazala_ridge_recon | axis | own 8 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
@@ -174,7 +174,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | north_03_tunis_1943 | 摧毀山地遠程砲 | destroy 14,8 after tunis_pass_depot | allies | own 11 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | north_04_bizerte_1943 | 奪取前進燃料站 | capture 9,4 | allies | own 7 / enemy 3 | XP 1, reinforce -2t | enemy closer; reinforce best T7->T5 |
 | north_04_bizerte_1943 | 摧毀港口遠程砲 | destroy 14,8 after bizerte_forward_fuel branch bizerte_harbor_choice | allies | own 11 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
-| north_04_bizerte_1943 | 標定碼頭構工 | recon 12,4 after bizerte_forward_fuel branch bizerte_harbor_choice | allies | own 10 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| north_04_bizerte_1943 | 標定碼頭構工 | recon 12,4 after bizerte_forward_fuel branch bizerte_harbor_choice | allies | own 10 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_01_guadalcanal_1942 | 奪取補給村 | capture 8,4 | allies | own 6 / enemy 4 | XP 1, supp -2 | enemy closer; sustain reward |
 | pacific_01_guadalcanal_1942 | 摧毀叢林機槍 | destroy 12,6 after guadalcanal_supply_village | allies | own 9 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_02_tarawa_1943 | 奪取棧橋補給 | capture 7,6 | allies | own 4 / enemy 3 | XP 1, supp -2 | enemy closer; sustain reward |
@@ -182,13 +182,13 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | pacific_03_peleliu_1944 | 摧毀洞窟機槍 | destroy 10,4 | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_03_peleliu_1944 | 偵察北側山脊 | recon 12,2 after peleliu_cave_mg | allies | own 11 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_04_manila_1945 | 奪取醫院補給 | capture 8,5 | allies | own 6 / enemy 2 | XP 1, supp -2 | enemy closer; sustain reward |
-| pacific_04_manila_1945 | 標定城北砲位 | recon 12,2 after manila_hospital_supply | allies | own 11 / enemy 2 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| pacific_04_manila_1945 | 標定城北砲位 | recon 12,2 after manila_hospital_supply | allies | own 11 / enemy 2 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_05_iwo_jima_1945 | 控制機場補給點 | hold 2t 6,4 | allies | own 3 / enemy 6 | XP 1, reinforce -2t | reinforce best T7->T5 |
-| pacific_05_iwo_jima_1945 | 偵察北側洞窟 | recon 12,2 after iwo_airfield_supply branch iwo_airfield_choice | allies | own 10 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| pacific_05_iwo_jima_1945 | 偵察北側洞窟 | recon 12,2 after iwo_airfield_supply branch iwo_airfield_choice | allies | own 10 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | pacific_05_iwo_jima_1945 | 摧毀島內山砲 | destroy 14,7 after iwo_airfield_supply branch iwo_airfield_choice | allies | own 12 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
 | pacific_05_okinawa_1945 | 控制前進觀測所 | hold 2t 8,4 | allies | own 6 / enemy 2 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
 | pacific_05_okinawa_1945 | 摧毀首里機槍 | destroy 10,4 after okinawa_forward_observer branch okinawa_observer_choice | allies | own 8 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
-| pacific_05_okinawa_1945 | 偵察稜線機槍 | recon 12,2 after okinawa_forward_observer branch okinawa_observer_choice | allies | own 11 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1 |
+| pacific_05_okinawa_1945 | 偵察稜線機槍 | recon 12,2 after okinawa_forward_observer branch okinawa_observer_choice | allies | own 11 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | tut_01_terrain_zoc_overwatch | 道路檢查點 | capture 4,0 | allies | own 2 / enemy 2 | XP 1 | ok |
 | west_08_falaise_1944 | 封鎖撤退道路 | recon 22,11 | allies | own 19 / enemy 0 | XP 1, enemy supp +1 R1 | enemy closer; tactical suppression reward R1 |
 | west_08_falaise_1944 | 摧毀 StuG 掩護 | destroy 22,0 after seal_escape_road | allies | own 20 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
@@ -196,7 +196,7 @@ Focused audit of optional objective pressure, reward type, and static reward eff
 | west_08_normandy_cobra_1944 | 反砲兵偵察 | recon 22,2 after clear_mg42 | allies | own 21 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | west_08_pegasus_bridge_1944 | 穩住南岸橋頭 | hold 2t 7,5 | allies | own 4 / enemy 1 | XP 1, reinforce -2t | enemy closer; reinforce best T6->T4 |
 | west_08_pegasus_bridge_1944 | 摧毀橋北機槍 | destroy 8,3 after pegasus_hold_bridge branch pegasus_bridge_choice | allies | own 5 / enemy 0 | XP 1, enemy supp +1 R2 | enemy closer; tactical suppression reward R2 |
-| west_08_pegasus_bridge_1944 | 佔領橋北醫護點 | capture 9,4 after pegasus_hold_bridge branch pegasus_bridge_choice | allies | own 6 / enemy 0 | XP 1, repair 2, campaign +1p | enemy closer; damage recovery; campaign bonus +1 |
+| west_08_pegasus_bridge_1944 | 佔領橋北醫護點 | capture 9,4 after pegasus_hold_bridge branch pegasus_bridge_choice | allies | own 6 / enemy 0 | XP 1, repair 2 | enemy closer; damage recovery |
 | west_09_aachen_1944 | 清除西側 PaK 40 | destroy 6,4 | allies | own 4 / enemy 0 | XP 1, enemy dig -1 R1 | enemy closer; breach reward R1 |
 | west_09_aachen_1944 | 市政廳側翼 | recon 5,11 after clear_western_at | allies | own 2 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2 |
 | west_09_aachen_1944 | 前線救護站 | capture 5,5 after clear_western_at | allies | own 4 / enemy 1 | XP 1, supp -2, repair 1 | enemy closer; sustain reward; damage recovery |
@@ -384,10 +384,10 @@ Focused gate for main battles: secondary objectives should form at least one exp
 | blitz_00_poland_1939 | 1 | 2 | 摧毀 37mm 反戰車砲 -> 偵察砲兵陣地 | repair -> suppression | covered |
 | blitz_02_dunkirk_1940 | 1 | 2 | 堅守撤退出口 -> 偵察裝甲縱隊 | sustain -> suppression | covered |
 | blitz_03_moscow_1941 | 1 | 2 | 壓制 MG 34 -> 前進觀測點 | suppression -> breach | covered |
-| east_05_kharkov_1943 | 2 | 2 | 突破機槍據點 -> 南側警戒線 | suppression -> breach+campaign | covered |
+| east_05_kharkov_1943 | 2 | 2 | 突破機槍據點 -> 南側警戒線 | suppression -> breach | covered |
 | east_06_dnieper_1943 | 1 | 2 | 控制東岸渡口 -> 偵察西岸觀測點 | reinforcement -> breach | covered |
 | east_09_seelow_1945 | 1 | 2 | 清除 MG 42 -> 偵察砲兵觀測點 | suppression -> breach | covered |
-| east_10_berlin_1945 | 2 | 3 | 清除西側 MG 42 -> 標定重砲陣地 -> 最後突擊集結點 | repair+suppression -> breach+campaign -> sustain+suppression | covered |
+| east_10_berlin_1945 | 2 | 3 | 清除西側 MG 42 -> 標定重砲陣地 -> 最後突擊集結點 | repair+suppression -> breach -> sustain+suppression | covered |
 | north_00_gazala_1942 | 1 | 2 | 偵察北側崖線 -> 摧毀 6-pdr 反戰車砲 | suppression -> repair | covered |
 | north_01_el_alamein_1942 | 1 | 2 | 奪取綠洲補給 -> 偵察北側山脊 | repair -> suppression | covered |
 | north_02_kasserine_1943 | 1 | 2 | 守住山口補給 -> 偵察南側山脊 | reinforcement -> suppression | covered |
@@ -396,8 +396,8 @@ Focused gate for main battles: secondary objectives should form at least one exp
 | pacific_01_guadalcanal_1942 | 1 | 2 | 奪取補給村 -> 摧毀叢林機槍 | sustain -> suppression | covered |
 | pacific_02_tarawa_1943 | 1 | 2 | 奪取棧橋補給 -> 摧毀海堤機槍 | sustain -> suppression | covered |
 | pacific_03_peleliu_1944 | 1 | 2 | 摧毀洞窟機槍 -> 偵察北側山脊 | suppression -> breach | covered |
-| pacific_04_manila_1945 | 1 | 2 | 奪取醫院補給 -> 標定城北砲位 | sustain -> breach+campaign | covered |
-| pacific_05_iwo_jima_1945 | 2 | 2 | 控制機場補給點 -> 偵察北側洞窟 | reinforcement -> breach+campaign | covered |
+| pacific_04_manila_1945 | 1 | 2 | 奪取醫院補給 -> 標定城北砲位 | sustain -> breach | covered |
+| pacific_05_iwo_jima_1945 | 2 | 2 | 控制機場補給點 -> 偵察北側洞窟 | reinforcement -> breach | covered |
 | pacific_05_okinawa_1945 | 2 | 2 | 控制前進觀測所 -> 摧毀首里機槍 | reinforcement -> suppression | covered |
 | west_08_falaise_1944 | 1 | 2 | 封鎖撤退道路 -> 摧毀 StuG 掩護 | suppression -> repair | covered |
 | west_08_normandy_cobra_1944 | 1 | 2 | 清除 MG 42 -> 反砲兵偵察 | suppression -> breach | covered |
@@ -413,27 +413,27 @@ Focused gate for main battles with explicit secondary-objective tradeoffs: exclu
 
 | scenario | branch | options | choices | reward families | check |
 | --- | --- | --- | --- | --- | --- |
-| 01_sedan_1940 | sedan_crossing_choice | 2 | 橋頭補給 / 清除南翼機槍 | repair / suppression+campaign | covered |
+| 01_sedan_1940 | sedan_crossing_choice | 2 | 橋頭補給 / 清除南翼機槍 | repair / suppression | covered |
 | 03_stalingrad_1942 | stalingrad_counterattack | 2 | 突擊工兵 / 迫砲觀測所 | suppression / sustain | covered |
 | 04_kursk_1943 | kursk_breakthrough_choice | 2 | 壓制 SU-152 / 前進燃料補給 | repair / sustain | covered |
 | 05_bastogne_1944 | bastogne_relief_choice | 2 | 南側遠程砲 / 野戰醫護站 | suppression / repair | covered |
-| east_05_kharkov_1943 | kharkov_city_choice | 2 | 南側警戒線 / 奪取野戰修理所 | breach+campaign / repair | covered |
-| north_04_bizerte_1943 | bizerte_harbor_choice | 2 | 摧毀港口遠程砲 / 標定碼頭構工 | suppression / breach+campaign | covered |
-| pacific_05_iwo_jima_1945 | iwo_airfield_choice | 2 | 偵察北側洞窟 / 摧毀島內山砲 | breach+campaign / suppression | covered |
-| pacific_05_okinawa_1945 | okinawa_observer_choice | 2 | 摧毀首里機槍 / 偵察稜線機槍 | suppression / breach+campaign | covered |
-| west_08_pegasus_bridge_1944 | pegasus_bridge_choice | 2 | 摧毀橋北機槍 / 佔領橋北醫護點 | suppression / repair+campaign | covered |
+| east_05_kharkov_1943 | kharkov_city_choice | 2 | 南側警戒線 / 奪取野戰修理所 | breach / repair | covered |
+| north_04_bizerte_1943 | bizerte_harbor_choice | 2 | 摧毀港口遠程砲 / 標定碼頭構工 | suppression / breach | covered |
+| pacific_05_iwo_jima_1945 | iwo_airfield_choice | 2 | 偵察北側洞窟 / 摧毀島內山砲 | breach / suppression | covered |
+| pacific_05_okinawa_1945 | okinawa_observer_choice | 2 | 摧毀首里機槍 / 偵察稜線機槍 | suppression / breach | covered |
+| west_08_pegasus_bridge_1944 | pegasus_bridge_choice | 2 | 摧毀橋北機槍 / 佔領橋北醫護點 | suppression / repair | covered |
 
-## Campaign Strategic Reward Coverage
+## Campaign In-Battle Reward Coverage
 
-Focused gate for formal campaigns: optional objectives should create at least one cross-battle resource decision per campaign.
+Focused gate for formal campaigns: optional objectives should stay self-contained in the current battle while still offering richer tactical rewards than XP alone.
 
-| campaign | scenarios | campaign reward objectives | reward scenarios | reward paths | check |
+| campaign | scenarios | secondary objectives | enriched objectives | tactical reward mix | check |
 | --- | --- | --- | --- | --- | --- |
-| blitzkrieg_early_war | 5 | 1 | 01_sedan_1940 | 01_sedan_1940:清除南翼機槍 +1p | covered |
-| eastern_front | 7 | 2 | east_05_kharkov_1943, east_10_berlin_1945 | east_05_kharkov_1943:南側警戒線 +1p; east_10_berlin_1945:標定重砲陣地 +1p | covered |
-| north_africa | 5 | 1 | north_04_bizerte_1943 | north_04_bizerte_1943:標定碼頭構工 +1p | covered |
-| pacific_front | 6 | 3 | pacific_04_manila_1945, pacific_05_iwo_jima_1945, pacific_05_okinawa_1945 | pacific_04_manila_1945:標定城北砲位 +1p; pacific_05_iwo_jima_1945:偵察北側洞窟 +1p; pacific_05_okinawa_1945:偵察稜線機槍 +1p | covered |
-| western_front | 9 | 1 | west_08_pegasus_bridge_1944 | west_08_pegasus_bridge_1944:佔領橋北醫護點 +1p | covered |
+| blitzkrieg_early_war | 5 | 11 | 11 | breach:2, repair:2, suppression:6, sustain:1 | covered |
+| eastern_front | 7 | 18 | 18 | breach:6, reinforcement:2, repair:3, suppression:6, sustain:3 | covered |
+| north_africa | 5 | 11 | 11 | breach:1, reinforcement:2, repair:3, suppression:5 | covered |
+| pacific_front | 6 | 14 | 14 | breach:4, reinforcement:2, suppression:5, sustain:3 | covered |
+| western_front | 9 | 22 | 22 | breach:5, reinforcement:3, repair:6, suppression:7, sustain:4 | covered |
 
 ## Scenario Expansion Coverage
 

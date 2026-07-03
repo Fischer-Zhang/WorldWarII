@@ -314,9 +314,7 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
             amount = int(effect.get("amount", 0))
             if amount <= 0:
                 continue
-            if effect_type == "campaign_bonus_points":
-                parts.append(f"campaign +{amount}p")
-            elif effect_type == "conquest_reduce_enemy_strength":
+            if effect_type == "conquest_reduce_enemy_strength":
                 parts.append(f"conquest enemy -{amount}")
             elif effect_type == "conquest_reduce_enemy_fortification":
                 parts.append(f"conquest fort -{amount}")

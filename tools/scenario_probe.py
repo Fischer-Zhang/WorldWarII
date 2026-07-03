@@ -470,9 +470,7 @@ def secondary_reward_text(objective: dict[str, Any]) -> str:
             amount = int(effect.get("amount", 0))
             if amount <= 0:
                 continue
-            if effect_type == "campaign_bonus_points":
-                parts.append(f"campaign +{amount}p")
-            elif effect_type == "conquest_reduce_enemy_strength":
+            if effect_type == "conquest_reduce_enemy_strength":
                 parts.append(f"conquest enemy -{amount}")
             elif effect_type == "conquest_reduce_enemy_fortification":
                 parts.append(f"conquest fort -{amount}")
@@ -615,9 +613,7 @@ def secondary_reward_audit_notes(scenario: dict[str, Any], objective: dict[str, 
             amount = int(effect.get("amount", 0))
             if amount <= 0:
                 continue
-            if effect_type == "campaign_bonus_points":
-                notes.append(f"campaign bonus +{amount}")
-            elif effect_type == "conquest_reduce_enemy_strength":
+            if effect_type == "conquest_reduce_enemy_strength":
                 notes.append(f"conquest pressure -{amount}")
             elif effect_type == "conquest_reduce_enemy_fortification":
                 notes.append(f"conquest fort -{amount}")
@@ -1123,7 +1119,7 @@ def objective_branch_check_text(option_count: int) -> str:
     return "covered"
 
 
-def campaign_strategic_reward_rows(
+def campaign_in_battle_reward_rows(
     scenarios: list[dict[str, Any]],
     campaigns: dict[str, Any],
 ) -> list[list[Any]]:
@@ -1138,66 +1134,62 @@ def campaign_strategic_reward_rows(
             for scenario_id in scenario_ids
             if scenario_id in scenario_by_id
         ]
-        objectives = campaign_bonus_objectives(campaign_scenarios)
+        objectives = campaign_secondary_objectives(campaign_scenarios)
+        enriched_objectives = [
+            (scenario_id, objective)
+            for scenario_id, objective in objectives
+            if not is_xp_only_secondary(objective)
+        ]
         rows.append([
             campaign_id,
             len(campaign_scenarios),
             len(objectives),
-            campaign_bonus_scenario_text(objectives),
-            campaign_bonus_path_text(objectives),
-            campaign_strategic_reward_check_text(len(campaign_scenarios), len(objectives)),
+            len(enriched_objectives),
+            campaign_tactical_reward_mix_text(enriched_objectives),
+            campaign_in_battle_reward_check_text(
+                len(campaign_scenarios),
+                len(objectives),
+                len(enriched_objectives),
+            ),
         ])
     return rows
 
 
-def campaign_bonus_objectives(scenarios: list[dict[str, Any]]) -> list[tuple[str, dict[str, Any]]]:
+def campaign_secondary_objectives(scenarios: list[dict[str, Any]]) -> list[tuple[str, dict[str, Any]]]:
     objectives: list[tuple[str, dict[str, Any]]] = []
     for scenario in scenarios:
         scenario_id = str(scenario.get("id", ""))
         for objective in scenario.get("secondary_objectives", []):
             if not isinstance(objective, dict):
                 continue
-            if secondary_objective_campaign_bonus(objective) > 0:
-                objectives.append((scenario_id, objective))
+            objectives.append((scenario_id, objective))
     return objectives
 
 
-def secondary_objective_campaign_bonus(objective: dict[str, Any]) -> int:
-    total = 0
-    strategic_effects = objective.get("strategic_effects", [])
-    if not isinstance(strategic_effects, list):
-        return 0
-    for effect in strategic_effects:
-        if not isinstance(effect, dict):
-            continue
-        if str(effect.get("type", "")) == "campaign_bonus_points":
-            total += max(0, int(effect.get("amount", 0)))
-    return total
-
-
-def campaign_bonus_scenario_text(objectives: list[tuple[str, dict[str, Any]]]) -> str:
+def campaign_tactical_reward_mix_text(objectives: list[tuple[str, dict[str, Any]]]) -> str:
     if not objectives:
         return "none"
-    scenario_ids = sorted({scenario_id for scenario_id, _objective in objectives})
-    return ", ".join(scenario_ids)
+    counts: collections.Counter[str] = collections.Counter()
+    for _scenario_id, objective in objectives:
+        for family in operation_reward_family(objective).split("+"):
+            if family and family != "xp" and not family.startswith("conquest"):
+                counts[family] += 1
+    if not counts:
+        return "xp only"
+    return ", ".join(f"{family}:{count}" for family, count in sorted(counts.items()))
 
 
-def campaign_bonus_path_text(objectives: list[tuple[str, dict[str, Any]]]) -> str:
-    if not objectives:
-        return "none"
-    parts: list[str] = []
-    for scenario_id, objective in objectives:
-        label = str(objective.get("label", objective.get("id", "secondary")))
-        amount = secondary_objective_campaign_bonus(objective)
-        parts.append(f"{scenario_id}:{label} +{amount}p")
-    return "; ".join(parts)
-
-
-def campaign_strategic_reward_check_text(scenario_count: int, objective_count: int) -> str:
+def campaign_in_battle_reward_check_text(
+    scenario_count: int,
+    objective_count: int,
+    enriched_count: int,
+) -> str:
     if scenario_count <= 0:
         return "missing scenarios"
     if objective_count <= 0:
-        return "missing campaign reward"
+        return "missing secondary objectives"
+    if enriched_count <= 0:
+        return "missing tactical rewards"
     return "covered"
 
 
@@ -1298,9 +1290,7 @@ def operation_reward_family(objective: dict[str, Any]) -> str:
             amount = int(effect.get("amount", 0))
             if amount <= 0:
                 continue
-            if effect_type == "campaign_bonus_points":
-                families.append("campaign")
-            elif effect_type == "conquest_reduce_enemy_strength":
+            if effect_type == "conquest_reduce_enemy_strength":
                 families.append("conquest")
             elif effect_type == "conquest_reduce_enemy_fortification":
                 families.append("conquest-fort")
@@ -2033,18 +2023,18 @@ def generate_report() -> str:
             ],
             objective_branch_coverage_rows(scenarios),
         ),
-        "## Campaign Strategic Reward Coverage",
-        "Focused gate for formal campaigns: optional objectives should create at least one cross-battle resource decision per campaign.",
+        "## Campaign In-Battle Reward Coverage",
+        "Focused gate for formal campaigns: optional objectives should stay self-contained in the current battle while still offering richer tactical rewards than XP alone.",
         table(
             [
                 "campaign",
                 "scenarios",
-                "campaign reward objectives",
-                "reward scenarios",
-                "reward paths",
+                "secondary objectives",
+                "enriched objectives",
+                "tactical reward mix",
                 "check",
             ],
-            campaign_strategic_reward_rows(scenarios, campaigns),
+            campaign_in_battle_reward_rows(scenarios, campaigns),
         ),
         "## Scenario Expansion Coverage",
         "Dynamic coverage gate for formal campaign expansion: reports campaign size, victory variety, special terrain usage, and role hooks that should diversify new battles.",

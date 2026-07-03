@@ -172,8 +172,6 @@ static func strategic_effect_text(effects: Array[Dictionary]) -> String:
 		if amount <= 0:
 			continue
 		match effect_type:
-			"campaign_bonus_points":
-				parts.append("戰役資源 +%d" % amount)
 			"conquest_reduce_enemy_strength":
 				parts.append("敵戰力 -%d" % amount)
 			"conquest_reduce_enemy_fortification":

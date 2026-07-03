@@ -71,9 +71,16 @@ def main() -> None:
         "scenario probe missing objective branch coverage section",
     )
     require(
-        "## Campaign Strategic Reward Coverage" in report
-        and "| campaign | scenarios | campaign reward objectives | reward scenarios | reward paths | check |" in report,
-        "scenario probe missing campaign strategic reward coverage section",
+        "## Campaign In-Battle Reward Coverage" in report
+        and "| campaign | scenarios | secondary objectives | enriched objectives | tactical reward mix | check |" in report,
+        "scenario probe missing campaign in-battle reward coverage section",
+    )
+    require(
+        "campaign +" not in report
+        and "campaign bonus" not in report
+        and "Campaign Strategic Reward" not in report
+        and "戰役資源" not in report,
+        "scenario probe should not report cross-battle campaign reward effects",
     )
     require(
         "## Scenario Expansion Coverage" in report
@@ -198,9 +205,9 @@ def main() -> None:
     )
     require(
         "east_10_berlin_1945" in report
-        and "標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
+        and "標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2 | enemy closer; breach reward R2"
         in report,
-        "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
+        "Reward audit should show Berlin recon breach reward without campaign carryover pressure",
     )
     require(
         "06_market_garden_1944" in report
@@ -414,7 +421,7 @@ def main() -> None:
     )
     require(
         "| 03_stalingrad_1942 | 2 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |" in report
-        and "| east_10_berlin_1945 | 2 | 3 | 清除西側 MG 42 -> 標定重砲陣地 -> 最後突擊集結點 | repair+suppression -> breach+campaign -> sustain+suppression | covered |" in report
+        and "| east_10_berlin_1945 | 2 | 3 | 清除西側 MG 42 -> 標定重砲陣地 -> 最後突擊集結點 | repair+suppression -> breach -> sustain+suppression | covered |" in report
         and "| west_10_remagen_1945 | 1 | 2 | 奪取橋西岸 -> 偵察東岸橋頭 | repair -> breach | covered |" in report,
         "Operation chain coverage should expose staged breach and bridgehead examples",
     )
@@ -458,11 +465,12 @@ def main() -> None:
         for part in line.strip("|").split("|")[4].split("/")
     ]
     require(
-        any("campaign" in family for family in branch_reward_families)
+        not any("campaign" in family for family in branch_reward_families)
         and any("repair" in family for family in branch_reward_families)
         and any("suppression" in family for family in branch_reward_families)
+        and any("sustain" in family for family in branch_reward_families)
         and any("breach" in family for family in branch_reward_families),
-        "Objective branch coverage should expose campaign, repair, suppression and breach tradeoffs",
+        "Objective branch coverage should expose tactical repair, sustain, suppression and breach tradeoffs only",
     )
     require(
         "| 03_stalingrad_1942 | stalingrad_counterattack | 2 | 突擊工兵 / 迫砲觀測所 | suppression / sustain | covered |" in report
@@ -470,11 +478,11 @@ def main() -> None:
         "Objective branch coverage should expose mutually exclusive tactical choices",
     )
     require(
-        "| 01_sedan_1940 | sedan_crossing_choice | 2 | 橋頭補給 / 清除南翼機槍 | repair / suppression+campaign | covered |" in report
-        and "| pacific_05_iwo_jima_1945 | iwo_airfield_choice | 2 | 偵察北側洞窟 / 摧毀島內山砲 | breach+campaign / suppression | covered |" in report,
-        "Objective branch coverage should expose strategic campaign reward tradeoffs",
+        "| 01_sedan_1940 | sedan_crossing_choice | 2 | 橋頭補給 / 清除南翼機槍 | repair / suppression | covered |" in report
+        and "| pacific_05_iwo_jima_1945 | iwo_airfield_choice | 2 | 偵察北側洞窟 / 摧毀島內山砲 | breach / suppression | covered |" in report,
+        "Objective branch coverage should expose self-contained tactical reward tradeoffs",
     )
-    campaign_reward_section = section_text(report, "## Campaign Strategic Reward Coverage")
+    campaign_reward_section = section_text(report, "## Campaign In-Battle Reward Coverage")
     campaign_reward_rows = [
         line for line in campaign_reward_section.splitlines()
         if line.startswith("| ")
@@ -483,31 +491,38 @@ def main() -> None:
     ]
     require(
         len(campaign_reward_rows) == campaign_count,
-        "Campaign strategic reward coverage should include every non-tutorial campaign",
+        "Campaign in-battle reward coverage should include every non-tutorial campaign",
     )
     require(
         all(line.endswith("| covered |") for line in campaign_reward_rows),
-        "Every non-tutorial campaign should expose at least one campaign reward objective",
+        "Every non-tutorial campaign should expose self-contained secondary rewards",
     )
-    total_campaign_rewards = 0
+    total_secondary_objectives = 0
+    total_enriched_objectives = 0
     for line in campaign_reward_rows:
         parts = [part.strip() for part in line.strip("|").split("|")]
         require(len(parts) >= 6, "Campaign reward coverage rows should expose all columns")
         campaign_id = parts[0]
         scenario_count = int(parts[1])
-        reward_count = int(parts[2])
-        reward_paths = parts[4]
+        objective_count = int(parts[2])
+        enriched_count = int(parts[3])
+        reward_mix = parts[4]
         require(scenario_count > 0, f"{campaign_id} should include scenario coverage")
-        require(reward_count > 0 and "+1p" in reward_paths, f"{campaign_id} should include campaign bonus paths")
-        total_campaign_rewards += reward_count
+        require(objective_count >= scenario_count, f"{campaign_id} should include secondary objective coverage")
+        require(enriched_count > 0 and "campaign" not in reward_mix, f"{campaign_id} should use tactical in-battle rewards")
+        total_secondary_objectives += objective_count
+        total_enriched_objectives += enriched_count
     require(
-        total_campaign_rewards >= 8,
-        "Formal campaigns should expose at least eight campaign bonus objectives",
+        total_secondary_objectives >= main_scenario_count
+        and total_enriched_objectives >= main_scenario_count,
+        "Formal campaigns should keep every main battle covered by enriched in-battle rewards",
     )
     require(
-        "| blitzkrieg_early_war | 5 | 1 | 01_sedan_1940 | 01_sedan_1940:清除南翼機槍 +1p | covered |" in report
-        and "| pacific_front | 6 | 3 | pacific_04_manila_1945, pacific_05_iwo_jima_1945, pacific_05_okinawa_1945 |" in report,
-        "Campaign strategic reward coverage should expose early-war and Pacific bonus paths",
+        "| blitzkrieg_early_war | 5 | 11 | 11 |"
+        in report
+        and "| pacific_front | 6 | 14 | 14 |"
+        in report,
+        "Campaign in-battle reward coverage should expose early-war and Pacific tactical reward breadth",
     )
     expansion_section = section_text(report, "## Scenario Expansion Coverage")
     expansion_rows = [
