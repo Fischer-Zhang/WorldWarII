@@ -2,9 +2,16 @@
 
 Turn-based WW2 tactical hex wargame built with **Godot 4 / GDScript**.
 
-[![Tests](https://img.shields.io/badge/tests-395%2F395-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-424%2F424-brightgreen)]() [![Engine](https://img.shields.io/badge/validated-Godot%204.2.2-blue)]() [![License](https://img.shields.io/badge/license-MIT-lightgrey)]()
 
 ![Sedan 1940 — a Panzer IV selected, showing its movement range, full stat/general breakdown and capture objectives](docs/screenshots/03_sedan_battle.png)
+
+## Play / Download
+
+- **Play in your browser:** <https://fischer-zhang.github.io/WorldWarII/> (desktop browser, no install)
+- **Download v1.1 (Linux / Windows / macOS):** [latest release](https://github.com/Fischer-Zhang/WorldWarII/releases/latest)
+
+Builds are unsigned: on macOS use right-click → Open, on Windows dismiss the SmartScreen prompt. Any build reproduces locally with `godot --headless --export-release "<Linux|Windows|macOS|Web>"` against the checked-in `export_presets.cfg`.
 
 ## What It Is
 
@@ -21,7 +28,7 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 | Content | 49 scenario JSON files: 43 single-battle scenarios including `00_sandbox`, plus 6 campaign-only tutorial scenarios |
 | Catalogs | 11 unit types, 9 terrain types, 14 generals (every conquest power has a roster), 3 tech upgrades |
 | Strategic layer | 6 campaigns, including tutorial campaign 0, and a 32-region conquest map with zoomable world view, supply, port, rail logistics, theater objectives and region development |
-| Tests | 395 headless GDScript checks plus static data/report validators |
+| Tests | 424 headless GDScript checks plus static data/report validators, including a deterministic AI self-play difficulty-ladder gate |
 | Platforms | Export presets for Linux, Windows, macOS and Web |
 
 ## Game Modes
