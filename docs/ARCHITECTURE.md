@@ -178,6 +178,9 @@ mark scores and breach-support mark scores.
 - advance progress only on victory
 - grant lounge resources when progress advances
 
+Secondary objective rewards remain scoped to the current battle in campaign mode;
+progress advancement is the only campaign lounge-resource source.
+
 `LoungeManager` spends resources on:
 
 - general upgrades
