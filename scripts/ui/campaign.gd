@@ -46,15 +46,15 @@ func _rebuild_campaign_list() -> void:
 		var cstate := CampaignManager.campaign_state(state, cid, order)
 		var progress := int(cstate.get("progress", 0))
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 58)
+		btn.custom_minimum_size = Vector2(0, 48)
 		btn.add_theme_font_size_override("font_size", 18)
-		btn.text = "%s  (%d/%d)\n%s" % [
+		btn.clip_text = true
+		btn.text = "%s  (%d/%d)" % [
 			String(campaign.get("title", cid)),
 			min(progress, order.size()),
 			order.size(),
-			String(campaign.get("description", "")),
 		]
-		btn.tooltip_text = "查看此戰線的作戰進度。"
+		btn.tooltip_text = String(campaign.get("description", "查看此戰線的作戰進度。"))
 		btn.pressed.connect(func(): _select_campaign(cid))
 		list.add_child(btn)
 
@@ -95,7 +95,8 @@ func _rebuild_scenario_list() -> void:
 		if selected_scenario_id == sid:
 			prefix = "> " + prefix
 		btn.add_theme_color_override("font_color", color)
-		btn.text = "%s  %s — %s" % [prefix, sid, title]
+		btn.clip_text = true
+		btn.text = "%s  %s" % [prefix, title]
 		btn.disabled = i > progress
 		btn.tooltip_text = "尚未解鎖,先完成前一場作戰。" if btn.disabled else "選擇此作戰。"
 		btn.pressed.connect(func(): _select_scenario(sid))

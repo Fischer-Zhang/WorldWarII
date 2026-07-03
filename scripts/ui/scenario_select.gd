@@ -1,9 +1,9 @@
 extends Control
 
 const DIFFICULTY_HINTS := {
-	"easy":   "AI 較被動,攻擊與獵殺權重低",
-	"normal": "標準難度,平衡權重,無 lookahead",
-	"hard":   "啟用 1 步 lookahead,AI 會評估「我走這步後玩家最強反擊」",
+	"easy":   "AI 保守:攻擊/獵殺權重低、偶爾走位失誤、不保存殘兵",
+	"normal": "平衡權重:會前瞻反擊、集火與保存殘兵,強度中等",
+	"hard":   "全面進取:高攻擊權重、強前瞻反擊、積極集火與保存老兵",
 }
 
 const CATEGORY_ALL := "all"
@@ -93,9 +93,10 @@ func _rebuild_scenario_list() -> void:
 		if not _scenario_in_active_category(scenario_id):
 			continue
 		var btn := Button.new()
-		btn.text = "%s — %s" % [scenario.get("id", ""), scenario.get("title", "(無標題)")]
+		btn.text = String(scenario.get("title", "(無標題)"))
 		btn.custom_minimum_size = Vector2(0, 44)
 		btn.add_theme_font_size_override("font_size", 18)
+		btn.clip_text = true
 		btn.tooltip_text = "查看此作戰簡報。"
 		btn.pressed.connect(func(): _on_scenario_picked(scenario_id))
 		list.add_child(btn)
