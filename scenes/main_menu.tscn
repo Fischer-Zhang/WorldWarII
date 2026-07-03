@@ -36,6 +36,12 @@ theme_override_font_sizes/font_size = 18
 text = "戰術六角格戰棋"
 horizontal_alignment = 1
 
+[node name="NewPlayerHint" type="Label" parent="VBox"]
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.62, 0.78, 0.95, 1)
+text = "首次遊玩?從「戰役 → 教學戰役 0」開始"
+horizontal_alignment = 1
+
 [node name="Spacer" type="Control" parent="VBox"]
 custom_minimum_size = Vector2(0, 8)
 

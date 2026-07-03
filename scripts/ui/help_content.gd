@@ -114,6 +114,48 @@ static func legend_bbcode() -> String:
 
 	return "\n\n".join(blocks)
 
+# Short teaching lines keyed by the scenario `tutorial_mechanics` entries. Only
+# tutorial scenarios carry that array; battle.gd and briefing.gd surface these
+# so the authored mechanic list actually reaches the player.
+const TUTORIAL_HINTS := {
+	"movement": "點我方單位顯示藍色可移動格,點格移動;移動後尚未行動仍可再選取。",
+	"attack": "靠近敵人時紅色格為可攻擊目標,點擊開火;開火即結束該單位回合。",
+	"counterattack": "近戰會遭反擊;砲兵等間接單位防守時不反擊。",
+	"capture": "站上金色目標城鎮並守到時限即可獲勝。",
+	"secondary_objective": "藍色次要目標非必要,完成給一次性獎勵(經驗/補給/壓制等)。",
+	"terrain_defense": "森林、城鎮提供防禦加成,善用地形站位。",
+	"zoc": "貼著未被壓制的敵軍移動會多花 2 移動(管制區)。",
+	"overwatch": "進入警戒後,敵人移入射程會自動開火。",
+	"direct_fire_los": "直射需要視線;森林與山會擋住視線。",
+	"indirect_fire": "間接火力(砲兵)可越過遮蔽,但仍需友軍看見目標。",
+	"spotting": "視野好的單位(如輕戰車)可當觀測手,替砲兵指出目標。",
+	"suppression": "壓制會降低移動與攻擊;達 2 會被釘住,不能警戒/構工。",
+	"rally": "整隊消耗行動、降低壓制,躲在掩蔽處效果更好。",
+	"dig_in": "整回合不動會構工 +防禦(最多 +3);砲兵與工兵可以拆。",
+	"engineer_bridge": "工兵可在相鄰河流或海面架橋開路。",
+	"engineer_breach": "工兵能拆除敵軍構工,替後續攻擊開路。",
+	"armor": "戰車正面對撞風險高,注意裝甲與反裝甲數值。",
+	"anti_armor": "反戰車砲與驅逐戰車專剋裝甲,但對步兵較弱。",
+	"armor_standoff": "驅逐戰車保持 2 格射距才有伏擊反裝甲加成,貼身射擊會失去優勢。",
+	"general_skill": "將領提供數值加成與主動技能,注意冷卻回合。",
+	"veteran": "單位升級為老兵會提升數值(攻/防/移動/視野)。",
+	"airdrop": "傘兵可一次性空降到遠處的空地。",
+	"reinforcements": "援軍會在指定回合從邊緣進場,撐住即可。",
+	"splash_damage": "火箭砲造成濺射傷害,適合打擊密集的敵群。",
+}
+
+# BBCode "本關教學重點" block from a scenario's tutorial_mechanics list. Unknown
+# keys are skipped; returns "" when nothing matches so callers can guard.
+static func tutorial_hint_bbcode(mechanics: Array) -> String:
+	var lines := PackedStringArray()
+	for key in mechanics:
+		var hint := String(TUTORIAL_HINTS.get(String(key), ""))
+		if hint != "":
+			lines.append("• " + hint)
+	if lines.is_empty():
+		return ""
+	return _heading("本關教學重點") + "\n" + "\n".join(lines)
+
 static func _heading(text: String) -> String:
 	return "[b][color=%s]%s[/color][/b]" % [_HEADING, text]
 

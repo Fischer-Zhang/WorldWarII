@@ -1,6 +1,7 @@
 extends Control
 
 const ConquestBattleSetup := preload("res://scripts/scenario/conquest_battle_setup.gd")
+const HelpContent := preload("res://scripts/ui/help_content.gd")
 
 @onready var title_label: Label = $Margin/VBox/Title
 @onready var briefing_label: RichTextLabel = $Margin/VBox/BriefingScroll/Briefing
@@ -24,7 +25,11 @@ func _ready() -> void:
 		_show_conquest_briefing(scenario)
 	else:
 		title_label.text = String(scenario.get("title", scenario.get("id", "")))
-		briefing_label.text = String(scenario.get("briefing", "(無簡報)"))
+		var briefing_text := String(scenario.get("briefing", "(無簡報)"))
+		var tutorial_hints := HelpContent.tutorial_hint_bbcode(scenario.get("tutorial_mechanics", []))
+		if tutorial_hints != "":
+			briefing_text += "\n\n" + tutorial_hints
+		briefing_label.text = briefing_text
 	begin_button.pressed.connect(_on_begin_pressed)
 	begin_button.tooltip_text = "開始戰鬥。" if GameState.campaign_mode else "進入戰前部署。"
 	back_button.pressed.connect(_on_back_pressed)

@@ -181,8 +181,15 @@ func _ready() -> void:
 	bridge_button.tooltip_text = "工兵消耗行動在相鄰河流或海面架橋。"
 	legend_button.pressed.connect(_toggle_legend)
 	legend_close_button.pressed.connect(_close_legend)
-	legend_text.text = HelpContent.legend_bbcode()
-	legend_panel.visible = false
+	# Tutorial scenarios carry a mechanic list; surface it as a teaching block at
+	# the top of the legend and auto-open it once so a new player is oriented.
+	var tutorial_hints := HelpContent.tutorial_hint_bbcode(scenario.get("tutorial_mechanics", []))
+	if tutorial_hints != "":
+		legend_text.text = tutorial_hints + "\n\n" + HelpContent.legend_bbcode()
+		legend_panel.visible = true
+	else:
+		legend_text.text = HelpContent.legend_bbcode()
+		legend_panel.visible = false
 	result_panel.visible = false
 	_apply_player_objective_pulse()
 	_recompute_visibility()
