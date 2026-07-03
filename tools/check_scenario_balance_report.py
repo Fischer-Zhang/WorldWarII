@@ -34,10 +34,22 @@ def main() -> None:
         and "壓制馬克沁火點 [destroy Maxim@4,4 after southern_sweep]" in report,
         "Destroy secondary objectives should show their marked unit targets",
     )
+    require(
+        "橋面工兵補給 [capture 10,12 after nijmegen_south_bridgehead] (XP 1, supp -2, repair 1)" in report,
+        "Market Garden should expose the bridge engineer sustain cache",
+    )
     require("east_10_berlin_1945" in report, "scenario report missing Berlin row")
     require(
         "soviet: eng 1, art 1, rocket 0, mg 0" in report,
         "Berlin should show the Soviet assault group has an engineer and artillery",
+    )
+    require(
+        "最後突擊集結點 [hold 2t 18,4 after locate_heavy_battery] (XP 1, supp -2, enemy supp +1 R1)" in report,
+        "Berlin should expose the final assault staging objective",
+    )
+    require(
+        "前線救護站 [capture 5,5 after clear_western_at] (XP 1, supp -2, repair 1)" in report,
+        "Aachen should expose the urban sustain objective",
     )
     print("Scenario balance report checks passed")
 

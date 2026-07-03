@@ -151,7 +151,7 @@ def main() -> None:
     require(
         "| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 |"
         in report
-        and "counter-suppress:1, repair:1"
+        and "counter-suppress:2, recover:1, repair:1"
         in report,
         "Berlin morale coverage should expose dense defensive pressure and assault sustain hooks",
     )
@@ -201,6 +201,24 @@ def main() -> None:
         and "標定重砲陣地 | recon 22,2 after clear_western_mg | soviet | own 13 / enemy 0 | XP 1, enemy dig -1 R2, campaign +1p | enemy closer; breach reward R2; campaign bonus +1"
         in report,
         "Reward audit should show Berlin recon breach reward and campaign bonus pressure",
+    )
+    require(
+        "06_market_garden_1944" in report
+        and "橋面工兵補給 | capture 10,12 after nijmegen_south_bridgehead | allies | own 8 / enemy 10 | XP 1, supp -2, repair 1 | sustain reward; damage recovery"
+        in report,
+        "Reward audit should show Market Garden bridge sustain cache",
+    )
+    require(
+        "west_09_aachen_1944" in report
+        and "前線救護站 | capture 5,5 after clear_western_at | allies | own 4 / enemy 1 | XP 1, supp -2, repair 1 | enemy closer; sustain reward; damage recovery"
+        in report,
+        "Reward audit should show Aachen urban sustain branch",
+    )
+    require(
+        "east_10_berlin_1945" in report
+        and "最後突擊集結點 | hold 2t 18,4 after locate_heavy_battery | soviet | own 8 / enemy 0 | XP 1, supp -2, enemy supp +1 R1 | enemy closer; sustain reward; tactical suppression reward R1"
+        in report,
+        "Reward audit should show Berlin final assault staging reward",
     )
     conquest_section = section_text(report, "## Conquest Secondary Coverage")
     conquest_rows = [
@@ -364,7 +382,9 @@ def main() -> None:
     )
     require(
         "| west_08_normandy_cobra_1944 | 2 | 0 | 2 | covered |" in report
-        and "| east_10_berlin_1945 | 2 | 0 | 2 | covered |" in report,
+        and "| 06_market_garden_1944 | 3 | 0 | 3 | covered |" in report
+        and "| east_10_berlin_1945 | 3 | 0 | 3 | covered |" in report
+        and "| west_09_aachen_1944 | 3 | 0 | 3 | covered |" in report,
         "Gameplay depth coverage should expose enriched objective counts",
     )
     operation_section = section_text(report, "## Operation Chain Coverage")
@@ -388,6 +408,7 @@ def main() -> None:
     )
     require(
         "| 03_stalingrad_1942 | 2 | 2 | 標定突擊路線 -> 突擊工兵 | breach -> suppression | covered |" in report
+        and "| east_10_berlin_1945 | 2 | 3 | 清除西側 MG 42 -> 標定重砲陣地 -> 最後突擊集結點 | repair+suppression -> breach+campaign -> sustain+suppression | covered |" in report
         and "| west_10_remagen_1945 | 1 | 2 | 奪取橋西岸 -> 偵察東岸橋頭 | repair -> breach | covered |" in report,
         "Operation chain coverage should expose staged breach and bridgehead examples",
     )
