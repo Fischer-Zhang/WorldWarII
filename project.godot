@@ -42,6 +42,7 @@ window/stretch/aspect="expand"
 
 [gui]
 
+theme/custom="res://assets/theme/ww2_theme.tres"
 theme/custom_font="res://assets/fonts/NotoSansCJKtc-Regular.otf"
 
 [input]
