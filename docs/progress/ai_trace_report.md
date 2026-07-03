@@ -128,6 +128,19 @@ Plan: `rally` to `0,0`, target `none`, score `19.50`.
 | 4 | `-1,1` | `none` | `none` | `none` | `none` | -4.65 | -4.65 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -1.15 | 0.00 | -0.50 | 0.00 | 0.00 |
 | 5 | `1,-2` | `none` | `none` | `none` | `none` | -4.65 | -4.65 | -inf | -inf | -inf | -inf | -2.00 | 0.00 | -1.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | -1.15 | 0.00 | -0.50 | 0.00 | 0.00 |
 
+## Low morale rally choice
+A shaky unit with no suppression but a known contact should still value Rally enough to spend the action and steady morale.
+
+Plan: `rally` to `0,0`, target `none`, score `2.50`.
+
+| rank | coord | target | fire support | breach support | suppressive fire | base | overwatch | mark | breach | suppress | rally | distance | attack | exposure | terrain | role | primary | secondary | denial | guard | objective | objective detail | lookahead | preservation | encirclement | coordination | blocking |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0,0` | `none` | `none` | `none` | `none` | -5.10 | -5.10 | -inf | -inf | -inf | 2.50 | -6.00 | 0.00 | -0.00 | 0.90 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| 2 | `3,0` | `none` | `none` | `none` | `none` | -3.00 | -3.00 | -inf | -inf | -inf | -inf | -3.00 | 0.00 | -0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| 3 | `2,1` | `none` | `none` | `none` | `none` | -4.00 | -4.00 | -inf | -inf | -inf | -inf | -4.00 | 0.00 | -0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| 4 | `2,0` | `none` | `none` | `none` | `none` | -4.00 | -4.00 | -inf | -inf | -inf | -inf | -4.00 | 0.00 | -0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| 5 | `3,-1` | `none` | `none` | `none` | `none` | -4.00 | -4.00 | -inf | -inf | -inf | -inf | -4.00 | 0.00 | -0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | `none` | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+
 ## MG overwatch lane
 MG reaction-fire profile should appear in overwatch candidate scores.
 

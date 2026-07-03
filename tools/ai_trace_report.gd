@@ -52,6 +52,8 @@ class StubUnit:
 	var general_id: String = ""
 	var dig_in_level: int = 0
 	var suppression: int = 0
+	var morale: int = 10
+	var morale_max: int = 10
 	var has_moved: bool = false
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
@@ -243,6 +245,19 @@ func _case_defs(data_loader) -> Array[Dictionary]:
 				Vector2i(0, 0): "town",
 			},
 			"notes": "Pinned unit in cover should show rally value competing with the attack plan.",
+		},
+		{
+			"id": "low_morale_rally",
+			"title": "Low morale rally choice",
+			"difficulty": "normal",
+			"attacker": _morale_unit("infantry", "axis", Vector2i(0, 0), 2, 10, data_loader),
+			"enemies": [
+				{"unit": _unit("infantry", "allies", Vector2i(6, 0), data_loader), "visible": false},
+			],
+			"terrain": {
+				Vector2i(0, 0): "town",
+			},
+			"notes": "A shaky unit with no suppression but a known contact should still value Rally enough to spend the action and steady morale.",
 		},
 		{
 			"id": "mg_overwatch",
@@ -452,6 +467,19 @@ func _dug_in_unit(type_id: String, faction: String, coord: Vector2i, dig_in: int
 func _suppressed_unit(type_id: String, faction: String, coord: Vector2i, suppression: int, data_loader) -> StubUnit:
 	var unit := _unit(type_id, faction, coord, data_loader)
 	unit.suppression = suppression
+	return unit
+
+func _morale_unit(
+	type_id: String,
+	faction: String,
+	coord: Vector2i,
+	morale: int,
+	morale_max: int,
+	data_loader
+) -> StubUnit:
+	var unit := _unit(type_id, faction, coord, data_loader)
+	unit.morale = morale
+	unit.morale_max = morale_max
 	return unit
 
 func _coord_text(value: Variant) -> String:

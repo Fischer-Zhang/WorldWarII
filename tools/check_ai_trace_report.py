@@ -85,6 +85,14 @@ def main() -> None:
         "normal difficulty must expose a net-exchange lookahead penalty",
     )
 
+    morale_section = section_text(report, "## Low morale rally choice")
+    require(
+        re.search(r"Plan: `rally` to `0,0`, target `none`", morale_section) is not None,
+        "low morale case should spend the action on Rally",
+    )
+    morale_row = table_row(morale_section, 1)
+    require(float(morale_row[11]) > 0.0, "low morale rally case must expose positive rally score")
+
     guard_section = section_text(report, "## Victory point guard hold")
     require(
         re.search(r"Plan: `(wait|overwatch)` to `2,0`, target `none`", guard_section) is not None,

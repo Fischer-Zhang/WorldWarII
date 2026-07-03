@@ -51,6 +51,11 @@ def main() -> None:
         "scenario probe missing terrain identity coverage section",
     )
     require(
+        "## Morale Pressure Coverage" in report
+        and "| scenario | pressure sources | rout window | sustain hooks | check |" in report,
+        "scenario probe missing morale pressure coverage section",
+    )
+    require(
         "## Gameplay Depth Coverage" in report
         and "| scenario | secondary objectives | xp-only objectives | enriched objectives | check |" in report,
         "scenario probe missing gameplay depth coverage section",
@@ -119,6 +124,36 @@ def main() -> None:
         "| east_10_berlin_1945 | soviet | 3/3 | 7 | 3 | 0/3 | 1/3 | supported |"
         in report,
         "Berlin urban breach focus should show supported breach access",
+    )
+    morale_section = section_text(report, "## Morale Pressure Coverage")
+    morale_rows = [
+        line for line in morale_section.splitlines()
+        if line.startswith("| ")
+        and not line.startswith("| ---")
+        and not line.startswith("| scenario |")
+    ]
+    require(
+        len(morale_rows) == main_scenario_count,
+        "Morale pressure coverage should include every main battle",
+    )
+    require(
+        "| 03_stalingrad_1942 | axis artillery:1, mg_team:1; soviet mg_team:2, rocket_artillery:1 |"
+        in report,
+        "Stalingrad morale coverage should include rocket and MG pressure sources",
+    )
+    require(
+        "| 05_bastogne_1944 | allies artillery:1, mg_team:1; axis artillery:1 |"
+        in report
+        and "counter-suppress:1, recover:1, reinforce:1, repair:1"
+        in report,
+        "Bastogne morale coverage should expose both pressure and sustain hooks",
+    )
+    require(
+        "| east_10_berlin_1945 | axis artillery:1, mg_team:2; soviet artillery:1 |"
+        in report
+        and "counter-suppress:1, repair:1"
+        in report,
+        "Berlin morale coverage should expose dense defensive pressure and assault sustain hooks",
     )
     require(
         "tut_03_suppression_digin_engineer" in report

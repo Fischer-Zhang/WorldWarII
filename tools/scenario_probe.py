@@ -48,7 +48,12 @@ SUPPRESSION_BY_TYPE = {
     "light_tank": 1,
     "medium_tank": 1,
     "artillery": 3,
+    "rocket_artillery": 3,
 }
+MORALE_BASE = 10
+MORALE_RESIST_DIV = 3
+MORALE_MIN_DRAIN = 1
+MORALE_MAX_SUPPRESSION = 5
 REGION_TRAIT_EFFECTS = {
     "industrial_hub": {"strength": 1},
     "fortress_line": {"support": ["mg_team"]},
@@ -198,11 +203,11 @@ def movement_costs(
     return cost_to
 
 
-def suppression_sources(scenario: dict[str, Any]) -> str:
+def suppression_sources(scenario: dict[str, Any], units: dict[str, Any]) -> str:
     by_faction: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
     for unit in initial_units(scenario):
         unit_type = str(unit.get("type", ""))
-        suppression = SUPPRESSION_BY_TYPE.get(unit_type, 1)
+        suppression = unit_suppression_pressure(unit_type, units)
         if suppression >= 3:
             by_faction[str(unit.get("faction", ""))][unit_type] += 1
     if not by_faction:
@@ -212,6 +217,14 @@ def suppression_sources(scenario: dict[str, Any]) -> str:
         labels = ", ".join(f"{unit_type}:{count}" for unit_type, count in sorted(counts.items()))
         parts.append(f"{faction} {labels}")
     return "; ".join(parts)
+
+
+def unit_suppression_pressure(unit_type: str, units: dict[str, Any]) -> int:
+    unit_def = units.get(unit_type, {})
+    pressure = SUPPRESSION_BY_TYPE.get(unit_type, 1)
+    if bool(unit_def.get("indirect", False)):
+        pressure = max(pressure, 3)
+    return pressure
 
 
 def artillery_coverage(scenario: dict[str, Any], units: dict[str, Any]) -> str:
@@ -1673,6 +1686,167 @@ def urban_breach_check_text(stats: dict[str, Any]) -> str:
     return "supported"
 
 
+def morale_pressure_rows(scenarios: list[dict[str, Any]], units: dict[str, Any]) -> list[list[Any]]:
+    rows: list[list[Any]] = []
+    for scenario in scenarios:
+        scenario_id = str(scenario.get("id", ""))
+        if not is_main_battle_scenario(scenario_id):
+            continue
+        pressure_text, high_pressure_count = morale_pressure_source_text(scenario, units)
+        rout_window = morale_rout_window_text(scenario, units)
+        sustain_text = morale_sustain_hook_text(scenario)
+        rows.append([
+            scenario_id,
+            pressure_text,
+            rout_window,
+            sustain_text,
+            morale_pressure_check_text(high_pressure_count, rout_window, sustain_text),
+        ])
+    return rows
+
+
+def morale_pressure_source_text(
+    scenario: dict[str, Any],
+    units: dict[str, Any],
+) -> tuple[str, int]:
+    by_faction: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
+    high_pressure_count = 0
+    for unit in initial_units(scenario):
+        unit_type = str(unit.get("type", ""))
+        pressure = unit_suppression_pressure(unit_type, units)
+        if pressure < 3:
+            continue
+        by_faction[str(unit.get("faction", ""))][unit_type] += 1
+        high_pressure_count += 1
+    if not by_faction:
+        return ("none", 0)
+    parts: list[str] = []
+    for faction, counts in sorted(by_faction.items()):
+        labels = ", ".join(f"{unit_type}:{count}" for unit_type, count in sorted(counts.items()))
+        parts.append(f"{faction} {labels}")
+    return ("; ".join(parts), high_pressure_count)
+
+
+def morale_rout_window_text(scenario: dict[str, Any], units: dict[str, Any]) -> str:
+    best: tuple[int, int, str] | None = None
+    faction_ids = [str(faction.get("id", "")) for faction in scenario.get("factions", [])]
+    for faction_id in faction_ids:
+        attackers = [
+            unit for unit in initial_units(scenario)
+            if str(unit.get("faction", "")) == faction_id
+        ]
+        defenders = [
+            unit for unit in initial_units(scenario)
+            if str(unit.get("faction", "")) != faction_id
+        ]
+        for defender in defenders:
+            pressures: list[int] = []
+            for attacker in attackers:
+                if morale_can_pressure_target(attacker, defender, units):
+                    pressures.append(unit_suppression_pressure(str(attacker.get("type", "")), units))
+            if not pressures:
+                continue
+            pressures.sort(reverse=True)
+            focused = pressures[:4]
+            adjacent = sum(
+                1
+                for attacker in attackers
+                if hex_distance(
+                    axial_from_offset(attacker.get("at", [0, 0])),
+                    axial_from_offset(defender.get("at", [0, 0])),
+                ) <= 1
+            )
+            hits = morale_hits_to_rout(focused, int(defender.get("suppression", 0)), adjacent)
+            total_pressure = sum(focused)
+            defender_faction = str(defender.get("faction", "enemy"))
+            defender_label = str(defender.get("name", defender.get("type", "unit")))
+            prefix = f"{faction_id}->{defender_faction} {defender_label}"
+            pressure_text = "+".join(str(value) for value in focused)
+            if hits is None:
+                candidate = (99, -total_pressure, f"{prefix} no rout p{total_pressure} [{pressure_text}]")
+            else:
+                candidate = (hits, -total_pressure, f"{prefix} h{hits} p{total_pressure} [{pressure_text}]")
+            if best is None or candidate < best:
+                best = candidate
+    return best[2] if best is not None else "none"
+
+
+def morale_can_pressure_target(
+    attacker: dict[str, Any],
+    defender: dict[str, Any],
+    units: dict[str, Any],
+) -> bool:
+    attacker_type = str(attacker.get("type", ""))
+    attacker_def = units.get(attacker_type, {})
+    attacker_coord = axial_from_offset(attacker.get("at", [0, 0]))
+    defender_coord = axial_from_offset(defender.get("at", [0, 0]))
+    distance = hex_distance(attacker_coord, defender_coord)
+    reach = int(attacker_def.get("range", 1)) + int(attacker_def.get("move", 0))
+    return distance <= reach
+
+
+def morale_hits_to_rout(
+    pressures: list[int],
+    initial_suppression: int,
+    adjacent_enemies: int,
+) -> int | None:
+    morale = MORALE_BASE
+    suppression = min(MORALE_MAX_SUPPRESSION, max(0, initial_suppression))
+    for index, pressure in enumerate(pressures, start=1):
+        pinned = suppression >= SUPPRESSION_PIN_THRESHOLD
+        resistance = max(
+            0,
+            morale // MORALE_RESIST_DIV
+            - max(0, adjacent_enemies - 1)
+            - (1 if pinned else 0),
+        )
+        drain = max(MORALE_MIN_DRAIN, pressure - resistance)
+        morale = max(0, morale - drain)
+        suppression = min(MORALE_MAX_SUPPRESSION, suppression + pressure)
+        if morale <= 0:
+            return index
+    return None
+
+
+def morale_sustain_hook_text(scenario: dict[str, Any]) -> str:
+    counts: collections.Counter[str] = collections.Counter()
+    for objective in scenario.get("secondary_objectives", []):
+        if not isinstance(objective, dict):
+            continue
+        for reward in objective.get("rewards", []):
+            if not isinstance(reward, dict):
+                continue
+            amount = int(reward.get("amount", 0))
+            if amount <= 0:
+                continue
+            reward_type = str(reward.get("type", ""))
+            if reward_type == "recover_suppression":
+                counts["recover"] += 1
+            elif reward_type == "repair_hp":
+                counts["repair"] += 1
+            elif reward_type == "advance_reinforcements":
+                counts["reinforce"] += 1
+            elif reward_type == "suppress_enemies":
+                counts["counter-suppress"] += 1
+    if not counts:
+        return "none"
+    return ", ".join(f"{key}:{value}" for key, value in sorted(counts.items()))
+
+
+def morale_pressure_check_text(
+    high_pressure_count: int,
+    rout_window: str,
+    sustain_text: str,
+) -> str:
+    if high_pressure_count <= 0:
+        return "low pressure"
+    if " h" in rout_window and sustain_text != "none":
+        return "covered"
+    if " h" in rout_window:
+        return "playtest recovery"
+    return "tracked"
+
+
 def reinforcement_delta(scenario: dict[str, Any], units: dict[str, Any]) -> str:
     by_faction: dict[str, float] = collections.defaultdict(float)
     by_turn: dict[int, list[str]] = collections.defaultdict(list)
@@ -1701,7 +1875,7 @@ def generate_report() -> str:
         rows.append(
             [
                 scenario.get("id", ""),
-                suppression_sources(scenario),
+                suppression_sources(scenario, units),
                 artillery_coverage(scenario, units),
                 spotter_coverage(scenario, units),
                 breach_path_pressure(scenario, units, terrains),
@@ -1745,6 +1919,18 @@ def generate_report() -> str:
                 "check",
             ],
             urban_breach_focus_rows(scenarios, units, terrains),
+        ),
+        "## Morale Pressure Coverage",
+        "Focused gate for rout-pressure tuning: high-suppression sources and four-hit focus windows should be visible before scenario playtests.",
+        table(
+            [
+                "scenario",
+                "pressure sources",
+                "rout window",
+                "sustain hooks",
+                "check",
+            ],
+            morale_pressure_rows(scenarios, units),
         ),
         "## Secondary Objective Reward Audit",
         "Focused audit of optional objective pressure, reward type, and static reward effectiveness.",
