@@ -101,6 +101,11 @@ For balance or scenario work:
 - Regenerate `docs/progress/ai_trace_report.md` with
   `godot --headless --path . --script res://tools/ai_trace_report.gd` when AI
   scoring, role shaping or action selection changes.
+- Regenerate `docs/progress/ai_selfplay_report.md` with
+  `godot --headless --path . --script res://tools/ai_selfplay_report.gd` when AI
+  scoring, action selection, unit stats or the probed scenarios change. Full
+  headless AI-vs-AI battles (~10s, deterministic); `tools/validate.sh`
+  regenerates and gates it automatically.
 
 Urban breach checks must use both `scenario_balance_report.md` and
 `scenario_probe.md`. Stalingrad and Berlin currently have breach tools but long
@@ -121,6 +126,7 @@ Generated progress reports currently include:
 - `docs/progress/scenario_probe.md`
 - `docs/progress/tutorial_probe.md`
 - `docs/progress/ai_trace_report.md`
+- `docs/progress/ai_selfplay_report.md`
 
 ## Validation
 

@@ -40,6 +40,8 @@ Use `tools/validate.sh` for the full standard validation sequence:
 - Everything in `tools/validate_fast.sh`.
 - Regeneration of the Godot AI trace report.
 - AI trace report smoke checks for exposed objective-chain diagnostics.
+- Regeneration of the Godot AI self-play report (full headless AI-vs-AI battles).
+- AI self-play report smoke checks (clean resolution, difficulty-ladder verdicts).
 - `bash tests/run_all.sh`.
 
 Use `tools/install_hooks.sh` to install a local git `pre-commit` hook that runs
@@ -131,3 +133,33 @@ Current role-shaping pass:
 - Secondary objective movement pull stops scoring mutually exclusive branch alternatives once one objective in that branch completes.
 - Suppressed units can choose Rally when recovery is worth more than other actions.
 - Overwatch scoring uses unit-data reaction-fire percentages, so MG lane denial reflects its full-damage reaction profile.
+
+## Workflow 6: AI Self-Play Probe
+
+After AI scoring, action selection or balance changes, verify the AI in full
+battles — not just synthetic trace situations.
+
+Use `godot --headless --path . --script res://tools/ai_selfplay_report.gd` to
+regenerate `docs/progress/ai_selfplay_report.md` (~10s). The generator drives
+the real battle scene with every faction handed to `AIController` via
+`tools/selfplay_runner.gd`, so combat, morale, overwatch, reinforcements and
+victory all execute through game code. The engine is RNG-free, so reruns are
+byte-identical until AI or data changes. Prefix with
+`XDG_DATA_HOME="$(mktemp -d)"` to keep the game-over replay write out of your
+real user directory (validate.sh already does this).
+
+Run matrix and how to read it:
+
+- One tutorial canary plus symmetric mirror matches (easy/easy, normal/normal,
+  hard/hard) on small capture and eliminate scenarios measure attacker/defender
+  balance per difficulty.
+- Ladder runs play the attacking seat hard-vs-easy in both orientations. The
+  metric is the seat's HP exchange (enemy HP destroyed minus own HP destroyed);
+  the hard seat must not do worse than the easy seat. `tools/check_ai_selfplay_report.py`
+  recomputes the verdicts from the table and fails validation on a regression.
+- The Notes section flags pathologies straight from the data: stalled runs,
+  turn-cap hits and zero-damage no-contact sides.
+
+`tools/validate.sh` regenerates and checks this report on every full
+validation, so committed AI changes cannot silently break the difficulty
+ladder or stall a battle.
