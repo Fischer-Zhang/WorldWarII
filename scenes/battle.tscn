@@ -19,7 +19,7 @@ script = ExtResource("3_cam")
 anchor_right = 1.0
 offset_left = 12.0
 offset_top = 12.0
-offset_right = -132.0
+offset_right = -270.0
 offset_bottom = 44.0
 mouse_filter = 2
 theme_override_font_sizes/font_size = 18
@@ -33,7 +33,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
 offset_top = -40.0
-offset_right = -280.0
+offset_right = -270.0
 offset_bottom = -10.0
 mouse_filter = 2
 theme_override_font_sizes/font_size = 16
@@ -41,42 +41,54 @@ text = ""
 horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="InfoPanel" type="Panel" parent="UI"]
+[node name="ActionDock" type="VBoxContainer" parent="UI"]
 anchor_left = 1.0
+anchor_top = 0.0
 anchor_right = 1.0
-offset_left = -200.0
+anchor_bottom = 1.0
+offset_left = -244.0
 offset_top = 60.0
 offset_right = -12.0
-offset_bottom = 500.0
+offset_bottom = -10.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="InfoPanel" type="Panel" parent="UI/ActionDock"]
+custom_minimum_size = Vector2(0, 360)
+size_flags_horizontal = 3
+size_flags_vertical = 3
 mouse_filter = 2
 modulate = Color(1, 1, 1, 0.78)
 
-[node name="VBox" type="VBoxContainer" parent="UI/InfoPanel"]
+[node name="VBox" type="VBoxContainer" parent="UI/ActionDock/InfoPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 178.0
-offset_bottom = 430.0
+offset_right = -10.0
+offset_bottom = -10.0
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="Header" type="Label" parent="UI/InfoPanel/VBox"]
+[node name="Header" type="Label" parent="UI/ActionDock/InfoPanel/VBox"]
 mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = "單位資訊"
 
-[node name="UnitName" type="Label" parent="UI/InfoPanel/VBox"]
+[node name="UnitName" type="Label" parent="UI/ActionDock/InfoPanel/VBox"]
 mouse_filter = 2
 theme_override_font_sizes/font_size = 20
 text = "(未選取)"
 
-[node name="FactionLabel" type="Label" parent="UI/InfoPanel/VBox"]
+[node name="FactionLabel" type="Label" parent="UI/ActionDock/InfoPanel/VBox"]
 mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = ""
 
-[node name="Sep1" type="HSeparator" parent="UI/InfoPanel/VBox"]
+[node name="Sep1" type="HSeparator" parent="UI/ActionDock/InfoPanel/VBox"]
 
-[node name="StatsLabel" type="RichTextLabel" parent="UI/InfoPanel/VBox"]
+[node name="StatsLabel" type="RichTextLabel" parent="UI/ActionDock/InfoPanel/VBox"]
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
@@ -85,9 +97,9 @@ mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 14
 text = "點擊單位以查看數據"
 
-[node name="Sep2" type="HSeparator" parent="UI/InfoPanel/VBox"]
+[node name="Sep2" type="HSeparator" parent="UI/ActionDock/InfoPanel/VBox"]
 
-[node name="TerrainLabel" type="RichTextLabel" parent="UI/InfoPanel/VBox"]
+[node name="TerrainLabel" type="RichTextLabel" parent="UI/ActionDock/InfoPanel/VBox"]
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
@@ -132,59 +144,37 @@ mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 14
 text = ""
 
-[node name="AbilityBox" type="VBoxContainer" parent="UI"]
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -230.0
-offset_top = 506.0
-offset_right = -20.0
-offset_bottom = 562.0
+[node name="AbilityBox" type="VBoxContainer" parent="UI/ActionDock"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 mouse_filter = 2
 alignment = 2
 theme_override_constants/separation = 6
 
-[node name="SkillBox" type="VBoxContainer" parent="UI/AbilityBox"]
+[node name="SkillBox" type="VBoxContainer" parent="UI/ActionDock/AbilityBox"]
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="BridgeButton" type="Button" parent="UI/AbilityBox"]
+[node name="BridgeButton" type="Button" parent="UI/ActionDock/AbilityBox"]
 visible = false
 custom_minimum_size = Vector2(0, 40)
 text = "架橋"
 
-[node name="OverwatchButton" type="Button" parent="UI"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -230.0
-offset_top = -150.0
-offset_right = -20.0
-offset_bottom = -110.0
+[node name="OverwatchButton" type="Button" parent="UI/ActionDock"]
+custom_minimum_size = Vector2(0, 40)
+size_flags_horizontal = 3
 visible = false
 text = "進入警戒 (O)"
 
-[node name="RallyButton" type="Button" parent="UI"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -230.0
-offset_top = -100.0
-offset_right = -20.0
-offset_bottom = -60.0
+[node name="RallyButton" type="Button" parent="UI/ActionDock"]
+custom_minimum_size = Vector2(0, 40)
+size_flags_horizontal = 3
 visible = false
 text = "整隊 (R)"
 
-[node name="EndTurnButton" type="Button" parent="UI"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -230.0
-offset_top = -50.0
-offset_right = -20.0
-offset_bottom = -10.0
+[node name="EndTurnButton" type="Button" parent="UI/ActionDock"]
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 text = "結束回合"
 
 [node name="LegendButton" type="Button" parent="UI"]

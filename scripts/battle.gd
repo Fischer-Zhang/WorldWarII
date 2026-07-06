@@ -42,21 +42,21 @@ enum Phase { IDLE, UNIT_SELECTED, ATTACK_PHASE, GAME_OVER, AIRDROP_TARGET, BRIDG
 @onready var camera: CameraController = $Camera
 @onready var info_label: Label = $UI/InfoLabel
 @onready var status_label: Label = $UI/StatusLabel
-@onready var end_turn_button: Button = $UI/EndTurnButton
-@onready var overwatch_button: Button = $UI/OverwatchButton
-@onready var rally_button: Button = $UI/RallyButton
-@onready var skill_box: VBoxContainer = $UI/AbilityBox/SkillBox
-@onready var bridge_button: Button = $UI/AbilityBox/BridgeButton
+@onready var end_turn_button: Button = $UI/ActionDock/EndTurnButton
+@onready var overwatch_button: Button = $UI/ActionDock/OverwatchButton
+@onready var rally_button: Button = $UI/ActionDock/RallyButton
+@onready var skill_box: VBoxContainer = $UI/ActionDock/AbilityBox/SkillBox
+@onready var bridge_button: Button = $UI/ActionDock/AbilityBox/BridgeButton
 @onready var result_panel: Panel = $UI/ResultPanel
 @onready var result_label: Label = $UI/ResultPanel/ResultLabel
 @onready var result_summary: RichTextLabel = $UI/ResultPanel/ResultSummary
 @onready var menu_button: Button = $UI/ResultPanel/MenuButton
 @onready var lounge_button: Button = $UI/ResultPanel/LoungeButton
 @onready var next_button: Button = $UI/ResultPanel/NextButton
-@onready var info_unit_name: Label = $UI/InfoPanel/VBox/UnitName
-@onready var info_faction_label: Label = $UI/InfoPanel/VBox/FactionLabel
-@onready var info_stats: RichTextLabel = $UI/InfoPanel/VBox/StatsLabel
-@onready var info_terrain: RichTextLabel = $UI/InfoPanel/VBox/TerrainLabel
+@onready var info_unit_name: Label = $UI/ActionDock/InfoPanel/VBox/UnitName
+@onready var info_faction_label: Label = $UI/ActionDock/InfoPanel/VBox/FactionLabel
+@onready var info_stats: RichTextLabel = $UI/ActionDock/InfoPanel/VBox/StatsLabel
+@onready var info_terrain: RichTextLabel = $UI/ActionDock/InfoPanel/VBox/TerrainLabel
 @onready var turn_banner: Label = $UI/TurnBanner
 @onready var damage_preview_panel: Panel = $UI/DamagePreviewPanel
 @onready var damage_preview_content: RichTextLabel = $UI/DamagePreviewPanel/Content
@@ -213,7 +213,7 @@ func _set_prompt(step: String, detail: String) -> void:
 func _battle_map_screen_rect() -> Rect2:
 	var viewport_size := get_viewport_rect().size
 	var origin := Vector2(20.0, 54.0)
-	var size := Vector2(max(320.0, viewport_size.x - 280.0), max(240.0, viewport_size.y - 112.0))
+	var size := Vector2(max(320.0, viewport_size.x - 304.0), max(240.0, viewport_size.y - 112.0))
 	return Rect2(origin, size)
 
 func _input(event: InputEvent) -> void:
