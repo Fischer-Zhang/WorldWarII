@@ -14,6 +14,7 @@ This project keeps a small runtime and a data-heavy content layer. Rules are det
 
 ```text
 Autoloads
+├── AppTheme            global theme/fallback font setup
 ├── DataLoader          loads JSON catalogs once
 ├── GameState           inter-scene route state
 ├── AudioBank           lazy SFX dispatch
@@ -21,6 +22,7 @@ Autoloads
 
 Scenes
 ├── main_menu.tscn
+├── help.tscn
 ├── scenario_select.tscn
 ├── briefing.tscn
 ├── deployment.tscn
@@ -137,7 +139,9 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 **Suppression** comes from damaging attacks, especially MG/artillery. Pinned units lose overwatch/dig-in access and stop projecting ZoC; heavier suppression reduces move/attack.
 
-**Rally** spends the action to reduce suppression, with better recovery in defensive terrain.
+**Morale / Rout** is a separate pressure pool handled by `CombatEffects`. Non-lethal hits drain morale based on the attack's suppression pressure, current morale resistance, adjacent enemies and pinned state. At zero morale the unit routs, withdraws automatically and is spent for the turn; routed units reform after recovering enough morale out of enemy reach.
+
+**Rally** spends the action to reduce suppression and restore morale, with better suppression recovery in defensive terrain.
 
 **Fire-Support Marking** lets a light tank spend its action to mark a visible enemy in LOS. The mark is stored by the battle scene and consumed by the next same-faction active attack against that target, adding +1 suppression through `CombatEffects` only when the hit deals non-lethal damage.
 
@@ -147,27 +151,28 @@ The same dictionary feeds combat attack/defense/vs-armor and movement/vision bud
 
 ## AI
 
-`AIController` scores candidate positions and actions with deterministic heuristics:
+`AIController` enumerates reachable hexes and candidate actions, then scores deterministic components:
 
-- distance to known enemies/objectives
-- expected damage
-- kill bonus
-- counter-damage risk
-- exposure
-- terrain defense
-- wounded/suppressed target focus
-- role shaping for scouts, AT, artillery and engineers
-- movement pressure toward primary objectives, secondary objectives and visible breach targets; destroy-unit secondary objectives also bias attack selection toward the marked unit
-- rally value when suppressed
-- overwatch value when no attack is better
-- fire-support marking when a light tank has a visible LOS target and a same-faction follow-up attacker can use the suppression bonus
-- breach-support marking when an engineer has a nearby visible entrenched target and a same-faction follow-up attacker can use the extra dig-in loss
+- distance to known enemies, primary objectives, secondary objectives and visible breach targets
+- expected damage, kill value, suppression value, dig-in break value and counter-damage risk
+- terrain defense and exposure from a per-plan threat map built from true pathing reach of visible enemies, including ZoC, terrain and occupancy
+- net-exchange lookahead at every difficulty, summing concentrated player retaliation with anti-gang-up falloff, crediting discounted return fire and adding a lethal kill-zone penalty
+- encirclement penalties for hexes whose exits are threatened, scaled by preservation need
+- wounded/veteran preservation pull toward safer hexes when no profitable kill is available
+- turn-level coordination: focus-fire pull toward targets already engaged this turn and support-mark synergy for unspent friendly fire-support or breach marks
+- corridor-blocking penalties when a unit parks on a narrow passage while unacted allies still need to advance through it
+- role shaping for scouts, AT, artillery, engineers, objective denial and guard behavior
+- rally, overwatch, suppressive fire, fire-support marking and breach-support marking when those actions beat attacking or moving
+- deterministic Easy positioning mistakes through a seed-free jitter term
 
-Hard difficulty adds one-ply lookahead against visible player retaliation.
+`DIFFICULTY_PROFILE` shapes five axes: trade aggression, lookahead weight, turn-level coordination, unit preservation and Easy mistake rate. The lookahead mechanism is not Hard-only: Easy/Normal/Hard use `lookahead_w` values `0.35 / 0.7 / 1.0`.
+
 `tools/ai_trace_report.gd` generates `docs/progress/ai_trace_report.md` through
 `AIController.plan_trace_for_unit()` so AI diagnostics stay tied to the runtime
-scoring path, including primary/secondary objective score splits, fire-support
-mark scores and breach-support mark scores.
+scoring path, including primary/secondary objective score splits, support-mark
+scores, lookahead, preservation, encirclement, coordination and blocking terms.
+`tools/ai_selfplay_report.gd` drives full headless AI-vs-AI battles through the
+real battle scene and gates the difficulty ladder.
 
 ## Campaign
 
@@ -278,8 +283,8 @@ Strategic end-turn first computes supply from owned `supply_source` regions. Rai
 - conquest owner/neighbor/production/coordinate errors
 - non-reciprocal conquest neighbors
 
-`tools/validate.sh` adds the Godot AI trace report generator and
-`bash tests/run_all.sh`.
+`tools/validate.sh` adds the Godot AI trace and AI self-play report generators
+plus `bash tests/run_all.sh`.
 
 Headless GDScript coverage currently includes combat, AI, pathfinding, visibility, campaign, conquest, deployment, lounge, reinforcements, UI smoke, and formatter behavior.
 
@@ -288,6 +293,7 @@ Headless GDScript coverage currently includes combat, AI, pathfinding, visibilit
 `tests/test_ui_smoke.gd` loads all major screens headlessly:
 
 - main menu
+- how-to-play
 - scenario select
 - briefing
 - deployment

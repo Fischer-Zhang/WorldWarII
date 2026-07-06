@@ -44,10 +44,11 @@ The project is intentionally data-driven. Units, terrain, scenarios, campaigns, 
 - Deterministic combat: same position, HP, terrain and modifiers always resolve the same way.
 - Shared attack legality for player and AI through `CombatRules`.
 - Fog of war, line of sight and AI last-known-position memory.
-- Zone of control, overwatch, dig-in, suppression, rally and optional secondary objectives layered into movement and action economy; pinned units stop projecting ZoC, MG overwatch uses full reaction-fire damage, and MGs can spend an action on short-range suppressive fire.
+- Zone of control, overwatch, dig-in, suppression, morale/rout, rally and optional secondary objectives layered into movement and action economy; pinned units stop projecting ZoC, routed units withdraw under stress, MG overwatch uses full reaction-fire damage, and MGs can spend an action on short-range suppressive fire.
 - Historical generals, veteran XP, lounge upgrades and tech upgrades routed through a shared modifier pipeline.
 - Pre-battle deployment with scenario-scoped placement, general reassignment and upgrade breakdown in single battles; conquest uses a free deployment zone for every recruited attacker before battle starts.
 - Conquest battles are real tactical battles, not a separate mini-simulator; fortified regions also field stronger strategic and tactical defenses.
+- Main-menu how-to-play reference, battlefield legend, tutorial scenario hints, Tab unit cycling and dimmed spent units keep the tactical UI readable during play.
 - Static balance reports and UI smoke coverage are part of normal validation.
 
 ## Screenshots
@@ -98,6 +99,7 @@ Key settings in `project.godot`:
 | UI layout contract | Desktop-first at `1280x720` and `1366x768`; smaller windows are not currently guaranteed |
 | Renderer | `gl_compatibility` for desktop and mobile |
 | Autoloads | `AppTheme`, `DataLoader`, `GameState`, `AudioBank`, `ScreenshotHelper` |
+| Theme | Global UI theme in `assets/theme/ww2_theme.tres` |
 | Fonts | Bundles Noto Sans CJK TC (`assets/fonts/`, SIL OFL 1.1) as the default theme font and `ThemeDB.fallback_font`, so Chinese text renders on every machine — including the Web build — without depending on host system fonts |
 | Camera input | WASD actions mapped as `ui_camera_pan_*` |
 | CI engine | GitHub Actions downloads Godot `4.2.2-stable` |
@@ -126,7 +128,9 @@ Useful controls:
 | Overwatch | Use `進入警戒` |
 | Rally | Use `整隊` when suppressed |
 | End turn | Bottom-right button |
+| Cycle unacted unit | Tab / Shift+Tab |
 | Camera | WASD, mouse wheel, middle-drag |
+| How to play | Main-menu guide button or battlefield legend |
 | Screenshot | F12 |
 
 ### Troubleshooting: only a taskbar icon, no window (native Linux)
@@ -223,10 +227,10 @@ tools/validate.sh
 - JSON syntax checks for unit data and balance baselines.
 - Python compile checks for report, probe and validator scripts.
 - `tools/validate_data.py` for unknown refs, bounds, duplicate coordinates, campaign references and conquest graph integrity.
-- Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe and Godot AI trace report.
+- Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe, Godot AI trace report and Godot AI self-play report.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
-- 395 headless GDScript checks through `bash tests/run_all.sh`.
+- 424 headless GDScript checks through `bash tests/run_all.sh`.
 
 The UI smoke test loads these screens headlessly: main menu, how-to-play, scenario select, briefing, deployment, battle, campaign, lounge and conquest. The UI layout test checks the same major screens against the supported desktop viewport contract, and the UI workflow test verifies key cross-screen interactions such as scenario filtering, deployment selection, battle action prompts, conquest source/target selection, map zoom and region development controls.
 
@@ -258,7 +262,7 @@ base = max(1, attack + vs_armor_if_target_armored - defense - terrain_defense)
 damage = max(1, round(base * attacker_hp / attacker_max_hp))
 ```
 
-Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary. Light tanks can spend their action to mark a visible LOS target for fire support, adding +1 suppression to the next same-faction active attack that deals non-lethal damage to that target. Engineers can spend their action to mark a nearby entrenched target for breach support, adding +1 dig-in loss to the next same-faction active attack that damages that target.
+Combat modifiers come from veteran rank, generals, general upgrades, tech upgrades and temporary skill effects. Deployment shows detailed source lines; the battle info panel shows compact final values plus source summary. Non-lethal hits apply suppression pressure and drain morale; a unit whose morale hits zero routs, withdraws automatically, and cannot be ordered until it reforms. Rally reduces suppression and restores morale, with better suppression recovery in defensive terrain. Light tanks can spend their action to mark a visible LOS target for fire support, adding +1 suppression to the next same-faction active attack that deals non-lethal damage to that target. Engineers can spend their action to mark a nearby entrenched target for breach support, adding +1 dig-in loss to the next same-faction active attack that damages that target.
 
 Secondary objectives can grant one-time in-battle rewards such as XP, recovery, repair, faster reinforcements or local suppression of nearby enemies. In campaign mode they stay scenario-scoped; only victory progress grants lounge points, while conquest templates can still feed conquest-map strategic effects. AI scores movement candidates by distance, terrain, exposure, attack value, kill value, counter-damage risk, role shaping and objective pressure. It also evaluates light-tank fire-support marks and engineer breach-support marks when a same-faction follow-up attacker can use the bonus. Wounded and veteran units feel a scale-based preservation pull toward safety when no profitable kill is on offer, so the AI stops trading away its leveled units; a clean kill still overrides it. Difficulty is a weight ladder over several axes — trade aggression, retaliation-lookahead weight, turn-level coordination, unit preservation and a deterministic Easy positioning-error budget. The net-exchange lookahead (anti gang-up, discounted return fire, kill-zone) and turn-level focus-fire / support-mark coordination run at *every* difficulty, scaled by weight: Hard weights them highest and preserves veterans aggressively, while Easy keeps them low, never retreats and occasionally misplaces a unit. A deterministic AI self-play report (`tools/ai_selfplay_report.gd`) plays full headless AI-vs-AI battles and gates the difficulty ladder. `tools/ai_trace_report.gd` regenerates `docs/progress/ai_trace_report.md` from the live `AIController.plan_trace_for_unit()` diagnostics, including primary/secondary objective score splits, support-mark scores and the preservation pull.
 
@@ -272,7 +276,7 @@ scenes/     Godot scenes
 scripts/    autoloads, grid, units, combat, turn AI, scenario managers, UI
 tests/      headless GDScript tests
 tools/      validators, reports, local hooks
-docs/       architecture, demo script, progress reports, screenshots placeholder
+docs/       architecture, demo script, progress reports, screenshots
 ```
 
 Detailed system notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -300,15 +304,16 @@ Done:
 - Single battle, campaign, lounge upgrades and conquest-to-battle flow.
 - Deployment setup and upgrade visibility.
 - Per-region conquest battlefields with terrain notes surfaced in briefing.
-- In-game how-to-play screen and battlefield legend (rules, combat formula, terrain/unit tables, status glossary).
+- In-game how-to-play screen, main-menu beginner entry, battlefield legend and tutorial scenario hint blocks (rules, combat formula, terrain/unit tables, status glossary).
 - Campaign-only tutorial campaign 0 covering movement, attacks, capture, secondary objectives, terrain, ZoC, overwatch, suppression, rally, dig-in, LOS, indirect fire, spotting, armor/AT, engineer bridge/breach, airdrop, generals, veterans, reinforcements and splash damage.
+- Tab / Shift+Tab unit cycling and stronger spent-unit dimming for turn management.
 - Headless validators, balance reports and UI smoke coverage.
 
 Open:
 
 - Save/load mid-scenario.
 - Art replacement for tiles and units.
-- Guided, step-by-step first-battle overlay (the static reference and playable tutorial scenarios now ship; an interactive step tracker does not yet).
+- Optional interactive step tracker beyond the shipped help page, tutorial hints and playable tutorial campaign.
 - Packaged release workflow for generated desktop/web builds.
 
 ## License

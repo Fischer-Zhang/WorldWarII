@@ -33,11 +33,20 @@ every commit passes `tools/validate.sh`.
 
 - Retuned Pacific and European assault clocks and campaign defenders; morale
   pressure diagnostics; survival-objective guard AI.
+- Morale/rout is a battlefield layer: sustained non-lethal pressure can break a
+  unit into forced withdrawal, and Rally can steady morale while reducing
+  suppression.
 
 ### Presentation
 
 - Bundled Noto Sans CJK TC so clean machines and the web build render labels
   without tofu; README screenshots and a browser-playable web build.
+- Global UI theme for consistent menu/panel styling across screens.
+- Main-menu how-to-play entry, battlefield tutorial hint injection and updated
+  help content for new players.
+- Tab / Shift+Tab unit cycling plus stronger dimming for units that have already
+  acted.
+- Web export COOP/COEP service-worker shim for static hosts such as GitHub Pages.
 
 ## v1.0
 
