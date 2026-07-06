@@ -314,7 +314,8 @@ readable zoom on small tutorial maps.
 `tests/test_ui_workflows.gd` drives representative UI paths headlessly: scenario
 filtering, briefing, deployment selection, battle action prompting, campaign
 selection, lounge upgrade list rendering, order-independent conquest region
-selection, conquest map zoom and conquest region development controls.
+selection, conquest detail tab switching, conquest map zoom and conquest region
+development controls.
 
 ## Adding A Feature
 

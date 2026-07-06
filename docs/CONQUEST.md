@@ -35,7 +35,16 @@ The map has 32 regions. Each region carries these settings:
 
 ## Per-turn player actions (own regions only)
 
-Selecting one of your regions opens the recruit/manage panel.
+Selecting one of your regions updates the right-side detail panel. The panel is
+split into three views so the player can scan strategy first and then manage the
+selected region without one long mixed list:
+
+- **Overview 概覽:** theater objectives, selected source/target details,
+  tactical battle preview, trait effects and disabled-action guidance.
+- **Forces 部隊:** recruitment, garrison roster, commander assignment, disband
+  controls and transfer checkboxes.
+- **Development 經營:** region upgrades, defensive preparations and attack
+  preparations.
 
 ### Recruit (徵兵)
 Spends `strength` equal to the unit's `cost`. Garrison cap is **8** units.
