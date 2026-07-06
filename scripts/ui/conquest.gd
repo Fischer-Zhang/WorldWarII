@@ -16,6 +16,9 @@ const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 @onready var zoom_out_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomOutButton
 @onready var zoom_reset_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomResetButton
 @onready var zoom_in_button: Button = $Margin/VBox/Body/MapPanel/MapToolbar/ZoomInButton
+@onready var overview_button: Button = $Margin/VBox/Body/DetailPanel/ViewTabs/OverviewButton
+@onready var forces_button: Button = $Margin/VBox/Body/DetailPanel/ViewTabs/ForcesButton
+@onready var development_button: Button = $Margin/VBox/Body/DetailPanel/ViewTabs/DevelopmentButton
 @onready var detail_label: RichTextLabel = $Margin/VBox/Body/DetailPanel/Detail
 @onready var recruit_list: VBoxContainer = $Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList
 @onready var attack_button: Button = $Margin/VBox/Actions/AttackButton
@@ -39,11 +42,15 @@ var _map_drag_start := Vector2.ZERO
 var _map_drag_scroll_start := Vector2.ZERO
 var _map_drag_moved := false
 var _map_suppress_next_region_click := false
+var _detail_view := "overview"
 const MAP_CELL_ASPECT := 0.64
 const MAP_DRAG_THRESHOLD := 5.0
 const MAP_ZOOM_MIN := 0.75
 const MAP_ZOOM_MAX := 1.65
 const MAP_ZOOM_STEP := 0.15
+const DETAIL_VIEW_OVERVIEW := "overview"
+const DETAIL_VIEW_FORCES := "forces"
+const DETAIL_VIEW_DEVELOPMENT := "development"
 
 func _ready() -> void:
 	state = CampaignManager.load_state()
@@ -53,6 +60,12 @@ func _ready() -> void:
 	zoom_out_button.pressed.connect(_on_zoom_out_pressed)
 	zoom_reset_button.pressed.connect(_on_zoom_reset_pressed)
 	zoom_in_button.pressed.connect(_on_zoom_in_pressed)
+	overview_button.pressed.connect(_on_detail_view_pressed.bind(DETAIL_VIEW_OVERVIEW))
+	forces_button.pressed.connect(_on_detail_view_pressed.bind(DETAIL_VIEW_FORCES))
+	development_button.pressed.connect(_on_detail_view_pressed.bind(DETAIL_VIEW_DEVELOPMENT))
+	overview_button.tooltip_text = "查看地區、戰區目標與戰術預覽。"
+	forces_button.tooltip_text = "查看徵兵、守備軍、將領與調動。"
+	development_button.tooltip_text = "查看地區經營、戰前準備與防禦準備。"
 	map_scroll.gui_input.connect(_on_map_scroll_gui_input)
 	map_center.gui_input.connect(_on_map_scroll_gui_input)
 	map_grid.gui_input.connect(_on_map_scroll_gui_input)
@@ -71,6 +84,15 @@ func _ready() -> void:
 		_advance_enemy_turn(return_message)
 	elif return_message != "":
 		_update_detail(return_message)
+
+func _on_detail_view_pressed(view_id: String) -> void:
+	_detail_view = view_id
+	_update_detail()
+
+func _update_detail_tabs() -> void:
+	overview_button.disabled = _detail_view == DETAIL_VIEW_OVERVIEW
+	forces_button.disabled = _detail_view == DETAIL_VIEW_FORCES
+	development_button.disabled = _detail_view == DETAIL_VIEW_DEVELOPMENT
 
 func _build_country_options() -> void:
 	_refreshing_country = true
@@ -290,6 +312,7 @@ func _select_region(region_id: String) -> void:
 	_update_detail()
 
 func _update_detail(message: String = "") -> void:
+	_update_detail_tabs()
 	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
 	var lines: Array[String] = []

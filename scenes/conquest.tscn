@@ -92,6 +92,25 @@ columns = 9
 
 [node name="DetailPanel" type="VBoxContainer" parent="Margin/VBox/Body"]
 custom_minimum_size = Vector2(300, 0)
+theme_override_constants/separation = 8
+
+[node name="ViewTabs" type="HBoxContainer" parent="Margin/VBox/Body/DetailPanel"]
+theme_override_constants/separation = 6
+
+[node name="OverviewButton" type="Button" parent="Margin/VBox/Body/DetailPanel/ViewTabs"]
+custom_minimum_size = Vector2(0, 34)
+size_flags_horizontal = 3
+text = "概覽"
+
+[node name="ForcesButton" type="Button" parent="Margin/VBox/Body/DetailPanel/ViewTabs"]
+custom_minimum_size = Vector2(0, 34)
+size_flags_horizontal = 3
+text = "部隊"
+
+[node name="DevelopmentButton" type="Button" parent="Margin/VBox/Body/DetailPanel/ViewTabs"]
+custom_minimum_size = Vector2(0, 34)
+size_flags_horizontal = 3
+text = "經營"
 
 [node name="Detail" type="RichTextLabel" parent="Margin/VBox/Body/DetailPanel"]
 size_flags_vertical = 3
