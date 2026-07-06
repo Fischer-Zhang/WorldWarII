@@ -102,7 +102,7 @@ Key settings in `project.godot`:
 | Theme | Global UI theme in `assets/theme/ww2_theme.tres` |
 | Fonts | Bundles Noto Sans CJK TC (`assets/fonts/`, SIL OFL 1.1) as the default theme font and `ThemeDB.fallback_font`, so Chinese text renders on every machine — including the Web build — without depending on host system fonts |
 | Camera input | WASD actions mapped as `ui_camera_pan_*` |
-| CI engine | GitHub Actions downloads Godot `4.2.2-stable` |
+| CI engine | GitHub Actions workflow [`.github/workflows/validate.yml`](.github/workflows/validate.yml) downloads Godot `4.2.2-stable` and runs `tools/validate.sh` |
 
 The project is pinned to Godot 4.2.2: `config/features` is `PackedStringArray("4.2", "GL Compatibility")`, and `tools/validate_fast.sh` fails if that tag drifts. If you open the project in a newer Godot editor it will rewrite this tag (and may rewrite other settings) — revert those edits before committing so every device runs the same engine.
 
@@ -227,7 +227,7 @@ tools/validate.sh
 - JSON syntax checks for unit data and balance baselines.
 - Python compile checks for report, probe and validator scripts.
 - `tools/validate_data.py` for unknown refs, bounds, duplicate coordinates, campaign references and conquest graph integrity.
-- Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe, Godot AI trace report and Godot AI self-play report.
+- Generated diagnostics: unit balance report, scenario pressure report, scenario probe, tutorial probe, Godot AI trace report and Godot AI self-play report. See [docs/REPORTS.md](docs/REPORTS.md) for generator/checker ownership and review guidance.
 - Focused report checks for Stalingrad/Berlin urban breach diagnostics and scenario breach-path coverage.
 - `git diff --check`.
 - 424 headless GDScript checks through `bash tests/run_all.sh`.
@@ -281,17 +281,24 @@ docs/       architecture, demo script, progress reports, screenshots
 
 Detailed system notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+Data authoring schema (catalogs, scenarios, campaigns, conquest): [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
+
 Conquest mode reference (regions, economy, supply, generals, battle handoff): [docs/CONQUEST.md](docs/CONQUEST.md)
 
+Generated report index and review workflow: [docs/REPORTS.md](docs/REPORTS.md)
+
 Demo capture plan: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+
+Release build/runbook: [docs/RELEASE.md](docs/RELEASE.md)
 
 ## Adding A Scenario
 
 1. Copy a JSON file in `data/scenarios/`.
 2. Change `id`, `title`, `briefing`, `map`, `factions`, `units` and `victory`.
 3. Use odd-r offset coordinates in JSON; runtime converts to axial hex coordinates.
-4. Run `tools/validate_fast.sh`.
-5. Launch the game. Normal scenarios appear automatically in the single-battle list.
+4. Check [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md) for optional fields such as reinforcements, secondary objectives, tutorial mechanics and conquest victory templates.
+5. Run `tools/validate_fast.sh`.
+6. Launch the game. Normal scenarios appear automatically in the single-battle list.
 
 Tutorial scenarios use `tut_` ids, set `deployment_locked: true`, list `tutorial_mechanics`, and are campaign-only through `00_tutorial` in `data/campaigns.json`; they are intentionally hidden from Single Battle. `tools/tutorial_probe.py` verifies that their declared mechanics are actionable from authored starting positions.
 
@@ -308,13 +315,14 @@ Done:
 - Campaign-only tutorial campaign 0 covering movement, attacks, capture, secondary objectives, terrain, ZoC, overwatch, suppression, rally, dig-in, LOS, indirect fire, spotting, armor/AT, engineer bridge/breach, airdrop, generals, veterans, reinforcements and splash damage.
 - Tab / Shift+Tab unit cycling and stronger spent-unit dimming for turn management.
 - Headless validators, balance reports and UI smoke coverage.
+- Data schema, generated-report index and release runbook for maintainers.
 
 Open:
 
 - Save/load mid-scenario.
 - Art replacement for tiles and units.
 - Optional interactive step tracker beyond the shipped help page, tutorial hints and playable tutorial campaign.
-- Packaged release workflow for generated desktop/web builds.
+- Automated release artifact publishing beyond the manual release runbook.
 
 ## License
 
