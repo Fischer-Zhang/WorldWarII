@@ -69,7 +69,17 @@ const SCENE_CASES := [
 		"scenario_id": "01_sedan_1940",
 		"campaign_mode": false,
 		"conquest_mode": false,
-		"required": ["UI/ActionDock/InfoPanel", "UI/ActionDock/EndTurnButton", "UI/ResultPanel", "UI/LegendButton", "UI/LegendPanel/LegendScroll/LegendText"],
+		"required": [
+			"UI/ActionDock",
+			"UI/ActionDock/InfoPanel",
+			"UI/ActionDock/AbilityBox",
+			"UI/ActionDock/OverwatchButton",
+			"UI/ActionDock/RallyButton",
+			"UI/ActionDock/EndTurnButton",
+			"UI/ResultPanel",
+			"UI/LegendButton",
+			"UI/LegendPanel/LegendScroll/LegendText",
+		],
 	},
 	{
 		"name": "campaign",

@@ -506,8 +506,34 @@ func _check_battle() -> void:
 		scene.selected_unit == unit and not scene.movement_range.is_empty(),
 		"move hexes=%d" % scene.movement_range.size()
 	)
+	var action_dock: VBoxContainer = scene.get_node("UI/ActionDock")
+	var dock_rect: Rect2 = action_dock.get_global_rect()
+	var prompt_rect: Rect2 = scene.get_node("UI/InfoLabel").get_global_rect()
+	_expect(
+		"battle action dock owns action controls",
+		scene.get_node("UI/ActionDock/InfoPanel").get_parent() == action_dock
+				and scene.get_node("UI/ActionDock/AbilityBox").get_parent() == action_dock
+				and scene.get_node("UI/ActionDock/EndTurnButton").get_parent() == action_dock,
+		"dock children=%d" % action_dock.get_child_count()
+	)
+	_expect(
+		"battle prompt avoids action dock",
+		not prompt_rect.intersects(dock_rect),
+		"prompt=%s dock=%s" % [str(prompt_rect), str(dock_rect)]
+	)
 	var info := String(scene.get_node("UI/InfoLabel").text)
 	_expect("battle prompt has step prefix", info.contains(":"))
+	unit.has_moved = true
+	scene._enter_attack_phase()
+	_expect(
+		"battle action dock presents turn actions",
+		scene.get_node("UI/ActionDock/OverwatchButton").visible
+				and scene.get_node("UI/ActionDock/EndTurnButton").visible,
+		"overwatch=%s end=%s" % [
+			str(scene.get_node("UI/ActionDock/OverwatchButton").visible),
+			str(scene.get_node("UI/ActionDock/EndTurnButton").visible),
+		]
+	)
 	await _free_scene(scene)
 
 func _check_campaign() -> void:
