@@ -102,10 +102,16 @@ func _list_has_prefix(list: VBoxContainer, prefix: String) -> bool:
 	return false
 
 func _list_text(list: VBoxContainer) -> String:
+	return _control_text(list)
+
+func _control_text(node: Node) -> String:
 	var text := ""
-	for child in list.get_children():
-		if child is Label or child is Button:
-			text += " %s" % String(child.text)
+	if node is Label:
+		text += " %s" % String((node as Label).text)
+	elif node is Button:
+		text += " %s" % String((node as Button).text)
+	for child in node.get_children():
+		text += _control_text(child)
 	return text
 
 func _button_with_text(list: VBoxContainer, needle: String) -> Button:
@@ -612,13 +618,39 @@ func _check_conquest() -> void:
 	_expect("conquest tactical preview", detail.contains("戰術作戰") or detail.contains("出擊地沒有駐軍"))
 	_expect("conquest theater objectives visible", detail.contains("戰區目標"))
 	_expect("conquest attack tooltip", String(scene.get_node("Margin/VBox/Actions/AttackButton").tooltip_text) != "")
+	var overview_button: Button = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/ViewTabs/OverviewButton")
+	var forces_button: Button = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/ViewTabs/ForcesButton")
+	var development_button: Button = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/ViewTabs/DevelopmentButton")
+	var recruit_scroll: ScrollContainer = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/RecruitScroll")
 	var recruit_list: VBoxContainer = scene.get_node_or_null("Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList")
-	if recruit_list == null:
-		_fail("conquest region development controls", "missing recruit list")
+	if overview_button == null or forces_button == null or development_button == null or recruit_scroll == null or recruit_list == null:
+		_fail("conquest detail view controls", "missing tab or list nodes")
 		await _free_scene(scene)
 		_restore_campaign_save(save_snapshot)
 		return
+	_expect(
+		"conquest detail defaults to overview",
+		overview_button.disabled and not forces_button.disabled and not development_button.disabled and not recruit_scroll.visible
+	)
+	forces_button.pressed.emit()
+	await process_frame
+	await process_frame
+	detail = String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
 	var recruit_text := _list_text(recruit_list)
+	_expect(
+		"conquest forces tab shows roster",
+		forces_button.disabled and recruit_scroll.visible and detail.contains("部隊")
+				and recruit_text.contains("守備軍") and recruit_text.contains("測試步兵")
+	)
+	development_button.pressed.emit()
+	await process_frame
+	await process_frame
+	detail = String(scene.get_node("Margin/VBox/Body/DetailPanel/Detail").text)
+	recruit_text = _list_text(recruit_list)
+	_expect(
+		"conquest development tab active",
+		development_button.disabled and recruit_scroll.visible and detail.contains("經營與準備")
+	)
 	_expect("conquest region development controls", recruit_text.contains("地區經營") and recruit_text.contains("築防整備") and recruit_text.contains("軍校訓練"))
 	_expect("conquest defense preparation controls", recruit_text.contains("防禦準備") and recruit_text.contains("前哨警戒") and recruit_text.contains("火力據點"))
 	var outposts_button := _button_with_text(recruit_list, "前哨警戒")

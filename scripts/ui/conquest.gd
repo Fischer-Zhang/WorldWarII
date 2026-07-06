@@ -20,6 +20,7 @@ const ConquestSupply := preload("res://scripts/scenario/conquest_supply.gd")
 @onready var forces_button: Button = $Margin/VBox/Body/DetailPanel/ViewTabs/ForcesButton
 @onready var development_button: Button = $Margin/VBox/Body/DetailPanel/ViewTabs/DevelopmentButton
 @onready var detail_label: RichTextLabel = $Margin/VBox/Body/DetailPanel/Detail
+@onready var recruit_scroll: ScrollContainer = $Margin/VBox/Body/DetailPanel/RecruitScroll
 @onready var recruit_list: VBoxContainer = $Margin/VBox/Body/DetailPanel/RecruitScroll/RecruitList
 @onready var attack_button: Button = $Margin/VBox/Actions/AttackButton
 @onready var transfer_button: Button = $Margin/VBox/Actions/TransferButton
@@ -315,12 +316,74 @@ func _update_detail(message: String = "") -> void:
 	_update_detail_tabs()
 	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	var countries: Dictionary = DataLoader.conquest_map.get("countries", {})
-	var lines: Array[String] = []
 	var status := ConquestManager.victory_status(state, DataLoader.conquest_map)
+	var can_attack := selected_region_id != "" \
+			and target_region_id != "" \
+			and ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
+	var can_transfer := selected_region_id != "" \
+			and target_region_id != "" \
+			and ConquestManager.can_transfer(state, DataLoader.conquest_map, selected_region_id, target_region_id)
+	attack_button.disabled = not can_attack or status != ""
+	transfer_button.disabled = not can_transfer or status != ""
+	var unavailable := _unavailable_reason() if selected_region_id != "" and target_region_id != "" else ""
+	attack_button.tooltip_text = "進入戰術簡報與部署。" if can_attack and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰敵方目標。")
+	transfer_button.tooltip_text = "調動勾選部隊;未勾選時調動全部守備軍。" if can_transfer and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰己方目標。")
+	_refresh_transfer_button_label()
+	end_turn_button.disabled = status != ""
+	var lines: Array[String] = _detail_lines_for_view(message, status, countries, can_attack)
+	# Tell the player what to do next / why the action is greyed out, so a
+	# disabled Attack button never looks like a dead end.
+	if _detail_view == DETAIL_VIEW_OVERVIEW and status == "":
+		if selected_region_id != "" and target_region_id == "":
+			lines.append("")
+			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 調動。[/color]")
+		elif selected_region_id != "" and target_region_id != "" and not can_attack and not can_transfer:
+			lines.append("")
+			lines.append("[color=#d88]%s[/color]" % unavailable)
+	detail_label.text = "\n".join(lines)
+	_rebuild_recruit_panel()
+
+func _detail_lines_for_view(
+	message: String, status: String, countries: Dictionary, can_preview_attack: bool
+) -> Array[String]:
+	var lines: Array[String] = []
 	if status != "":
 		lines.append("[b]%s[/b]" % status)
 	if message != "":
 		lines.append(message)
+	match _detail_view:
+		DETAIL_VIEW_FORCES:
+			lines.append("[b]部隊[/b]")
+			if selected_region_id == "":
+				lines.append("選擇己方地區以徵兵、分配將領或調動守備軍。")
+			else:
+				var region := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+				lines.append(_region_force_summary(region, countries))
+				lines.append("下方清單管理徵兵、守備軍、將領與調動勾選。")
+		DETAIL_VIEW_DEVELOPMENT:
+			lines.append("[b]經營與準備[/b]")
+			if selected_region_id == "":
+				lines.append("選擇己方地區以投資產能、防備、後勤、訓練或準備下一場戰鬥。")
+			else:
+				var region := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
+				lines.append(_region_development_summary(region, countries))
+				var defense_summary := ConquestManager.defense_preparation_summary(
+					state, DataLoader.conquest_map, selected_region_id
+				)
+				if defense_summary != "":
+					lines.append("防禦準備: %s" % defense_summary)
+				if target_region_id != "":
+					var prep_summary := ConquestManager.attack_preparation_summary(
+						state, DataLoader.conquest_map, selected_region_id, target_region_id
+					)
+					if prep_summary != "":
+						lines.append("戰前準備: %s" % prep_summary)
+		_:
+			lines.append_array(_overview_detail_lines(countries, can_preview_attack))
+	return lines
+
+func _overview_detail_lines(countries: Dictionary, can_preview_attack: bool) -> Array[String]:
+	var lines: Array[String] = []
 	var theater_lines := _theater_objective_lines()
 	if not theater_lines.is_empty():
 		lines.append("[b]戰區目標[/b]")
@@ -346,9 +409,6 @@ func _update_detail(message: String = "") -> void:
 			var src := ConquestManager.region_state(state, DataLoader.conquest_map, selected_region_id)
 			var tgt := ConquestManager.region_state(state, DataLoader.conquest_map, target_region_id)
 			var trait_context := ConquestManager.region_trait_battle_context(tgt)
-			var can_preview_attack := ConquestManager.can_attack(
-				state, DataLoader.conquest_map, selected_region_id, target_region_id
-			)
 			var my_force: int = (src.get("garrison", []) as Array).size()
 			var prep_summary := ConquestManager.attack_preparation_summary(
 				state, DataLoader.conquest_map, selected_region_id, target_region_id
@@ -373,30 +433,7 @@ func _update_detail(message: String = "") -> void:
 			lines.append("任務: %s" % ConquestBattleSetup.conquest_attack_objective_text(battle_scenario))
 			if my_force == 0:
 				lines.append("[color=#d88]此地無駐軍 — 請先徵兵再出擊。[/color]")
-	var can_attack := selected_region_id != "" \
-			and target_region_id != "" \
-			and ConquestManager.can_attack(state, DataLoader.conquest_map, selected_region_id, target_region_id)
-	var can_transfer := selected_region_id != "" \
-			and target_region_id != "" \
-			and ConquestManager.can_transfer(state, DataLoader.conquest_map, selected_region_id, target_region_id)
-	attack_button.disabled = not can_attack or status != ""
-	transfer_button.disabled = not can_transfer or status != ""
-	var unavailable := _unavailable_reason() if selected_region_id != "" and target_region_id != "" else ""
-	attack_button.tooltip_text = "進入戰術簡報與部署。" if can_attack and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰敵方目標。")
-	transfer_button.tooltip_text = "調動勾選部隊;未勾選時調動全部守備軍。" if can_transfer and status == "" else (unavailable if unavailable != "" else "先選己方出擊地與相鄰己方目標。")
-	_refresh_transfer_button_label()
-	end_turn_button.disabled = status != ""
-	# Tell the player what to do next / why the action is greyed out, so a
-	# disabled Attack button never looks like a dead end.
-	if status == "":
-		if selected_region_id != "" and target_region_id == "":
-			lines.append("")
-			lines.append("[color=#9bd]再點選目標:敵方相鄰地區 → 進攻,己方相鄰地區 → 調動。[/color]")
-		elif selected_region_id != "" and target_region_id != "" and not can_attack and not can_transfer:
-			lines.append("")
-			lines.append("[color=#d88]%s[/color]" % unavailable)
-	detail_label.text = "\n".join(lines)
-	_rebuild_recruit_panel()
+	return lines
 
 func _theater_objective_lines() -> Array[String]:
 	var out: Array[String] = []
@@ -430,14 +467,27 @@ func _unavailable_reason() -> String:
 func _rebuild_recruit_panel() -> void:
 	for child in recruit_list.get_children():
 		child.queue_free()
+	recruit_scroll.visible = _detail_view != DETAIL_VIEW_OVERVIEW
+	if _detail_view == DETAIL_VIEW_OVERVIEW:
+		return
 	var conquest := ConquestManager.conquest_state(state, DataLoader.conquest_map)
 	var player_country := String(conquest.get("player_country", ""))
 	if selected_region_id == "":
-		_add_recruit_hint("選擇己方地區以徵召部隊。")
+		if _detail_view == DETAIL_VIEW_FORCES:
+			_add_recruit_hint("選擇己方地區以徵召部隊。")
+		else:
+			_add_recruit_hint("選擇己方地區以進行經營或準備。")
 		return
 	var region: Dictionary = conquest.get("regions", {}).get(selected_region_id, {})
 	if region.is_empty() or String(region.get("owner", "")) != player_country:
-		_add_recruit_hint("(僅能在己方地區徵兵)")
+		_add_recruit_hint("(僅能管理己方地區)")
+		return
+	if _detail_view == DETAIL_VIEW_DEVELOPMENT:
+		var has_management := _add_development_panel()
+		has_management = _add_defense_preparation_panel() or has_management
+		has_management = _add_attack_preparation_panel() or has_management
+		if not has_management:
+			_add_recruit_hint("此地區目前沒有可用經營或準備行動。")
 		return
 	var header := Button.new()
 	header.flat = true
@@ -528,14 +578,11 @@ func _rebuild_recruit_panel() -> void:
 		tip.text = "勾選後選相鄰己方目標,按「調動」送選取(未勾=全部)"
 		tip.add_theme_font_size_override("font_size", 11)
 		recruit_list.add_child(tip)
-	_add_development_panel()
-	_add_defense_preparation_panel()
-	_add_attack_preparation_panel()
 
-func _add_development_panel() -> void:
+func _add_development_panel() -> bool:
 	var actions: Array = ConquestManager.development_actions_for_region(state, DataLoader.conquest_map, selected_region_id)
 	if actions.is_empty():
-		return
+		return false
 	var header := Label.new()
 	header.text = "地區經營"
 	header.add_theme_font_size_override("font_size", 14)
@@ -550,13 +597,14 @@ func _add_development_panel() -> void:
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.pressed.connect(_on_develop_pressed.bind(String(action.get("id", ""))))
 		recruit_list.add_child(btn)
+	return true
 
-func _add_attack_preparation_panel() -> void:
+func _add_attack_preparation_panel() -> bool:
 	var actions: Array = ConquestManager.attack_preparation_actions_for_region(
 		state, DataLoader.conquest_map, selected_region_id, target_region_id
 	)
 	if actions.is_empty():
-		return
+		return false
 	var header := Label.new()
 	header.text = "戰前準備"
 	header.add_theme_font_size_override("font_size", 14)
@@ -575,13 +623,14 @@ func _add_attack_preparation_panel() -> void:
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.pressed.connect(_on_prepare_attack_pressed.bind(String(action.get("id", ""))))
 		recruit_list.add_child(btn)
+	return true
 
-func _add_defense_preparation_panel() -> void:
+func _add_defense_preparation_panel() -> bool:
 	var actions: Array = ConquestManager.defense_preparation_actions_for_region(
 		state, DataLoader.conquest_map, selected_region_id
 	)
 	if actions.is_empty():
-		return
+		return false
 	var header := Label.new()
 	header.text = "防禦準備"
 	header.add_theme_font_size_override("font_size", 14)
@@ -600,6 +649,7 @@ func _add_defense_preparation_panel() -> void:
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.pressed.connect(_on_prepare_defense_pressed.bind(String(action.get("id", ""))))
 		recruit_list.add_child(btn)
+	return true
 
 func _add_recruit_hint(text: String) -> void:
 	var hint := Label.new()
@@ -677,6 +727,32 @@ func _on_prepare_defense_pressed(action_id: String) -> void:
 	if bool(result.get("ok", false)):
 		_rebuild()
 	_update_detail(String(result.get("message", "")))
+
+func _region_force_summary(region: Dictionary, countries: Dictionary) -> String:
+	if region.is_empty():
+		return "未選取"
+	var owner := String(region.get("owner", ""))
+	var garrison: Array = region.get("garrison", [])
+	return "%s · %s · 兵力 %d · 守備軍 %d/%d" % [
+		String(region.get("name_zh", "")),
+		String(countries.get(owner, {}).get("name_zh", owner)),
+		int(region.get("strength", 0)),
+		garrison.size(),
+		ConquestRecruit.GARRISON_CAP,
+	]
+
+func _region_development_summary(region: Dictionary, countries: Dictionary) -> String:
+	if region.is_empty():
+		return "未選取"
+	var owner := String(region.get("owner", ""))
+	return "%s · %s · 產能 %d · 防備 %d · 後勤 %d · 訓練 %d" % [
+		String(region.get("name_zh", "")),
+		String(countries.get(owner, {}).get("name_zh", owner)),
+		int(region.get("production", 0)),
+		int(region.get("fort_level", 0)),
+		int(region.get("logistics_level", 0)),
+		int(region.get("training_level", 0)),
+	]
 
 func _region_detail(region: Dictionary, countries: Dictionary) -> String:
 	if region.is_empty():
