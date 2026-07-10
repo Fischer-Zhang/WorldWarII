@@ -211,7 +211,7 @@ def main() -> None:
     )
     require(
         "06_market_garden_1944" in report
-        and "橋面工兵補給 | capture 10,12 after nijmegen_south_bridgehead | allies | own 8 / enemy 10 | XP 1, supp -2, repair 1 | sustain reward; damage recovery"
+        and "橋面工兵補給 | capture 10,12 after nijmegen_south_bridgehead | allies | own 8 / enemy 5 | XP 1, supp -2, repair 1 | enemy closer; sustain reward; damage recovery"
         in report,
         "Reward audit should show Market Garden bridge sustain cache",
     )

@@ -54,12 +54,14 @@
     {"faction": "axis", "type": "infantry", "name": "SS 擲彈兵 2", "at": [6, 1]},
     {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [5, 2]},
     {"faction": "axis", "type": "at_gun", "name": "PaK 40", "at": [4, 2]},
-    {"id": "axis_150mm_sfh", "faction": "axis", "type": "artillery", "name": "150 mm sFH", "at": [18, 2]}
+    {"id": "axis_150mm_sfh", "faction": "axis", "type": "artillery", "name": "150 mm sFH", "at": [18, 2]},
+    {"faction": "axis", "type": "infantry", "name": "SS 擲彈兵 3", "at": [5, 11], "dig_in": 1},
+    {"faction": "axis", "type": "infantry", "name": "SS 擲彈兵 4", "at": [6, 10], "dig_in": 1}
   ],
   "reinforcements": [
-    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 a", "at": [4, 15], "general": "patton"},
-    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 b", "at": [5, 15]},
-    {"at_turn": 7, "faction": "allies", "type": "infantry", "name": "XXX 軍步兵", "at": [6, 15]}
+    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 a", "at": [17, 15], "general": "patton"},
+    {"at_turn": 7, "faction": "allies", "type": "medium_tank", "name": "M4 雪曼 b", "at": [18, 15]},
+    {"at_turn": 7, "faction": "allies", "type": "infantry", "name": "XXX 軍步兵", "at": [16, 15]}
   ],
   "secondary_objectives": [
     {
