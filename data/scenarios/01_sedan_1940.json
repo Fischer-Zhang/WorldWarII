@@ -51,8 +51,8 @@
     {"faction": "allies", "type": "mg_team", "name": "Hotchkiss", "at": [3, 3]},
     {"faction": "allies", "type": "infantry", "name": "法步 2", "at": [1, 4]},
     {"faction": "allies", "type": "at_gun", "name": "25 mm AT", "at": [4, 11]},
-    {"faction": "allies", "type": "mg_team", "name": "Hotchkiss", "at": [3, 13]},
-    {"faction": "allies", "type": "infantry", "name": "法步 3", "at": [20, 14], "general": "de_gaulle", "dig_in": 1}
+    {"faction": "allies", "type": "mg_team", "name": "MAC 31", "at": [3, 13]},
+    {"faction": "allies", "type": "infantry", "name": "法步 3", "at": [5, 10], "general": "de_gaulle", "dig_in": 1}
   ],
   "secondary_objectives": [
     {
@@ -78,7 +78,7 @@
       "type": "destroy_unit",
       "label": "清除南翼機槍",
       "faction": "axis",
-      "target_unit": "Hotchkiss",
+      "target_unit": "MAC 31",
       "requires": ["sedan_crossing_recon"],
       "exclusive_group": "sedan_crossing_choice",
       "rewards": [{"type": "xp", "amount": 1}, {"type": "suppress_enemies", "amount": 1, "radius": 2}]
@@ -88,8 +88,8 @@
     "axis": {
       "type": "capture",
       "target": [
-        20,
-        14
+        5,
+        10
       ],
       "by_turn": 12
     },

@@ -99,7 +99,7 @@
         [12, 6],
         [16, 6]
       ],
-      "required": 2,
+      "required": 3,
       "by_turn": 14
     },
     "soviet": {
