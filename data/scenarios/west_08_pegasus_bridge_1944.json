@@ -34,11 +34,11 @@
     }
   ],
   "units": [
-    {"faction": "allies", "type": "paratrooper", "name": "Ox and Bucks a", "at": [2, 4], "general": "bradley"},
+    {"faction": "allies", "type": "paratrooper", "name": "Ox and Bucks a", "at": [2, 4]},
     {"faction": "allies", "type": "paratrooper", "name": "Ox and Bucks b", "at": [3, 5]},
     {"faction": "allies", "type": "engineer", "name": "滑翔機工兵", "at": [3, 3]},
     {"faction": "allies", "type": "mg_team", "name": "Vickers 橋頭組", "at": [2, 5]},
-    {"faction": "allies", "type": "at_gun", "name": "6-pdr 空降 AT", "at": [2, 3]},
+    {"faction": "allies", "type": "at_gun", "name": "6-pdr 空降 AT", "at": [2, 3], "general": "montgomery"},
     {"id": "axis_bridge_mg", "faction": "axis", "type": "mg_team", "name": "橋北 MG 42", "at": [8, 3], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "橋頭守軍 a", "at": [8, 4], "dig_in": 1},
     {"faction": "axis", "type": "infantry", "name": "橋頭守軍 b", "at": [9, 4], "dig_in": 1},

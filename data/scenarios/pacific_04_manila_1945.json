@@ -44,7 +44,7 @@
     {"faction": "allies", "type": "artillery", "name": "105 mm 砲兵", "at": [0, 8]},
     {"faction": "allies", "type": "rocket_artillery", "name": "火箭支援排", "at": [1, 9]},
     {"id": "axis_manila_mg", "faction": "axis", "type": "mg_team", "name": "市政廳機槍火點", "at": [10, 4], "dig_in": 2},
-    {"faction": "axis", "type": "infantry", "name": "日軍守軍 a", "at": [11, 5], "dig_in": 2},
+    {"faction": "axis", "type": "infantry", "name": "日軍守軍 a", "at": [11, 5], "dig_in": 2, "general": "yamashita"},
     {"faction": "axis", "type": "infantry", "name": "日軍守軍 b", "at": [13, 4], "dig_in": 1},
     {"faction": "axis", "type": "infantry", "name": "日軍守軍 c", "at": [12, 7], "dig_in": 1},
     {"faction": "axis", "type": "mg_team", "name": "河岸機槍組", "at": [10, 6], "dig_in": 1},

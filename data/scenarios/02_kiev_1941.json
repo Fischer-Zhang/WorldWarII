@@ -41,7 +41,7 @@
   ],
   "units": [
     {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [22, 0]},
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [22, 2], "general": "rommel"},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [22, 2], "general": "guderian"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III a", "at": [23, 4]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III b", "at": [22, 12]},
     {"faction": "axis", "type": "artillery", "name": "150 mm sFH", "at": [23, 13]},

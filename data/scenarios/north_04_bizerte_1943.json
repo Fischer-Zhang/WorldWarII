@@ -46,7 +46,7 @@
     {"faction": "axis", "type": "infantry", "name": "港口守軍 a", "at": [12, 4], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "港口守軍 b", "at": [11, 2], "dig_in": 1},
     {"faction": "axis", "type": "at_gun", "name": "88 mm 港口砲", "at": [12, 3], "dig_in": 1},
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 後衛", "at": [13, 6], "general": "rommel"},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 後衛", "at": [13, 6]},
     {"faction": "axis", "type": "tank_destroyer", "name": "Marder 後衛", "at": [11, 6]},
     {"faction": "axis", "type": "infantry", "name": "碼頭後衛", "at": [12, 7], "dig_in": 1},
     {"id": "axis_bizerte_artillery", "faction": "axis", "type": "artillery", "name": "港口遠程砲", "at": [14, 8]}

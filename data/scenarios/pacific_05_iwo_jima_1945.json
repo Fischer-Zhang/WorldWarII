@@ -42,7 +42,7 @@
     {"faction": "allies", "type": "mg_team", "name": "M1919 灘頭支援", "at": [2, 8]},
     {"faction": "allies", "type": "rocket_artillery", "name": "艦砲火箭觀測排", "at": [1, 6]},
     {"id": "axis_iwo_mg", "faction": "axis", "type": "mg_team", "name": "折鉢山機槍火點", "at": [13, 4], "dig_in": 3},
-    {"faction": "axis", "type": "infantry", "name": "洞窟守軍 a", "at": [12, 4], "dig_in": 2},
+    {"faction": "axis", "type": "infantry", "name": "洞窟守軍 a", "at": [12, 4], "dig_in": 2, "general": "kuribayashi"},
     {"faction": "axis", "type": "infantry", "name": "洞窟守軍 b", "at": [13, 6], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "機場守軍", "at": [11, 3], "dig_in": 1},
     {"faction": "axis", "type": "at_gun", "name": "47 mm 速射砲", "at": [12, 5], "dig_in": 1},

@@ -46,7 +46,7 @@
     {"faction": "axis", "type": "infantry", "name": "山口守軍 a", "at": [10, 4], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "山口守軍 b", "at": [13, 4], "dig_in": 1},
     {"faction": "axis", "type": "at_gun", "name": "88 mm 砲", "at": [12, 3], "dig_in": 1},
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 後衛", "at": [13, 6], "general": "rommel"},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 後衛", "at": [13, 6]},
     {"faction": "axis", "type": "tank_destroyer", "name": "Marder 後衛", "at": [12, 7]},
     {"id": "axis_tunis_artillery", "faction": "axis", "type": "artillery", "name": "山地遠程砲", "at": [14, 8]}
   ],

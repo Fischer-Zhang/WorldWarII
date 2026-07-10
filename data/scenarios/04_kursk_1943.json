@@ -42,7 +42,7 @@
   "units": [
     {"faction": "axis", "type": "tank_destroyer", "name": "StuG III", "at": [22, 0]},
     {"faction": "soviet", "type": "tank_destroyer", "name": "SU-152", "at": [4, 0]},
-    {"faction": "axis", "type": "heavy_tank", "name": "Tiger I", "at": [22, 1], "general": "rommel"},
+    {"faction": "axis", "type": "heavy_tank", "name": "Tiger I", "at": [22, 1], "general": "manstein"},
     {"faction": "axis", "type": "medium_tank", "name": "Panther", "at": [23, 3]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV a", "at": [22, 11]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV b", "at": [23, 13]},
