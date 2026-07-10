@@ -36,8 +36,8 @@
   "units": [
     {"faction": "allies", "type": "light_tank", "name": "Crusader 偵察隊", "at": [1, 7]},
     {"faction": "allies", "type": "medium_tank", "name": "Grant a", "at": [2, 8], "general": "patton"},
-    {"faction": "allies", "type": "medium_tank", "name": "Grant b", "at": [1, 5]},
-    {"faction": "allies", "type": "tank_destroyer", "name": "M10 先遣車", "at": [3, 7]},
+    {"faction": "allies", "type": "medium_tank", "name": "Sherman", "at": [1, 5]},
+    {"faction": "allies", "type": "tank_destroyer", "name": "6-pdr Portee 先遣車", "at": [3, 7]},
     {"faction": "allies", "type": "at_gun", "name": "6-pdr AT", "at": [2, 6]},
     {"faction": "allies", "type": "infantry", "name": "第 51 高地步兵", "at": [1, 8]},
     {"faction": "allies", "type": "artillery", "name": "25-pdr 野砲", "at": [0, 8]},

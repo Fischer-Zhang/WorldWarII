@@ -1,7 +1,7 @@
 {
   "id": "north_00_gazala_1942",
   "title": "加查拉側翼戰 1942",
-  "briefing": "1942 年 5 月。隆美爾準備從加查拉防線南翼迂迴,切入英軍補給線並撕開托布魯克外圍。沙漠開闊但山脊會切斷視線,英軍反戰車砲和構工火點能把裝甲突擊拖成消耗戰。\n\n你的任務:作為德意非洲軍,在 11 個回合內奪取英軍補給堡壘。英軍只要守住陣地,就能穩住防線並等待預備隊反擊。\n\n次要目標:偵察北側崖線可壓制英軍火網;摧毀 6-pdr 反戰車砲可讓突擊群修復戰損。\n\n戰術提示:先用偵察戰車替砲兵找目標,再用 Marder 和 Pz.IV 從反戰車砲射界外壓迫。不要把輕戰車停在英軍機槍與 AT 交叉火力前。",
+  "briefing": "1942 年 5 月。隆美爾準備從加查拉防線南翼迂迴,切入英軍補給線並撕開托布魯克外圍。沙漠開闊但山脊會切斷視線,英軍反戰車砲和構工火點能把裝甲突擊拖成消耗戰。\n\n你的任務:作為德意非洲軍,在 11 個回合內奪取英軍補給堡壘。英軍只要守住陣地,就能穩住防線並等待預備隊反擊。\n\n次要目標:偵察北側崖線可壓制英軍火網;摧毀 6-pdr 反戰車砲可讓突擊群修復戰損。\n\n戰術提示:先用偵察戰車替砲兵找目標,再用 Panzerjäger I 和 Pz.IV 從反戰車砲射界外壓迫。不要把輕戰車停在英軍機槍與 AT 交叉火力前。",
   "map": {
     "width": 16,
     "height": 10,
@@ -37,7 +37,7 @@
     {"faction": "axis", "type": "light_tank", "name": "Pz.III 偵察排", "at": [1, 7], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 突擊排", "at": [2, 6]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III 主力排", "at": [1, 8]},
-    {"faction": "axis", "type": "tank_destroyer", "name": "Marder 反裝甲車", "at": [3, 7]},
+    {"faction": "axis", "type": "tank_destroyer", "name": "Panzerjäger I", "at": [3, 7]},
     {"faction": "axis", "type": "infantry", "name": "裝甲擲彈兵", "at": [2, 5]},
     {"faction": "axis", "type": "at_gun", "name": "50 mm PaK", "at": [3, 5]},
     {"faction": "axis", "type": "artillery", "name": "105 mm 牽引砲", "at": [0, 8]},

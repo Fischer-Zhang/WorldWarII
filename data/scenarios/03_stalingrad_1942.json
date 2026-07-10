@@ -55,7 +55,7 @@
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [1, 12]},
     {"id": "axis_assault_engineer", "faction": "axis", "type": "engineer", "name": "突擊工兵", "at": [13, 10]},
     {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [2, 2]},
-    {"faction": "axis", "type": "artillery", "name": "Wespe", "at": [14, 11]}
+    {"faction": "axis", "type": "artillery", "name": "105 mm leFH", "at": [14, 11]}
   ],
   "secondary_objectives": [
     {

@@ -49,8 +49,8 @@
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III a", "at": [22, 2], "general": "rommel"},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.III b", "at": [23, 11]},
     {"faction": "axis", "type": "light_tank", "name": "Pz.II", "at": [22, 14]},
-    {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [21, 3]},
-    {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [21, 13]},
+    {"faction": "axis", "type": "infantry", "name": "摩托步槍兵 1", "at": [21, 3]},
+    {"faction": "axis", "type": "infantry", "name": "摩托步槍兵 2", "at": [21, 13]},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [23, 1]}
   ],
   "secondary_objectives": [
