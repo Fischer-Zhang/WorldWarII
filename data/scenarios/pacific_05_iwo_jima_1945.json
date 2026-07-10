@@ -87,7 +87,7 @@
   "victory": {
     "allies": {
       "type": "capture",
-      "target": [13, 4],
+      "target": [13, 5],
       "by_turn": 12
     },
     "axis": {
