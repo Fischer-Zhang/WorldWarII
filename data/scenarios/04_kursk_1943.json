@@ -27,13 +27,13 @@
   "factions": [
     {
       "id": "axis",
-      "name": "德軍第四裝甲軍",
+      "name": "德軍第四裝甲軍團",
       "controller": "player",
       "color": "#a86632"
     },
     {
       "id": "soviet",
-      "name": "蘇軍中央方面軍",
+      "name": "蘇軍沃羅涅日方面軍",
       "controller": "ai",
       "ai": "defensive",
       "color": "#3f7f4a"

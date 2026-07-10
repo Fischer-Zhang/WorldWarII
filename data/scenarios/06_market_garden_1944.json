@@ -33,7 +33,7 @@
     },
     {
       "id": "axis",
-      "name": "德軍第 9 SS 裝甲",
+      "name": "德軍第 10 SS 裝甲（Frundsberg）",
       "controller": "ai",
       "ai": "defensive",
       "color": "#a86632"

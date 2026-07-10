@@ -21,7 +21,7 @@
   "factions": [
     {
       "id": "allies",
-      "name": "美軍第六軍",
+      "name": "美軍第六軍團",
       "controller": "player",
       "color": "#3b65c7"
     },
