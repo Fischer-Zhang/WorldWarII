@@ -89,8 +89,8 @@ def main() -> None:
     )
     require(
         "03_stalingrad_1942" in report
-        and "axis: eng min 7, art 0/6, targets 6" in report,
-        "Stalingrad breach probe should show forward Axis engineer approach",
+        and "axis control 2/3 own min 3 enemy min 1" in report,
+        "Stalingrad control-count objective should show reachable Axis control points",
     )
     require(
         "01_sedan_1940" in report
@@ -106,10 +106,10 @@ def main() -> None:
         "Destroy secondary objectives should be included in pressure probes",
     )
     require(
-        "03_stalingrad_1942" in report
-        and "axis: eng turns 3" in report
-        and "axis: art move 1/6" in report,
-        "Stalingrad tempo probe should show supported breach timing",
+        "north_03_tunis_1943" in report
+        and "allies: eng turns 3" in report
+        and "allies: art move 0/4" in report,
+        "Tunis tempo probe should show supported breach timing",
     )
     require(
         "east_10_berlin_1945" in report
@@ -122,11 +122,10 @@ def main() -> None:
         and "soviet: art move 1/3" in report,
         "Berlin tempo probe should show supported breach timing",
     )
-    require(
-        "| 03_stalingrad_1942 | axis | 6/6 | 7 | 3 | 0/6 | 1/6 | supported |"
-        in report,
-        "Stalingrad urban breach focus should show supported breach access",
-    )
+    # Stalingrad switched to a control_count objective (was eliminate), so it no
+    # longer appears in the eliminate-only urban-breach focus table. Berlin
+    # remains the urban-breach-focus representative (there is no other axis-side
+    # engineer-breach scenario to repoint to).
     require(
         "| east_10_berlin_1945 | soviet | 3/3 | 7 | 3 | 0/3 | 1/3 | supported |"
         in report,
