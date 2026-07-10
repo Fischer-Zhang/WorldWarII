@@ -43,7 +43,7 @@
     {"faction": "axis", "type": "infantry", "name": "橋頭守軍 a", "at": [8, 4], "dig_in": 1},
     {"faction": "axis", "type": "infantry", "name": "橋頭守軍 b", "at": [9, 4], "dig_in": 1},
     {"faction": "axis", "type": "at_gun", "name": "PaK 40", "at": [10, 5]},
-    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 反擊排", "at": [13, 4], "general": "manteuffel"},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV 反擊排", "at": [13, 4], "general": "rommel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [14, 8]}
   ],
   "reinforcements": [

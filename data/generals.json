@@ -157,9 +157,9 @@
     "title_zh": "自由法蘭西",
     "country": "france",
     "quality": "silver",
-    "specialization": "infantry",
-    "applies_to": ["infantry", "mg_team", "at_gun"],
-    "attack_bonus": 0,
+    "specialization": "armor",
+    "applies_to": ["infantry", "mg_team", "at_gun", "light_tank", "medium_tank"],
+    "attack_bonus": 1,
     "defense_bonus": 2,
     "move_bonus": 0,
     "skill": {

@@ -454,7 +454,7 @@ def main() -> None:
             "east_05_kharkov_1943",
             "north_04_bizerte_1943",
             "pacific_05_iwo_jima_1945",
-            "pacific_05_okinawa_1945",
+            "pacific_06_okinawa_1945",
             "west_08_pegasus_bridge_1944",
         }.issubset(branch_scenarios),
         "Objective branch coverage should preserve newly branched campaign scenarios",
