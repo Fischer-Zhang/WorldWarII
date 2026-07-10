@@ -39,6 +39,7 @@
     {"faction": "allies", "type": "engineer", "name": "海軍工兵", "at": [3, 6]},
     {"faction": "allies", "type": "light_tank", "name": "M3 Stuart", "at": [2, 5]},
     {"faction": "allies", "type": "artillery", "name": "75 mm 山砲排", "at": [1, 6]},
+    {"faction": "allies", "type": "light_tank", "name": "M3 Stuart b", "at": [1, 7]},
     {"faction": "allies", "type": "mg_team", "name": "M1919 支援組", "at": [2, 8]},
     {"id": "axis_jungle_mg", "faction": "axis", "type": "mg_team", "name": "叢林機槍火點", "at": [12, 6], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "日軍步兵 a", "at": [12, 4], "dig_in": 1},
