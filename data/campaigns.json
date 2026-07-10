@@ -28,8 +28,8 @@
     "scenario_order": [
       "03_stalingrad_1942",
       "east_05_kharkov_1943",
-      "east_06_dnieper_1943",
       "04_kursk_1943",
+      "east_06_dnieper_1943",
       "07_bagration_1944",
       "east_09_seelow_1945",
       "east_10_berlin_1945"

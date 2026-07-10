@@ -21,13 +21,13 @@
   "factions": [
     {
       "id": "soviet",
-      "name": "蘇軍第 3 近衛軍",
+      "name": "蘇軍第 3 近衛坦克軍團",
       "controller": "player",
       "color": "#3f7f4a"
     },
     {
       "id": "axis",
-      "name": "德軍南方集團軍",
+      "name": "德軍南方集團軍群",
       "controller": "ai",
       "ai": "defensive",
       "color": "#a86632"
