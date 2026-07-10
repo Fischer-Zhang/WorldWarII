@@ -48,9 +48,9 @@
     {"faction": "allies", "type": "infantry", "name": "步兵 2", "at": [3, 12]},
     {"faction": "allies", "type": "at_gun", "name": "57 mm AT", "at": [4, 13]},
     {"faction": "allies", "type": "artillery", "name": "105 mm", "at": [0, 14]},
-    {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [5, 11]},
-    {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [6, 12]},
-    {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [4, 11]},
+    {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [19, 11], "dig_in": 2},
+    {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [19, 12], "dig_in": 1},
+    {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [18, 11], "dig_in": 1},
     {"faction": "axis", "type": "at_gun", "name": "PaK 40", "at": [6, 4]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [17, 13], "general": "manteuffel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
@@ -87,7 +87,7 @@
     "allies": {
       "type": "capture",
       "target": [
-        5,
+        19,
         11
       ],
       "by_turn": 12
