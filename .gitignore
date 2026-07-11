@@ -26,3 +26,8 @@ Thumbs.db
 
 # Local-only audit/report output (kept out of git by request)
 /docs/audit/
+
+# Regenerated progress reports (rewritten every validate run) — keep the
+# hand-written workflow doc and the balance baseline tracked.
+/docs/progress/*.md
+!/docs/progress/BALANCE_WORKFLOWS.md
