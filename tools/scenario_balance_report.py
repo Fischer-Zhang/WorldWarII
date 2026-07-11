@@ -18,6 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 UNITS_PATH = ROOT / "data" / "units.json"
 TERRAINS_PATH = ROOT / "data" / "terrains.json"
+GENERALS_PATH = ROOT / "data" / "generals.json"
 SCENARIOS_GLOB = str(ROOT / "data" / "scenarios" / "*.json")
 DEFAULT_OUTPUT = ROOT / "docs" / "progress" / "scenario_balance_report.md"
 
@@ -86,13 +87,33 @@ def unit_power(unit_type: str, units: dict[str, Any]) -> float:
     return hp + attack * 2.0 + defense * 1.5 + armor * 1.5 + move * 0.8 + vision * 0.5 + (rng - 1.0) * 2.0 + vs_armor * 0.8 + standoff_bonus + indirect_bonus
 
 
+def general_power_bonus(unit: dict[str, Any], generals: dict[str, Any]) -> float:
+    """Static power from a unit's assigned general: the carrier-unit passive,
+    weighted like unit_power. Only counts when the carrier type is in the
+    general's applies_to (otherwise the passive is inert). Aura/active skills are
+    not modelled. Without this, scenarios lean on generals (e.g. Berlin's 3
+    Soviet generals) report a misleadingly low power ratio."""
+    gid = str(unit.get("general", ""))
+    if not gid or gid not in generals:
+        return 0.0
+    general = generals[gid]
+    if str(unit.get("type", "")) not in general.get("applies_to", []):
+        return 0.0
+    return (
+        float(general.get("attack_bonus", 0)) * 2.0
+        + float(general.get("defense_bonus", 0)) * 1.5
+        + float(general.get("move_bonus", 0)) * 0.8
+    )
+
+
 def scenario_units(scenario: dict[str, Any]) -> list[dict[str, Any]]:
     out = list(scenario.get("units", []))
     out.extend(scenario.get("reinforcements", []))
     return out
 
 
-def faction_rows(scenario: dict[str, Any], units: dict[str, Any]) -> tuple[list[list[Any]], dict[str, Any]]:
+def faction_rows(scenario: dict[str, Any], units: dict[str, Any], generals: dict[str, Any] | None = None) -> tuple[list[list[Any]], dict[str, Any]]:
+    generals = generals or {}
     by_faction: dict[str, list[dict[str, Any]]] = collections.defaultdict(list)
     for unit in scenario_units(scenario):
         by_faction[str(unit.get("faction", ""))].append(unit)
@@ -114,6 +135,7 @@ def faction_rows(scenario: dict[str, Any], units: dict[str, Any]) -> tuple[list[
             role = ROLE_BY_TYPE.get(unit_type, unit_type)
             role_counts[role] += 1
             power += unit_power(unit_type, units)
+            power += general_power_bonus(unit, generals)
             if role in ["armor", "scout_armor"]:
                 armor_count += 1
             if role == "anti_armor":
@@ -388,6 +410,24 @@ def risk_notes(scenario: dict[str, Any], faction_summary: dict[str, Any], terrai
         high = max(first["power"], second["power"])
         if low > 0 and high / low >= 1.35:
             notes.append("force power ratio above 1.35: check objective or roster compensation")
+        # Attacker-aware check: a faction with an attacking objective
+        # (capture/eliminate/control_count) that is statically weaker than the
+        # defender it must overcome is a review flag — the symmetric 1.35 rule
+        # above cannot catch it because it does not know which side attacks.
+        # (Dynamics like suppression/XP may still make it winnable; this only
+        # fires below parity to stay high-signal.)
+        for fid, summary in faction_summary.items():
+            objective_type = str(scenario.get("victory", {}).get(fid, {}).get("type", ""))
+            if objective_type not in {"capture", "eliminate", "control_count"}:
+                continue
+            defender_power = max(
+                (other["power"] for other_fid, other in faction_summary.items() if other_fid != fid),
+                default=0.0,
+            )
+            if defender_power > 0 and summary["power"] / defender_power < 1.0:
+                notes.append(
+                    f"{fid} attacks but is out-powered {summary['power'] / defender_power:.2f} < 1.0: attacker may be underpowered"
+                )
         for fid, summary in faction_summary.items():
             enemy_armor = sum(other["armor"] for other_fid, other in faction_summary.items() if other_fid != fid)
             if enemy_armor >= 3 and summary["anti_armor"] == 0:
@@ -400,6 +440,7 @@ def risk_notes(scenario: dict[str, Any], faction_summary: dict[str, Any], terrai
 def generate_report() -> str:
     units = load_json(UNITS_PATH)
     terrains = load_json(TERRAINS_PATH)
+    generals = load_json(GENERALS_PATH)
     scenarios = [load_json(Path(path)) for path in sorted(glob.glob(SCENARIOS_GLOB))]
 
     sections: list[str] = [
@@ -410,7 +451,7 @@ def generate_report() -> str:
     overview_rows: list[list[Any]] = []
     detail_sections: list[str] = []
     for scenario in scenarios:
-        faction_table_rows, summary = faction_rows(scenario, units)
+        faction_table_rows, summary = faction_rows(scenario, units, generals)
         terrain = terrain_summary(scenario, terrains)
         breach = urban_breach_summary(summary)
         objective = objective_distance(scenario)

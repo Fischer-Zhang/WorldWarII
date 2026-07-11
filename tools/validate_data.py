@@ -287,6 +287,8 @@ def validate_scenario(
                 target = objective.get("target", [])
                 if not in_bounds(target, width, height):
                     fail(errors, path, f"victory {faction_id!r} {objective_type} target out of bounds: {target!r}")
+                elif tile_impassable(target, rows, terrains):
+                    fail(errors, path, f"victory {faction_id!r} {objective_type} target on impassable terrain (unwinnable): {target!r}")
             if objective_type == "hold_hex_turns":
                 try:
                     if int(objective.get("required_turns", 0)) <= 0:
@@ -301,6 +303,8 @@ def validate_scenario(
                     for t in targets:
                         if not in_bounds(t, width, height):
                             fail(errors, path, f"victory {faction_id!r} control_count target out of bounds: {t!r}")
+                        elif tile_impassable(t, rows, terrains):
+                            fail(errors, path, f"victory {faction_id!r} control_count target on impassable terrain (unwinnable): {t!r}")
                     try:
                         required = int(objective.get("required", len(targets)))
                         if required <= 0 or required > len(targets):
@@ -696,6 +700,18 @@ def in_bounds(at: Any, width: int, height: int) -> bool:
     except (TypeError, ValueError):
         return False
     return 0 <= col < width and 0 <= row < height
+
+
+def tile_impassable(at: Any, rows: list[Any], terrains: dict[str, Any]) -> bool:
+    """True if the hex sits on impassable terrain. A capture/hold/control victory
+    hex on impassable terrain can never be stood on, so the objective is
+    unwinnable (e.g. a target placed on a mountain)."""
+    try:
+        col, row = int(at[0]), int(at[1])
+        terrain_id = str(rows[row][col])
+    except (IndexError, TypeError, ValueError):
+        return False
+    return bool(terrains.get(terrain_id, {}).get("impassable", False))
 
 
 def terrain_counter(scenario: dict[str, Any]) -> dict[str, int]:
