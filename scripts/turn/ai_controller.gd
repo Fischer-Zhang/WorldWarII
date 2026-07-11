@@ -45,6 +45,7 @@ const SECONDARY_REWARD_PULL_RADIUS := 4.0
 const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_RALLY_MORALE := 0.5  # small, so steadying morale stays below taking a real attack
+const W_ROUT_FRACTION := 0.6  # value of routing a target relative to killing it
 const W_FIRE_SUPPORT := 2.0
 const W_BREACH_SUPPORT := 2.0
 const W_SUPPRESSIVE_FIRE := 1.2
@@ -1069,6 +1070,17 @@ func _attack_candidate_score(
 	score += _engineer_breach_role_score(attacker_type, enemy, def_terr, r)
 	score += _secondary_destroy_target_score(attacker_faction, enemy)
 	score -= 0.6 * float(r.counter_damage)
+	# Rout awareness: a non-lethal hit that breaks the target's morale forces it
+	# to withdraw and strips its command for the turn — nearly as valuable as a
+	# kill, and the only way to cheaply neutralise a now-durable dug-in defender.
+	if not r.defender_dies and suppression > 0 and int(enemy.morale) > 0 and not enemy.get("routed"):
+		var enemy_pinned: bool = CombatEffects.is_pinned(int(enemy.suppression) + suppression)
+		var drain: int = CombatEffects.morale_drain(
+			suppression, int(enemy.morale), 1, enemy_pinned,
+			int(enemy.dig_in_level), int(def_terr.get("defense", 0))
+		)
+		if drain >= int(enemy.morale):
+			score += _kill_bonus * W_ROUT_FRACTION
 	return score
 
 func _fire_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:

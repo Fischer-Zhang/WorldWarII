@@ -117,6 +117,7 @@ class StubUnit:
 	var suppression: int = 0
 	var morale: int = 10
 	var morale_max: int = 10
+	var routed: bool = false
 	var has_moved: bool = false
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
@@ -160,6 +161,24 @@ func _init() -> void:
 	else:
 		fail_count += 1
 		printerr("FAIL: AT gun should prefer armored target when role score breaks tie")
+
+	# 1b) Rout awareness: between two identical soft targets, prefer the one this
+	# suppressing hit would break (its morale collapses), since routing it removes
+	# it from the fight for the turn.
+	var rout_arty := make_unit("artillery", "axis", Vector2i(0, 0), 8)
+	var steady_inf := make_unit("infantry", "allies", Vector2i(2, 0), 10)
+	var wavering_inf := make_unit("infantry", "allies", Vector2i(0, 2), 10)
+	wavering_inf.morale = 1  # one suppressing hit routs it; the steady one holds
+	var rout_pick = ai._best_attack_from(
+		rout_arty.coord, rout_arty.faction_id, rout_arty.type_id,
+		[steady_inf, wavering_inf], ARTILLERY_DEF,
+		{steady_inf.coord: true, wavering_inf.coord: true}
+	)
+	if rout_pick == wavering_inf:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: AI should prefer routing a wavering target over an identical steady one")
 
 	# 2) Artillery should score adjacent known-enemy positions below standoff positions.
 	var artillery := make_unit("artillery", "axis", Vector2i(0, 0), 8)
