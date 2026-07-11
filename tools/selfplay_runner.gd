@@ -78,6 +78,13 @@ static func run_battle(
 	if max_by_turn > 0:
 		turn_cutoff = min(turn_cutoff_cap, max_by_turn + 3)
 
+	# Morale/rout activity, straight from live battle state, as a regression
+	# tripwire: the morale layer must actually engage somewhere in the suite.
+	var ever_routed: Dictionary = {}  # instance id -> true (distinct units routed)
+	var prev_routed: Dictionary = {}  # instance id -> bool (for reform detection)
+	var routs := 0
+	var reforms := 0
+
 	var stalled := false
 	while battle.phase != battle.Phase.GAME_OVER \
 			and battle.turn_manager.turn_number <= turn_cutoff:
@@ -98,6 +105,16 @@ static func run_battle(
 			if not seen_units.has(key):
 				seen_units[key] = true
 				hp_pool[u.faction_id] = int(hp_pool.get(u.faction_id, 0)) + int(u.max_hp)
+		# Tally rout/reform activity from the current state.
+		for u in battle.units:
+			var iid: int = u.get_instance_id()
+			var now_routed: bool = bool(u.routed)
+			if now_routed and not ever_routed.has(iid):
+				ever_routed[iid] = true
+				routs += 1
+			elif prev_routed.get(iid, false) and not now_routed and u.is_alive():
+				reforms += 1
+			prev_routed[iid] = now_routed
 		if battle.phase != battle.Phase.GAME_OVER \
 				and kick_key == [battle.turn_manager.current_faction(), battle.turn_manager.turn_number]:
 			stalled = true  # kick was swallowed; avoid an infinite loop
@@ -135,4 +152,6 @@ static func run_battle(
 		"turn_capped": turn_capped,
 		"stalled": stalled,
 		"factions": factions_out,
+		"routs": routs,
+		"reforms": reforms,
 	}

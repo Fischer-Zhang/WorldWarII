@@ -27,24 +27,38 @@ EXPECTED_RUNS = [
     ("pacific_01_guadalcanal_1942", "allies:normal vs axis:normal"),
     ("pacific_01_guadalcanal_1942", "allies:hard vs axis:hard"),
     ("east_06_dnieper_1943", "soviet:normal vs axis:normal"),
+    ("03_stalingrad_1942", "soviet:normal vs axis:normal"),
+    ("04_kursk_1943", "axis:normal vs soviet:normal"),
+    ("01_sedan_1940", "axis:normal vs allies:normal"),
+    ("05_bastogne_1944", "allies:normal vs axis:normal"),
     ("north_00_gazala_1942", "axis:hard vs allies:easy"),
     ("north_00_gazala_1942", "axis:easy vs allies:hard"),
     ("pacific_01_guadalcanal_1942", "allies:hard vs axis:easy"),
     ("pacific_01_guadalcanal_1942", "allies:easy vs axis:hard"),
+    ("01_sedan_1940", "axis:hard vs allies:easy"),
+    ("01_sedan_1940", "axis:easy vs allies:hard"),
 ]
 
-# end-turn ceiling per scenario: victory by_turn + settle buffer.
+# end-turn ceiling per scenario: victory by_turn + the driver's settle buffer (3).
 MAX_END_TURN = {
     "tut_00_basic_turn": 9,
     "north_00_gazala_1942": 14,
     "pacific_01_guadalcanal_1942": 14,
     "east_06_dnieper_1943": 16,
+    "03_stalingrad_1942": 15,
+    "04_kursk_1943": 17,
+    "01_sedan_1940": 15,
+    "05_bastogne_1944": 17,
 }
 
-# Ladder pairs: scenario -> (seat, hard-seat matchup, easy-seat matchup).
+# Ladder pairs: scenario -> (seat, hard-seat matchup, easy-seat matchup). Only
+# scenarios whose AI-vs-AI mirror is a clean monotonic ladder belong here; the
+# broader roster (stalingrad, kursk, bastogne, dnieper) is symmetric-coverage
+# only, since a heavily out-powered attacker makes the AI-vs-AI ladder unreliable.
 LADDER_PAIRS = {
     "north_00_gazala_1942": ("axis", "axis:hard vs allies:easy", "axis:easy vs allies:hard"),
     "pacific_01_guadalcanal_1942": ("allies", "allies:hard vs axis:easy", "allies:easy vs axis:hard"),
+    "01_sedan_1940": ("axis", "axis:hard vs allies:easy", "axis:easy vs allies:hard"),
 }
 
 
@@ -134,6 +148,19 @@ def main() -> None:
         require(row_match.group(4) == "PASS", f"{scenario}: ladder verdict must be PASS")
 
     section_text(report, "## Symmetric balance summary")
+
+    # Morale tripwire: the rout/rally layer must actually engage somewhere in the
+    # suite, or a refactor could silently disable it while every run still
+    # resolves with a winner. Only the aggregate is pinned (exact per-run counts
+    # move with AI tuning), so this stays robust like the rest of the checks.
+    morale = section_text(report, "## Morale activity")
+    morale_totals = re.search(r"Across all runs: (\d+) routs, (\d+) reforms", morale)
+    require(morale_totals is not None, "missing morale activity totals line")
+    require(
+        int(morale_totals.group(1)) + int(morale_totals.group(2)) >= 1,
+        "morale/rout layer never engaged across the suite (0 routs and 0 reforms)",
+    )
+
     section_text(report, "## Notes")
     print("AI self-play report checks passed")
 

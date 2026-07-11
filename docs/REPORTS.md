@@ -217,7 +217,8 @@ Use this when changing:
 Gate behavior:
 
 - `tools/check_ai_selfplay_report.py` checks run order, clean resolution,
-  end-turn ceilings, survivor bookkeeping, difficulty-ladder verdicts and notes.
+  end-turn ceilings, survivor bookkeeping, difficulty-ladder verdicts, the
+  morale/rout activity tripwire and notes.
 
 Review focus:
 

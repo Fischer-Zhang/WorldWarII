@@ -151,12 +151,20 @@ real user directory (validate.sh already does this).
 Run matrix and how to read it:
 
 - One tutorial canary plus symmetric mirror matches (easy/easy, normal/normal,
-  hard/hard) on small capture and eliminate scenarios measure attacker/defender
-  balance per difficulty.
+  hard/hard) across theaters (gazala, guadalcanal, dnieper, stalingrad, kursk,
+  sedan, bastogne) measure attacker/defender balance per difficulty.
 - Ladder runs play the attacking seat hard-vs-easy in both orientations. The
   metric is the seat's HP exchange (enemy HP destroyed minus own HP destroyed);
   the hard seat must not do worse than the easy seat. `tools/check_ai_selfplay_report.py`
   recomputes the verdicts from the table and fails validation on a regression.
+  Only scenarios whose AI-vs-AI mirror is a clean monotonic ladder are gated
+  (gazala, guadalcanal, sedan); a heavily out-powered attacker (berlin, cbi,
+  stalingrad, kursk, dnieper) makes the AI-vs-AI ladder unreliable, so those stay
+  symmetric-coverage only — judge their winnability with a human/reference
+  attacker, not this AI-vs-AI mirror.
+- The Morale activity section tallies routs and reform events straight from live
+  battle state; the checker requires at least one across the suite so a refactor
+  cannot silently disable the rout/rally layer while runs still resolve.
 - The Notes section flags pathologies straight from the data: stalled runs,
   turn-cap hits and zero-damage no-contact sides.
 

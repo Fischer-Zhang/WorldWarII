@@ -26,10 +26,16 @@ const RUNS := [
 	{"scenario": "pacific_01_guadalcanal_1942", "diffs": {"allies": "normal", "axis": "normal"}, "tag": "symmetric"},
 	{"scenario": "pacific_01_guadalcanal_1942", "diffs": {"allies": "hard", "axis": "hard"}, "tag": "symmetric"},
 	{"scenario": "east_06_dnieper_1943", "diffs": {"soviet": "normal", "axis": "normal"}, "tag": "symmetric"},
+	{"scenario": "03_stalingrad_1942", "diffs": {"soviet": "normal", "axis": "normal"}, "tag": "symmetric"},
+	{"scenario": "04_kursk_1943", "diffs": {"axis": "normal", "soviet": "normal"}, "tag": "symmetric"},
+	{"scenario": "01_sedan_1940", "diffs": {"axis": "normal", "allies": "normal"}, "tag": "symmetric"},
+	{"scenario": "05_bastogne_1944", "diffs": {"allies": "normal", "axis": "normal"}, "tag": "symmetric"},
 	{"scenario": "north_00_gazala_1942", "diffs": {"axis": "hard", "allies": "easy"}, "tag": "ladder"},
 	{"scenario": "north_00_gazala_1942", "diffs": {"axis": "easy", "allies": "hard"}, "tag": "ladder"},
 	{"scenario": "pacific_01_guadalcanal_1942", "diffs": {"allies": "hard", "axis": "easy"}, "tag": "ladder"},
 	{"scenario": "pacific_01_guadalcanal_1942", "diffs": {"allies": "easy", "axis": "hard"}, "tag": "ladder"},
+	{"scenario": "01_sedan_1940", "diffs": {"axis": "hard", "allies": "easy"}, "tag": "ladder"},
+	{"scenario": "01_sedan_1940", "diffs": {"axis": "easy", "allies": "hard"}, "tag": "ladder"},
 ]
 
 func _init() -> void:
@@ -207,6 +213,34 @@ func _render_report(records: Array[Dictionary]) -> String:
 		lines.append("| %s | %d | %d | %d | %.1f |" % [
 			diff_level, runs, attacker_wins, defender_wins, float(exchange_sum) / float(runs),
 		])
+
+	lines.append_array([
+		"",
+		"## Morale activity",
+		"",
+		"Distinct units routed and reform events (a routed unit recovering back over"
+		+ " the reform threshold), read from live battle state. At least one must fire"
+		+ " across the whole suite, or the morale/rout layer has silently stopped"
+		+ " engaging.",
+		"",
+		"| # | scenario | matchup | routs | reforms |",
+		"| --- | --- | --- | --- | --- |",
+	])
+	var total_routs := 0
+	var total_reforms := 0
+	var morale_index := 0
+	for record in records:
+		morale_index += 1
+		var r_routs := int(record.get("routs", 0))
+		var r_reforms := int(record.get("reforms", 0))
+		total_routs += r_routs
+		total_reforms += r_reforms
+		lines.append("| %d | %s | %s | %d | %d |" % [
+			morale_index, String(record["scenario_id"]),
+			_matchup_label(record["order"], record["diffs"]), r_routs, r_reforms,
+		])
+	lines.append("")
+	lines.append("Across all runs: %d routs, %d reforms." % [total_routs, total_reforms])
 
 	lines.append_array(["", "## Notes", ""])
 	var notes: Array[String] = []
