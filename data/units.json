@@ -154,7 +154,7 @@
     "vs_armor": 7,
     "armor": 3,
     "armor_standoff_min_range": 2,
-    "armor_standoff_vs_armor_bonus": 2,
+    "armor_standoff_vs_armor_bonus": 1,
     "requires_tech": {"id": "armored_logistics", "level": 2}
   },
   "heavy_tank": {
@@ -172,7 +172,7 @@
   },
   "rocket_artillery": {
     "name_zh": "火箭砲",
-    "cost": 3,
+    "cost": 2,
     "hp": 8,
     "attack": 6,
     "defense": 1,
