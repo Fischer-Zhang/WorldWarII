@@ -50,7 +50,7 @@
     {"faction": "allies", "type": "artillery", "name": "105 mm", "at": [0, 14]},
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 1", "at": [21, 4]},
     {"faction": "axis", "type": "infantry", "name": "擲彈兵 2", "at": [22, 11]},
-    {"faction": "axis", "type": "mg_team", "name": "MG 42", "at": [20, 4]},
+    {"faction": "axis", "type": "medium_tank", "name": "Pz.IV b", "at": [20, 4]},
     {"faction": "axis", "type": "at_gun", "name": "PaK 40", "at": [22, 3]},
     {"faction": "axis", "type": "medium_tank", "name": "Pz.IV", "at": [23, 12], "general": "rommel"},
     {"faction": "axis", "type": "artillery", "name": "105 mm", "at": [22, 2]}
