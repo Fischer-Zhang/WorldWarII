@@ -30,6 +30,12 @@ const W_HOLD_OBJECTIVE := 1.65
 const W_DENIAL_OBJECTIVE := 1.15
 const W_GUARD_OBJECTIVE := 2.8
 const GUARD_OBJECTIVE_RADIUS := 2
+# Standing exactly on a guarded objective hex adds a large flat "hold" bonus so a
+# defender does not abandon the hex to chase a marginal attack elsewhere. It can
+# still attack adjacent enemies without leaving, so this pins objective-sitters
+# without making them passive. Without it the on-hex vs one-hex-away guard delta
+# (~2.3) loses to the attack/kill pull and defenders walk off the victory hex.
+const W_GUARD_ONHEX_HOLD := 10.0
 const W_SECONDARY_OBJECTIVE := 1.1
 const W_SECONDARY_RECON_OBJECTIVE := 1.35
 const W_SECONDARY_DESTROY_OBJECTIVE := 1.45
@@ -1513,6 +1519,8 @@ func _guard_target_breakdown(target_info: Dictionary, pos: Vector2i) -> Dictiona
 	var score: float = weight / float(distance + 1)
 	if distance <= GUARD_OBJECTIVE_RADIUS:
 		score += weight * float(GUARD_OBJECTIVE_RADIUS + 1 - distance) / float(GUARD_OBJECTIVE_RADIUS + 1)
+	if distance == 0:
+		score += W_GUARD_ONHEX_HOLD
 	return {
 		"score": score,
 		"target": target_coord,

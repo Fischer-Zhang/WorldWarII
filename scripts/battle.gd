@@ -466,7 +466,7 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 			await get_tree().create_timer(AI_STEP_DELAY).timeout
 			if not survived:
 				continue
-		u.has_moved = true
+			u.has_moved = true
 		var action := String(plan.get("action", "attack"))
 		match action:
 			"attack":
@@ -528,8 +528,8 @@ func _process_ai_units(ai: AIController, ai_units: Array[Unit]) -> void:
 				var recovered := _rally_unit(u)
 				_set_prompt("AI 行動", "%s 整隊,壓制 -%d" % [u.display_name, recovered])
 				await get_tree().create_timer(AI_STEP_DELAY * 0.5).timeout
-			_:  # "wait" or anything else
-				u.has_attacked = true
+			_:  # "wait" — hold in place; if it also did not move it accumulates
+				# dig-in at end of turn, mirroring an idle player unit.
 				u.queue_redraw()
 		# Feed the coordination ledger so units still waiting to plan converge
 		# on targets this unit just engaged.
