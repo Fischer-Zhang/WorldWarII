@@ -23,3 +23,6 @@ Thumbs.db
 
 # Optional: keep this if you want to ignore generated documentation
 /docs/api/
+
+# Local-only audit/report output (kept out of git by request)
+/docs/audit/
