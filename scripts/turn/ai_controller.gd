@@ -82,6 +82,9 @@ const W_ENCIRCLEMENT := 0.5
 # Corridor blocking: penalty scale for parking on a chokepoint while unacted
 # allies still need to come through (friendly occupancy blocks pathing).
 const W_SELF_BLOCK := 1.5
+# Initiative ordering only kicks in above this coordination weight, so the
+# low-coordination Easy profile (0.5) keeps spawn order while Normal/Hard reorder.
+const TURN_ORDER_MIN_COORDINATION := 0.75
 # Overwatch: certain reaction fire from a visible enemy currently on overwatch,
 # credited as exposure on any hex inside its weapon range + LOS. Unlike the
 # threat map (potential next-turn fire) this is immediate and unavoidable, so it
@@ -617,6 +620,48 @@ func _nearest_known_distance(pos: Vector2i, known: Array) -> int:
 		if d < nearest:
 			nearest = d
 	return nearest
+
+func order_units_for_turn(ai_units: Array) -> void:
+	# Deterministic initiative order (sorted in place): support/setup roles act
+	# first so their fire-support / breach marks and suppressive softening land
+	# while the exploiters that consume them are still un-acted. The follow-up
+	# scorers skip allies that have already acted (is_done_for_turn), so raw spawn
+	# order otherwise left the whole multi-unit combo layer firing only by luck.
+	# Tie-break by proximity to the nearest known enemy, then the original index,
+	# so the order is a total, reproducible sort regardless of sort stability.
+	# Ordering is a coordination behavior, so the lowest-coordination (Easy)
+	# profile keeps raw spawn order and stays deliberately less organised — this
+	# preserves the difficulty ladder's coordination gradient.
+	if ai_units.size() <= 1 or _coordination_w < TURN_ORDER_MIN_COORDINATION:
+		return
+	var faction_id := String(ai_units[0].faction_id)
+	var known: Array = []
+	if battle.has_method("get_known_enemies"):
+		known = battle.get_known_enemies(faction_id)
+	var keys := {}
+	for i in ai_units.size():
+		var u = ai_units[i]
+		keys[u] = [_turn_order_priority(u), _nearest_known_distance(u.coord, known), i]
+	ai_units.sort_custom(func(a, b):
+		var ka: Array = keys[a]
+		var kb: Array = keys[b]
+		if ka[0] != kb[0]:
+			return ka[0] < kb[0]
+		if ka[1] != kb[1]:
+			return ka[1] < kb[1]
+		return ka[2] < kb[2]
+	)
+
+func _turn_order_priority(unit) -> int:
+	# 0 = support/setup (marks or softens a target for a follow-up attacker),
+	# 1 = direct exploiter. Support acts first so the combo layer can fire.
+	var def: Dictionary = _get_unit_def(unit.type_id)
+	if not _fire_support_skill(unit, def).is_empty() \
+			or not _breach_support_skill(unit, def).is_empty() \
+			or not _suppressive_fire_skill(unit, def).is_empty() \
+			or bool(def.get("indirect", false)):
+		return 0
+	return 1
 
 func _unacted_allies_behind(unit, pos: Vector2i, known: Array) -> int:
 	# Allies that have not acted yet this turn and still need to come through:

@@ -438,6 +438,9 @@ func _run_ai_turn(faction_id: String) -> void:
 	for u in units:
 		if u.faction_id == faction_id and u.is_alive():
 			ai_units.append(u)
+	# Support/setup roles act before their exploiters so marks and softening land
+	# while follow-up attackers are still un-acted (sorts ai_units in place).
+	ai.order_units_for_turn(ai_units)
 	await _process_ai_units(ai, ai_units)
 	ai_running = false
 	if phase != Phase.GAME_OVER:

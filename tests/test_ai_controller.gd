@@ -1467,5 +1467,58 @@ func _init() -> void:
 			focus_shaken, focus_steady, adj_count, score_near, score_full,
 		])
 
+	# 35) Initiative ordering: support/setup roles (fire-support marker, engineer
+	# breacher, suppressive MG, indirect artillery) sort before direct exploiters
+	# so their marks/softening land while follow-up attackers are still un-acted;
+	# same-role ties break by proximity to the nearest known enemy.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var order_ai := AIController.new(battle, "aggressive", "normal")
+	order_ai._data_loader = ai._data_loader
+	# (a) support-first, index-stable when no enemy is in view.
+	var e_infantry := make_unit("infantry", "axis", Vector2i(0, 0), 10)     # exploiter
+	var s_lighttank := make_unit("light_tank", "axis", Vector2i(1, 0), 12)  # fire-support marker
+	var e_tank := make_unit("medium_tank", "axis", Vector2i(2, 0), 16)      # exploiter
+	var s_engineer := make_unit("engineer", "axis", Vector2i(3, 0), 8)      # breach support
+	var s_artillery := make_unit("artillery", "axis", Vector2i(4, 0), 8)    # indirect
+	var e_atgun := make_unit("at_gun", "axis", Vector2i(5, 0), 6)           # exploiter
+	var s_mg := make_unit("mg_team", "axis", Vector2i(6, 0), 8)             # suppressive fire
+	var order_units := [e_infantry, s_lighttank, e_tank, s_engineer, s_artillery, e_atgun, s_mg]
+	battle.units = order_units.duplicate()
+	order_ai.order_units_for_turn(order_units)
+	var expected_order := [s_lighttank, s_engineer, s_artillery, s_mg, e_infantry, e_tank, e_atgun]
+	var order_ok: bool = (order_units == expected_order)
+	# (b) same-role tie-break: the exploiter closer to a known enemy acts first.
+	var near_inf := make_unit("infantry", "axis", Vector2i(1, 0), 10)
+	var far_inf := make_unit("infantry", "axis", Vector2i(-5, 0), 10)
+	var order_enemy := make_unit("infantry", "allies", Vector2i(2, 0), 10)
+	battle.units = [near_inf, far_inf, order_enemy]
+	battle.visibility_by_faction = {"axis": {order_enemy.coord: true}}
+	var order_tie := [far_inf, near_inf]  # spawn order puts the far one first
+	order_ai.order_units_for_turn(order_tie)
+	var tie_ok: bool = (order_tie[0] == near_inf and order_tie[1] == far_inf)
+	# (c) low-coordination Easy AI keeps raw spawn order (ladder coordination gradient).
+	var easy_order_ai := AIController.new(battle, "aggressive", "easy")
+	easy_order_ai._data_loader = ai._data_loader
+	var easy_spawn := [e_infantry, s_lighttank, e_tank, s_engineer]
+	var easy_order := easy_spawn.duplicate()
+	easy_order_ai.order_units_for_turn(easy_order)
+	var easy_keeps_order: bool = (easy_order == easy_spawn)
+	if order_ok and tie_ok and easy_keeps_order:
+		pass_count += 1
+	else:
+		fail_count += 1
+		var got := []
+		for ou in order_units:
+			got.append(ou.type_id)
+		printerr("FAIL: initiative order expected support-first + closest-tie + easy-unsorted; order_ok %s tie_ok %s easy %s got %s" % [
+			str(order_ok), str(tie_ok), str(easy_keeps_order), str(got),
+		])
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
