@@ -1339,5 +1339,44 @@ func _init() -> void:
 			blocked, freed, open_hex,
 		])
 
+	# 32) Defensive near-rout caution: a full-HP but wavering (near-rout) unit gets
+	# a positive preservation pull toward safety when no clean kill is on offer,
+	# while a steady full-morale unit at the same hex gets none. Gated by
+	# preservation_w, so Easy (preservation_w 0) never applies it.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var morale_normal_ai := AIController.new(battle, "aggressive", "normal")
+	morale_normal_ai._data_loader = ai._data_loader
+	var morale_easy_ai := AIController.new(battle, "aggressive", "easy")
+	morale_easy_ai._data_loader = ai._data_loader
+	var wavering_unit := make_unit("infantry", "axis", Vector2i(0, 0), 10)  # full HP
+	wavering_unit.morale = 2  # ratio 0.2 < PRESERVE_MORALE_THRESHOLD: one round from routing
+	var steady_unit := make_unit("infantry", "axis", Vector2i(0, 0), 10)  # full HP, full morale
+	var morale_enemy := make_unit("infantry", "allies", Vector2i(6, 0), 10)  # too far to attack/threaten (0,0)
+	battle.units = [wavering_unit, steady_unit, morale_enemy]
+	var morale_known := [{"coord": morale_enemy.coord, "visible": true, "unit": morale_enemy}]
+	var morale_inf_def: Dictionary = morale_normal_ai._get_unit_def("infantry")
+	var wavering_preserve: float = float(morale_normal_ai._score_position_breakdown(
+		wavering_unit, Vector2i(0, 0), morale_known, [morale_enemy], battle.hex_map, morale_inf_def, {}
+	).get("preservation", 0.0))
+	var steady_preserve: float = float(morale_normal_ai._score_position_breakdown(
+		steady_unit, Vector2i(0, 0), morale_known, [morale_enemy], battle.hex_map, morale_inf_def, {}
+	).get("preservation", 0.0))
+	var easy_preserve: float = float(morale_easy_ai._score_position_breakdown(
+		wavering_unit, Vector2i(0, 0), morale_known, [morale_enemy], battle.hex_map, morale_inf_def, {}
+	).get("preservation", 0.0))
+	if wavering_preserve > 0.0 and steady_preserve == 0.0 and easy_preserve == 0.0:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: morale preservation expected wavering > 0, steady == 0, easy == 0; wavering %.2f steady %.2f easy %.2f" % [
+			wavering_preserve, steady_preserve, easy_preserve,
+		])
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

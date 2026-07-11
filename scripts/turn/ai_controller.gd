@@ -67,6 +67,7 @@ const ARMOR_STANDOFF_SETUP_BAND := 2
 # Unit-preservation / withdrawal shaping.
 const W_PRESERVATION := 1.0
 const PRESERVE_HP_THRESHOLD := 0.5  # below half HP the safety pull starts to rise
+const PRESERVE_MORALE_THRESHOLD := 0.4  # below this morale fraction a wavering unit also seeks safety
 const PRESERVE_RANK_WEIGHT := 0.35  # each veteran rank amplifies how hard we pull back
 # Anti gang-up lookahead: concentrated fire is summed but discounted geometrically.
 const GANG_UP_FALLOFF := 0.5
@@ -88,7 +89,7 @@ const MISTAKE_JITTER_SCALE := 0.6
 #     retaliation net of return fire — the mechanism runs at every difficulty,
 #     only the weight scales
 #   - coordination_w: how strongly units converge on engaged/marked targets
-#   - preservation_w: how hard it pulls wounded/veteran units to safety
+#   - preservation_w: how hard it pulls wounded/wavering/veteran units to safety
 #   - mistake_rate: deterministic positioning jitter so Easy reads as fallible
 const DIFFICULTY_PROFILE := {
 	"easy":   {"attack_w": 1.5, "kill_bonus": 2.5, "exposure_w": 0.3, "lookahead_w": 0.35, "coordination_w": 0.5, "preservation_w": 0.0, "mistake_rate": 2},
@@ -459,10 +460,10 @@ func _score_position_breakdown(
 		) + float(lookahead_detail["kill_zone"])
 		lookahead_term = -net_threat * _lookahead_w
 
-	# Unit preservation: pull wounded (and especially veteran) units toward
-	# safety — distance from threats and cover — but only when no profitable
-	# kill is on offer here. Scale-based, not a hard "never fight below X HP"
-	# cap, so a clean kill still overrides the urge to retreat.
+	# Unit preservation: pull wounded, wavering (near-rout) and especially veteran
+	# units toward safety — distance from threats and cover — but only when no
+	# profitable kill is on offer here. Scale-based, not a hard "never fight below
+	# X HP/morale" cap, so a clean kill still overrides the urge to retreat.
 	var preservation_term := 0.0
 	if _preservation_w > 0.0 and not visible_enemies.is_empty():
 		var need: float = _preservation_need(unit, atk_def)
@@ -629,18 +630,40 @@ func _unacted_allies_behind(unit, pos: Vector2i, known: Array) -> int:
 	return behind
 
 func _preservation_need(unit, atk_def: Dictionary) -> float:
-	# 0 while healthy; rises as HP drops below PRESERVE_HP_THRESHOLD and is
-	# amplified by veteran rank so leveled units are pulled back harder. Healthy
-	# units return 0, so preservation never makes a full-strength army passive.
+	# 0 while healthy and steady; rises as HP drops below PRESERVE_HP_THRESHOLD
+	# or morale nears the rout point, whichever is more urgent, and is amplified
+	# by veteran rank so leveled units are pulled back harder. A full-strength,
+	# steady unit returns 0, so preservation never makes a fresh army passive.
 	var unit_max_hp: int = int(unit.max_hp) if int(unit.max_hp) > 0 else int(atk_def.get("hp", 1))
-	if unit_max_hp <= 0:
+	var hp_need := 0.0
+	if unit_max_hp > 0:
+		var hp_ratio: float = float(unit.hp) / float(unit_max_hp)
+		if hp_ratio < PRESERVE_HP_THRESHOLD:
+			hp_need = (PRESERVE_HP_THRESHOLD - hp_ratio) / PRESERVE_HP_THRESHOLD
+	var need: float = max(hp_need, _morale_need(unit))
+	if need <= 0.0:
 		return 0.0
-	var hp_ratio: float = float(unit.hp) / float(unit_max_hp)
-	if hp_ratio >= PRESERVE_HP_THRESHOLD:
-		return 0.0
-	var low_hp: float = (PRESERVE_HP_THRESHOLD - hp_ratio) / PRESERVE_HP_THRESHOLD
 	var invest: float = min(1.0, float(unit.rank) * PRESERVE_RANK_WEIGHT)
-	return low_hp * (1.0 + invest)
+	return need * (1.0 + invest)
+
+func _morale_need(unit) -> float:
+	# Morale arm of _preservation_need: rises as a unit's morale nears the rout
+	# point (morale 0), so a full-HP but wavering unit still gets pulled toward
+	# cover instead of attacking into a self-inflicted rout next turn. Units with
+	# no morale pool return 0; already-routed units (morale <= 0) withdraw through
+	# the battle turn-start path and are never scored here, so they add no pull.
+	var morale_var: Variant = unit.get("morale")
+	var morale_max_var: Variant = unit.get("morale_max")
+	if morale_var == null or morale_max_var == null:
+		return 0.0
+	var morale := int(morale_var)
+	var morale_max := int(morale_max_var)
+	if morale_max <= 0 or morale <= 0:
+		return 0.0
+	var ratio: float = float(morale) / float(morale_max)
+	if ratio >= PRESERVE_MORALE_THRESHOLD:
+		return 0.0
+	return (PRESERVE_MORALE_THRESHOLD - ratio) / PRESERVE_MORALE_THRESHOLD
 
 func _mistake_jitter(unit, pos: Vector2i) -> float:
 	# Deterministic positioning noise for Easy AI. Pure function of the candidate
