@@ -316,8 +316,10 @@ func _apply_morale_pressure(defender: Unit, pressure: int) -> bool:
 	if pressure <= 0 or not defender.is_alive() or defender.routed:
 		return false
 	var pinned := CombatEffects.is_pinned(defender.suppression)
+	var terrain_def := int(DataLoader.get_terrain_def(hex_map.terrain_at(defender.coord)).get("defense", 0))
 	defender.morale = CombatEffects.morale_after_hit(
-		defender.morale, pressure, _adjacent_enemy_count(defender), pinned
+		defender.morale, pressure, _adjacent_enemy_count(defender), pinned,
+		defender.dig_in_level, terrain_def
 	)
 	defender.queue_redraw()
 	if defender.morale <= 0:

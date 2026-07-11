@@ -223,5 +223,30 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: low morale should recover faster and a broken unit pulled to safety should reform in one turn; rec_low %d rec_high %d" % [rec_low, rec_high])
 
+	# M-fortify) Entrenchment and defensive terrain steady a unit against rout,
+	# so the morale/rout path no longer bypasses dug-in / town defenders.
+	var r_open := CombatEffects.morale_resistance(mmax, 2, true)
+	var r_dug := CombatEffects.morale_resistance(mmax, 2, true, 3, 3)
+	if r_dug > r_open:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: dig-in + defensive terrain should raise morale resistance (open %d, dug %d)" % [r_open, r_dug])
+
+	var mf := mmax
+	var sf := 0
+	var routed_f := 0
+	for hit in range(1, 12):
+		var pinned_f := CombatEffects.is_pinned(sf)
+		mf = CombatEffects.morale_after_hit(mf, 3, 2, pinned_f, 3, 3)  # town + dig3, 2 adjacent MGs
+		sf = CombatEffects.apply_suppression(sf, 3)
+		if mf <= 0 and routed_f == 0:
+			routed_f = hit
+	if routed_f == 0 or routed_f > 4:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: a town+dig3 unit should resist rout past the 4-hit open-field baseline, routed on %d" % routed_f)
+
 	print("CombatEffects tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)

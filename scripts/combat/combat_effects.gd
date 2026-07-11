@@ -105,22 +105,28 @@ const RALLY_MORALE := 3
 static func morale_max(rank: int) -> int:
 	return MORALE_BASE + max(0, rank)
 
-static func morale_resistance(morale: int, adjacent_enemies: int, pinned: bool) -> int:
+static func morale_resistance(morale: int, adjacent_enemies: int, pinned: bool, dig_in: int = 0, terrain_def: int = 0) -> int:
 	# Higher morale resists; being ganged up on (each adjacent enemy past the
 	# first) or already suppressed lowers resistance.
 	var resist := int(morale / MORALE_RESIST_DIV)
 	resist -= max(0, adjacent_enemies - 1)
 	if pinned:
 		resist -= 1
+	# Entrenchment and defensive terrain steady a unit against rout the same way
+	# they blunt HP damage; without this the morale/rout path bypasses dug-in and
+	# town/forest defenders entirely.
+	resist += min(dig_in, 2)
+	if terrain_def >= 2:
+		resist += 1
 	return max(0, resist)
 
-static func morale_drain(pressure: int, morale: int, adjacent_enemies: int, pinned: bool) -> int:
+static func morale_drain(pressure: int, morale: int, adjacent_enemies: int, pinned: bool, dig_in: int = 0, terrain_def: int = 0) -> int:
 	if pressure <= 0:
 		return 0
-	return max(MORALE_MIN_DRAIN, pressure - morale_resistance(morale, adjacent_enemies, pinned))
+	return max(MORALE_MIN_DRAIN, pressure - morale_resistance(morale, adjacent_enemies, pinned, dig_in, terrain_def))
 
-static func morale_after_hit(morale: int, pressure: int, adjacent_enemies: int, pinned: bool) -> int:
-	return max(0, morale - morale_drain(pressure, morale, adjacent_enemies, pinned))
+static func morale_after_hit(morale: int, pressure: int, adjacent_enemies: int, pinned: bool, dig_in: int = 0, terrain_def: int = 0) -> int:
+	return max(0, morale - morale_drain(pressure, morale, adjacent_enemies, pinned, dig_in, terrain_def))
 
 static func morale_recovery(morale: int, max_morale: int) -> int:
 	# Lower morale recovers faster (a broken unit pulled to safety rallies quickly).
