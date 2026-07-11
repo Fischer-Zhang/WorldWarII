@@ -183,7 +183,12 @@ func use_skill(skill_def: Dictionary, current_turn: int) -> void:
 	var duration: int = int(skill_def.get("duration", 1))
 	var effect: Dictionary = {
 		"skill_id": String(skill_def.get("id", "")),
-		"expires_at_turn": current_turn + duration,
+		# duration counts rounds inclusive of the cast round; turn_number ticks
+		# once per full round, so `+ duration - 1` makes a duration-1 ("this turn")
+		# skill expire at the end of the cast round instead of lasting a second
+		# full round. The enemy's turn is in the same round, so defensive auras
+		# still cover it.
+		"expires_at_turn": current_turn + duration - 1,
 		"self_mods": skill_def.get("self_mods", {}),
 		"aura_mods": skill_def.get("aura_mods", {}),
 		"no_counter": bool(skill_def.get("no_counter", false)),

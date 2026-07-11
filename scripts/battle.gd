@@ -1082,7 +1082,9 @@ func _on_skill_pressed(skill: Dictionary) -> void:
 		var duration: int = int(skill.get("duration", 1))
 		var aura_effect := {
 			"skill_id": skill_id,
-			"expires_at_turn": turn_manager.turn_number + duration,
+			# See unit.gd apply_skill_effect: -1 so a duration-1 skill lasts the
+			# cast round only (turn_number ticks per full round), not a second one.
+			"expires_at_turn": turn_manager.turn_number + duration - 1,
 			"self_mods": {},
 			"aura_mods": aura,
 			"no_counter": false,
