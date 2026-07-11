@@ -80,6 +80,11 @@ const W_ENCIRCLEMENT := 0.5
 # Corridor blocking: penalty scale for parking on a chokepoint while unacted
 # allies still need to come through (friendly occupancy blocks pathing).
 const W_SELF_BLOCK := 1.5
+# Overwatch: certain reaction fire from a visible enemy currently on overwatch,
+# credited as exposure on any hex inside its weapon range + LOS. Unlike the
+# threat map (potential next-turn fire) this is immediate and unavoidable, so it
+# is added on top of the same hex's potential exposure at the same 0.5 scale.
+const W_OVERWATCH_EXPOSURE := 0.5
 # Easy-difficulty deterministic positioning error magnitude (per mistake-rate step).
 const MISTAKE_JITTER_SCALE := 0.6
 
@@ -428,8 +433,11 @@ func _score_position_breakdown(
 	# Exposure: only visible enemies are a known threat. The threat map uses
 	# true pathing reach (ZoC, terrain, occupancy) instead of a raw move+range
 	# radius, so cover behind rivers and blocked lanes reads as actual safety.
+	# A visible enemy currently on overwatch adds certain reaction fire on top for
+	# any hex in its weapon range + LOS, so the AI stops walking into watched lanes.
 	_ensure_threat_map(visible_enemies, hex_map)
-	var exposure: float = float(_threat_at(pos).get("attack_sum", 0.0)) * 0.5
+	var exposure: float = float(_threat_at(pos).get("attack_sum", 0.0)) * 0.5 \
+		+ _overwatch_exposure_at(pos, visible_enemies, hex_map)
 	var exposure_term: float = -exposure * _exposure_w
 
 	# Terrain defense bonus
@@ -1792,6 +1800,25 @@ func _ensure_threat_map(visible_enemies: Array, hex_map) -> void:
 func _threat_at(pos: Vector2i) -> Dictionary:
 	# {} means no visible enemy can strike this hex next turn.
 	return _threat_map.get(pos, {})
+
+func _overwatch_exposure_at(pos: Vector2i, visible_enemies: Array, hex_map) -> float:
+	# Certain reaction fire: a visible enemy currently on overwatch snap-fires as
+	# our unit steps into a hex within its weapon range and LOS (OverwatchResolver).
+	# Only enemies we can actually see count — the AI never reacts to hidden
+	# overwatchers. Scored per-destination (the last path step is a fired-on hex),
+	# which biases the plan away from ending in a watched lane.
+	var total := 0.0
+	for e in visible_enemies:
+		var enemy = e
+		if not enemy.get("on_overwatch"):
+			continue
+		var enemy_def: Dictionary = _get_unit_def(enemy.type_id)
+		if HexCoord.distance(enemy.coord, pos) > int(enemy_def.get("range", 1)):
+			continue
+		if not Visibility.has_los(enemy.coord, pos, hex_map):
+			continue
+		total += float(enemy_def.get("attack", 0))
+	return total * W_OVERWATCH_EXPOSURE
 
 # ---------- 1-ply net-exchange lookahead ----------
 

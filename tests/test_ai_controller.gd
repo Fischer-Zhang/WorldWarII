@@ -118,6 +118,7 @@ class StubUnit:
 	var morale: int = 10
 	var morale_max: int = 10
 	var routed: bool = false
+	var on_overwatch: bool = false
 	var has_moved: bool = false
 	var has_attacked: bool = false
 	var skill_cooldowns: Dictionary = {}
@@ -1376,6 +1377,48 @@ func _init() -> void:
 		fail_count += 1
 		printerr("FAIL: morale preservation expected wavering > 0, steady == 0, easy == 0; wavering %.2f steady %.2f easy %.2f" % [
 			wavering_preserve, steady_preserve, easy_preserve,
+		])
+
+	# 33) Overwatch awareness: a hex inside a visible overwatching enemy's weapon
+	# range + LOS reads as more exposed (certain reaction fire) than the same hex
+	# when that enemy is not on overwatch; a hex outside the enemy's range is
+	# unaffected either way.
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var ow_ai := AIController.new(battle, "aggressive", "normal")
+	ow_ai._data_loader = ai._data_loader
+	var ow_mover := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var ow_enemy := make_unit("mg_team", "allies", Vector2i(2, 0), 8)  # range 1
+	battle.units = [ow_mover, ow_enemy]
+	var ow_known := [{"coord": ow_enemy.coord, "visible": true, "unit": ow_enemy}]
+	var ow_inf_def: Dictionary = ow_ai._get_unit_def("infantry")
+	var watched := Vector2i(1, 0)  # distance 1 from the MG: inside range + LOS
+	var safe := Vector2i(4, 0)     # distance 2 from the MG: out of range
+	ow_enemy.on_overwatch = true
+	var watched_on: float = float(ow_ai._score_position_breakdown(
+		ow_mover, watched, ow_known, [ow_enemy], battle.hex_map, ow_inf_def, {}
+	).get("exposure", 0.0))
+	var safe_on: float = float(ow_ai._score_position_breakdown(
+		ow_mover, safe, ow_known, [ow_enemy], battle.hex_map, ow_inf_def, {}
+	).get("exposure", 0.0))
+	ow_enemy.on_overwatch = false
+	var watched_off: float = float(ow_ai._score_position_breakdown(
+		ow_mover, watched, ow_known, [ow_enemy], battle.hex_map, ow_inf_def, {}
+	).get("exposure", 0.0))
+	var safe_off: float = float(ow_ai._score_position_breakdown(
+		ow_mover, safe, ow_known, [ow_enemy], battle.hex_map, ow_inf_def, {}
+	).get("exposure", 0.0))
+	if watched_on < watched_off and safe_on == safe_off:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: overwatch exposure expected watched_on < watched_off and safe unchanged; watched_on %.2f watched_off %.2f safe_on %.2f safe_off %.2f" % [
+			watched_on, watched_off, safe_on, safe_off,
 		])
 
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
