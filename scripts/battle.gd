@@ -559,14 +559,17 @@ func _update_dig_in_for_current_faction() -> void:
 		var unit: Unit = u
 		if not unit.is_alive() or unit.faction_id != current:
 			continue
-		if CombatEffects.is_pinned(unit.suppression):
-			unit.dig_in_level = 0
-			unit.queue_redraw()
-			continue
 		if unit.has_moved or unit.has_attacked or unit.on_overwatch:
 			unit.dig_in_level = 0
+		elif CombatEffects.is_pinned(unit.suppression):
+			# Suppression erodes entrenchment one level per turn instead of
+			# wiping the whole stack, so a single pin no longer deletes a
+			# 3-turn dig-in investment (which made the artillery/engineer
+			# strip mechanics and the whole investment moot).
+			unit.dig_in_level = max(0, unit.dig_in_level - 1)
 		else:
 			unit.dig_in_level = min(Unit.MAX_DIG_IN, unit.dig_in_level + 1)
+		unit.queue_redraw()
 		unit.queue_redraw()
 
 func _handle_game_over(winner: String) -> void:

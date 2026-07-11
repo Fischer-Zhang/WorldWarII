@@ -1,7 +1,7 @@
 {
   "id": "pacific_01_guadalcanal_1942",
   "title": "瓜達康納爾叢林戰 1942",
-  "briefing": "1942 年 8 月。美軍陸戰隊登上瓜達康納爾,準備清除亨德森機場周邊的日軍據點。海岸線限制機動,叢林遮蔽視線,機槍火點和反戰車砲會把正面推進變成消耗戰。\n\n你的任務:在 11 個回合內殲滅日軍守備隊。日軍只要拖到夜間反擊前仍有戰鬥力,就能守住島上縱深。\n\n次要目標:奪取中央補給村可讓突擊部隊整隊恢復;摧毀日軍機槍火點可壓制周邊守軍。\n\n戰術提示:叢林會擋視線,先用步兵與輕戰車逼近偵察,再讓山砲打擊密集守軍。工兵能靠近構工火點,替後續攻擊拆掉防禦。",
+  "briefing": "1942 年 8 月。美軍陸戰隊登上瓜達康納爾,準備清除亨德森機場周邊的日軍據點。海岸線限制機動,叢林遮蔽視線,機槍火點和反戰車砲會把正面推進變成消耗戰。\n\n你的任務:在 13 個回合內殲滅日軍守備隊。日軍只要拖到夜間反擊前仍有戰鬥力,就能守住島上縱深。\n\n次要目標:奪取中央補給村可讓突擊部隊整隊恢復;摧毀日軍機槍火點可壓制周邊守軍。\n\n戰術提示:叢林會擋視線,先用步兵與輕戰車逼近偵察,再讓山砲打擊密集守軍。工兵能靠近構工火點,替後續攻擊拆掉防禦。",
   "map": {
     "width": 16,
     "height": 10,
@@ -40,6 +40,7 @@
     {"faction": "allies", "type": "light_tank", "name": "M3 Stuart", "at": [2, 5]},
     {"faction": "allies", "type": "artillery", "name": "75 mm 山砲排", "at": [1, 6]},
     {"faction": "allies", "type": "light_tank", "name": "M3 Stuart b", "at": [1, 7]},
+    {"faction": "allies", "type": "artillery", "name": "75 mm 山砲排 b", "at": [3, 5]},
     {"faction": "allies", "type": "mg_team", "name": "M1919 支援組", "at": [2, 8]},
     {"id": "axis_jungle_mg", "faction": "axis", "type": "mg_team", "name": "叢林機槍火點", "at": [12, 6], "dig_in": 2},
     {"faction": "axis", "type": "infantry", "name": "日軍步兵 a", "at": [12, 4], "dig_in": 1},
@@ -70,11 +71,11 @@
   "victory": {
     "allies": {
       "type": "eliminate",
-      "by_turn": 11
+      "by_turn": 13
     },
     "axis": {
       "type": "survive",
-      "by_turn": 11
+      "by_turn": 13
     }
   }
 }
