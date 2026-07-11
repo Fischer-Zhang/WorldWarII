@@ -46,11 +46,13 @@ const SECONDARY_DESTROY_TARGET_BONUS := 4.0
 const W_RALLY := 4.0
 const W_RALLY_MORALE := 0.5  # small, so steadying morale stays below taking a real attack
 const W_ROUT_FRACTION := 0.6  # value of routing a target relative to killing it
+const W_ROUT_PROGRESS := 0.5  # partial morale-drain credit, as a fraction of the full-rout bonus
 const W_FIRE_SUPPORT := 2.0
 const W_BREACH_SUPPORT := 2.0
 const W_SUPPRESSIVE_FIRE := 1.2
 const W_FOCUS_DAMAGE := 0.18
 const W_FOCUS_SUPPRESSION := 0.7
+const W_FOCUS_MORALE := 0.12  # converge on a wavering target; capped below a real kill
 # Turn-level coordination: value of converging on a target an earlier unit
 # already engaged this turn, and of converting an unspent friendly support
 # mark before it expires.
@@ -1104,15 +1106,44 @@ func _attack_candidate_score(
 	# Rout awareness: a non-lethal hit that breaks the target's morale forces it
 	# to withdraw and strips its command for the turn — nearly as valuable as a
 	# kill, and the only way to cheaply neutralise a now-durable dug-in defender.
+	# Gang-up matters: extra adjacent attackers lower the target's resistance, so
+	# the drain is estimated with the real adjacent count (not a lone 1). Progress
+	# short of a break is credited too, so the AI whittles a defender toward rout
+	# across attackers/turns instead of only valuing the finishing blow.
 	if not r.defender_dies and suppression > 0 and int(enemy.morale) > 0 and not enemy.get("routed"):
+		var adjacent_attackers: int = _adjacent_attacker_count(attacker_faction, enemy.coord, attacker, pos)
 		var enemy_pinned: bool = CombatEffects.is_pinned(int(enemy.suppression) + suppression)
 		var drain: int = CombatEffects.morale_drain(
-			suppression, int(enemy.morale), 1, enemy_pinned,
+			suppression, int(enemy.morale), adjacent_attackers, enemy_pinned,
 			int(enemy.dig_in_level), int(def_terr.get("defense", 0))
 		)
 		if drain >= int(enemy.morale):
 			score += _kill_bonus * W_ROUT_FRACTION
+		else:
+			var progress: float = clampf(float(drain) / float(int(enemy.morale)), 0.0, 1.0)
+			score += _kill_bonus * W_ROUT_FRACTION * W_ROUT_PROGRESS * progress
 	return score
+
+func _adjacent_attacker_count(attacker_faction: String, enemy_coord: Vector2i, attacker, pos: Vector2i) -> int:
+	# Same-faction units that would sit adjacent to the target when this attack
+	# lands — the acting attacker counted at its destination `pos`. Mirrors the
+	# defender-side adjacency the live morale resolver uses (_adjacent_enemy_count),
+	# so a ganged-up target's lowered resistance is estimated, not assumed to be 1.
+	var count := 0
+	var counted_actor := false
+	for u in battle.units:
+		var unit = u
+		if not unit.is_alive() or unit.faction_id != attacker_faction:
+			continue
+		var upos: Vector2i = pos if (attacker != null and unit == attacker) else unit.coord
+		if HexCoord.distance(upos, enemy_coord) == 1:
+			count += 1
+		if attacker != null and unit == attacker:
+			counted_actor = true
+	# Legacy/trace path with no attacker identity in battle.units: count the shot.
+	if not counted_actor and HexCoord.distance(pos, enemy_coord) == 1:
+		count += 1
+	return count
 
 func _fire_support_skill(unit, unit_def: Dictionary = {}) -> Dictionary:
 	var def := unit_def
@@ -1243,7 +1274,16 @@ func _target_focus_score(enemy, defender_def: Dictionary) -> float:
 	var max_hp := int(defender_def.get("hp", max(1, enemy.hp)))
 	var missing_hp: int = max(0, max_hp - enemy.hp)
 	var suppression := int(enemy.suppression)
-	return float(missing_hp) * W_FOCUS_DAMAGE + float(suppression) * W_FOCUS_SUPPRESSION
+	var score := float(missing_hp) * W_FOCUS_DAMAGE + float(suppression) * W_FOCUS_SUPPRESSION
+	# Converge on a wavering target: the more its morale is already worn down, the
+	# more a shared push toward a rout is worth. Capped small (W_FOCUS_MORALE) so it
+	# biases target choice on close calls without overriding a real kill.
+	var morale_var: Variant = enemy.get("morale")
+	var morale_max_var: Variant = enemy.get("morale_max")
+	if morale_var != null and morale_max_var != null and int(morale_max_var) > 0:
+		var missing_morale: int = clampi(int(morale_max_var) - int(morale_var), 0, int(morale_max_var))
+		score += float(missing_morale) * W_FOCUS_MORALE
+	return score
 
 func _engineer_breach_role_score(
 	attacker_type: String,

@@ -1421,5 +1421,51 @@ func _init() -> void:
 			watched_on, watched_off, safe_on, safe_off,
 		])
 
+	# 34) Graded, gang-up-aware rout scoring + morale-proximity focus: a worn-down
+	# target is a more attractive focus target; adjacency is counted for real (not
+	# a lone 1); and a non-lethal hit that only chips morale still scores higher
+	# against a near-rout target than a steady one (whittle-toward-rout credit).
+	battle.units = []
+	battle.visibility_by_faction = {}
+	battle.hex_map.terrain_overrides.clear()
+	battle.hex_map.occupants.clear()
+	battle.scenario = {}
+	battle.fire_support_marks.clear()
+	battle.breach_support_marks.clear()
+	var rout_ai := AIController.new(battle, "aggressive", "normal")
+	rout_ai._data_loader = ai._data_loader
+	var rinf_def: Dictionary = rout_ai._get_unit_def("infantry")
+	# (a) focus term rewards a worn-down morale target.
+	var shaken := make_unit("infantry", "allies", Vector2i(9, 9), 10)
+	shaken.morale = 2
+	var steady_target := make_unit("infantry", "allies", Vector2i(9, 9), 10)  # morale 10
+	var focus_shaken: float = rout_ai._target_focus_score(shaken, rinf_def)
+	var focus_steady: float = rout_ai._target_focus_score(steady_target, rinf_def)
+	# (b) real adjacent-attacker count: acting attacker at pos + one adjacent ally.
+	var ga_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var ga_ally := make_unit("infantry", "axis", Vector2i(1, 1), 10)   # d1 from target
+	var ga_target := make_unit("infantry", "allies", Vector2i(1, 0), 10)
+	battle.units = [ga_attacker, ga_ally, ga_target]
+	var adj_count: int = rout_ai._adjacent_attacker_count("axis", ga_target.coord, ga_attacker, Vector2i(0, 0))
+	# (c) graded rout: identical non-lethal hit scores higher vs a near-rout target.
+	var rout_attacker := make_unit("infantry", "axis", Vector2i(0, 0), 10)
+	var near_rout := make_unit("infantry", "allies", Vector2i(1, 0), 10)   # d1, morale 2
+	near_rout.morale = 2
+	var full_morale := make_unit("infantry", "allies", Vector2i(-1, 0), 10)  # d1, morale 10
+	battle.units = [rout_attacker, near_rout, full_morale]
+	var score_near: float = rout_ai._attack_candidate_score(
+		rout_attacker, Vector2i(0, 0), "axis", "infantry", near_rout, rinf_def
+	)
+	var score_full: float = rout_ai._attack_candidate_score(
+		rout_attacker, Vector2i(0, 0), "axis", "infantry", full_morale, rinf_def
+	)
+	if focus_shaken > focus_steady and adj_count == 2 and score_near > score_full:
+		pass_count += 1
+	else:
+		fail_count += 1
+		printerr("FAIL: rout scoring expected focus_shaken > focus_steady, adj_count == 2, score_near > score_full; focus %.2f/%.2f adj %d score %.2f/%.2f" % [
+			focus_shaken, focus_steady, adj_count, score_near, score_full,
+		])
+
 	print("AIController tests: %d pass, %d fail" % [pass_count, fail_count])
 	quit(0 if fail_count == 0 else 1)
