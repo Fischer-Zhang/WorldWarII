@@ -1,0 +1,458 @@
+{
+  "id": "it_02_salerno_1943",
+  "title": "薩勒諾灘頭 1943",
+  "briefing": "1943 年 9 月,雪崩行動。克拉克的美軍第五軍團在薩勒諾登陸,隨即遭德軍第 16 裝甲師與傘兵的猛烈反撲——一度打到灘頭幾乎被逼回海裡。\n\n你的任務:守住灘頭撐到第 12 回合。背海而戰,沒有退路;內陸的城鎮與河谷是德軍裝甲南下的通道,守住村鎮線就能拖垮反擊。\n\n次要目標:連續守住灘頭核心村兩個我方回合可提前調來裝甲增援;偵察北面山脊能標定德軍砲兵。\n\n戰術提示:反戰車砲與工兵構工是撐住裝甲衝擊的關鍵;克拉克的灘頭突破技能能在第五軍團反推時撕開缺口。別讓步兵在開闊地被 Pz.IV 逐一碾碎。",
+  "map": {
+    "width": 15,
+    "height": 11,
+    "tiles": [
+      [
+        "mountain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "mountain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "美軍第五軍團灘頭守備",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "德軍薩勒諾反擊集群",
+      "controller": "ai",
+      "ai": "aggressive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 a",
+      "at": [
+        3,
+        8
+      ],
+      "dig_in": 1,
+      "general": "clark"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 b",
+      "at": [
+        8,
+        7
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "M1919 灘頭組",
+      "at": [
+        4,
+        8
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57mm AT a",
+      "at": [
+        2,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57mm AT b",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "戰鬥工兵",
+      "at": [
+        3,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "海軍岸轟支援",
+      "at": [
+        12,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "tank_destroyer",
+      "name": "M10 反戰車",
+      "at": [
+        11,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "第16裝甲 Pz.IV a",
+      "at": [
+        1,
+        0
+      ],
+      "general": "manteuffel"
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "第16裝甲 Pz.IV b",
+      "at": [
+        6,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "第16裝甲 Pz.IV c",
+      "at": [
+        12,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍傘兵 a",
+      "at": [
+        4,
+        1
+      ],
+      "general": "kesselring"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍傘兵 b",
+      "at": [
+        9,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 組",
+      "at": [
+        7,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "StuG III",
+      "at": [
+        10,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "150mm sFH",
+      "at": [
+        2,
+        1
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "第29裝甲擲彈兵團",
+      "at": [
+        6,
+        0
+      ]
+    },
+    {
+      "at_turn": 4,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍增援步兵",
+      "at": [
+        10,
+        0
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼登陸排",
+      "at": [
+        6,
+        9
+      ]
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "salerno_hold_village",
+      "type": "hold_turns",
+      "label": "守住灘頭核心村",
+      "faction": "allies",
+      "target": [
+        8,
+        7
+      ],
+      "required_turns": 2,
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "salerno_recon_ridge",
+      "type": "recon_hex",
+      "label": "偵察北面山脊",
+      "faction": "allies",
+      "target": [
+        7,
+        2
+      ],
+      "requires": [
+        "salerno_hold_village"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "survive",
+      "by_turn": 12
+    },
+    "axis": {
+      "type": "capture",
+      "target": [
+        4,
+        8
+      ],
+      "by_turn": 12
+    }
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "id": "it_05_gothic_line_1944",
+  "title": "哥德防線突破 1944",
+  "briefing": "1944 年 8 至 9 月,橄欖行動。德軍在北亞平寧山脈築起最後一道橫貫半島的防線——哥德防線。突破它,波河平原與義大利北部就此洞開。\n\n你的任務:在第 16 回合前控制三處山口城鎮中的至少兩處。連綿的山體只留下幾條隘路,凱塞林把傘兵、反戰車砲與構工全壓在這些隘口上。\n\n次要目標:奪取中央山口據點可打開第二條軸線;摧毀反斜面的德軍砲兵能解除隘路火力封鎖。\n\n戰術提示:多軸並進,逼德軍分散預備隊;砲兵與火箭砲先軟化隘口,再用步兵與工兵爭奪城鎮。這是義大利戰役線的收官之戰。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "mountain",
+        "mountain",
+        "plain",
+        "town",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "town",
+        "plain",
+        "mountain",
+        "mountain"
+      ],
+      [
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "road",
+        "forest",
+        "plain",
+        "plain",
+        "mountain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "forest",
+        "mountain",
+        "plain",
+        "mountain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "盟軍哥德防線突破集群",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "德軍哥德防線守備集群",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 a",
+      "at": [
+        4,
+        8
+      ],
+      "general": "clark"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 b",
+      "at": [
+        12,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "英軍第八軍團步兵",
+      "at": [
+        2,
+        9
+      ],
+      "general": "montgomery"
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "白朗寧機槍組",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "戰鬥工兵",
+      "at": [
+        3,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼排",
+      "at": [
+        13,
+        9
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "155mm 砲",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "rocket_artillery",
+      "name": "火箭砲營",
+      "at": [
+        8,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵守備 a",
+      "at": [
+        3,
+        0
+      ],
+      "dig_in": 3,
+      "general": "kesselring"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 a",
+      "at": [
+        4,
+        1
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵守備 b",
+      "at": [
+        11,
+        0
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 b",
+      "at": [
+        10,
+        1
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "山地守備 c",
+      "at": [
+        5,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 隘路砲",
+      "at": [
+        10,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "追獵者殲擊車",
+      "at": [
+        8,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "反斜面砲兵",
+      "at": [
+        8,
+        1
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 5,
+      "faction": "allies",
+      "type": "tank_destroyer",
+      "name": "M10 支援排",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "at_turn": 8,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "南非軍步兵",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍隘口預備隊",
+      "at": [
+        8,
+        2
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "gothic_central_pass",
+      "type": "capture",
+      "label": "奪取中央山口據點",
+      "faction": "allies",
+      "target": [
+        5,
+        4
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "gothic_kill_arty",
+      "type": "destroy_unit",
+      "label": "摧毀反斜面砲兵",
+      "faction": "allies",
+      "target_unit": "反斜面砲兵",
+      "requires": [
+        "gothic_central_pass"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "control_count",
+      "targets": [
+        [
+          3,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          10,
+          4
+        ]
+      ],
+      "required": 2,
+      "by_turn": 16
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}

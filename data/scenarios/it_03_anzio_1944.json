@@ -1,0 +1,465 @@
+{
+  "id": "it_03_anzio_1944",
+  "title": "安其奧突圍 1944",
+  "briefing": "1944 年 1 月至 5 月,投石機行動。盟軍在安其奧登陸後被德軍圍困在狹窄灘頭數月。如今第六軍要向內陸突圍,奪取通往羅馬的公路樞紐——奇斯泰納與坎波萊奧內。\n\n你的任務:在第 15 回合前控制內陸兩座公路城鎮中的至少一座並守住。德軍在灘頭外緣構築了縱深防線,凱塞林隨時能調來預備隊封口。\n\n次要目標:摧毀封鎖公路的德軍自走砲可加速裝甲推進;偵察側翼農莊能標定德軍反擊集結地。\n\n戰術提示:突圍要集中兵力打一點,別均分正面。工兵開路、砲兵壓制火點,克拉克的突破技能留給決定性一擊。",
+  "map": {
+    "width": 15,
+    "height": 11,
+    "tiles": [
+      [
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "盟軍第六軍突圍集群",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "德軍安其奧封鎖集群",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 a",
+      "at": [
+        2,
+        9
+      ],
+      "general": "clark"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 b",
+      "at": [
+        3,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "M1919 組",
+      "at": [
+        3,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "突擊工兵",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼排 a",
+      "at": [
+        11,
+        9
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼排 b",
+      "at": [
+        12,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57mm AT",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "155mm 長腳湯姆",
+      "at": [
+        6,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍守備 a",
+      "at": [
+        5,
+        0
+      ],
+      "dig_in": 2,
+      "general": "kesselring"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 a",
+      "at": [
+        4,
+        0
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍守備 b",
+      "at": [
+        7,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 b",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 a",
+      "at": [
+        6,
+        3
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "斐迪南獵殲車",
+      "at": [
+        9,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "德軍自走砲",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "Pz.IV 預備排",
+      "at": [
+        10,
+        4
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 5,
+      "faction": "allies",
+      "type": "tank_destroyer",
+      "name": "M10 突圍排",
+      "at": [
+        9,
+        9
+      ]
+    },
+    {
+      "at_turn": 8,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "英軍增援步兵",
+      "at": [
+        1,
+        9
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍封口預備隊",
+      "at": [
+        6,
+        1
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "anzio_kill_spg",
+      "type": "destroy_unit",
+      "label": "摧毀封路自走砲",
+      "faction": "allies",
+      "target_unit": "德軍自走砲",
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 1
+        }
+      ]
+    },
+    {
+      "id": "anzio_recon_farm",
+      "type": "recon_hex",
+      "label": "偵察側翼農莊",
+      "faction": "allies",
+      "target": [
+        10,
+        4
+      ],
+      "requires": [
+        "anzio_kill_spg"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "control_count",
+      "targets": [
+        [
+          5,
+          0
+        ],
+        [
+          7,
+          3
+        ]
+      ],
+      "required": 1,
+      "by_turn": 15
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}

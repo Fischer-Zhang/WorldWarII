@@ -1,0 +1,493 @@
+{
+  "id": "it_04_monte_cassino_1944",
+  "title": "卡西諾山攻堅 1944",
+  "briefing": "1944 年 2 至 5 月。古斯塔夫防線橫亙義大利中部,卡西諾山與山頂的本篤會修道院俯瞰通往羅馬的 6 號公路。德軍第 1 傘兵師據守著全歐洲最堅固的天然要塞之一。\n\n你的任務:在第 16 回合前攻佔卡西諾鎮。拉皮多河橫在面前,只有兩座橋能通過(工兵可另闢渡點);兩側的石灰岩山體完全不可通行,攻勢只能沿狹窄河谷仰攻設防高地。\n\n次要目標:法國遠征軍偵察南側山肩可迂迴古斯塔夫線;剝除修道院外圍德軍傘兵的構工能為總攻鋪路。\n\n戰術提示:正面強攻仰攻 dig-in 3 的傘兵是絞肉機。先用砲兵與煙幕壓制火點、工兵搶渡,再讓步兵逐屋爭奪。這是全戰役最硬的一關。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain"
+      ],
+      [
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "river",
+        "river",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "river",
+        "river",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "river",
+        "river"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "盟軍卡西諾攻堅集群",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "德軍第一傘兵師",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 a",
+      "at": [
+        4,
+        8
+      ],
+      "general": "clark"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 b",
+      "at": [
+        11,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "架橋工兵 a",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "架橋工兵 b",
+      "at": [
+        11,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "白朗寧機槍組",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "155mm 砲 a",
+      "at": [
+        1,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "155mm 砲 b",
+      "at": [
+        13,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "rocket_artillery",
+      "name": "火箭砲營",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "法國遠征軍山地步兵",
+      "at": [
+        2,
+        8
+      ],
+      "general": "de_gaulle"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵守備 a",
+      "at": [
+        4,
+        1
+      ],
+      "dig_in": 3,
+      "general": "kesselring"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 a",
+      "at": [
+        5,
+        1
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 b",
+      "at": [
+        4,
+        2
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵守備 b",
+      "at": [
+        10,
+        2
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 山砲",
+      "at": [
+        11,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵守備 c",
+      "at": [
+        7,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "衛擊砲兵陣地",
+      "at": [
+        13,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 c",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 2
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 6,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "波蘭軍步兵",
+      "at": [
+        7,
+        10
+      ]
+    },
+    {
+      "at_turn": 9,
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼支援排",
+      "at": [
+        4,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "傘兵預備隊",
+      "at": [
+        9,
+        2
+      ],
+      "dig_in": 1
+    },
+    {
+      "at_turn": 10,
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "增援機槍組",
+      "at": [
+        10,
+        1
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "cassino_french_flank",
+      "type": "recon_hex",
+      "label": "法軍偵察南側山肩",
+      "faction": "allies",
+      "target": [
+        13,
+        4
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "cassino_strip_digin",
+      "type": "capture",
+      "label": "奪取河谷渡口據點",
+      "faction": "allies",
+      "target": [
+        4,
+        3
+      ],
+      "requires": [
+        "cassino_french_flank"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        4,
+        1
+      ],
+      "by_turn": 16
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}

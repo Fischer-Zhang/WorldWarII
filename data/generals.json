@@ -265,5 +265,43 @@
       "duration": 2,
       "aura_mods": {"attack": 1, "defense": 1}
     }
+  },
+  "kesselring": {
+    "name_zh": "凱塞林",
+    "title_zh": "南線總司令",
+    "country": "germany",
+    "quality": "gold",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 1,
+    "defense_bonus": 2,
+    "move_bonus": 0,
+    "skill": {
+      "id": "elastic_defence",
+      "name_zh": "彈性防禦",
+      "description_zh": "2 回合內,相鄰我方 +1 攻擊 +2 防禦",
+      "cooldown": 6,
+      "duration": 2,
+      "aura_mods": {"attack": 1, "defense": 2}
+    }
+  },
+  "clark": {
+    "name_zh": "克拉克",
+    "title_zh": "第五軍團司令",
+    "country": "usa",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "at_gun", "artillery"],
+    "attack_bonus": 1,
+    "defense_bonus": 1,
+    "move_bonus": 0,
+    "skill": {
+      "id": "beachhead_push",
+      "name_zh": "灘頭突破",
+      "description_zh": "本回合 +2 攻擊 +1 移動",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"attack": 2, "move": 1}
+    }
   }
 }

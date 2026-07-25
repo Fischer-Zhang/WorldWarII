@@ -1,0 +1,489 @@
+{
+  "id": "it_01_sicily_1943",
+  "title": "西西里登陸 1943",
+  "briefing": "1943 年 7 月,哈士奇行動。巴頓的美軍第七軍團與蒙哥馬利的英軍第八軍團在西西里南岸登陸,目標是打穿德義守軍、奪取沿海城鎮並直取墨西拿。\n\n你的任務:在第 14 回合前控制三座沿海城鎮中的至少兩座。埃特納火山的熔岩山體不可通行,會把攻勢逼進兩側的濱海走廊——那裡正是德軍反戰車砲與裝甲擲彈兵設防的地方。\n\n次要目標:傘兵搶佔內陸恩納城可打開中路;肅清濱海公路上的德軍砲兵能為裝甲縱隊解套。\n\n戰術提示:別讓謝爾曼在開闊濱海平原被 Pz.IV 與 Marder 對射消耗,先用步兵與砲兵沿城鎮線推進,巴頓的裝甲留待突破口出現再投入。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "forest",
+        "plain",
+        "road",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "town",
+        "plain"
+      ],
+      [
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "forest",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea",
+        "sea"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "盟軍西西里登陸集群",
+      "controller": "player",
+      "color": "#3b65c7"
+    },
+    {
+      "id": "axis",
+      "name": "德義西西里守備集群",
+      "controller": "ai",
+      "ai": "aggressive",
+      "color": "#a86632"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 a",
+      "at": [
+        2,
+        8
+      ],
+      "general": "bradley"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍步兵 b",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "M1919 機槍組",
+      "at": [
+        3,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼排 a",
+      "at": [
+        6,
+        8
+      ],
+      "general": "patton"
+    },
+    {
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "謝爾曼排 b",
+      "at": [
+        7,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "57mm 反戰車砲",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105mm 榴彈砲",
+      "at": [
+        1,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "英軍第八軍團步兵",
+      "at": [
+        12,
+        8
+      ],
+      "general": "montgomery"
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "英軍 25 磅砲",
+      "at": [
+        13,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "裝甲擲彈兵 a",
+      "at": [
+        3,
+        1
+      ],
+      "dig_in": 2,
+      "general": "kesselring"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 a",
+      "at": [
+        4,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 濱海砲",
+      "at": [
+        2,
+        2
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "裝甲擲彈兵 b",
+      "at": [
+        12,
+        1
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 b",
+      "at": [
+        13,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "medium_tank",
+      "name": "赫爾曼戈林 Pz.IV",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "Marder III",
+      "at": [
+        5,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "義軍 149mm 砲",
+      "at": [
+        7,
+        1
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 3,
+      "faction": "allies",
+      "type": "paratrooper",
+      "name": "82 空降步兵",
+      "at": [
+        9,
+        5
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "美軍後續步兵",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍後撤守備隊",
+      "at": [
+        10,
+        6
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "sicily_take_enna",
+      "type": "capture",
+      "label": "傘兵搶佔恩納",
+      "faction": "allies",
+      "target": [
+        9,
+        6
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "sicily_silence_arty",
+      "type": "destroy_unit",
+      "label": "肅清濱海砲兵",
+      "faction": "allies",
+      "target_unit": "義軍 149mm 砲",
+      "requires": [
+        "sicily_take_enna"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "control_count",
+      "targets": [
+        [
+          3,
+          0
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          9,
+          6
+        ]
+      ],
+      "required": 2,
+      "by_turn": 14
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 14
+    }
+  }
+}

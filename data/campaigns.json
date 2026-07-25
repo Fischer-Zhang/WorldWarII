@@ -58,6 +58,17 @@
       "pacific_06_okinawa_1945"
     ]
   },
+  "italian_campaign": {
+    "title": "義大利戰役 1943-1944",
+    "description": "從西西里登陸打上義大利本土,經薩勒諾灘頭的裝甲反擊、安其奧突圍,到卡西諾山與哥德防線的山地攻堅。以河谷、山口與不可通行的亞平寧山體為骨架,強調狹窄軸線上的仰攻、渡河與對縱深構工的逐點爭奪。",
+    "scenario_order": [
+      "it_01_sicily_1943",
+      "it_02_salerno_1943",
+      "it_03_anzio_1944",
+      "it_04_monte_cassino_1944",
+      "it_05_gothic_line_1944"
+    ]
+  },
   "western_front": {
     "title": "西線反攻 1944-1945",
     "description": "從諾曼第突破到萊茵河橋頭堡,串起盟軍空降、裝甲突破、城市攻堅與德軍反擊。",
