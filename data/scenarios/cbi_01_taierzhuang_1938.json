@@ -1,0 +1,488 @@
+{
+  "id": "cbi_01_taierzhuang_1938",
+  "title": "台兒莊大捷 1938",
+  "briefing": "1938 年 3 月,徐州會戰。日軍第 5、第 10 師團南下爭奪魯南要鎮台兒莊。中國第 2 集團軍死守運河邊的城垣,李宗仁調第 20 集團軍從外線合圍,要把突入城內的日軍反包圍殲滅。\n\n你的任務:在第 16 回合前奪回城北三個街區中的至少兩個。日軍已在北面街區構築工事,大運河則封住東翼,巷戰只能一個院落一個院落地爭。\n\n次要目標:切斷日軍北面退路可斷其增援;摧毀城外的日軍山砲能解除對突擊隊的壓制。\n\n戰術提示:仰攻 dig-in 的城鎮火點傷亡慘重,先用砲兵與機槍壓制,再讓步兵貼近逐屋清剿。孫立人的稅警總團突擊在此磨礪。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "forest"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "river",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "river",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "jungle"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "中國第2集團軍",
+      "controller": "player",
+      "color": "#c7b23b"
+    },
+    {
+      "id": "axis",
+      "name": "日軍瀨谷支隊",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "稅警總團突擊 a",
+      "at": [
+        6,
+        5
+      ],
+      "dig_in": 1,
+      "general": "sun_liren"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "守城步兵 b",
+      "at": [
+        7,
+        5
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "馬克沁機槍組",
+      "at": [
+        8,
+        5
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "巷戰步兵 c",
+      "at": [
+        4,
+        7
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "捷克式輕機組",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "戰防砲排",
+      "at": [
+        3,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "山砲營 a",
+      "at": [
+        2,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "山砲營 b",
+      "at": [
+        11,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "工兵爆破組",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍守備步兵 a",
+      "at": [
+        7,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 a",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍守備步兵 b",
+      "at": [
+        8,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 b",
+      "at": [
+        6,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "速射砲組",
+      "at": [
+        7,
+        2
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "八九式中戰車",
+      "at": [
+        10,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍外圍步兵",
+      "at": [
+        5,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "日軍 75mm 山砲",
+      "at": [
+        12,
+        1
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "第20集團軍合圍步兵",
+      "at": [
+        1,
+        0
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "allies",
+      "type": "artillery",
+      "name": "外線砲兵支援",
+      "at": [
+        0,
+        9
+      ]
+    },
+    {
+      "at_turn": 3,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍增援步兵",
+      "at": [
+        9,
+        0
+      ]
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "tzz_encircle",
+      "type": "capture",
+      "label": "切斷日軍北面退路",
+      "faction": "allies",
+      "target": [
+        9,
+        3
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "tzz_silence_gun",
+      "type": "destroy_unit",
+      "label": "摧毀日軍山砲",
+      "faction": "allies",
+      "target_unit": "日軍 75mm 山砲",
+      "requires": [
+        "tzz_encircle"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "control_count",
+      "targets": [
+        [
+          7,
+          3
+        ],
+        [
+          8,
+          3
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "required": 2,
+      "by_turn": 16
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}

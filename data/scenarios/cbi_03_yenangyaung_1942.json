@@ -1,0 +1,480 @@
+{
+  "id": "cbi_03_yenangyaung_1942",
+  "title": "仁安羌解圍 1942",
+  "briefing": "1942 年 4 月,第一次緬甸戰役。英軍第 1 緬甸師被日軍第 33 師團切斷在仁安羌油田,水糧斷絕。孫立人率新編第 38 師第 113 團星夜馳援,以寡擊眾,要打穿賓河南岸的日軍封鎖線,把七千英軍與傷患救出。\n\n你的任務:在第 14 回合前攻佔仁安羌油田鎮,與被圍英軍會師。日軍扼守賓河渡口的高地火點,正面強渡代價高昂。\n\n次要目標:先奪取賓河渡口打開通路;突入後與英軍殘部接觸並為其補給,能穩住會師後的防線。\n\n戰術提示:兵力居於劣勢,務必集中於一點強渡,別讓部隊分散在河灘上被逐一壓制。孫立人的新一軍突擊技能留給決定性的渡河一擊。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "plain",
+        "plain",
+        "jungle"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "中國新編第38師",
+      "controller": "player",
+      "color": "#c7b23b"
+    },
+    {
+      "id": "axis",
+      "name": "日軍第33師團",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "第113團突擊 a",
+      "at": [
+        6,
+        9
+      ],
+      "general": "sun_liren"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "第113團突擊 b",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "第113團突擊 c",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "輕機槍組 a",
+      "at": [
+        8,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "輕機槍組 b",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "戰防砲排",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "山砲支援",
+      "at": [
+        7,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "工兵渡河組",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "英軍第7裝甲旅殘部",
+      "at": [
+        8,
+        3
+      ],
+      "hp": 5
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "英軍反戰車砲",
+      "at": [
+        9,
+        3
+      ],
+      "hp": 4
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍封鎖步兵 a",
+      "at": [
+        7,
+        4
+      ],
+      "dig_in": 2,
+      "general": "mutaguchi"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "渡口重機 a",
+      "at": [
+        8,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "渡口速射砲",
+      "at": [
+        6,
+        6
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍封鎖步兵 b",
+      "at": [
+        10,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "渡口重機 b",
+      "at": [
+        9,
+        6
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "九五式輕戰車",
+      "at": [
+        11,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "油田守備步兵",
+      "at": [
+        7,
+        2
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "日軍山砲",
+      "at": [
+        5,
+        3
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 3,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "第113團後續步兵",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "日軍增援重機",
+      "at": [
+        8,
+        6
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "yny_seize_ford",
+      "type": "capture",
+      "label": "奪取賓河渡口",
+      "faction": "allies",
+      "target": [
+        7,
+        5
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "yny_link_british",
+      "type": "recon_hex",
+      "label": "與英軍殘部會師補給",
+      "faction": "allies",
+      "target": [
+        9,
+        3
+      ],
+      "requires": [
+        "yny_seize_ford"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "repair_hp",
+          "amount": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        8,
+        1
+      ],
+      "by_turn": 14
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 14
+    }
+  }
+}

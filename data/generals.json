@@ -303,5 +303,43 @@
       "duration": 1,
       "self_mods": {"attack": 2, "move": 1}
     }
+  },
+  "xue_yue": {
+    "name_zh": "薛岳",
+    "title_zh": "天爐戰法",
+    "country": "china",
+    "quality": "gold",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun", "artillery"],
+    "attack_bonus": 1,
+    "defense_bonus": 2,
+    "move_bonus": 0,
+    "skill": {
+      "id": "furnace_tactics",
+      "name_zh": "天爐合圍",
+      "description_zh": "2 回合內,相鄰我方 +1 攻擊 +2 防禦",
+      "cooldown": 6,
+      "duration": 2,
+      "aura_mods": {"attack": 1, "defense": 2}
+    }
+  },
+  "mutaguchi": {
+    "name_zh": "牟田口廉也",
+    "title_zh": "緬甸方面軍",
+    "country": "japan",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 2,
+    "defense_bonus": 0,
+    "move_bonus": 1,
+    "skill": {
+      "id": "banzai_charge",
+      "name_zh": "萬歲突擊",
+      "description_zh": "本回合 +3 攻擊 +1 移動",
+      "cooldown": 4,
+      "duration": 1,
+      "self_mods": {"attack": 3, "move": 1}
+    }
   }
 }

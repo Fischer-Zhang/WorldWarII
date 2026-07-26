@@ -1,0 +1,483 @@
+{
+  "id": "cbi_05_songshan_1944",
+  "title": "松山攻堅 1944",
+  "briefing": "1944 年 6 至 9 月,滇西反攻。中國遠征軍(Y 部隊)強渡怒江,仰攻扼守滇緬公路咽喉的松山。日軍第 56 師團拉孟守備隊把整座山鑿成地下堡壘,以永備工事俯瞰惠通橋。這是抗戰中最慘烈的攻堅戰之一。\n\n你的任務:在第 18 回合前攻佔松山主峰。連綿的山體只留下幾條林間小徑,日軍在 dig-in 3 的坑道火點裡等著;正面仰攻等同送死。\n\n次要目標:先奪取半山腰的據點打開通路;工兵爆破日軍反斜面火力點,能為主峰總攻鋪路。\n\n戰術提示:這一關要靠砲兵、工兵坑道爆破與逐點蠶食,而非猛衝。孫立人不在此役,但滇西的中國步兵已是百戰之師——耐心把每個火點一個個拔掉。這是滇緬戰役線的收官死戰。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "mountain",
+        "forest",
+        "town",
+        "forest",
+        "mountain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "forest",
+        "forest",
+        "forest",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "forest",
+        "forest",
+        "forest",
+        "forest",
+        "forest",
+        "plain",
+        "mountain",
+        "plain",
+        "jungle",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "jungle",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "jungle",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle"
+      ],
+      [
+        "plain",
+        "plain",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "river",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "中國遠征軍Y部隊",
+      "controller": "player",
+      "color": "#c7b23b"
+    },
+    {
+      "id": "axis",
+      "name": "日軍拉孟守備隊",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "遠征軍步兵 a",
+      "at": [
+        7,
+        10
+      ],
+      "general": "sun_liren"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "遠征軍步兵 b",
+      "at": [
+        8,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "坑道爆破工兵 a",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "坑道爆破工兵 b",
+      "at": [
+        9,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "山腳突擊步兵 c",
+      "at": [
+        7,
+        8
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "重機槍組 a",
+      "at": [
+        5,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "重機槍組 b",
+      "at": [
+        10,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "怒江砲兵 a",
+      "at": [
+        8,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "怒江砲兵 b",
+      "at": [
+        4,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "拉孟守備步兵 a",
+      "at": [
+        8,
+        2
+      ],
+      "dig_in": 3,
+      "general": "mutaguchi"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "坑道重機 a",
+      "at": [
+        7,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "坑道重機 b",
+      "at": [
+        9,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "拉孟守備步兵 b",
+      "at": [
+        8,
+        4
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "反斜面速射砲 a",
+      "at": [
+        7,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "拉孟守備步兵 c",
+      "at": [
+        9,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "坑道重機 c",
+      "at": [
+        8,
+        5
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "反斜面速射砲 b",
+      "at": [
+        6,
+        5
+      ],
+      "dig_in": 2
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 6,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "遠征軍後續步兵",
+      "at": [
+        2,
+        10
+      ]
+    },
+    {
+      "at_turn": 9,
+      "faction": "allies",
+      "type": "artillery",
+      "name": "重砲增援",
+      "at": [
+        13,
+        10
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍坑道預備隊",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "ssn_clear_slope",
+      "type": "capture",
+      "label": "奪取半山腰據點",
+      "faction": "allies",
+      "target": [
+        8,
+        4
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "ssn_demolish",
+      "type": "capture",
+      "label": "工兵爆破反斜面火點",
+      "faction": "allies",
+      "target": [
+        7,
+        4
+      ],
+      "requires": [
+        "ssn_clear_slope"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 1
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "capture",
+      "target": [
+        8,
+        2
+      ],
+      "by_turn": 18
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 18
+    }
+  }
+}

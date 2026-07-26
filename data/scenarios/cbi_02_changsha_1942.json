@@ -1,0 +1,487 @@
+{
+  "id": "cbi_02_changsha_1942",
+  "title": "第三次長沙會戰 1942",
+  "briefing": "1941 年底至 1942 年初,第三次長沙會戰。日軍第 11 軍渡新牆河、汨羅江南下猛撲長沙。薛岳以「天爐戰法」誘敵深入,城垣死守,兩翼伏兵待日軍頓挫於堅城之下再行合圍。\n\n你的任務:守住長沙城撐到第 12 回合。湘江與河汊限制了日軍的渡點,只要城區不失,深入的日軍就會在反擊中被反包圍。\n\n次要目標:守住湘江渡橋兩個我方回合可穩住西翼;擊毀日軍先鋒戰車能遲滯其突擊縱隊。\n\n戰術提示:把重機槍與戰防砲擺進 dig-in 的城鎮火點,讓日軍在開闊接近地付出代價。薛岳的天爐合圍能在關鍵時刻把守勢轉為反擊。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "forest",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "river",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "中國第9戰區",
+      "controller": "player",
+      "color": "#c7b23b"
+    },
+    {
+      "id": "axis",
+      "name": "日軍第11軍",
+      "controller": "ai",
+      "ai": "aggressive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "長沙守軍 a",
+      "at": [
+        7,
+        7
+      ],
+      "dig_in": 2,
+      "general": "xue_yue"
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "重機槍組 a",
+      "at": [
+        8,
+        7
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "長沙守軍 b",
+      "at": [
+        7,
+        8
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "重機槍組 b",
+      "at": [
+        6,
+        8
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "戰防砲排",
+      "at": [
+        8,
+        8
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "城垣步兵 c",
+      "at": [
+        7,
+        6
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "預備步兵 d",
+      "at": [
+        9,
+        8
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "岳麓山砲兵 a",
+      "at": [
+        5,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "岳麓山砲兵 b",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍突擊步兵 a",
+      "at": [
+        6,
+        1
+      ],
+      "general": "mutaguchi"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍突擊步兵 b",
+      "at": [
+        8,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍突擊步兵 c",
+      "at": [
+        10,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 a",
+      "at": [
+        7,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 b",
+      "at": [
+        9,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "速射砲組",
+      "at": [
+        11,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "日軍先鋒戰車 95式",
+      "at": [
+        5,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "九五式輕戰車",
+      "at": [
+        12,
+        1
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "日軍野砲",
+      "at": [
+        8,
+        0
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍第二梯隊",
+      "at": [
+        6,
+        0
+      ]
+    },
+    {
+      "at_turn": 6,
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "日軍戰車增援",
+      "at": [
+        10,
+        0
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "南翼伏兵",
+      "at": [
+        7,
+        10
+      ]
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "csa_hold_bridge",
+      "type": "hold_turns",
+      "label": "守住湘江渡橋",
+      "faction": "allies",
+      "target": [
+        3,
+        4
+      ],
+      "required_turns": 2,
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "csa_kill_tank",
+      "type": "destroy_unit",
+      "label": "擊毀日軍先鋒戰車",
+      "faction": "allies",
+      "target_unit": "日軍先鋒戰車 95式",
+      "requires": [
+        "csa_hold_bridge"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "survive",
+      "by_turn": 12
+    },
+    "axis": {
+      "type": "capture",
+      "target": [
+        7,
+        8
+      ],
+      "by_turn": 12
+    }
+  }
+}

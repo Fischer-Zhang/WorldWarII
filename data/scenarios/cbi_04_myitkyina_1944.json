@@ -1,0 +1,479 @@
+{
+  "id": "cbi_04_myitkyina_1944",
+  "title": "密支那攻略 1944",
+  "briefing": "1944 年 5 至 8 月,緬北反攻。史迪威的中國駐印軍(新一軍、新六軍)與梅里爾突擊隊翻越野人山,奇襲伊洛瓦底江畔的密支那——緬北鐵路與機場樞紐。日軍第 18 師團殘部據城死守,叢林與江防使每一步都血腥。\n\n你的任務:奪取密支那機場並固守 3 個回合(第 16 回合前達成)。拿下容易,守住難——日軍會從城區與江對岸不斷反撲。\n\n次要目標:先肅清密支那城區可穩住機場側背;摧毀日軍江防砲能剝奪其對機場的火力壓制。\n\n戰術提示:駐印軍已換裝美式裝備,善用謝爾曼與工兵在叢林中開路。奪下機場後立刻構工、把反戰車砲前置,準備迎接日軍的萬歲突擊。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "river",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "jungle"
+      ],
+      [
+        "plain",
+        "plain",
+        "jungle",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "jungle",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "river",
+        "jungle",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "river",
+        "plain",
+        "jungle",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "jungle",
+        "plain",
+        "plain",
+        "jungle",
+        "plain",
+        "jungle",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "jungle",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "allies",
+      "name": "中國駐印軍",
+      "controller": "player",
+      "color": "#c7b23b"
+    },
+    {
+      "id": "axis",
+      "name": "日軍第18師團",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "新38師步兵 a",
+      "at": [
+        6,
+        9
+      ],
+      "general": "sun_liren"
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "新38師步兵 b",
+      "at": [
+        8,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "mg_team",
+      "name": "白朗寧機槍組",
+      "at": [
+        7,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "engineer",
+      "name": "駐印軍工兵",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "at_gun",
+      "name": "37mm 戰防砲",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "light_tank",
+      "name": "M3 斯圖亞特排",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "artillery",
+      "name": "105mm 榴彈砲",
+      "at": [
+        7,
+        10
+      ]
+    },
+    {
+      "faction": "allies",
+      "type": "infantry",
+      "name": "梅里爾突擊隊",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "機場守備步兵",
+      "at": [
+        8,
+        5
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "城區守備步兵 a",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 3,
+      "general": "mutaguchi"
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 a",
+      "at": [
+        7,
+        4
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "九二式重機 b",
+      "at": [
+        9,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "速射砲組",
+      "at": [
+        8,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "城區守備步兵 b",
+      "at": [
+        7,
+        6
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "light_tank",
+      "name": "九五式輕戰車",
+      "at": [
+        10,
+        3
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "日軍江防砲",
+      "at": [
+        6,
+        3
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "allies",
+      "type": "infantry",
+      "name": "新22師步兵",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "allies",
+      "type": "medium_tank",
+      "name": "駐印軍謝爾曼排",
+      "at": [
+        9,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍反撲步兵 a",
+      "at": [
+        8,
+        0
+      ],
+      "dig_in": 1
+    },
+    {
+      "at_turn": 8,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "日軍反撲步兵 b",
+      "at": [
+        10,
+        0
+      ]
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "myk_secure_town",
+      "type": "capture",
+      "label": "肅清密支那城區",
+      "faction": "allies",
+      "target": [
+        8,
+        3
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "myk_cut_river_gun",
+      "type": "destroy_unit",
+      "label": "摧毀日軍江防砲",
+      "faction": "allies",
+      "target_unit": "日軍江防砲",
+      "requires": [
+        "myk_secure_town"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "allies": {
+      "type": "hold_hex_turns",
+      "target": [
+        8,
+        5
+      ],
+      "required_turns": 3,
+      "by_turn": 16
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}
