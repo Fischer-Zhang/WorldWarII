@@ -1,0 +1,486 @@
+{
+  "id": "east_fortress_01_sevastopol_1942",
+  "title": "塞瓦斯托波爾攻堅 1942",
+  "briefing": "1942 年 6 月,克里米亞。曼施坦因的第 11 軍團對蘇軍黑海要塞塞瓦斯托波爾發動最後總攻。要塞外圍是層層混凝土砲台與薩彭山脊,北面隔著北灣,德軍動用了史上最重的攻城砲。\n\n你的任務:在第 16 回合前攻佔要塞市區。薩彭山脊不可通行,攻勢只能沿幾條隘路與渡口推進,仰攻 dig-in 的岸防砲台與 KV 重戰車。\n\n次要目標:先拿下側翼的稜堡要塞打開缺口;摧毀壓制隘路的蘇軍岸防砲,能剝除其對突擊隊的火力。\n\n戰術提示:別讓步兵在北灣渡口的開闊地被岸防砲逐一點名。用攻城砲兵與突擊砲軟化砲台,工兵開路,曼施坦因的預備隊調動留給決定性突破。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "mountain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "forest",
+        "town",
+        "plain",
+        "town",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "axis",
+      "name": "德軍第11軍團",
+      "controller": "player",
+      "color": "#6a7b8a"
+    },
+    {
+      "id": "soviet",
+      "name": "蘇軍濱海集團軍",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#b03a3a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍突擊步兵 a",
+      "at": [
+        6,
+        9
+      ],
+      "general": "manstein"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍突擊步兵 b",
+      "at": [
+        8,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍突擊步兵 c",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍突擊步兵 d",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG34 火力組",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 38",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "engineer",
+      "name": "突擊工兵",
+      "at": [
+        7,
+        8
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "III號突擊砲",
+      "at": [
+        4,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "攻城砲兵 a",
+      "at": [
+        2,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "攻城砲兵 b",
+      "at": [
+        13,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "要塞守備步兵 a",
+      "at": [
+        7,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "岸防重機 a",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "要塞守備步兵 b",
+      "at": [
+        3,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "稜堡重機 b",
+      "at": [
+        12,
+        3
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "45mm 要塞砲",
+      "at": [
+        7,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "蘇軍岸防砲",
+      "at": [
+        8,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "76mm 要塞砲",
+      "at": [
+        9,
+        3
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "soviet",
+      "type": "heavy_tank",
+      "name": "KV-1 火力點",
+      "at": [
+        9,
+        4
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍第二梯隊",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "羅馬尼亞山地兵",
+      "at": [
+        10,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "水兵陸戰隊",
+      "at": [
+        8,
+        0
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "sev_take_bastion",
+      "type": "capture",
+      "label": "奪取側翼稜堡",
+      "faction": "axis",
+      "target": [
+        3,
+        3
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "sev_silence_battery",
+      "type": "destroy_unit",
+      "label": "摧毀蘇軍岸防砲",
+      "faction": "axis",
+      "target_unit": "蘇軍岸防砲",
+      "requires": [
+        "sev_take_bastion"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "axis": {
+      "type": "capture",
+      "target": [
+        8,
+        2
+      ],
+      "by_turn": 16
+    },
+    "soviet": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}

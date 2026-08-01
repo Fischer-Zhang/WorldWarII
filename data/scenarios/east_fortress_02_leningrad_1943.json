@@ -1,0 +1,500 @@
+{
+  "id": "east_fortress_02_leningrad_1943",
+  "title": "列寧格勒破圍 1943",
+  "briefing": "1943 年 1 月,火花行動(Iskra)。列寧格勒已被圍困十六個月。蘇軍列寧格勒方面軍與沃爾霍夫方面軍要在拉多加湖南岸相向對進,強渡涅瓦河、打穿德軍希利瑟爾堡走廊,在城市與大陸之間鑿開一條陸上通道。\n\n你的任務:在第 14 回合前控制走廊上的兩座工人鎮,把兩個方面軍接通。涅瓦河與森林沼澤限制了渡點,德軍在河北岸的據點嚴陣以待。\n\n次要目標:先奪取涅瓦河渡口打開通路;兩軍先頭部隊會師點會師,能穩住新打開的走廊。\n\n戰術提示:集中砲兵與喀秋莎覆蓋渡口,工兵架橋強渡,再用步兵擴大登陸場。這是把守勢轉為反攻的關鍵一戰。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "town",
+        "town",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "river",
+        "plain",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "soviet",
+      "name": "蘇軍列寧格勒方面軍",
+      "controller": "player",
+      "color": "#b03a3a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍第18軍團",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#6a7b8a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步兵 a",
+      "at": [
+        6,
+        9
+      ],
+      "general": "zhukov"
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步兵 b",
+      "at": [
+        8,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步兵 c",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "馬克沁機槍組",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "engineer",
+      "name": "架橋工兵",
+      "at": [
+        7,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "76mm ZiS-3",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "152mm 榴彈砲",
+      "at": [
+        3,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "rocket_artillery",
+      "name": "喀秋莎火箭營",
+      "at": [
+        11,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34 突擊排",
+      "at": [
+        9,
+        8
+      ],
+      "general": "konev"
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍守備步兵 a",
+      "at": [
+        4,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 a",
+      "at": [
+        7,
+        4
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍守備步兵 b",
+      "at": [
+        11,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 火點 b",
+      "at": [
+        8,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 河防砲",
+      "at": [
+        7,
+        5
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "III號突擊砲",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "德軍野砲",
+      "at": [
+        5,
+        2
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍守備步兵 c",
+      "at": [
+        10,
+        2
+      ],
+      "dig_in": 1
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 河防砲 b",
+      "at": [
+        9,
+        5
+      ],
+      "dig_in": 2
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "沃爾霍夫方面軍步兵",
+      "at": [
+        8,
+        10
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "soviet",
+      "type": "heavy_tank",
+      "name": "KV-1 突破戰車",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍預備步兵",
+      "at": [
+        8,
+        1
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "len_cross_neva",
+      "type": "capture",
+      "label": "奪取涅瓦河渡口",
+      "faction": "soviet",
+      "target": [
+        7,
+        6
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "len_link_fronts",
+      "type": "recon_hex",
+      "label": "兩軍會師",
+      "faction": "soviet",
+      "target": [
+        11,
+        2
+      ],
+      "requires": [
+        "len_cross_neva"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "repair_hp",
+          "amount": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "soviet": {
+      "type": "control_count",
+      "targets": [
+        [
+          4,
+          2
+        ],
+        [
+          11,
+          2
+        ],
+        [
+          7,
+          4
+        ]
+      ],
+      "required": 2,
+      "by_turn": 14
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 14
+    }
+  }
+}

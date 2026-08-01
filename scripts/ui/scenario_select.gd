@@ -12,13 +12,16 @@ const CATEGORY_LABELS := {
 	CATEGORY_ALL: "全部",
 	"blitzkrieg_early_war": "早期",
 	"eastern_front": "東線",
+	"eastern_fortresses": "東線要塞",
 	"north_africa": "北非",
 	"pacific_front": "太平洋",
+	"china_burma_india": "中緬印",
+	"italian_campaign": "義大利",
 	"western_front": "西線",
 	CATEGORY_SANDBOX: "沙盒",
 }
 
-@onready var category_row: HBoxContainer = $Margin/VBox/CategoryRow
+@onready var category_row: HFlowContainer = $Margin/VBox/CategoryRow
 @onready var list: VBoxContainer = $Margin/VBox/ListScroll/List
 @onready var back_button: Button = $Margin/VBox/BackButton
 @onready var easy_btn: Button = $Margin/VBox/DifficultyRow/EasyButton
@@ -75,6 +78,7 @@ func _build_category_buttons() -> void:
 		var btn := Button.new()
 		btn.toggle_mode = true
 		btn.custom_minimum_size = Vector2(104, 34)
+		btn.clip_text = true
 		btn.text = _category_label(category_id)
 		btn.tooltip_text = "篩選作戰列表:%s" % _category_label(category_id)
 		btn.pressed.connect(func(): _set_category(category_id))

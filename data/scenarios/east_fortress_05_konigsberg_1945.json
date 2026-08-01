@@ -1,0 +1,487 @@
+{
+  "id": "east_fortress_05_konigsberg_1945",
+  "title": "柯尼斯堡強攻 1945",
+  "briefing": "1945 年 4 月,東普魯士。蘇軍第 3 白俄羅斯方面軍對德軍要塞城市柯尼斯堡發動總攻。城市外圍是一圈拿破崙時代改建的環形堡壘,中央是普雷格爾河與市中心城堡。這是東線最堅固的要塞之一,只用了四天就被攻破。\n\n你的任務:在第 16 回合前攻佔市中心城堡。環形堡壘與普雷格爾河層層設防,只有橋樑與少數隘路可通,仰攻 dig-in 的堡壘火點代價高昂。\n\n次要目標:先攻克一座外圍環形堡壘打開缺口;摧毀堡壘要塞砲能剝除其對突擊隊的火力壓制。\n\n戰術提示:蘇軍以「突擊群」戰術攻堅——工兵爆破、直瞄重砲抵近轟擊、步兵隨行。集中砲兵與 IS-2 逐個拔除堡壘,再向城堡總攻。這是東線要塞戰役線的終局。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "mountain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "forest",
+        "forest",
+        "plain",
+        "road",
+        "plain",
+        "forest",
+        "forest",
+        "plain",
+        "town",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "road",
+        "river",
+        "river",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "soviet",
+      "name": "蘇軍第3白俄羅斯方面軍",
+      "controller": "player",
+      "color": "#b03a3a"
+    },
+    {
+      "id": "axis",
+      "name": "德軍柯尼斯堡守備集群",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#6a7b8a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "突擊群步兵 a",
+      "at": [
+        6,
+        9
+      ],
+      "general": "zhukov"
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "突擊群步兵 b",
+      "at": [
+        8,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "突擊群步兵 c",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "engineer",
+      "name": "爆破工兵",
+      "at": [
+        7,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "馬克沁機槍組",
+      "at": [
+        5,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "152mm 直瞄重砲",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "heavy_tank",
+      "name": "IS-2 攻堅戰車",
+      "at": [
+        11,
+        9
+      ],
+      "general": "konev"
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "203mm 攻城砲",
+      "at": [
+        3,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "rocket_artillery",
+      "name": "喀秋莎火箭營",
+      "at": [
+        13,
+        9
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "堡壘守備步兵 a",
+      "at": [
+        8,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "堡壘重機 a",
+      "at": [
+        7,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "堡壘重機 b",
+      "at": [
+        9,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "堡壘守備步兵 b",
+      "at": [
+        3,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "堡壘要塞砲",
+      "at": [
+        8,
+        2
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "堡壘守備步兵 c",
+      "at": [
+        13,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "追獵者殲擊車",
+      "at": [
+        10,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "德軍城防砲",
+      "at": [
+        6,
+        4
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "堡壘側翼砲",
+      "at": [
+        12,
+        4
+      ],
+      "dig_in": 2
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛步兵增援",
+      "at": [
+        6,
+        10
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34 突擊排",
+      "at": [
+        9,
+        10
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍反撲步兵",
+      "at": [
+        8,
+        0
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "kon_breach_fort",
+      "type": "capture",
+      "label": "攻克外圍環形堡壘",
+      "faction": "soviet",
+      "target": [
+        3,
+        4
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "kon_silence_fort",
+      "type": "destroy_unit",
+      "label": "摧毀堡壘要塞砲",
+      "faction": "soviet",
+      "target_unit": "堡壘要塞砲",
+      "requires": [
+        "kon_breach_fort"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "suppress_enemies",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "soviet": {
+      "type": "capture",
+      "target": [
+        8,
+        3
+      ],
+      "by_turn": 16
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 16
+    }
+  }
+}

@@ -35,6 +35,17 @@
       "east_10_berlin_1945"
     ]
   },
+  "eastern_fortresses": {
+    "title": "東線要塞攻防 1942-1945",
+    "description": "東線主戰場之外的圍城與要塞死戰:曼施坦因強攻塞瓦斯托波爾、火花行動打通列寧格勒走廊、庫爾蘭鐵壁死守、布達佩斯巷戰,到柯尼斯堡要塞總攻。攻守雙方視角交替,以河川、環形堡壘與永備工事為骨架,強調渡河、突擊群攻堅與對縱深防線的逐點爭奪。",
+    "scenario_order": [
+      "east_fortress_01_sevastopol_1942",
+      "east_fortress_02_leningrad_1943",
+      "east_fortress_03_kurland_1944",
+      "east_fortress_04_budapest_1945",
+      "east_fortress_05_konigsberg_1945"
+    ]
+  },
   "north_africa": {
     "title": "北非沙漠戰 1942-1943",
     "description": "從加查拉側翼機動、阿拉曼突破到凱塞林山口防禦,再推進至突尼斯山口與比塞大港口,以開闊沙漠、長距離裝甲交火與補給點爭奪補足正式戰役的非歐洲戰場。",

@@ -1,0 +1,479 @@
+{
+  "id": "east_fortress_04_budapest_1945",
+  "title": "布達佩斯圍城 1945",
+  "briefing": "1944 年底至 1945 年 2 月。蘇軍與羅馬尼亞軍合圍匈牙利首都布達佩斯。德軍與匈牙利守軍夾多瑙河據守佩斯城區的連片街廓,黨衛軍死守每一個街區。希特勒嚴令不得棄城,巷戰血腥而漫長。\n\n你的任務:在第 15 回合前控制佩斯城區三個街廓中的至少兩個。多瑙河把戰場切成兩半,只有橋樑能通過,守軍在 dig-in 的樓房火點裡逐屋頑抗。\n\n次要目標:先奪取多瑙河橋鞏固登陸場;清除頑抗的黨衛軍街壘,能瓦解其街區防禦。\n\n戰術提示:巷戰要靠突擊工兵、直瞄砲與步兵協同逐屋清剿,別讓 T-34 孤車衝進街壘吃鐵拳。崔可夫的巷戰指揮正是為此而生。",
+  "map": {
+    "width": 16,
+    "height": 11,
+    "tiles": [
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "road",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "road",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "road",
+        "road",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "town",
+        "town",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "road",
+        "town",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "forest",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain"
+      ],
+      [
+        "plain",
+        "forest",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "forest",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "road",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ],
+      [
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "river",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain",
+        "plain"
+      ]
+    ]
+  },
+  "factions": [
+    {
+      "id": "soviet",
+      "name": "蘇軍第2烏克蘭方面軍",
+      "controller": "player",
+      "color": "#b03a3a"
+    },
+    {
+      "id": "axis",
+      "name": "德匈守備集群",
+      "controller": "ai",
+      "ai": "defensive",
+      "color": "#6a7b8a"
+    }
+  ],
+  "units": [
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛突擊步兵 a",
+      "at": [
+        8,
+        8
+      ],
+      "general": "chuikov"
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛突擊步兵 b",
+      "at": [
+        10,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "mg_team",
+      "name": "馬克沁機槍組",
+      "at": [
+        9,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "engineer",
+      "name": "突擊工兵",
+      "at": [
+        11,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "at_gun",
+      "name": "76mm 直瞄砲",
+      "at": [
+        12,
+        8
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "medium_tank",
+      "name": "T-34 街壘排",
+      "at": [
+        8,
+        9
+      ],
+      "general": "konev"
+    },
+    {
+      "faction": "soviet",
+      "type": "artillery",
+      "name": "152mm 榴彈砲",
+      "at": [
+        13,
+        9
+      ]
+    },
+    {
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "近衛突擊步兵 c",
+      "at": [
+        12,
+        7
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "黨衛軍守備 a",
+      "at": [
+        9,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 樓房火點 a",
+      "at": [
+        10,
+        3
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "黨衛軍守備 b",
+      "at": [
+        10,
+        4
+      ],
+      "dig_in": 3
+    },
+    {
+      "faction": "axis",
+      "type": "mg_team",
+      "name": "MG42 樓房火點 b",
+      "at": [
+        9,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "at_gun",
+      "name": "PaK 40 街壘砲",
+      "at": [
+        11,
+        4
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "infantry",
+      "name": "匈牙利守備步兵",
+      "at": [
+        9,
+        5
+      ],
+      "dig_in": 2
+    },
+    {
+      "faction": "axis",
+      "type": "tank_destroyer",
+      "name": "追獵者殲擊車",
+      "at": [
+        11,
+        5
+      ]
+    },
+    {
+      "faction": "axis",
+      "type": "artillery",
+      "name": "德軍城防砲",
+      "at": [
+        10,
+        2
+      ]
+    }
+  ],
+  "reinforcements": [
+    {
+      "at_turn": 4,
+      "faction": "soviet",
+      "type": "infantry",
+      "name": "羅馬尼亞軍步兵",
+      "at": [
+        10,
+        9
+      ]
+    },
+    {
+      "at_turn": 7,
+      "faction": "soviet",
+      "type": "heavy_tank",
+      "name": "IS-2 重戰車",
+      "at": [
+        12,
+        9
+      ]
+    },
+    {
+      "at_turn": 5,
+      "faction": "axis",
+      "type": "infantry",
+      "name": "德軍反撲步兵",
+      "at": [
+        10,
+        1
+      ],
+      "dig_in": 1
+    }
+  ],
+  "secondary_objectives": [
+    {
+      "id": "bud_seize_bridge",
+      "type": "capture",
+      "label": "奪取多瑙河橋",
+      "faction": "soviet",
+      "target": [
+        6,
+        4
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "advance_reinforcements",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": "bud_clear_block",
+      "type": "destroy_unit",
+      "label": "清除黨衛軍街壘",
+      "faction": "soviet",
+      "target_unit": "黨衛軍守備 b",
+      "requires": [
+        "bud_seize_bridge"
+      ],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 1
+        },
+        {
+          "type": "strip_enemy_dig_in",
+          "amount": 1,
+          "radius": 2
+        }
+      ]
+    }
+  ],
+  "victory": {
+    "soviet": {
+      "type": "control_count",
+      "targets": [
+        [
+          9,
+          3
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          9,
+          5
+        ]
+      ],
+      "required": 2,
+      "by_turn": 15
+    },
+    "axis": {
+      "type": "survive",
+      "by_turn": 15
+    }
+  }
+}
