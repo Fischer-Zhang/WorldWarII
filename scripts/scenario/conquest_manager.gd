@@ -112,6 +112,29 @@ const THEATER_REINFORCEMENT_REWARD := "theater_reinforcement"
 
 static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionary:
 	var conquest: Dictionary = state.get("conquest", {})
+	var map_rev := int(map_data.get("map_revision", 0))
+	# Stale-map guard: an existing save pins every region to its *saved* owner
+	# (see _migrate_regions), so a base-map ownership change — e.g. Italy
+	# becoming its own power and taking the Italy region from Germany — would
+	# never reach a save started before the change. When the map declares a new
+	# revision, re-seed a fresh world from the map, keeping the chosen country.
+	if map_rev > 0 and conquest.has("regions") \
+			and int(conquest.get("map_revision", 0)) != map_rev:
+		var chosen := String(conquest.get("player_country", ""))
+		if not (map_data.get("countries", {}) as Dictionary).has(chosen):
+			chosen = String(map_data.get("start_country", "germany"))
+		conquest = {
+			"turn": 1,
+			"player_country": chosen,
+			"regions": _initial_regions(map_data),
+			"attack_preparations": {},
+			"defense_preparations": {},
+			"next_unit_id": 1,
+			"map_revision": map_rev,
+		}
+		state["conquest"] = conquest
+		CampaignManager.save_state(state)
+		return conquest
 	if not conquest.has("turn"):
 		conquest["turn"] = 1
 	if not conquest.has("player_country"):
@@ -124,6 +147,7 @@ static func conquest_state(state: Dictionary, map_data: Dictionary) -> Dictionar
 		conquest["attack_preparations"] = {}
 	if not conquest.has("defense_preparations"):
 		conquest["defense_preparations"] = {}
+	conquest["map_revision"] = map_rev
 	_migrate_regions(conquest, map_data)
 	_prune_attack_preparations(conquest)
 	_prune_defense_preparations(conquest)
@@ -137,6 +161,7 @@ static func reset_conquest(state: Dictionary, map_data: Dictionary) -> void:
 		"regions": _initial_regions(map_data),
 		"attack_preparations": {},
 		"defense_preparations": {},
+		"map_revision": int(map_data.get("map_revision", 0)),
 	}
 	CampaignManager.save_state(state)
 

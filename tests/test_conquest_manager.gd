@@ -33,6 +33,11 @@ func _init() -> void:
 	else:
 		fail_count += 1
 
+	if _test_stale_map_revision_reseeds_ownership():
+		pass_count += 1
+	else:
+		fail_count += 1
+
 	if _test_development_actions():
 		pass_count += 1
 	else:
@@ -256,6 +261,56 @@ func _test_conquest_region_migration_tracks_map_data() -> bool:
 		return true
 	printerr("FAIL: migration should preserve saved region state and add new map regions")
 	return false
+
+func _test_map_rev2() -> Dictionary:
+	# The revised map hands alpha to "b" and declares map_revision 2.
+	var m := _test_map()
+	m["map_revision"] = 2
+	for r in m["regions"]:
+		if String(r["id"]) == "alpha":
+			r["owner"] = "b"
+	return m
+
+func _test_stale_map_revision_reseeds_ownership() -> bool:
+	# A save from before the revision pins alpha to "a"; the revised map hands
+	# alpha to "b". conquest_state must re-seed ownership from the map so the
+	# world matches the updated map (the Italy-not-owning-Italy bug).
+	var state := {
+		"version": 2,
+		"campaigns": {},
+		"conquest": {
+			"turn": 7,
+			"player_country": "b",
+			"regions": {"alpha": {"owner": "a", "strength": 40, "garrison": [{"id": 1, "type": "infantry"}]}},
+		},
+	}
+	var conquest := ConquestManager.conquest_state(state, _test_map_rev2())
+	var alpha: Dictionary = (conquest.get("regions", {}) as Dictionary).get("alpha", {})
+	if String(alpha.get("owner", "")) != "b":
+		printerr("FAIL: stale map_revision should re-seed alpha owner to 'b', got %s" % String(alpha.get("owner", "")))
+		return false
+	if int(conquest.get("turn", 0)) != 1 or String(conquest.get("player_country", "")) != "b" \
+			or int(conquest.get("map_revision", 0)) != 2:
+		printerr("FAIL: re-seed should reset turn to 1, keep chosen country, stamp revision")
+		return false
+	# A matching revision must NOT wipe progress (saved owner/turn preserved).
+	var state2 := {
+		"version": 2,
+		"campaigns": {},
+		"conquest": {
+			"turn": 5,
+			"player_country": "b",
+			"map_revision": 2,
+			"regions": {"alpha": {"owner": "a", "strength": 40, "garrison": []}},
+		},
+	}
+	var conquest2 := ConquestManager.conquest_state(state2, _test_map_rev2())
+	var alpha2: Dictionary = (conquest2.get("regions", {}) as Dictionary).get("alpha", {})
+	if String(alpha2.get("owner", "")) != "a" or int(conquest2.get("turn", 0)) != 5:
+		printerr("FAIL: matching map_revision must preserve saved owner/turn (owner=%s turn=%d)" % [
+			String(alpha2.get("owner", "")), int(conquest2.get("turn", 0))])
+		return false
+	return true
 
 func _test_development_actions() -> bool:
 	var state := {"version": 2, "campaigns": {}}
