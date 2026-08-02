@@ -19,7 +19,7 @@ const REGION_SCENARIOS := {
 	"ukraine": "02_kiev_1941",
 	"italy": "conq_mediterranean_coast",
 	"iberia": "conq_mediterranean_coast",
-	"free_france": "conq_desert_north_africa",
+	"west_africa": "conq_desert_north_africa",
 	"libya": "conq_desert_north_africa",
 	"turkey": "north_02_kasserine_1943",
 	"caucasus": "conq_middle_east_oilfields",

@@ -1,6 +1,6 @@
 {
   "start_country": "germany",
-  "map_revision": 2,
+  "map_revision": 3,
   "map_width": 11,
   "map_height": 5,
   "countries": {
@@ -229,7 +229,7 @@
         "southern_france",
         "maghreb",
         "iberia",
-        "free_france"
+        "west_africa"
       ]
     },
     {
@@ -648,7 +648,7 @@
         "mediterranean",
         "egypt",
         "iberia",
-        "free_france",
+        "west_africa",
         "libya"
       ]
     },
@@ -1003,9 +1003,9 @@
       ]
     },
     {
-      "id": "free_france",
-      "name_zh": "自由法國",
-      "short_name_zh": "自由法",
+      "id": "west_africa",
+      "name_zh": "西非",
+      "short_name_zh": "西非",
       "x": 0,
       "y": 3,
       "production": 2,
