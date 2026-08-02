@@ -42,7 +42,7 @@ ALLOWED_SECONDARY_OBJECTIVE_TYPES = {"capture", "hold_turns", "destroy_unit", "r
 ALLOWED_CONQUEST_VICTORY_TYPES = {"eliminate", "capture", "control_count", "hold_hex_turns"}
 # Conquest powers a general may belong to (drives which country can field them);
 # "france" has no conquest country but is used by campaign scenarios.
-GENERAL_COUNTRIES = {"germany", "soviet", "usa", "britain", "japan", "china", "france"}
+GENERAL_COUNTRIES = {"germany", "soviet", "usa", "britain", "japan", "china", "france", "italy"}
 REQUIRED_TUTORIAL_MECHANICS = {
     "movement",
     "attack",

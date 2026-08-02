@@ -341,5 +341,24 @@
       "duration": 1,
       "self_mods": {"attack": 3, "move": 1}
     }
+  },
+  "messe": {
+    "name_zh": "梅塞",
+    "title_zh": "義大利第一軍團",
+    "country": "italy",
+    "quality": "silver",
+    "specialization": "infantry",
+    "applies_to": ["infantry", "mg_team", "at_gun"],
+    "attack_bonus": 1,
+    "defense_bonus": 2,
+    "move_bonus": 0,
+    "skill": {
+      "id": "tenacious_defence",
+      "name_zh": "頑強固守",
+      "description_zh": "2 回合內,相鄰我方 +1 攻擊 +1 防禦",
+      "cooldown": 6,
+      "duration": 2,
+      "aura_mods": {"attack": 1, "defense": 1}
+    }
   }
 }
