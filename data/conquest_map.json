@@ -1,6 +1,6 @@
 {
   "start_country": "germany",
-  "map_revision": 3,
+  "map_revision": 4,
   "map_width": 11,
   "map_height": 5,
   "countries": {
@@ -14,7 +14,9 @@
         "poland": 2,
         "north_sea": 2,
         "middle_east": 2,
-        "caucasus": 3
+        "caucasus": 3,
+        "persia": 2,
+        "azores": 2
       }
     },
     "soviet": {
@@ -25,7 +27,8 @@
         "germany": 5,
         "ukraine": 3,
         "leningrad": 3,
-        "caucasus": 4
+        "caucasus": 4,
+        "persia": 3
       }
     },
     "britain": {
@@ -36,7 +39,9 @@
         "maghreb": 3,
         "egypt": 4,
         "middle_east": 3,
-        "india": 3
+        "india": 3,
+        "azores": 2,
+        "persia": 2
       }
     },
     "usa": {
@@ -49,7 +54,8 @@
         "japan_home": 5,
         "atlantic": 3,
         "philippines": 3,
-        "australia": 2
+        "australia": 2,
+        "taiwan": 2
       }
     },
     "japan": {
@@ -63,7 +69,8 @@
         "central_pacific": 3,
         "india": 2,
         "philippines": 4,
-        "australia": 2
+        "australia": 2,
+        "aleutians": 2
       }
     },
     "china": {
@@ -73,7 +80,8 @@
         "manchuria": 5,
         "north_china": 4,
         "central_china": 3,
-        "south_china": 3
+        "south_china": 3,
+        "taiwan": 2
       }
     },
     "neutral": {
@@ -96,7 +104,8 @@
       "agenda_targets": {
         "northern_france": 5,
         "southern_france": 4,
-        "italy": 3
+        "italy": 3,
+        "congo": 2
       }
     }
   },
@@ -229,7 +238,9 @@
         "southern_france",
         "maghreb",
         "iberia",
-        "west_africa"
+        "west_africa",
+        "iceland",
+        "azores"
       ]
     },
     {
@@ -251,7 +262,8 @@
         "atlantic",
         "low_countries",
         "northern_france",
-        "north_sea"
+        "north_sea",
+        "iceland"
       ]
     },
     {
@@ -595,7 +607,8 @@
         "leningrad",
         "moscow",
         "central_asia",
-        "manchuria"
+        "manchuria",
+        "kamchatka"
       ]
     },
     {
@@ -718,7 +731,8 @@
         "egypt",
         "india",
         "turkey",
-        "caucasus"
+        "caucasus",
+        "persia"
       ]
     },
     {
@@ -747,7 +761,8 @@
         "egypt",
         "north_china",
         "south_china",
-        "southeast_asia"
+        "southeast_asia",
+        "persia"
       ]
     },
     {
@@ -796,7 +811,8 @@
       "neighbors": [
         "north_china",
         "south_china",
-        "manchuria"
+        "manchuria",
+        "taiwan"
       ]
     },
     {
@@ -820,7 +836,8 @@
       "neighbors": [
         "india",
         "central_china",
-        "southeast_asia"
+        "southeast_asia",
+        "taiwan"
       ]
     },
     {
@@ -875,7 +892,8 @@
         "southeast_asia",
         "central_pacific",
         "north_pacific",
-        "korea"
+        "korea",
+        "aleutians"
       ]
     },
     {
@@ -918,7 +936,8 @@
       "neighbors": [
         "japan_home",
         "central_pacific",
-        "pacific"
+        "pacific",
+        "aleutians"
       ]
     },
     {
@@ -999,7 +1018,8 @@
       "neighbors": [
         "atlantic",
         "southern_france",
-        "maghreb"
+        "maghreb",
+        "azores"
       ]
     },
     {
@@ -1018,7 +1038,8 @@
       ],
       "neighbors": [
         "atlantic",
-        "maghreb"
+        "maghreb",
+        "congo"
       ]
     },
     {
@@ -1037,7 +1058,8 @@
       "neighbors": [
         "mediterranean",
         "maghreb",
-        "egypt"
+        "egypt",
+        "congo"
       ]
     },
     {
@@ -1074,7 +1096,8 @@
       "neighbors": [
         "volga",
         "middle_east",
-        "central_asia"
+        "central_asia",
+        "persia"
       ],
       "rail_neighbors": [
         "volga",
@@ -1117,7 +1140,8 @@
       "neighbors": [
         "southeast_asia",
         "central_pacific",
-        "south_pacific"
+        "south_pacific",
+        "taiwan"
       ]
     },
     {
@@ -1138,6 +1162,133 @@
         "south_pacific",
         "southeast_asia",
         "central_pacific"
+      ]
+    },
+    {
+      "id": "iceland",
+      "name_zh": "冰島",
+      "short_name_zh": "冰島",
+      "x": 1,
+      "y": 0,
+      "production": 2,
+      "owner": "britain",
+      "port": true,
+      "region_traits": [
+        "naval_base",
+        "airfield_network"
+      ],
+      "neighbors": [
+        "atlantic",
+        "britain"
+      ]
+    },
+    {
+      "id": "azores",
+      "name_zh": "亞速爾",
+      "short_name_zh": "亞速爾",
+      "x": 0,
+      "y": 2,
+      "production": 1,
+      "owner": "neutral",
+      "port": true,
+      "region_traits": [
+        "naval_base",
+        "airfield_network"
+      ],
+      "neighbors": [
+        "atlantic",
+        "iberia"
+      ]
+    },
+    {
+      "id": "congo",
+      "name_zh": "剛果",
+      "short_name_zh": "剛果",
+      "x": 1,
+      "y": 4,
+      "production": 2,
+      "owner": "neutral",
+      "region_traits": [
+        "industrial_hub",
+        "jungle_front"
+      ],
+      "neighbors": [
+        "west_africa",
+        "libya"
+      ]
+    },
+    {
+      "id": "persia",
+      "name_zh": "波斯",
+      "short_name_zh": "波斯",
+      "x": 6,
+      "y": 4,
+      "production": 3,
+      "owner": "neutral",
+      "region_traits": [
+        "oilfield",
+        "airfield_network"
+      ],
+      "neighbors": [
+        "middle_east",
+        "india",
+        "caucasus"
+      ]
+    },
+    {
+      "id": "taiwan",
+      "name_zh": "台灣",
+      "short_name_zh": "台灣",
+      "x": 8,
+      "y": 3,
+      "production": 2,
+      "owner": "japan",
+      "port": true,
+      "region_traits": [
+        "fortress_line",
+        "naval_base"
+      ],
+      "neighbors": [
+        "central_china",
+        "south_china",
+        "philippines"
+      ]
+    },
+    {
+      "id": "kamchatka",
+      "name_zh": "堪察加",
+      "short_name_zh": "堪察加",
+      "x": 7,
+      "y": 0,
+      "production": 2,
+      "owner": "soviet",
+      "port": true,
+      "region_traits": [
+        "naval_base",
+        "airfield_network"
+      ],
+      "neighbors": [
+        "siberia",
+        "aleutians"
+      ]
+    },
+    {
+      "id": "aleutians",
+      "name_zh": "阿留申",
+      "short_name_zh": "阿留申",
+      "x": 9,
+      "y": 0,
+      "production": 1,
+      "owner": "usa",
+      "port": true,
+      "region_traits": [
+        "naval_base",
+        "airfield_network"
+      ],
+      "neighbors": [
+        "north_pacific",
+        "japan_home",
+        "kamchatka"
       ]
     }
   ]
